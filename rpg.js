@@ -1218,14 +1218,61 @@ function slotText(sc, slot) {
 }
 const typeChip = (ty) => `<span class="ty ty-${ty}" title="${esc(TYPES[ty][L()])}">${TYPES[ty].icon} ${esc(TYPES[ty][L()])}</span>`;
 const gradeChip = (gi) => `<span class="gr" style="--g:${GRADES[gi].col}">${esc(GRADES[gi][L()])}</span>`;
+/* TCG-style card: frame in the type colour, name bar with type gem and cooldown orb,
+   pixel-art box, type line with grade pips, effect box, lore, and a set number. */
+const TCOL = { fire: "#d9542c", plant: "#4f9a3c", light: "#e2ae2e", bolt: "#d8b81c", air: "#6fb8d0", music: "#cf5f9f", water: "#3f7fc9", stone: "#8a7a64", shadow: "#5b4b8e", ice: "#8fcbe0", mush: "#b0603c", dream: "#8a78d4", star: "#e0b84a" };
+const CARD_NO = Object.keys(CARDS);
+function tcgArt(by, ty, sil) {
+  return `<div class="tcg-art"><canvas class="rc-art" width="120" height="72" data-by="${by || ""}" data-ty="${ty}"${sil ? " data-sil=\"1\"" : ""}></canvas></div>`;
+}
+function tcgFrame(ty, gi, inner, ghost) {
+  return `<div class="tcg${ghost ? " ghost" : ""}${gi >= 3 ? " foil" : ""}" style="--tc:${TCOL[ty]};--g:${gi == null ? "#8a8a8a" : GRADES[gi].col}">${inner}</div>`;
+}
 function cardHtml(id, gi, opts) {
   opts = opts || {};
-  const sc = scaled(id, gi);
+  const sc = scaled(id, gi), C = CARDS[id], ty = C.type;
   const rows = ["a", "p", "s"].map((sl) => `<li class="${opts.slot === sl ? "on" : ""}"><b>${esc(tx("slot." + sl))}</b> ${esc(slotText(sc, sl))}</li>`).join("");
-  return `<div class="rcard" style="--g:${GRADES[gi].col}"><div class="rc-top"><strong>${esc(cardName(id))}</strong>${opts.count > 1 ? `<span class="cnt">×${opts.count}</span>` : ""}</div>
-  <div class="rc-tags">${typeChip(CARDS[id].type)}${gradeChip(gi)}</div>
-  <ul class="rc-fx">${rows}</ul><p class="rc-lore">${esc(cardLore(id))}</p>${opts.foot || ""}</div>`;
+  const by = C.by && MONS[C.by] ? monName(C.by) : "";
+  const no = String(CARD_NO.indexOf(id) + 1).padStart(3, "0") + "/" + CARD_NO.length;
+  const inner = `<div class="tcg-name"><span class="tcg-gem" title="${esc(TYPES[ty][L()])}">${TYPES[ty].icon}</span><strong>${esc(cardName(id))}</strong>${opts.count > 1 ? `<span class="cnt">×${opts.count}</span>` : ""}<span class="tcg-cd" title="${esc(tx("slot.a"))}">⟳${sc.a.cd}</span></div>
+  ${tcgArt(C.by, ty)}
+  <div class="tcg-line"><span>${esc(TYPES[ty][L()])}${by ? " · " + esc(by) : ""}${C.boss ? " · 👑" : ""}</span><span class="tcg-pips" title="${esc(GRADES[gi][L()])}">${"◆".repeat(gi + 1)}</span></div>
+  <div class="tcg-box"><ul class="rc-fx">${rows}</ul><p class="rc-lore">${esc(cardLore(id))}</p></div>
+  <div class="tcg-foot"><span>${esc(GRADES[gi][L()])}</span><span>EV · ${no}</span></div>`;
+  return `<div class="rcard">${tcgFrame(ty, gi, inner)}${opts.foot || ""}</div>`;
 }
+function ghostCardHtml(id, note, foot) {
+  const C = CARDS[id], ty = C.type;
+  const inner = `<div class="tcg-name"><span class="tcg-gem">${TYPES[ty].icon}</span><strong>???</strong></div>${tcgArt(C.by, ty, true)}<div class="tcg-line"><span>${esc(TYPES[ty][L()])}</span></div><div class="tcg-box"><p class="rc-lore">${esc(note)}</p></div><div class="tcg-foot"><span></span><span>EV · ${String(CARD_NO.indexOf(id) + 1).padStart(3, "0")}/${CARD_NO.length}</span></div>`;
+  return `<div class="rcard ghost">${tcgFrame(ty, null, inner, true)}${foot}</div>`;
+}
+// paint card art boxes whenever cards appear in the page
+function paintCardArt(root) {
+  (root || document).querySelectorAll("canvas.rc-art:not([data-done])").forEach((cv) => {
+    cv.dataset.done = "1";
+    const out = EV.setupCanvas(cv, 120, 72), ty = cv.dataset.ty, by = cv.dataset.by, col = TCOL[ty] || "#888";
+    const hasPX = typeof PX !== "undefined";
+    const Lr = hasPX ? PX.layer(40, 24) : null, c = hasPX ? Lr.g : out;
+    if (hasPX) c.scale(1 / 3, 1 / 3);
+    // backdrop: pale sky, tinted hills and ground, a few sparkles
+    c.fillStyle = "#fbf3e4"; c.fillRect(0, 0, 120, 72);
+    c.fillStyle = col; c.globalAlpha = 0.28; c.fillRect(0, 0, 120, 72);
+    c.globalAlpha = 0.45; c.beginPath(); c.ellipse(30, 66, 50, 22, 0, 0, Math.PI * 2); c.ellipse(96, 70, 44, 26, 0, 0, Math.PI * 2); c.fill();
+    c.globalAlpha = 0.8; c.fillRect(0, 60, 120, 12); c.globalAlpha = 1;
+    c.fillStyle = "#ffffff"; for (const [x, y] of [[12, 9], [104, 15], [84, 6], [26, 27]]) c.fillRect(x, y, 3, 3);
+    if (by && (MONS[by] || ["lumo", "fizz", "pebb"].includes(by))) {
+      const story = ["lumo", "fizz", "pebb"].includes(by), boss = MONS[by] && MONS[by].boss, k = story ? 0.42 : boss ? 0.46 : 0.66;
+      c.save(); c.translate(60, story ? 42 : boss ? 38 : 30); c.scale(k, k);
+      if (cv.dataset.sil) { c.globalAlpha = 1; c.filter = "brightness(0)"; }
+      try { drawMon(c, by, { t: 0.5, stage: 1, form: "bright", hp: 1 }); } catch (e) { /* art is decoration */ }
+      c.restore();
+    } else {
+      c.font = "28px system-ui, sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(TYPES[ty] ? TYPES[ty].icon : "?", 60, 38);
+    }
+    if (hasPX) { c.setTransform(1, 0, 0, 1, 0, 0); PX.quantize(c, 40, 24, false); PX.blit(out, Lr, 120, 72); }
+  });
+}
+new MutationObserver(() => paintCardArt()).observe(document.body, { childList: true, subtree: true });
 
 /* ---------- Saved data ---------- */
 function rpgState() {
@@ -1360,18 +1407,33 @@ const css = `
 .bctl .btn { flex: 1 1 160px; }
 .bturn { font-weight: 700; margin: 0; }
 .rcards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
-.rcard { border: 2px solid color-mix(in srgb, var(--g) 55%, var(--line)); border-radius: 14px; background: var(--bg); padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
-.rc-top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
-.rc-top strong { font-family: var(--font-display); font-size: 16px; line-height: 1.2; }
-.rc-top .cnt { font: 600 12px var(--font-mono); color: var(--muted); }
-.rc-tags { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.rcard { display: flex; flex-direction: column; gap: 6px; }
+.tcg { position: relative; background: var(--tc); border: 3px solid #1d1626; padding: 6px; display: flex; flex-direction: column; gap: 5px; box-shadow: 4px 4px 0 #1d1626; color: #1d1626; }
+.tcg::before { content: ""; position: absolute; inset: 2px; border: 2px solid color-mix(in srgb, #fff 45%, var(--tc)); pointer-events: none; }
+.tcg-name { position: relative; display: flex; align-items: center; gap: 6px; background: #fbf6ef; border: 2px solid #1d1626; padding: 3px 6px; min-height: 32px; }
+.tcg-name strong { font-family: var(--font-display); font-size: 15px; line-height: 1.1; flex: 1; min-width: 0; }
+.tcg-name .cnt { font: 700 12px var(--font-mono); color: #5b5266; }
+.tcg-gem { width: 22px; height: 22px; display: grid; place-items: center; background: var(--tc); border: 2px solid #1d1626; font: 13px/1 system-ui, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; flex: none; }
+.tcg-cd { font: 700 12px var(--font-mono); background: #1d1626; color: #fbf6ef; padding: 2px 6px; flex: none; }
+.tcg-art { position: relative; border: 2px solid #1d1626; background: #fbf3e4; overflow: hidden; line-height: 0; }
+.tcg-art canvas { width: 100%; height: auto; aspect-ratio: 120 / 72; image-rendering: pixelated; display: block; }
+.tcg.foil .tcg-art::after { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.55) 45%, rgba(255,240,180,.35) 52%, transparent 66%); background-size: 250% 100%; animation: foil 4s linear infinite; mix-blend-mode: screen; pointer-events: none; }
+@keyframes foil { from { background-position: 120% 0; } to { background-position: -120% 0; } }
+@media (prefers-reduced-motion: reduce) { .tcg.foil .tcg-art::after { animation: none; background-position: 50% 0; } }
+.tcg-line { position: relative; display: flex; justify-content: space-between; align-items: center; gap: 6px; background: #1d1626; color: #fbf6ef; padding: 2px 6px; font-size: 12px; font-weight: 700; }
+.tcg-pips { color: var(--g); letter-spacing: 1px; font-size: 11px; text-shadow: 0 0 0 #000; }
+.tcg-box { position: relative; background: #fbf6ef; border: 2px solid #1d1626; padding: 6px 7px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+.tcg-box .rc-fx li { color: #4a4255; } .tcg-box .rc-fx li b { color: #1d1626; } .tcg-box .rc-fx li.on { color: #1d1626; background: color-mix(in srgb, var(--tc) 22%, transparent); }
+.tcg-box .rc-lore { color: #5b5266; border-top: 1px dashed #b9ad9c; padding-top: 5px; }
+.tcg-foot { position: relative; display: flex; justify-content: space-between; font: 700 10px var(--font-mono); color: #1d1626; padding: 0 2px; text-transform: uppercase; letter-spacing: .04em; }
+.tcg-foot span:first-child { color: color-mix(in srgb, var(--g) 70%, #1d1626); background: #fbf6ef; padding: 0 4px; }
 .rc-fx { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; font-size: 13px; line-height: 1.35; }
-.rc-fx li { color: var(--muted); }
-.rc-fx li b { font: 700 11px var(--font-mono); text-transform: uppercase; letter-spacing: .06em; color: var(--ink); margin-right: 4px; }
-.rc-fx li.on { color: var(--ink); background: color-mix(in srgb, var(--accent) 10%, transparent); border-radius: 6px; padding: 2px 4px; margin: 0 -4px; }
+.rc-fx li b { font: 700 11px var(--font-mono); text-transform: uppercase; letter-spacing: .06em; margin-right: 4px; }
+.rc-fx li.on { border-radius: 0; padding: 2px 4px; margin: 0 -4px; }
 .rc-lore { margin: 0; font-size: 12px; font-style: italic; color: var(--muted); }
+.rcard.ghost .tcg { --tc: #b9b1a6 !important; opacity: .8; }
+.rcard.ghost .tcg-art { filter: grayscale(1); }
 .rc-btns { display: flex; gap: 6px; flex-wrap: wrap; margin-top: auto; }
-.rcard.ghost { --g: var(--muted); border-style: dashed; opacity: .75; background: repeating-linear-gradient(45deg, transparent 0 6px, color-mix(in srgb, var(--line) 12%, transparent) 6px 8px); }
 .ctabs { margin-left: auto; }
 .rc-btns .btn { padding: 6px 10px; font-size: 12px; min-height: 34px; }
 .slots { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
@@ -1396,7 +1458,7 @@ const css = `
 .choices .btn { text-align: left; justify-content: flex-start; }
 .loot { display: flex; gap: 10px; flex-wrap: wrap; font: 600 14px var(--font-mono); }
 .loot span { background: var(--bg); border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; }
-@media (max-width: 520px) { .mons { grid-template-columns: repeat(2, minmax(0, 1fr)); } .rcards { grid-template-columns: 1fr; } }
+@media (max-width: 520px) { .mons { grid-template-columns: repeat(2, minmax(0, 1fr)); } .rcards { grid-template-columns: minmax(0, 340px); justify-content: center; } }
 `;
 const styleEl = document.createElement("style"); styleEl.textContent = css; document.head.appendChild(styleEl);
 
@@ -2546,7 +2608,7 @@ function grimHtml() {
         const C = CARDS[id], boss = !!C.boss, owner = C.by && MONS[C.by] ? monName(C.by) : "";
         const craft = boss ? `<p class="rc-cant">${esc(tx("grim.boss"))}</p>` : `<div class="rc-btns"><button class="btn ghost" type="button" data-craft="${id}" ${(P.dust || 0) < CRAFT_COST ? "disabled" : ""}>${esc(tx("grim.craft", { c: CRAFT_COST }))}</button></div>`;
         if (P.grim[id]) h += cardHtml(id, 0, { foot: craft });
-        else h += `<div class="rcard ghost"><div class="rc-top"><strong>???</strong></div><div class="rc-tags">${typeChip(ty)}</div><p class="rc-lore">${esc(tx("grim.unknown"))}${owner && !boss ? " · " + esc(tx("grim.by", { mon: owner })) : ""}</p>${craft}</div>`;
+        else h += ghostCardHtml(id, tx("grim.unknown") + (owner && !boss ? " · " + tx("grim.by", { mon: owner }) : ""), craft);
       }
       h += `</div>`;
     }
