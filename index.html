@@ -3,6 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#4c8a39">
+<meta name="description" content="Hatch, raise and evolve a little creature of the Glimmerglade.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Evolvlings">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>Evolvlings</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -82,7 +91,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 .side { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
 .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
 .panel h3 { margin: 0; font: 700 12px var(--font-mono); text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
-.stat { display: grid; grid-template-columns: 74px minmax(0, 1fr) 34px; gap: 10px; align-items: center; font-size: 14px; }
+.stat { display: grid; grid-template-columns: 84px minmax(0, 1fr) 34px; gap: 10px; align-items: center; font-size: 14px; }
 .stat label { font-weight: 700; }
 .bar { height: 12px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
 .bar i { display: block; height: 100%; border-radius: inherit; background: var(--moss); transition: width .4s ease, background-color .4s; }
@@ -128,64 +137,147 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 .journal li span:last-child { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
 footer { font-size: 12px; color: var(--muted); }
 @media (prefers-reduced-motion: reduce) { .egg-card, .act, .bar i { transition: none; } }
+
+/* coins, toasts, shop, achievements */
+.chip-btn.coin { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-weight: 500; color: var(--warn); border-color: color-mix(in srgb, var(--warn) 45%, var(--line)); }
+.chip-btn.coin svg { width: 16px; height: 16px; }
+.chip-btn.coin.pop { animation: pop .45s ease; }
+.chip-btn.icon { padding: 6px 9px; display: inline-flex; align-items: center; }
+.chip-btn.icon svg { width: 18px; height: 18px; }
+@keyframes pop { 0% { transform: scale(1); } 40% { transform: scale(1.18); } 100% { transform: scale(1); } }
+.toasts { position: fixed; left: 50%; transform: translateX(-50%); bottom: max(16px, env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 8px; z-index: 50; width: min(420px, calc(100% - 32px)); pointer-events: none; }
+.toast { background: var(--ink); color: var(--bg); border-radius: 14px; padding: 10px 14px; font-weight: 700; font-size: 14px; box-shadow: 0 6px 20px rgba(0,0,0,.25); display: flex; gap: 10px; align-items: center; animation: toastIn .3s ease; }
+.toast b { color: var(--warn); font-family: var(--font-mono); font-weight: 500; margin-left: auto; white-space: nowrap; }
+@keyframes toastIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.panel-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.panel-head .close { margin-left: auto; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; }
+.card { border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px; background: var(--bg); display: flex; flex-direction: column; gap: 4px; }
+.card strong { font-family: var(--font-display); font-size: 16px; line-height: 1.2; }
+.card small { color: var(--muted); font-size: 13px; line-height: 1.35; }
+.card .foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: auto; padding-top: 6px; }
+.card .price { font-family: var(--font-mono); font-size: 13px; color: var(--warn); }
+.card .have { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.card .btn { padding: 7px 12px; font-size: 13px; min-height: 36px; }
+.card.locked { opacity: .55; }
+.card.locked strong::before { content: "🔒 "; font-size: 13px; }
+.card.done { border-color: color-mix(in srgb, var(--moss) 55%, var(--line)); }
+.card.done strong::before { content: "✓ "; color: var(--moss); }
+.cat-title { font: 700 12px var(--font-mono); text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin: 6px 0 0; }
+.progress { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.submenu .count { font-family: var(--font-mono); font-size: 11px; color: var(--warn); }
+.submenu .empty { flex: 1 1 100%; color: var(--muted); font-size: 13px; margin: 0; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.seg button { font: 600 13px var(--font-body); padding: 6px 12px; background: var(--bg); color: var(--ink); border: 0; cursor: pointer; min-height: 36px; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+
+/* mobile polish */
+button, .stage canvas, .egg-card { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.game, .stage { -webkit-user-select: none; user-select: none; }
+.actions { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.act { min-height: 64px; font-size: 13px; }
+.chip-btn { min-height: 36px; }
+@media (max-width: 520px) {
+  body { padding-block: 12px 96px; }
+  .brand { font-size: 26px; }
+  .brand small { display: none; }
+  .wrap { gap: 12px; }
+  .habitat { padding: 8px; border-radius: 18px; }
+  .panel { padding: 12px; }
+  .stat { grid-template-columns: 78px minmax(0, 1fr) 30px; gap: 8px; }
+  .act { padding: 8px 2px; }
+  .act svg { width: 24px; height: 24px; }
+}
+@media (prefers-reduced-motion: reduce) { .toast, .chip-btn.coin.pop { animation: none; } }
 </style>
 </head>
 <body>
 
 <div class="wrap">
   <header class="top">
-    <h1 class="brand">Evolvlings<small>Hatch, raise and evolve a little creature of the Glimmerglade.</small></h1>
+    <h1 class="brand">Evolvlings<small data-i18n="tagline">Hatch, raise and evolve a little creature of the Glimmerglade.</small></h1>
     <div class="top-tools">
-      <button class="chip-btn" id="btnJournal" type="button">Journal</button>
-      <button class="chip-btn" id="btnSettings" type="button">Settings</button>
+      <button class="chip-btn coin" id="btnCoins" type="button" data-i18n-aria="nav.coins"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.2 7.8L22 12l-7.8 2.2L12 22l-2.2-7.8L2 12l7.8-2.2z" fill="currentColor"/></svg><span id="coinVal">0</span></button>
+      <button class="chip-btn" id="btnAch" type="button" data-i18n="nav.ach">Achievements</button>
+      <button class="chip-btn" id="btnJournal" type="button" data-i18n="nav.journal">Journal</button>
+      <button class="chip-btn" id="btnSettings" type="button" data-i18n="nav.settings">Settings</button>
+      <button class="chip-btn icon" id="btnMute" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path id="muteWave" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/><path id="muteX" d="M16 9l6 6M22 9l-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" hidden/></svg></button>
     </div>
   </header>
 
   <section id="settingsPanel" class="panel" hidden>
-    <h2>Settings</h2>
+    <h2 data-i18n="set.title">Settings</h2>
     <div class="settings">
       <div class="row">
-        <label for="speedSel">Time speed</label>
+        <label data-i18n="set.lang">Language</label>
+        <div class="seg" id="langSeg"><button type="button" data-lang="es">Español</button><button type="button" data-lang="en">English</button></div>
+      </div>
+      <div class="row">
+        <label data-i18n="set.sound">Sound</label>
+        <div class="seg" id="soundSeg"><button type="button" data-v="1" data-i18n="on">On</button><button type="button" data-v="0" data-i18n="off">Off</button></div>
+      </div>
+      <div class="row">
+        <label data-i18n="set.haptics">Vibration</label>
+        <div class="seg" id="hapticSeg"><button type="button" data-v="1" data-i18n="on">On</button><button type="button" data-v="0" data-i18n="off">Off</button></div>
+      </div>
+      <div class="row">
+        <label for="speedSel" data-i18n="set.speed">Time speed</label>
         <select id="speedSel">
-          <option value="1">Normal (real time)</option>
-          <option value="10">Fast (10×)</option>
-          <option value="60">Turbo (60×)</option>
+          <option value="1" data-i18n="set.speed1">Normal (real time)</option>
+          <option value="10" data-i18n="set.speed10">Fast (10×)</option>
+          <option value="60" data-i18n="set.speed60">Turbo (60×)</option>
         </select>
       </div>
-      <p class="muted">Normal time means a creature grows up over a few hours and gets hungry while you're away. Fast and Turbo are handy for trying the whole life cycle quickly.</p>
+      <p class="muted" data-i18n="set.speedNote">Normal time means a creature grows up over a few hours and gets hungry while you're away. Fast and Turbo are handy for trying the whole life cycle quickly.</p>
+      <div class="row" id="installRow" hidden>
+        <button class="btn" id="btnInstall" type="button" data-i18n="set.install">Install app</button>
+      </div>
+      <p class="muted" id="iosHint" data-i18n="set.installIos" hidden>On iPhone or iPad: tap Share, then Add to Home Screen.</p>
       <div class="row" id="releaseRow">
-        <button class="btn ghost" id="btnRelease" type="button">Release creature and start over</button>
+        <button class="btn ghost" id="btnRelease" type="button" data-i18n="set.release">Release creature and start over</button>
       </div>
       <div class="row" id="releaseConfirm" hidden>
-        <span>Release <b id="relName">it</b> back into the glade? This can't be undone.</span>
-        <button class="btn danger" id="btnReleaseYes" type="button">Release</button>
-        <button class="btn ghost" id="btnReleaseNo" type="button">Keep</button>
+        <span id="releaseAsk"></span>
+        <button class="btn danger" id="btnReleaseYes" type="button" data-i18n="set.releaseYes">Release</button>
+        <button class="btn ghost" id="btnReleaseNo" type="button" data-i18n="set.releaseNo">Keep</button>
       </div>
     </div>
   </section>
 
   <section id="journalPanel" class="panel" hidden>
-    <h2>Glade journal</h2>
-    <p class="muted">Every creature you've raised, newest first.</p>
+    <h2 data-i18n="jr.title">Glade journal</h2>
+    <p class="muted" data-i18n="jr.desc">Every creature you've raised, newest first.</p>
     <ul class="journal" id="journalList"></ul>
+  </section>
+
+  <section id="shopPanel" class="panel" hidden>
+    <div class="panel-head"><h2 data-i18n="shop.title">Shop</h2><span class="progress" id="shopWallet"></span></div>
+    <p class="muted" data-i18n="shop.desc">Spend Chispas on treats, medicine and toys. You earn Chispas by caring well, playing and growing up.</p>
+    <div id="shopList"></div>
+  </section>
+
+  <section id="achPanel" class="panel" hidden>
+    <div class="panel-head"><h2 data-i18n="ach.title">Achievements</h2><span class="progress" id="achProgress"></span></div>
+    <div class="cards" id="achList"></div>
   </section>
 
   <!-- choose an egg -->
   <section id="scrChoose" class="choose" hidden>
-    <h2>Three eggs were found in the moss. Pick one to warm up.</h2>
-    <p class="lead">Each kind hatches into a different creature with its own habits. Care for it well and it grows into a bright, healthy adult.</p>
+    <h2 data-i18n="ch.title">Three eggs were found in the moss. Pick one to warm up.</h2>
+    <p class="lead" data-i18n="ch.lead">Each kind hatches into a different creature with its own habits. Care for it well and it grows into a bright, healthy adult.</p>
     <div class="eggs" id="eggs"></div>
   </section>
 
   <!-- egg / naming -->
   <section id="scrEgg" class="center-card" hidden>
-    <h2 id="eggTitle">Warming the egg…</h2>
-    <p class="muted" id="eggHint">Tap the egg to keep it warm. It will hatch on its own too.</p>
-    <div class="stage" style="max-width:420px"><canvas id="eggCanvas" aria-label="Your egg. Tap to warm it."></canvas></div>
+    <h2 id="eggTitle">…</h2>
+    <p class="muted" id="eggHint"></p>
+    <div class="stage" style="max-width:420px"><canvas id="eggCanvas" data-i18n-aria="egg.aria"></canvas></div>
     <div class="bar" style="width:100%;max-width:420px"><i id="eggBar" style="width:0%"></i></div>
     <div class="row" id="nameRow" hidden style="width:100%;max-width:420px">
-      <input class="textin" id="nameIn" maxlength="14" placeholder="Name your creature" autocomplete="off">
-      <button class="btn" id="btnName" type="button">Welcome home</button>
+      <input class="textin" id="nameIn" maxlength="14" data-i18n-ph="egg.placeholder" autocomplete="off">
+      <button class="btn" id="btnName" type="button" data-i18n="egg.welcome">Welcome home</button>
     </div>
   </section>
 
@@ -196,37 +288,36 @@ footer { font-size: 12px; color: var(--muted); }
         <div><div class="nm" id="petName">—</div><div class="sp" id="petSpecies">—</div></div>
         <div class="age" id="petAge">—</div>
       </div>
-      <div class="stage"><canvas id="scene" aria-label="Your creature's habitat"></canvas></div>
+      <div class="stage"><canvas id="scene" data-i18n-aria="g.sceneAria"></canvas></div>
       <div class="hint" id="hint" aria-live="polite"></div>
     </div>
     <div class="side">
       <div class="panel">
-        <h3>How it's doing</h3>
-        <div class="stat"><label>Belly</label><div class="bar"><i id="b_full"></i></div><output id="v_full">0</output></div>
-        <div class="stat"><label>Fun</label><div class="bar"><i id="b_fun"></i></div><output id="v_fun">0</output></div>
-        <div class="stat"><label>Energy</label><div class="bar"><i id="b_energy"></i></div><output id="v_energy">0</output></div>
-        <div class="stat"><label>Tidy</label><div class="bar"><i id="b_clean"></i></div><output id="v_clean">0</output></div>
-        <div class="stat"><label>Health</label><div class="bar"><i id="b_health"></i></div><output id="v_health">0</output></div>
+        <h3 data-i18n="g.status">How it's doing</h3>
+        <div class="stat"><label data-i18n="stat.full">Belly</label><div class="bar"><i id="b_full"></i></div><output id="v_full">0</output></div>
+        <div class="stat"><label data-i18n="stat.fun">Fun</label><div class="bar"><i id="b_fun"></i></div><output id="v_fun">0</output></div>
+        <div class="stat"><label data-i18n="stat.energy">Energy</label><div class="bar"><i id="b_energy"></i></div><output id="v_energy">0</output></div>
+        <div class="stat"><label data-i18n="stat.clean">Tidy</label><div class="bar"><i id="b_clean"></i></div><output id="v_clean">0</output></div>
+        <div class="stat"><label data-i18n="stat.health">Health</label><div class="bar"><i id="b_health"></i></div><output id="v_health">0</output></div>
         <div class="badges" id="badges"></div>
       </div>
       <div class="panel">
-        <h3>Care</h3>
+        <h3 data-i18n="g.care">Care</h3>
         <div class="actions">
-          <button class="act" id="aFeed" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="14" r="5" fill="#d9465b"/><circle cx="15.5" cy="13" r="4.5" fill="#b8364b"/><path d="M12 9c0-3 2-5 4-6" stroke="#3c7a2c" stroke-width="2" fill="none" stroke-linecap="round"/></svg>Feed</button>
-          <button class="act" id="aPlay" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.9 6.1 6.6.8-4.9 4.6 1.3 6.5L12 16.8 6.1 20l1.3-6.5L2.5 8.9l6.6-.8z" fill="#f2b632"/></svg>Play</button>
-          <button class="act" id="aClean" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="14" r="5" fill="none" stroke="#3aa0c8" stroke-width="2"/><circle cx="16" cy="9" r="3.5" fill="none" stroke="#3aa0c8" stroke-width="2"/><circle cx="17" cy="17" r="2" fill="#3aa0c8"/></svg>Clean</button>
+          <button class="act" id="aFeed" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="14" r="5" fill="#d9465b"/><circle cx="15.5" cy="13" r="4.5" fill="#b8364b"/><path d="M12 9c0-3 2-5 4-6" stroke="#3c7a2c" stroke-width="2" fill="none" stroke-linecap="round"/></svg><span data-i18n="act.feed">Feed</span></button>
+          <button class="act" id="aPlay" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.9 6.1 6.6.8-4.9 4.6 1.3 6.5L12 16.8 6.1 20l1.3-6.5L2.5 8.9l6.6-.8z" fill="#f2b632"/></svg><span data-i18n="act.play">Play</span></button>
+          <button class="act" id="aClean" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="14" r="5" fill="none" stroke="#3aa0c8" stroke-width="2"/><circle cx="16" cy="9" r="3.5" fill="none" stroke="#3aa0c8" stroke-width="2"/><circle cx="17" cy="17" r="2" fill="#3aa0c8"/></svg><span data-i18n="act.clean">Clean</span></button>
           <button class="act" id="aSleep" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15A8 8 0 1 1 9 4a6.5 6.5 0 0 0 11 11z" fill="#7b6be0"/></svg><span id="sleepLbl">Sleep</span></button>
-          <button class="act" id="aHeal" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="#e65a4a"/><path d="M12 7v10M7 12h10" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg>Herbs</button>
-          <button class="act" id="aPet" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 6-8 11-8 11z" fill="#ef6f9a"/></svg>Cuddle</button>
+          <button class="act" id="aHeal" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="#e65a4a"/><path d="M12 7v10M7 12h10" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg><span data-i18n="act.heal">Herbs</span></button>
+          <button class="act" id="aPet" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 6-8 11-8 11z" fill="#ef6f9a"/></svg><span data-i18n="act.pet">Cuddle</span></button>
+          <button class="act" id="aItems" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8h12l-1 12H7z" fill="#c98a3c"/><path d="M9 8V6a3 3 0 0 1 6 0v2" stroke="#7a5216" stroke-width="2" fill="none"/></svg><span data-i18n="act.items">Items</span></button>
+          <button class="act" id="aShop" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.2 7.8L22 12l-7.8 2.2L12 22l-2.2-7.8L2 12l7.8-2.2z" fill="#e0a42a"/></svg><span data-i18n="act.shop">Shop</span></button>
         </div>
-        <div class="submenu" id="feedMenu" hidden>
-          <button type="button" data-food="berry"><b>Dewberry</b><small>A filling meal</small></button>
-          <button type="button" data-food="cake"><b>Honey bun</b><small>Tasty, but a treat</small></button>
-          <button type="button" data-food="no"><b>Never mind</b><small>Close</small></button>
-        </div>
+        <div class="submenu" id="feedMenu" hidden></div>
+        <div class="submenu" id="itemMenu" hidden></div>
       </div>
       <div class="panel">
-        <h3>Diary</h3>
+        <h3 data-i18n="g.diary">Diary</h3>
         <ul class="log" id="log"></ul>
       </div>
     </div>
@@ -234,55 +325,327 @@ footer { font-size: 12px; color: var(--muted); }
 
   <!-- gone -->
   <section id="scrGone" class="center-card" hidden>
-    <h2 id="goneTitle">Wandered off</h2>
+    <h2 id="goneTitle"></h2>
     <p class="muted" id="goneText"></p>
-    <button class="btn" id="btnNew" type="button">Find a new egg</button>
+    <button class="btn" id="btnNew" type="button" data-i18n="gone.btn">Find a new egg</button>
   </section>
 
-  <footer>Evolvlings is a working name. Progress saves in this browser only.</footer>
+  <footer data-i18n="footer">Evolvlings is a working name. Progress saves in this browser only.</footer>
 </div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
 
 <script>
 (() => {
 "use strict";
 const SAVE_KEY = "glimmerglade.save.v1";
 const JOURNAL_KEY = "glimmerglade.journal.v1";
+const PROFILE_KEY = "glimmerglade.profile.v1";
 const $ = (id) => document.getElementById(id);
 const clamp = (v, a = 0, b = 100) => Math.max(a, Math.min(b, v));
 const rand = (a, b) => a + Math.random() * (b - a);
+const pick = (a) => a[Math.floor(Math.random() * a.length)];
+
+/* ---------- Text (English + Spanish) ---------- */
+const plural = (n, one, many) => (n === 1 ? one : many);
+const STR = {
+  en: {
+    tagline: "Hatch, raise and evolve a little creature of the Glimmerglade.",
+    "nav.coins": "Chispas: open the shop", "nav.ach": "Achievements", "nav.journal": "Journal", "nav.settings": "Settings",
+    "nav.mute": "Mute sound", "nav.unmute": "Turn sound on",
+    on: "On", off: "Off",
+    "set.title": "Settings", "set.lang": "Language", "set.sound": "Sound", "set.haptics": "Vibration", "set.speed": "Time speed",
+    "set.speed1": "Normal (real time)", "set.speed10": "Fast (10×)", "set.speed60": "Turbo (60×)",
+    "set.speedNote": "Normal time means a creature grows up over a few hours and gets hungry while you're away. Fast and Turbo are handy for trying the whole life cycle quickly.",
+    "set.install": "Install app", "set.installIos": "On iPhone or iPad: tap Share, then Add to Home Screen to install the game.",
+    "set.release": "Release creature and start over", "set.releaseAsk": "Release <b>{name}</b> back into the glade? This can't be undone.",
+    "set.releaseYes": "Release", "set.releaseNo": "Keep", "set.theEgg": "the egg",
+    "jr.title": "Glade journal", "jr.desc": "Every creature you've raised, newest first.", "jr.empty": "No entries yet. Creatures appear here after they leave your care.",
+    "end.released": "released", "end.gone": "wandered off",
+    "ch.title": "Three eggs were found in the moss. Pick one to warm up.",
+    "ch.lead": "Each kind hatches into a different creature with its own habits. Care for it well and it grows into a bright, healthy adult.",
+    "egg.warming": "Warming the {egg}…", "egg.hatched": "It hatched!", "egg.tap": "Tap the egg to keep it warm. It will hatch on its own in a little while too.",
+    "egg.hello": "Say hello to a little {baby}. What will you call it?", "egg.placeholder": "Name your creature", "egg.welcome": "Welcome home", "egg.aria": "Your egg. Tap to warm it.",
+    "g.sceneAria": "Your creature's habitat", "g.status": "How it's doing", "g.care": "Care", "g.diary": "Diary",
+    "stat.full": "Belly", "stat.fun": "Fun", "stat.energy": "Energy", "stat.clean": "Tidy", "stat.health": "Health",
+    "stage.0": "Baby", "stage.1": "Kid", "stage.2": "Grown-up",
+    "age.age": "Age {d}", "age.grows": "grows in {d}", "age.grown": "fully grown", "age.speed": "{n}× time",
+    "badge.asleep": "Asleep", "badge.sick": "Has a sniffle", "badge.messes": (v) => `${v.n} ${plural(v.n, "mess", "messes")}`,
+    "badge.hungry": "Hungry", "badge.bored": "Bored", "badge.sleepy": "Sleepy", "badge.happy": "Happy",
+    "act.feed": "Feed", "act.play": "Play", "act.clean": "Clean", "act.sleep": "Sleep", "act.wake": "Wake up", "act.heal": "Herbs", "act.pet": "Cuddle", "act.items": "Items", "act.shop": "Shop",
+    "menu.close": "Never mind", "menu.closeSub": "Close", "menu.noItems": "Your bag is empty. Medicine and soap from the shop show up here.",
+    "hint.sleeping": "{name} is sleeping. Energy refills while the lights are out.", "hint.sick": "{name} looks unwell. Give it herbs.",
+    "hint.messy": "The glade is getting messy. Time to clean.", "hint.hungry": "{name}'s tummy is rumbling.", "hint.tired": "{name} keeps yawning. Maybe it's bedtime.",
+    "hint.bored": "{name} looks bored. Play a round of catch.", "hint.pat": "Tap your creature to give it a little pat.",
+    "hint.play": "Catch the falling starseeds! Tap them before they hit the ground.", "hint.full": "{name} shakes its head. It's full.",
+    "hint.notTired": "{name} isn't tired yet.", "hint.notSick": "{name} isn't sick. Medicine is only needed for sniffles.", "hint.tooTired": "{name} is too tired to play. Let it rest.",
+    "hint.healthy": "{name} is already in perfect health.",
+    "say.yum": "Yum!", "say.sweet": "Sweet!", "say.full": "Too full!", "say.squeaky": "Squeaky!", "say.hm": "Hm?", "say.notSleepy": "Not sleepy!", "say.fine": "I'm fine!",
+    "say.better": "Bleh… better!", "say.better2": "Ahh, better!", "say.morning": "Morning!", "say.whoa": "Whoa!", "say.hi": "Hi!", "say.tooSleepy": "Too sleepy…", "say.again": "Again!!", "say.fun": "Fun!", "say.hehe": "Hehe",
+    "say.cuddle": ["♪", "Hehe", "Mmm"], "say.zing": "Zing!",
+    "log.mess": "{name} made a mess.", "log.sick": "{name} caught a sniffle. Herbs will help.", "log.fellAsleep": "{name} was so tired it fell asleep on the spot.",
+    "log.woke": "{name} woke up fully rested.", "log.grew": "{name} grew from {from} into {to}!", "log.gone": "{name} wandered off into the glade.",
+    "log.away": "You were away for {d}.", "log.awayCoins": "You were away for {d}. {name} earned you {n} Chispas.",
+    "log.fed": "{name} ate {food}.", "log.cleaned": (v) => `Cleaned up ${v.n} ${plural(v.n, "mess", "messes")} and gave ${v.name} a bath.`, "log.bath": "Gave {name} a bubble bath.",
+    "log.wokeGrumpy": "Woke {name} early. It's grumpy.", "log.wokeUp": "{name} woke up.", "log.lightsOut": "Lights out. {name} curled up to sleep.",
+    "log.herbs": "{name} chewed some bitter herbs and feels better.", "log.used": "Used {item} on {name}.",
+    "log.played": (v) => `Played catch with ${v.name}: ${v.n} ${plural(v.n, "starseed", "starseeds")} caught.`,
+    "log.hatched": "{name} hatched from a {egg}. Welcome to the glade!", "log.bought": "Bought {item}.", "log.ach": "Achievement unlocked: {name}.",
+    "gone.title": "{name} wandered off", "gone.released": "{name} hopped back into the tall grass. It's happy out there, and it'll remember you.",
+    "gone.sad": "{name} wasn't feeling cared for and went to look for a cozier glade. Creatures need food, play, rest and a tidy home every few hours. It's fine, there are more eggs in the moss.",
+    "gone.btn": "Find a new egg", footer: "Evolvlings is a working name. Progress saves in this browser only.",
+    "shop.title": "Shop", "shop.desc": "Spend Chispas on treats, medicine and toys. You earn Chispas by caring well, playing and growing up.",
+    "shop.wallet": "You have {n} Chispas", "shop.buy": "Buy", "shop.owned": "Owned", "shop.have": "In bag: {n}",
+    "cat.food": "Food", "cat.med": "Medicine & care", "cat.toy": "Toys (permanent)",
+    "ach.title": "Achievements", "ach.progress": "{n} of {m} unlocked", "toast.ach": "Achievement: {name}", "toast.poor": "Not enough Chispas yet.",
+    "toast.bought": "Bought {item}",
+    sp: {
+      lumo: { egg: "Glow egg", blurb: "Warm to the touch, with a soft light inside.", trait: "Playful · gets bored fast",
+        desc: ["a glowing moth-sprite", "a glowing moth-sprite", "a lantern-winged moth-sprite", "a dim, droopy moth-sprite"] },
+      pebb: { egg: "Pebble egg", blurb: "Heavy and speckled, like a river stone.", trait: "Hungry · very sturdy",
+        desc: ["a pebble critter", "a pebble critter", "a moss-capped stone critter", "a cracked, grumpy stone critter"] },
+      fizz: { egg: "Cloud egg", blurb: "Strangely light. It floats a little when you let go.", trait: "Sleepy · stays tidy",
+        desc: ["a cloud puff", "a cloud puff", "a sunny cloud puff", "a gloomy raincloud puff"] },
+    },
+    item: {
+      berry: ["Dewberry", "A filling meal. Always free.", "a dewberry"],
+      bun: ["Honey bun", "Tasty, but a treat. Always free.", "a honey bun"],
+      stew: ["Sunroot stew", "Very filling, with a little energy.", "a bowl of sunroot stew"],
+      fizzpop: ["Fizzpop", "Bubbly fun in a bottle.", "a fizzpop"],
+      melon: ["Moonmelon slice", "Juicy and good for health.", "a moonmelon slice"],
+      cookie: ["Starseed cookie", "Loads of fun, a little sugary.", "a starseed cookie"],
+      tea: ["Glimmer tea", "A warm cup that restores energy.", "a cup of glimmer tea"],
+      tonic: ["Thistle tonic", "Cures sniffles and restores a lot of health.", "a thistle tonic"],
+      salve: ["Sweet salve", "Cures sniffles with no bitter taste.", "a sweet salve"],
+      soap: ["Foam soap", "Cleans every mess and makes it sparkle.", "foam soap"],
+      ball: ["Burr ball", "Toy. Play rounds give more fun and +2 bonus Chispas.", "a burr ball"],
+      kite: ["Leaf kite", "Toy. Play rounds last 15 seconds instead of 10.", "a leaf kite"],
+    },
+    ach: {
+      hatch1: ["First hatch", "Hatch your first creature."],
+      feed1: ["Snack time", "Feed your creature."],
+      clean1: ["Tidy glade", "Clean up a mess."],
+      play1: ["Playmate", "Play a round of catch."],
+      stars10: ["Star catcher", "Catch 10 starseeds in one round."],
+      stars100: ["Starry sky", "Catch 100 starseeds in total."],
+      kid: ["Growing up", "Raise a creature to Kid."],
+      adult: ["All grown up", "Raise a creature to Grown-up."],
+      bright: ["Shining example", "Raise a bright adult with great care."],
+      scruffy: ["Every form counts", "Raise a scruffy adult."],
+      allEggs: ["Egg collector", "Hatch all three kinds of egg."],
+      allForms: ["Glade expert", "Discover all six adult forms."],
+      healer: ["Little healer", "Cure 5 sniffles."],
+      tidy25: ["Neat freak", "Clean up 25 messes."],
+      cuddle50: ["Cuddle bug", "Cuddle 50 times."],
+      shop1: ["First purchase", "Buy something in the shop."],
+      spend200: ["Big spender", "Spend 200 Chispas."],
+      rich300: ["Treasure hoard", "Hold 300 Chispas at once."],
+      day1: ["Old friend", "Keep a creature for a full day of game time."],
+      perfect: ["Perfect day", "Have every stat at 80 or more at once."],
+      gourmet: ["Gourmet", "Try 5 different foods."],
+      night: ["Night owl", "Play between midnight and 5 a.m."],
+    },
+  },
+  es: {
+    tagline: "Incuba, cría y haz evolucionar a una criaturita del Claro Brillante.",
+    "nav.coins": "Chispas: abrir la tienda", "nav.ach": "Logros", "nav.journal": "Recuerdos", "nav.settings": "Ajustes",
+    "nav.mute": "Silenciar", "nav.unmute": "Activar sonido",
+    on: "Sí", off: "No",
+    "set.title": "Ajustes", "set.lang": "Idioma", "set.sound": "Sonido", "set.haptics": "Vibración", "set.speed": "Velocidad",
+    "set.speed1": "Normal (tiempo real)", "set.speed10": "Rápida (10×)", "set.speed60": "Turbo (60×)",
+    "set.speedNote": "En velocidad normal la criatura crece a lo largo de unas horas y le entra hambre mientras no estás. Rápida y Turbo sirven para ver el ciclo de vida completo en poco tiempo.",
+    "set.install": "Instalar app", "set.installIos": "En iPhone o iPad: pulsa Compartir y luego «Añadir a pantalla de inicio» para instalar el juego.",
+    "set.release": "Liberar a la criatura y empezar de nuevo", "set.releaseAsk": "¿Devolver a <b>{name}</b> al claro? No se puede deshacer.",
+    "set.releaseYes": "Liberar", "set.releaseNo": "Quedármela", "set.theEgg": "el huevo",
+    "jr.title": "Recuerdos del claro", "jr.desc": "Todas las criaturas que has criado, de la más reciente a la más antigua.", "jr.empty": "Aún no hay nada. Las criaturas aparecen aquí cuando dejan de estar a tu cuidado.",
+    "end.released": "en libertad", "end.gone": "se marchó",
+    "ch.title": "Hay tres huevos entre el musgo. Elige uno para darle calor.",
+    "ch.lead": "De cada tipo nace una criatura distinta con sus propias costumbres. Si la cuidas bien, crecerá sana y brillante.",
+    "egg.warming": "Calentando el {egg}…", "egg.hatched": "¡Ha eclosionado!", "egg.tap": "Toca el huevo para darle calor. También eclosionará solo dentro de un rato.",
+    "egg.hello": "Saluda a tu pequeño {baby}. ¿Cómo lo vas a llamar?", "egg.placeholder": "Ponle nombre", "egg.welcome": "Bienvenido a casa", "egg.aria": "Tu huevo. Tócalo para darle calor.",
+    "g.sceneAria": "El hogar de tu criatura", "g.status": "Cómo está", "g.care": "Cuidados", "g.diary": "Diario",
+    "stat.full": "Barriga", "stat.fun": "Diversión", "stat.energy": "Energía", "stat.clean": "Limpieza", "stat.health": "Salud",
+    "stage.0": "Cría", "stage.1": "Joven", "stage.2": "Mayor",
+    "age.age": "Edad {d}", "age.grows": "crece en {d}", "age.grown": "ya ha crecido", "age.speed": "tiempo {n}×",
+    "badge.asleep": "Durmiendo", "badge.sick": "Con catarro", "badge.messes": (v) => `${v.n} ${plural(v.n, "caquita", "caquitas")}`,
+    "badge.hungry": "Tiene hambre", "badge.bored": "Se aburre", "badge.sleepy": "Tiene sueño", "badge.happy": "Feliz",
+    "act.feed": "Comer", "act.play": "Jugar", "act.clean": "Limpiar", "act.sleep": "Dormir", "act.wake": "Despertar", "act.heal": "Hierbas", "act.pet": "Mimar", "act.items": "Objetos", "act.shop": "Tienda",
+    "menu.close": "Mejor no", "menu.closeSub": "Cerrar", "menu.noItems": "Tu mochila está vacía. Aquí aparecen las medicinas y el jabón de la tienda.",
+    "hint.sleeping": "{name} está durmiendo. La energía se recupera con la luz apagada.", "hint.sick": "{name} no tiene buena cara. Dale hierbas.",
+    "hint.messy": "El claro se está ensuciando. Toca limpiar.", "hint.hungry": "A {name} le ruge la barriga.", "hint.tired": "{name} no para de bostezar. Quizá sea hora de dormir.",
+    "hint.bored": "{name} se aburre. Jugad una partida.", "hint.pat": "Toca a tu criatura para hacerle un mimo.",
+    "hint.play": "¡Atrapa las semillas estrella que caen! Tócalas antes de que lleguen al suelo.", "hint.full": "{name} niega con la cabeza. No le cabe más.",
+    "hint.notTired": "{name} todavía no tiene sueño.", "hint.notSick": "{name} no está enfermo. Las medicinas solo hacen falta con catarro.", "hint.tooTired": "{name} está demasiado cansado para jugar. Déjalo descansar.",
+    "hint.healthy": "{name} ya tiene la salud al máximo.",
+    "say.yum": "¡Ñam!", "say.sweet": "¡Qué rico!", "say.full": "¡No puedo más!", "say.squeaky": "¡Reluciente!", "say.hm": "¿Mm?", "say.notSleepy": "¡No tengo sueño!", "say.fine": "¡Estoy bien!",
+    "say.better": "Puaj… ¡mejor!", "say.better2": "¡Ah, mucho mejor!", "say.morning": "¡Buenos días!", "say.whoa": "¡Hala!", "say.hi": "¡Hola!", "say.tooSleepy": "Qué sueño…", "say.again": "¡¡Otra!!", "say.fun": "¡Qué guay!", "say.hehe": "Jeje",
+    "say.cuddle": ["♪", "Jeje", "Mmm"], "say.zing": "¡Zas!",
+    "log.mess": "{name} ha dejado una caquita.", "log.sick": "{name} ha pillado un catarro. Las hierbas le ayudarán.", "log.fellAsleep": "{name} no pudo más y se echó a dormir allí mismo.",
+    "log.woke": "{name} se despertó con energía de sobra.", "log.grew": "¡{name} ha crecido de {from} a {to}!", "log.gone": "{name} se marchó al claro.",
+    "log.away": "Estuviste fuera {d}.", "log.awayCoins": "Estuviste fuera {d}. {name} te ha hecho ganar {n} Chispas.",
+    "log.fed": "{name} se comió {food}.", "log.cleaned": (v) => `Limpiaste ${v.n} ${plural(v.n, "caquita", "caquitas")} y bañaste a ${v.name}.`, "log.bath": "Le diste un baño de burbujas a {name}.",
+    "log.wokeGrumpy": "Despertaste a {name} antes de tiempo y está de mal humor.", "log.wokeUp": "{name} se ha despertado.", "log.lightsOut": "Luces fuera. {name} se acurrucó para dormir.",
+    "log.herbs": "{name} masticó unas hierbas amargas y se encuentra mejor.", "log.used": "Usaste {item} con {name}.",
+    "log.played": (v) => `Jugaste con ${v.name}: ${v.n} ${plural(v.n, "semilla estrella atrapada", "semillas estrella atrapadas")}.`,
+    "log.hatched": "{name} salió de un {egg}. ¡Bienvenido al claro!", "log.bought": "Compraste {item}.", "log.ach": "Logro conseguido: {name}.",
+    "gone.title": "{name} se ha marchado", "gone.released": "{name} volvió saltando a la hierba alta. Allí es feliz, y se acordará de ti.",
+    "gone.sad": "{name} no se sentía bien cuidado y se fue a buscar un claro más acogedor. Las criaturas necesitan comida, juego, descanso y un hogar limpio cada pocas horas. No pasa nada, hay más huevos entre el musgo.",
+    "gone.btn": "Buscar otro huevo", footer: "Evolvlings es un nombre provisional. La partida se guarda solo en este navegador.",
+    "shop.title": "Tienda", "shop.desc": "Gasta Chispas en caprichos, medicinas y juguetes. Las Chispas se ganan cuidando bien, jugando y creciendo.",
+    "shop.wallet": "Tienes {n} Chispas", "shop.buy": "Comprar", "shop.owned": "Ya es tuyo", "shop.have": "En la mochila: {n}",
+    "cat.food": "Comida", "cat.med": "Medicinas y cuidado", "cat.toy": "Juguetes (para siempre)",
+    "ach.title": "Logros", "ach.progress": "{n} de {m} conseguidos", "toast.ach": "Logro: {name}", "toast.poor": "Todavía no tienes Chispas suficientes.",
+    "toast.bought": "Compraste {item}",
+    sp: {
+      lumo: { egg: "huevo luminoso", blurb: "Está tibio y tiene una luz suave dentro.", trait: "Juguetón · se aburre rápido",
+        desc: ["un duendecillo polilla brillante", "un duendecillo polilla brillante", "un duendecillo polilla con alas de farol", "un duendecillo polilla apagado y mustio"] },
+      pebb: { egg: "huevo de guijarro", blurb: "Pesado y moteado, como una piedra de río.", trait: "Comilón · muy resistente",
+        desc: ["un bichito de piedra", "un bichito de piedra", "un bichito de piedra con gorro de musgo", "un bichito de piedra agrietado y gruñón"] },
+      fizz: { egg: "huevo de nube", blurb: "Extrañamente ligero. Flota un poco si lo sueltas.", trait: "Dormilón · siempre limpio",
+        desc: ["una bolita de nube", "una bolita de nube", "una bolita de nube soleada", "una nube de lluvia tristona"] },
+    },
+    item: {
+      berry: ["Bayarrocío", "Una comida que llena. Siempre gratis.", "una bayarrocío"],
+      bun: ["Bollo de miel", "Muy rico, pero es un capricho. Siempre gratis.", "un bollo de miel"],
+      stew: ["Guiso de raíz solar", "Llena muchísimo y da algo de energía.", "un cuenco de guiso de raíz solar"],
+      fizzpop: ["Burbujita", "Diversión con gas en una botella.", "una burbujita"],
+      melon: ["Tajada de melón lunar", "Jugosa y buena para la salud.", "una tajada de melón lunar"],
+      cookie: ["Galleta estrella", "Divertidísima, aunque lleva azúcar.", "una galleta estrella"],
+      tea: ["Té de destellos", "Una taza calentita que devuelve la energía.", "una taza de té de destellos"],
+      tonic: ["Tónico de cardo", "Cura el catarro y recupera mucha salud.", "un tónico de cardo"],
+      salve: ["Bálsamo dulce", "Cura el catarro sin sabor amargo.", "un bálsamo dulce"],
+      soap: ["Jabón espumoso", "Limpia todas las caquitas y deja el claro reluciente.", "jabón espumoso"],
+      ball: ["Pelota de abrojo", "Juguete. Al jugar da más diversión y +2 Chispas extra.", "una pelota de abrojo"],
+      kite: ["Cometa de hoja", "Juguete. Las partidas duran 15 segundos en vez de 10.", "una cometa de hoja"],
+    },
+    ach: {
+      hatch1: ["Primera eclosión", "Haz eclosionar tu primera criatura."],
+      feed1: ["Hora de merendar", "Dale de comer a tu criatura."],
+      clean1: ["Claro limpio", "Limpia una caquita."],
+      play1: ["Compañero de juegos", "Juega una partida."],
+      stars10: ["Cazaestrellas", "Atrapa 10 semillas estrella en una partida."],
+      stars100: ["Cielo estrellado", "Atrapa 100 semillas estrella en total."],
+      kid: ["Dando el estirón", "Cría a una criatura hasta Joven."],
+      adult: ["Ya es mayor", "Cría a una criatura hasta Mayor."],
+      bright: ["Todo un ejemplo", "Cría a una criatura brillante con muy buenos cuidados."],
+      scruffy: ["Todas las formas cuentan", "Cría a una criatura mayor desaliñada."],
+      allEggs: ["Coleccionista de huevos", "Haz eclosionar los tres tipos de huevo."],
+      allForms: ["Experto del claro", "Descubre las seis formas adultas."],
+      healer: ["Pequeño sanador", "Cura 5 catarros."],
+      tidy25: ["Maniático del orden", "Limpia 25 caquitas."],
+      cuddle50: ["Achuchón", "Haz 50 mimos."],
+      shop1: ["Primera compra", "Compra algo en la tienda."],
+      spend200: ["Derrochón", "Gasta 200 Chispas."],
+      rich300: ["Tesoro escondido", "Ten 300 Chispas a la vez."],
+      day1: ["Viejo amigo", "Cuida de una criatura durante un día entero de juego."],
+      perfect: ["Día perfecto", "Ten todas las estadísticas en 80 o más a la vez."],
+      gourmet: ["Gourmet", "Prueba 5 comidas distintas."],
+      night: ["Ave nocturna", "Juega entre medianoche y las 5 de la mañana."],
+    },
+  },
+};
+let LANG = "en";
+function t(k, v) {
+  let s = STR[LANG][k]; if (s === undefined) s = STR.en[k]; if (s === undefined) return k;
+  if (typeof s === "function") return s(v || {});
+  if (typeof s !== "string") return s;
+  return s.replace(/\{(\w+)\}/g, (m, n) => (v && v[n] != null ? v[n] : m));
+}
+const spT = (k) => STR[LANG].sp[k];
+const itemName = (id) => STR[LANG].item[id][0];
+const itemDesc = (id) => STR[LANG].item[id][1];
+const itemA = (id) => STR[LANG].item[id][2];
+function applyStatic() {
+  document.documentElement.lang = LANG;
+  document.querySelectorAll("[data-i18n]").forEach((el) => { el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll("[data-i18n-ph]").forEach((el) => { el.placeholder = t(el.dataset.i18nPh); });
+  document.querySelectorAll("[data-i18n-aria]").forEach((el) => { el.setAttribute("aria-label", t(el.dataset.i18nAria)); });
+  document.querySelectorAll("#langSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === LANG)));
+}
 
 /* ---------- Species (all original) ---------- */
 const SPECIES = {
   lumo: {
-    egg: "Glow egg", blurb: "Warm to the touch, with a soft light inside.", trait: "Playful · gets bored fast",
     names: ["Lumi", "Lumbit", "Lanternmoth", "Dimwick"],
-    desc: ["a glowing moth-sprite", "a glowing moth-sprite", "a lantern-winged moth-sprite", "a dim, droopy moth-sprite"],
     rates: { full: 1, fun: 1.35, energy: 0.9, clean: 1 },
     col: { body: "#f5cf5d", belly: "#fde9a6", line: "#9a6f12", cheek: "#f39a7a", accent: "#ffe27a" },
     dull: { body: "#c9b77f", belly: "#e2d8b4", line: "#6d5f36", cheek: "#c9a092", accent: "#b9ae8b" },
     eggCol: ["#fbe39a", "#e7b53c", "#7a5410"],
   },
   pebb: {
-    egg: "Pebble egg", blurb: "Heavy and speckled, like a river stone.", trait: "Hungry · very sturdy",
     names: ["Pebb", "Cobbin", "Mossmonk", "Grumblestone"],
-    desc: ["a pebble critter", "a pebble critter", "a moss-capped stone critter", "a cracked, grumpy stone critter"],
     rates: { full: 1.35, fun: 0.9, energy: 1, clean: 1, health: 0.7 },
     col: { body: "#9fb0c2", belly: "#d3dde6", line: "#4b5a6b", cheek: "#e8a3a3", accent: "#6aa84f" },
     dull: { body: "#8c8f93", belly: "#b9bbbe", line: "#4c4e52", cheek: "#b99a9a", accent: "#7d8a5e" },
     eggCol: ["#c9d3dc", "#8796a6", "#3e4a57"],
   },
   fizz: {
-    egg: "Cloud egg", blurb: "Strangely light. It floats a little when you let go.", trait: "Sleepy · stays tidy",
     names: ["Wisp", "Driftlet", "Nimbuffin", "Drizzlump"],
-    desc: ["a cloud puff", "a cloud puff", "a sunny cloud puff", "a gloomy raincloud puff"],
     rates: { full: 0.9, fun: 1, energy: 1.35, clean: 0.7 },
     col: { body: "#bfe6f7", belly: "#f2fbff", line: "#4f8fae", cheek: "#f4a6c4", accent: "#ffd76a" },
     dull: { body: "#a8b4bb", belly: "#d4dadd", line: "#55656e", cheek: "#b8a0aa", accent: "#8fa3b0" },
     eggCol: ["#eef9ff", "#9fd3ec", "#4f8fae"],
   },
 };
-const STAGE_LABEL = ["Baby", "Kid", "Grown-up"];
 const TEEN_AT = 60, ADULT_AT = 240; // game minutes of age
+
+/* ---------- Items (cat: food | med | toy). price 0 = always free ---------- */
+const ITEMS = {
+  berry: { cat: "food", price: 0, eff: { full: 32 } },
+  bun: { cat: "food", price: 0, eff: { full: 14, fun: 14, health: -3 } },
+  stew: { cat: "food", price: 8, eff: { full: 45, energy: 10 } },
+  fizzpop: { cat: "food", price: 6, eff: { fun: 20, full: 8 } },
+  melon: { cat: "food", price: 10, eff: { full: 30, health: 6 } },
+  cookie: { cat: "food", price: 12, eff: { fun: 25, full: 10, health: -2 } },
+  tea: { cat: "food", price: 9, eff: { energy: 30, full: 4 } },
+  tonic: { cat: "med", price: 14, eff: { health: 35 }, cure: true },
+  salve: { cat: "med", price: 8, eff: { health: 10 }, cure: true },
+  soap: { cat: "med", price: 6, eff: { clean: 100 }, wash: true },
+  ball: { cat: "toy", price: 30, perm: true },
+  kite: { cat: "toy", price: 45, perm: true },
+};
+
+/* ---------- Achievements: [id, reward, test(P, S)] ---------- */
+const ACH = [
+  ["hatch1", 10, (p) => p.c.hatched >= 1],
+  ["feed1", 5, (p) => p.c.fed >= 1],
+  ["clean1", 5, (p) => p.c.messes >= 1],
+  ["play1", 5, (p) => p.c.plays >= 1],
+  ["stars10", 20, (p) => p.c.bestRound >= 10],
+  ["stars100", 30, (p) => p.c.stars >= 100],
+  ["kid", 15, (p) => p.c.kids >= 1],
+  ["adult", 25, (p) => p.c.adults >= 1],
+  ["bright", 40, (p) => Object.keys(p.seen.forms).some((k) => k.endsWith(":bright"))],
+  ["scruffy", 15, (p) => Object.keys(p.seen.forms).some((k) => k.endsWith(":scruffy"))],
+  ["allEggs", 40, (p) => Object.keys(p.seen.species).length >= 3],
+  ["allForms", 100, (p) => Object.keys(p.seen.forms).length >= 6],
+  ["healer", 20, (p) => p.c.cures >= 5],
+  ["tidy25", 20, (p) => p.c.messes >= 25],
+  ["cuddle50", 15, (p) => p.c.cuddles >= 50],
+  ["shop1", 5, (p) => p.c.bought >= 1],
+  ["spend200", 30, (p) => p.c.spent >= 200],
+  ["rich300", 30, (p) => p.coins >= 300],
+  ["day1", 50, (p, s) => s.phase === "alive" && s.age >= 1440],
+  ["perfect", 20, (p, s) => s.phase === "alive" && ["full", "fun", "energy", "clean", "health"].every((k) => s.stats[k] >= 80)],
+  ["gourmet", 20, (p) => Object.keys(p.seen.foods).length >= 5],
+  ["night", 10, (p) => p.c.nightPlay >= 1],
+];
+
+/* ---------- Profile: wallet, bag, achievements, settings (survives across creatures) ---------- */
+function freshProfile() {
+  return { v: 1, coins: 20, coinAcc: 0, inv: {}, owned: {}, ach: {}, lang: null, sound: true, haptics: true,
+    c: { hatched: 0, fed: 0, messes: 0, plays: 0, bestRound: 0, stars: 0, kids: 0, adults: 0, cures: 0, cuddles: 0, bought: 0, spent: 0, nightPlay: 0 },
+    seen: { species: {}, forms: {}, foods: {} } };
+}
+function loadProfile() {
+  const base = freshProfile();
+  try {
+    const o = JSON.parse(localStorage.getItem(PROFILE_KEY) || "null");
+    if (o && o.v === 1) return Object.assign(base, o, { c: Object.assign(base.c, o.c), seen: Object.assign(base.seen, o.seen) });
+  } catch (e) {}
+  return base;
+}
+let P = loadProfile();
+function saveProfile() { try { localStorage.setItem(PROFILE_KEY, JSON.stringify(P)); } catch (e) {} }
 
 /* ---------- State ---------- */
 let S = null;
@@ -293,22 +656,85 @@ function load() {
   try { const raw = localStorage.getItem(SAVE_KEY); if (raw) { const o = JSON.parse(raw); if (o && o.v === 1) return o; } } catch (e) {}
   return null;
 }
-function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} }
+function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} saveProfile(); }
 function loadJournal() { try { return JSON.parse(localStorage.getItem(JOURNAL_KEY) || "[]"); } catch (e) { return []; } }
 function saveJournal(j) { try { localStorage.setItem(JOURNAL_KEY, JSON.stringify(j.slice(0, 40))); } catch (e) {} }
 
-function stageName() {
-  const sp = SPECIES[S.species];
-  if (S.stage < 2) return sp.names[S.stage];
-  return S.form === "scruffy" ? sp.names[3] : sp.names[2];
-}
-function stageDesc() {
-  const sp = SPECIES[S.species];
-  if (S.stage < 2) return sp.desc[S.stage];
-  return S.form === "scruffy" ? sp.desc[3] : sp.desc[2];
-}
+function formIdx() { return S.stage < 2 ? S.stage : S.form === "scruffy" ? 3 : 2; }
+function stageName() { return SPECIES[S.species].names[formIdx()]; }
+function stageDesc() { return spT(S.species).desc[formIdx()]; }
 function clockStr() { const d = new Date(); return d.getHours().toString().padStart(2, "0") + ":" + d.getMinutes().toString().padStart(2, "0"); }
 function addLog(text) { S.log.unshift({ t: clockStr(), text }); S.log = S.log.slice(0, 40); renderLog(); }
+
+/* ---------- Sound (generated with Web Audio, no files) and vibration ---------- */
+let AC = null;
+function audio() {
+  if (!P.sound) return null;
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; } }
+  if (AC.state === "suspended") AC.resume();
+  return AC;
+}
+function tone(freq, dur, o = {}) {
+  const a = audio(); if (!a) return;
+  const t0 = a.currentTime + (o.delay || 0);
+  const osc = a.createOscillator(), g = a.createGain();
+  osc.type = o.type || "sine"; osc.frequency.setValueAtTime(freq, t0);
+  if (o.slide) osc.frequency.exponentialRampToValueAtTime(Math.max(40, freq + o.slide), t0 + dur);
+  g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(o.vol || 0.1, t0 + 0.012); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  osc.connect(g); g.connect(a.destination); osc.start(t0); osc.stop(t0 + dur + 0.05);
+}
+const SFX = {
+  tap: () => tone(620, 0.05, { type: "triangle", vol: 0.05 }),
+  coin: () => { tone(988, 0.07, { type: "square", vol: 0.04 }); tone(1319, 0.16, { type: "square", vol: 0.04, delay: 0.07 }); },
+  munch: () => { for (let i = 0; i < 3; i++) tone(170 + i * 25, 0.06, { type: "square", vol: 0.05, delay: i * 0.13 }); },
+  chirp: () => tone(640 + Math.random() * 120, 0.14, { slide: 520, vol: 0.08 }),
+  catch: () => tone(1100 + Math.random() * 500, 0.09, { type: "triangle", vol: 0.07 }),
+  splash: () => { for (let i = 0; i < 5; i++) tone(500 + Math.random() * 900, 0.08, { vol: 0.04, delay: i * 0.06, slide: 300 }); },
+  yawn: () => tone(420, 0.6, { slide: -220, vol: 0.06 }),
+  heal: () => { tone(523, 0.12, { vol: 0.06 }); tone(784, 0.2, { vol: 0.06, delay: 0.1 }); },
+  deny: () => tone(240, 0.16, { type: "sawtooth", vol: 0.035, slide: -70 }),
+  grow: () => { [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.18, { type: "triangle", vol: 0.07, delay: i * 0.11 })); },
+  ach: () => { [784, 988, 1175, 1568].forEach((f, i) => tone(f, i === 3 ? 0.35 : 0.1, { type: "square", vol: 0.035, delay: i * 0.08 })); },
+  hatch: () => { tone(300, 0.1, { type: "triangle", vol: 0.07 }); tone(450, 0.1, { type: "triangle", vol: 0.07, delay: 0.1 }); tone(900, 0.3, { vol: 0.08, delay: 0.2, slide: 300 }); },
+};
+function sfx(name) { try { SFX[name](); } catch (e) {} }
+function buzz(ms) { if (P.haptics && navigator.vibrate) try { navigator.vibrate(ms); } catch (e) {} }
+
+/* ---------- Chispas ---------- */
+function addCoins(n, quiet) {
+  if (n <= 0) return;
+  P.coins += n;
+  if (!quiet) {
+    sfx("coin");
+    effects.push({ type: "txt", text: "+" + n, x: petX + rand(-10, 10), y: 130, vy: -28, life: 1.4 });
+    const chip = $("btnCoins"); chip.classList.remove("pop"); void chip.offsetWidth; chip.classList.add("pop");
+  }
+  renderCoins();
+}
+function spendCoins(n) { if (P.coins < n) return false; P.coins -= n; P.c.spent += n; renderCoins(); return true; }
+function renderCoins() { $("coinVal").textContent = P.coins; if (!$("shopPanel").hidden) renderShop(); }
+
+function toast(text, extra) {
+  const el = document.createElement("div"); el.className = "toast";
+  el.textContent = text;
+  if (extra) { const b = document.createElement("b"); b.textContent = extra; el.appendChild(b); }
+  $("toasts").appendChild(el);
+  setTimeout(() => el.remove(), 3200);
+}
+function checkAch() {
+  for (const [id, reward, test] of ACH) {
+    if (P.ach[id]) continue;
+    let ok = false; try { ok = test(P, S); } catch (e) {}
+    if (!ok) continue;
+    P.ach[id] = Date.now();
+    const nm = STR[LANG].ach[id][0];
+    P.coins += reward; renderCoins();
+    toast(t("toast.ach", { name: nm }), "+" + reward + " ✦");
+    sfx("ach"); buzz([30, 40, 30]);
+    if (S && S.phase === "alive") addLog(t("log.ach", { name: nm }));
+    if (!$("achPanel").hidden) renderAch();
+  }
+}
 
 /* ---------- Simulation (dt in game minutes) ---------- */
 const PER_MIN = { full: 14 / 60, fun: 12 / 60, energy: 9 / 60, clean: 5 / 60 };
@@ -327,7 +753,7 @@ function step(dt, offline) {
   for (const p of S.pendingMess) p.in -= dt;
   const due = S.pendingMess.filter((p) => p.in <= 0);
   S.pendingMess = S.pendingMess.filter((p) => p.in > 0);
-  for (let i = 0; i < due.length; i++) if (S.messes.length < 5) { S.messes.push({ x: rand(40, 320) }); if (!offline) addLog(`${S.name} made a mess.`); }
+  for (let i = 0; i < due.length; i++) if (S.messes.length < 5) { S.messes.push({ x: rand(40, 320) }); if (!offline) addLog(t("log.mess", { name: S.name })); }
 
   // sickness
   if (!S.sick) {
@@ -335,7 +761,7 @@ function step(dt, offline) {
     if (s.clean < 25) risk += 0.35;
     if (S.messes.length >= 3) risk += 0.35;
     if (s.full < 10) risk += 0.2;
-    if (Math.random() < (risk / 60) * dt) { S.sick = true; addLog(`${S.name} caught a sniffle. Herbs will help.`); }
+    if (Math.random() < (risk / 60) * dt) { S.sick = true; addLog(t("log.sick", { name: S.name })); }
   }
 
   // health
@@ -347,28 +773,34 @@ function step(dt, offline) {
   else if (s.full > 40 && s.fun > 40 && s.energy > 30 && s.clean > 40) s.health = clamp(s.health + (6 / 60) * dt);
 
   // auto sleep / wake
-  if (!sl && s.energy < 8) { S.sleeping = true; addLog(`${S.name} was so tired it fell asleep on the spot.`); }
-  if (sl && s.energy >= 100) { S.sleeping = false; addLog(`${S.name} woke up fully rested.`); if (!offline) say("Morning!"); }
+  if (!sl && s.energy < 8) { S.sleeping = true; addLog(t("log.fellAsleep", { name: S.name })); }
+  if (sl && s.energy >= 100) { S.sleeping = false; addLog(t("log.woke", { name: S.name })); if (!offline) say(t("say.morning")); }
+
+  // a well cared-for creature earns 1 Chispa every 10 game minutes, also while you're away
+  if (careNow() > 60) { P.coinAcc += dt / 10; if (P.coinAcc >= 1) { const n = Math.floor(P.coinAcc); P.coinAcc -= n; P.coins += n; if (!offline) renderCoins(); } }
 
   // aging and care record
   S.age += dt;
   S.careSum += careNow() * dt; S.careN += dt;
-  if (S.stage === 0 && S.age >= TEEN_AT) grow();
-  else if (S.stage === 1 && S.age >= ADULT_AT) grow();
+  if (S.stage === 0 && S.age >= TEEN_AT) grow(offline);
+  else if (S.stage === 1 && S.age >= ADULT_AT) grow(offline);
 
   if (s.health <= 0) runAway();
 }
 
-function grow() {
+function grow(offline) {
   const before = stageName();
   S.stage++;
   if (S.stage === 2) {
     const avg = S.careN ? S.careSum / S.careN : 50;
     S.form = avg >= 58 ? "bright" : "scruffy";
-  }
-  addLog(`${S.name} grew from ${before} into ${stageName()}!`);
+    P.seen.forms[S.species + ":" + S.form] = 1; P.c.adults++;
+    addCoins(S.form === "bright" ? 70 : 40, offline);
+  } else { P.c.kids++; addCoins(20, offline); }
+  addLog(t("log.grew", { name: S.name, from: before, to: stageName() }));
   bloom = { t: 0 };
-  say("Whoa!");
+  say(t("say.whoa"));
+  if (!offline) { sfx("grow"); buzz([40, 60, 40]); }
 }
 
 function runAway() {
@@ -377,7 +809,7 @@ function runAway() {
   saveJournal(j);
   S.phase = "gone";
   S.goneName = S.name;
-  addLog(`${S.name} wandered off into the glade.`);
+  addLog(t("log.gone", { name: S.name }));
   save(); showScreen();
 }
 
@@ -388,73 +820,168 @@ function catchUp() {
   if (S.phase === "egg") { S.egg = clamp(S.egg + mins * 60 * 4); return; }
   if (S.phase !== "alive" || mins <= 0) return;
   mins = Math.min(mins, 60 * 24 * 2);
-  const away = mins;
+  const away = mins, coinsBefore = P.coins;
   while (mins > 0 && S.phase === "alive") { const d = Math.min(1, mins); step(d, true); mins -= d; }
-  if (away > 30 && S.phase === "alive") addLog(`You were away for ${fmtDur(away)}.`);
+  if (away > 30 && S.phase === "alive") {
+    const n = P.coins - coinsBefore;
+    addLog(n > 0 ? t("log.awayCoins", { d: fmtDur(away), name: S.name, n }) : t("log.away", { d: fmtDur(away) }));
+  }
+  renderCoins();
 }
 function fmtDur(m) { m = Math.round(m); if (m < 60) return m + " min"; const h = Math.floor(m / 60), mm = m % 60; return h + "h" + (mm ? " " + mm + "m" : ""); }
 
 /* ---------- Actions ---------- */
 let bubble = null, effects = [], foodAnim = null, bloom = null, mini = null, cleanAnim = null;
 function say(text) { bubble = { text, until: performance.now() + 2200 }; }
-function hint(text) { $("hint").textContent = text; }
+function hint(text) { $("hint").textContent = text; $("hint").dataset.auto = "0"; }
+function closeMenus() { $("feedMenu").hidden = true; $("itemMenu").hidden = true; }
 
-function feed(kind) {
-  $("feedMenu").hidden = true;
-  if (kind === "no") return;
+function applyEff(eff) { for (const k in eff) S.stats[k] = clamp(S.stats[k] + eff[k]); }
+function feed(id) {
+  closeMenus();
+  const it = ITEMS[id]; if (!it) return;
+  if (it.price > 0 && !(P.inv[id] > 0)) return;
   const s = S.stats;
-  if (s.full > 94) { say("Too full!"); hint(`${S.name} shakes its head. It's full.`); return; }
-  if (kind === "berry") { s.full = clamp(s.full + 32); addLog(`Fed ${S.name} a dewberry.`); }
-  else { s.full = clamp(s.full + 14); s.fun = clamp(s.fun + 14); s.health = clamp(s.health - 3); addLog(`${S.name} gobbled a honey bun.`); }
+  if (s.full > 94 && (it.eff.full || 0) >= 8) { say(t("say.full")); hint(t("hint.full", { name: S.name })); sfx("deny"); return; }
+  const wasHungry = s.full < 70;
+  applyEff(it.eff);
+  if (it.price > 0) P.inv[id]--;
+  P.c.fed++; P.seen.foods[id] = 1;
+  addLog(t("log.fed", { name: S.name, food: itemA(id) }));
   S.pendingMess.push({ in: rand(15, 45) });
-  foodAnim = { kind, t: 0 };
-  say(kind === "berry" ? "Yum!" : "Sweet!");
-  save(); renderStats();
+  foodAnim = { kind: id, t: 0 };
+  say(it.eff.fun > it.eff.full || id === "bun" ? t("say.sweet") : t("say.yum"));
+  setTimeout(() => sfx("munch"), 450);
+  if (wasHungry) setTimeout(() => addCoins(1), 900);
+  save(); renderStats(); checkAch();
 }
-function cleanUp() {
+function useItem(id) {
+  closeMenus();
+  const it = ITEMS[id]; if (!it || !(P.inv[id] > 0)) return;
+  if (it.cure && !S.sick && S.stats.health >= 98) { say(t("say.fine")); hint(t("hint.healthy", { name: S.name })); sfx("deny"); return; }
+  P.inv[id]--;
+  if (it.wash) { washScene(); }
+  else {
+    if (it.cure && S.sick) { S.sick = false; P.c.cures++; addCoins(3); }
+    applyEff(it.eff); say(t("say.better2")); sfx("heal");
+    for (let i = 0; i < 8; i++) effects.push({ type: "spark", x: petX + rand(-30, 30), y: rand(150, 200), vx: rand(-20, 20), vy: rand(-50, -20), life: 1, r: 3, hue: "#8fe08a" });
+  }
+  addLog(t("log.used", { item: itemA(id), name: S.name }));
+  save(); renderStats(); checkAch();
+}
+function washScene() {
   const n = S.messes.length;
   S.messes = []; S.stats.clean = clamp(S.stats.clean + 45);
   cleanAnim = { t: 0 };
   for (let i = 0; i < 18; i++) effects.push({ type: "bubble", x: rand(30, 330), y: rand(150, 250), vy: rand(-30, -12), life: rand(1, 2), r: rand(3, 8) });
-  addLog(n ? `Cleaned up ${n} mess${n > 1 ? "es" : ""} and gave ${S.name} a bath.` : `Gave ${S.name} a bubble bath.`);
-  say("Squeaky!"); save(); renderStats();
+  if (n) { P.c.messes += n; addCoins(2 * n); }
+  say(t("say.squeaky")); sfx("splash");
+  return n;
+}
+function cleanUp() {
+  closeMenus();
+  const n = washScene();
+  addLog(n ? t("log.cleaned", { n, name: S.name }) : t("log.bath", { name: S.name }));
+  save(); renderStats(); checkAch();
 }
 function toggleSleep() {
+  closeMenus();
   if (S.sleeping) {
-    if (S.stats.energy < 40) { S.stats.fun = clamp(S.stats.fun - 8); addLog(`Woke ${S.name} early. It's grumpy.`); }
-    else addLog(`${S.name} woke up.`);
-    S.sleeping = false; say("Hm?");
+    if (S.stats.energy < 40) { S.stats.fun = clamp(S.stats.fun - 8); addLog(t("log.wokeGrumpy", { name: S.name })); }
+    else addLog(t("log.wokeUp", { name: S.name }));
+    S.sleeping = false; say(t("say.hm")); sfx("chirp");
   } else {
-    if (S.stats.energy > 85) { say("Not sleepy!"); hint(`${S.name} isn't tired yet.`); return; }
-    S.sleeping = true; addLog(`Lights out. ${S.name} curled up to sleep.`);
+    if (S.stats.energy > 85) { say(t("say.notSleepy")); hint(t("hint.notTired", { name: S.name })); sfx("deny"); return; }
+    S.sleeping = true; addLog(t("log.lightsOut", { name: S.name })); sfx("yawn");
   }
   save(); renderAll();
 }
 function heal() {
-  if (!S.sick) { say("I'm fine!"); hint(`${S.name} isn't sick. Herbs are only needed for sniffles.`); return; }
+  closeMenus();
+  if (!S.sick) { say(t("say.fine")); hint(t("hint.notSick", { name: S.name })); sfx("deny"); return; }
   S.sick = false; S.stats.health = clamp(S.stats.health + 20); S.stats.fun = clamp(S.stats.fun - 5);
-  addLog(`${S.name} chewed some bitter herbs and feels better.`); say("Bleh… better!");
-  save(); renderStats();
+  P.c.cures++;
+  addLog(t("log.herbs", { name: S.name })); say(t("say.better")); sfx("heal");
+  addCoins(3);
+  save(); renderStats(); checkAch();
 }
+let lastCuddle = 0;
 function cuddle() {
   S.stats.fun = clamp(S.stats.fun + 6);
   for (let i = 0; i < 5; i++) effects.push({ type: "heart", x: petX + rand(-30, 30), y: 150, vy: rand(-40, -25), life: 1.4, r: rand(5, 8) });
-  say(["♪", "Hehe", "Mmm"][Math.floor(Math.random() * 3)]);
-  save(); renderStats();
+  say(pick(t("say.cuddle")));
+  const now = performance.now();
+  if (now - lastCuddle > 400) { P.c.cuddles++; sfx("chirp"); buzz(12); }
+  lastCuddle = now;
+  save(); renderStats(); checkAch();
 }
 function startPlay() {
-  if (S.stats.energy < 15) { say("Too sleepy…"); hint(`${S.name} is too tired to play. Let it rest.`); return; }
-  mini = { until: performance.now() + 10000, stars: [], caught: 0, next: 0 };
-  hint("Catch the falling starseeds! Tap them before they hit the ground.");
+  closeMenus();
+  if (S.stats.energy < 15) { say(t("say.tooSleepy")); hint(t("hint.tooTired", { name: S.name })); sfx("deny"); return; }
+  const len = P.owned.kite ? 15000 : 10000;
+  mini = { until: performance.now() + len, stars: [], caught: 0, next: 0 };
+  hint(t("hint.play"));
+  sfx("tap");
+  if (window.innerWidth < 760) scene.scrollIntoView({ behavior: "smooth", block: "center" });
   renderAll();
 }
 function endPlay() {
   const c = mini.caught; mini = null;
-  const s = S.stats;
-  s.fun = clamp(s.fun + 10 + c * 4); s.energy = clamp(s.energy - 10); s.full = clamp(s.full - 4);
-  addLog(`Played catch with ${S.name}: ${c} starseed${c === 1 ? "" : "s"} caught.`);
-  say(c >= 6 ? "Again!!" : c >= 3 ? "Fun!" : "Hehe");
-  hint(""); save(); renderAll();
+  const s = S.stats, ball = !!P.owned.ball;
+  s.fun = clamp(s.fun + (10 + c * 4) * (ball ? 1.5 : 1)); s.energy = clamp(s.energy - 10); s.full = clamp(s.full - 4);
+  P.c.plays++; P.c.stars += c; P.c.bestRound = Math.max(P.c.bestRound, c);
+  const h = new Date().getHours(); if (h < 5) P.c.nightPlay++;
+  addLog(t("log.played", { name: S.name, n: c }));
+  say(c >= 6 ? t("say.again") : c >= 3 ? t("say.fun") : t("say.hehe"));
+  addCoins(c + (ball ? 2 : 0));
+  hint(""); $("hint").dataset.auto = "1"; save(); renderAll(); checkAch();
+}
+
+/* ---------- Shop, bag and achievements UI ---------- */
+function buy(id) {
+  const it = ITEMS[id]; if (!it) return;
+  if (it.perm && P.owned[id]) return;
+  if (!spendCoins(it.price)) { toast(t("toast.poor")); sfx("deny"); return; }
+  if (it.perm) P.owned[id] = 1; else P.inv[id] = (P.inv[id] || 0) + 1;
+  P.c.bought++;
+  sfx("coin"); buzz(15);
+  toast(t("toast.bought", { item: itemName(id) }), "−" + it.price + " ✦");
+  if (S && S.phase === "alive") addLog(t("log.bought", { item: itemA(id) }));
+  save(); renderShop(); checkAch();
+}
+function renderShop() {
+  $("shopWallet").textContent = t("shop.wallet", { n: P.coins });
+  let html = "";
+  for (const cat of ["food", "med", "toy"]) {
+    const ids = Object.keys(ITEMS).filter((k) => ITEMS[k].cat === cat && ITEMS[k].price > 0);
+    html += `<p class="cat-title">${t("cat." + cat)}</p><div class="cards">`;
+    for (const id of ids) {
+      const it = ITEMS[id], owned = it.perm && P.owned[id];
+      const have = !it.perm && P.inv[id] ? `<span class="have">${t("shop.have", { n: P.inv[id] })}</span>` : `<span class="price">✦ ${it.price}</span>`;
+      html += `<div class="card${owned ? " done" : ""}"><strong>${itemName(id)}</strong><small>${itemDesc(id)}</small><div class="foot">${owned ? `<span class="have">${t("shop.owned")}</span>` : have}` +
+        (owned ? "" : `<button class="btn" type="button" data-buy="${id}"${P.coins < it.price ? " disabled" : ""}>${t("shop.buy")} · ${it.price}</button>`) + `</div></div>`;
+    }
+    html += `</div>`;
+  }
+  $("shopList").innerHTML = html;
+}
+function renderAch() {
+  const n = ACH.filter(([id]) => P.ach[id]).length;
+  $("achProgress").textContent = t("ach.progress", { n, m: ACH.length });
+  $("achList").innerHTML = ACH.map(([id, reward]) => {
+    const [nm, d] = STR[LANG].ach[id];
+    return `<div class="card ${P.ach[id] ? "done" : "locked"}"><strong>${nm}</strong><small>${d}</small><div class="foot"><span class="price">+${reward} ✦</span></div></div>`;
+  }).join("");
+}
+function renderFeedMenu() {
+  const ids = Object.keys(ITEMS).filter((k) => ITEMS[k].cat === "food" && (ITEMS[k].price === 0 || P.inv[k] > 0));
+  $("feedMenu").innerHTML = ids.map((id) => `<button type="button" data-food="${id}"><b>${itemName(id)}${ITEMS[id].price ? ` <span class="count">×${P.inv[id]}</span>` : ""}</b><small>${itemDesc(id)}</small></button>`).join("") +
+    `<button type="button" data-food="no"><b>${t("menu.close")}</b><small>${t("menu.closeSub")}</small></button>`;
+}
+function renderItemMenu() {
+  const ids = Object.keys(ITEMS).filter((k) => ITEMS[k].cat === "med" && P.inv[k] > 0);
+  $("itemMenu").innerHTML = (ids.length ? ids.map((id) => `<button type="button" data-item="${id}"><b>${itemName(id)} <span class="count">×${P.inv[id]}</span></b><small>${itemDesc(id)}</small></button>`).join("") : `<p class="empty">${t("menu.noItems")}</p>`) +
+    `<button type="button" data-item="no"><b>${t("menu.close")}</b><small>${t("menu.closeSub")}</small></button>`;
 }
 
 /* ---------- Drawing ---------- */
@@ -644,6 +1171,17 @@ function drawStar(c, x, y, r, rot) {
   c.closePath(); c.shadowColor = "#ffe27a"; c.shadowBlur = 10; c.fillStyle = "#ffd447"; c.fill(); c.strokeStyle = "#b07d10"; c.lineWidth = 1.5; c.stroke(); c.restore();
 }
 
+function drawFood(c, x, y, id) {
+  if (id === "berry") { c.fillStyle = "#c93a55"; ell(c, x - 4, y, 8, 8); c.fill(); ell(c, x + 5, y - 2, 7, 7); c.fill(); c.strokeStyle = "#3c7a2c"; c.lineWidth = 2; c.beginPath(); c.moveTo(x, y - 8); c.lineTo(x + 4, y - 14); c.stroke(); }
+  else if (id === "bun") { c.fillStyle = "#e8b15a"; c.beginPath(); c.arc(x, y, 11, Math.PI, 0); c.lineTo(x + 11, y + 5); c.lineTo(x - 11, y + 5); c.fill(); c.fillStyle = "#fff4d6"; c.fillRect(x - 9, y - 2, 18, 3); }
+  else if (id === "stew") { c.fillStyle = "#c8742e"; ell(c, x, y - 2, 13, 5); c.fill(); c.fillStyle = "#8a5a3c"; c.beginPath(); c.arc(x, y - 2, 14, 0, Math.PI); c.fill(); c.fillStyle = "#ffd76a"; ell(c, x - 4, y - 3, 3, 2); c.fill(); }
+  else if (id === "fizzpop") { c.fillStyle = "#8ac8ff"; c.beginPath(); c.roundRect(x - 6, y - 10, 12, 20, 4); c.fill(); c.fillStyle = "#ef6f9a"; c.fillRect(x - 3, y - 15, 6, 5); c.fillStyle = "#ffffff"; ell(c, x - 2, y - 2, 1.5, 1.5); c.fill(); ell(c, x + 2, y + 3, 1.2, 1.2); c.fill(); }
+  else if (id === "melon") { c.fillStyle = "#6aa84f"; c.beginPath(); c.arc(x, y - 6, 14, 0.15 * Math.PI, 0.85 * Math.PI); c.closePath(); c.fill(); c.fillStyle = "#c9b8f0"; c.beginPath(); c.arc(x, y - 7, 11, 0.15 * Math.PI, 0.85 * Math.PI); c.closePath(); c.fill(); }
+  else if (id === "cookie") { drawStar(c, x, y, 11, 0.3); c.fillStyle = "#8a5a3c"; ell(c, x, y, 2, 2); c.fill(); }
+  else if (id === "tea") { c.fillStyle = "#f2efe6"; c.beginPath(); c.roundRect(x - 9, y - 7, 16, 14, 4); c.fill(); c.strokeStyle = "#f2efe6"; c.lineWidth = 2.5; c.beginPath(); c.arc(x + 8, y, 4, -1.4, 1.4); c.stroke(); c.fillStyle = "#e0a42a"; ell(c, x - 1, y - 5, 6, 2); c.fill(); }
+  else { c.fillStyle = "#c93a55"; ell(c, x, y, 8, 8); c.fill(); }
+}
+
 /* ---------- Main render loop ---------- */
 const scene = $("scene"); let sc = setupCanvas(scene, W, H);
 const eggCv = $("eggCanvas"); let ec = setupCanvas(eggCv, W, H);
@@ -679,8 +1217,7 @@ function frame(now) {
       const fy = Math.min(190, 60 + ft * 260);
       if (ft < 1.1) {
         c.save(); c.globalAlpha = ft > 0.6 ? 1 - (ft - 0.6) / 0.5 : 1;
-        if (foodAnim.kind === "berry") { c.fillStyle = "#c93a55"; ell(c, petX - 4, fy, 8, 8); c.fill(); ell(c, petX + 5, fy - 2, 7, 7); c.fill(); c.strokeStyle = "#3c7a2c"; c.lineWidth = 2; c.beginPath(); c.moveTo(petX, fy - 8); c.lineTo(petX + 4, fy - 14); c.stroke(); }
-        else { c.fillStyle = "#e8b15a"; c.beginPath(); c.arc(petX, fy, 11, Math.PI, 0); c.lineTo(petX + 11, fy + 5); c.lineTo(petX - 11, fy + 5); c.fill(); c.fillStyle = "#fff4d6"; c.fillRect(petX - 9, fy - 2, 18, 3); }
+        drawFood(c, petX, fy, foodAnim.kind);
         c.restore();
       }
       eat = ft > 0.5 && ft < 1.6;
@@ -720,6 +1257,7 @@ function drawEffect(c, e) {
   if (e.type === "bubble") { c.strokeStyle = "#ffffff"; c.lineWidth = 1.5; ell(c, e.x, e.y, e.r, e.r); c.stroke(); c.fillStyle = "rgba(255,255,255,.25)"; c.fill(); }
   else if (e.type === "heart") { c.fillStyle = "#ef6f9a"; c.translate(e.x, e.y); c.scale(e.r / 8, e.r / 8); c.beginPath(); c.moveTo(0, 6); c.bezierCurveTo(-10, -2, -6, -10, 0, -5); c.bezierCurveTo(6, -10, 10, -2, 0, 6); c.fill(); }
   else if (e.type === "petal" || e.type === "spark") { c.fillStyle = e.hue || "#ffe27a"; ell(c, e.x, e.y, e.r, e.r * 0.6); c.fill(); }
+  else if (e.type === "txt") { c.font = "700 16px DM Mono, monospace"; c.textAlign = "center"; c.textBaseline = "middle"; c.lineWidth = 4; c.strokeStyle = "#2a2230"; c.strokeText(e.text + " ✦", e.x, e.y); c.fillStyle = "#ffd447"; c.fillText(e.text + " ✦", e.x, e.y); }
   c.restore();
 }
 function updateEffects(dt) {
@@ -739,10 +1277,8 @@ function showScreen() {
   if (S.phase === "egg") renderEggScreen();
   if (S.phase === "alive") renderAll();
   if (S.phase === "gone") {
-    $("goneTitle").textContent = `${S.goneName} wandered off`;
-    $("goneText").textContent = S.released
-      ? `${S.goneName} hopped back into the tall grass. It's happy out there, and it'll remember you.`
-      : `${S.goneName} wasn't feeling cared for and went to look for a cozier glade. Creatures need food, play, rest and a tidy home every few hours. It's fine, there are more eggs in the moss.`;
+    $("goneTitle").textContent = t("gone.title", { name: S.goneName });
+    $("goneText").textContent = S.released ? t("gone.released", { name: S.goneName }) : t("gone.sad", { name: S.goneName });
   }
 }
 
@@ -750,12 +1286,13 @@ let eggCanvases = [];
 function renderEggs() {
   const box = $("eggs"); box.innerHTML = ""; eggCanvases = [];
   for (const k of Object.keys(SPECIES)) {
-    const sp = SPECIES[k];
+    const sp = spT(k);
     const b = document.createElement("button"); b.type = "button"; b.className = "egg-card"; b.id = "egg_" + k;
     const cv = document.createElement("canvas"); const cc = setupCanvas(cv, 120, 140);
     b.appendChild(cv);
-    b.insertAdjacentHTML("beforeend", `<strong>${sp.egg}</strong><span>${sp.blurb}</span><span class="trait">${sp.trait}</span>`);
-    b.addEventListener("click", () => chooseEgg(k));
+    const eggTitle = sp.egg.charAt(0).toUpperCase() + sp.egg.slice(1);
+    b.insertAdjacentHTML("beforeend", `<strong>${eggTitle}</strong><span>${sp.blurb}</span><span class="trait">${sp.trait}</span>`);
+    b.addEventListener("click", () => { sfx("tap"); chooseEgg(k); });
     box.appendChild(b); eggCanvases.push({ cc, k, el: b });
   }
 }
@@ -771,8 +1308,8 @@ function chooseEgg(k) {
 function renderEggScreen() {
   const done = S.egg >= 100;
   $("eggBar").style.width = S.egg + "%";
-  $("eggTitle").textContent = done ? "It hatched!" : "Warming the " + SPECIES[S.species].egg.toLowerCase() + "…";
-  $("eggHint").textContent = done ? `Say hello to a little ${SPECIES[S.species].names[0]}. What will you call it?` : "Tap the egg to keep it warm. It will hatch on its own in a little while too.";
+  $("eggTitle").textContent = done ? t("egg.hatched") : t("egg.warming", { egg: spT(S.species).egg.toLowerCase() });
+  $("eggHint").textContent = done ? t("egg.hello", { baby: SPECIES[S.species].names[0] }) : t("egg.tap");
   $("nameRow").hidden = !done;
 }
 function hatchName() {
@@ -782,8 +1319,9 @@ function hatchName() {
     messes: [], pendingMess: [], careSum: 0, careN: 0, born: Date.now(),
     stats: { full: 70, fun: 70, energy: 80, clean: 90, health: 100 }, log: [],
   });
-  addLog(`${S.name} hatched from a ${SPECIES[S.species].egg.toLowerCase()}. Welcome to the glade!`);
-  save(); showScreen(); say("Hi!");
+  P.c.hatched++; P.seen.species[S.species] = 1;
+  addLog(t("log.hatched", { name: S.name, egg: spT(S.species).egg.toLowerCase() }));
+  save(); showScreen(); say(t("say.hi")); sfx("hatch"); buzz(30); checkAch();
 }
 
 function setBar(k) {
@@ -795,32 +1333,32 @@ function renderStats() {
   if (S.phase !== "alive") return;
   ["full", "fun", "energy", "clean", "health"].forEach(setBar);
   const b = [];
-  if (S.sleeping) b.push(["Asleep", "cool"]);
-  if (S.sick) b.push(["Has a sniffle", "bad"]);
-  if (S.messes.length) b.push([`${S.messes.length} mess${S.messes.length > 1 ? "es" : ""}`, "bad"]);
-  if (S.stats.full < 25) b.push(["Hungry", "bad"]);
-  if (S.stats.fun < 25) b.push(["Bored", "bad"]);
-  if (S.stats.energy < 20 && !S.sleeping) b.push(["Sleepy", "bad"]);
-  if (!b.length && careNow() > 75) b.push(["Happy", "good"]);
-  $("badges").innerHTML = b.map(([t, c]) => `<span class="badge ${c}">${t}</span>`).join("");
+  if (S.sleeping) b.push([t("badge.asleep"), "cool"]);
+  if (S.sick) b.push([t("badge.sick"), "bad"]);
+  if (S.messes.length) b.push([t("badge.messes", { n: S.messes.length }), "bad"]);
+  if (S.stats.full < 25) b.push([t("badge.hungry"), "bad"]);
+  if (S.stats.fun < 25) b.push([t("badge.bored"), "bad"]);
+  if (S.stats.energy < 20 && !S.sleeping) b.push([t("badge.sleepy"), "bad"]);
+  if (!b.length && careNow() > 75) b.push([t("badge.happy"), "good"]);
+  $("badges").innerHTML = b.map(([tx, c]) => `<span class="badge ${c}">${tx}</span>`).join("");
   $("petName").textContent = S.name;
-  $("petSpecies").textContent = `${STAGE_LABEL[S.stage]} · ${stageName()}, ${stageDesc()}`;
+  $("petSpecies").textContent = `${t("stage." + S.stage)} · ${stageName()}, ${stageDesc()}`;
   const nextAt = S.stage === 0 ? TEEN_AT : S.stage === 1 ? ADULT_AT : null;
-  $("petAge").innerHTML = `Age ${fmtDur(S.age)}${nextAt ? `<br>grows in ${fmtDur(Math.max(0, nextAt - S.age))}` : "<br>fully grown"}${S.speed > 1 ? `<br>${S.speed}× time` : ""}`;
+  $("petAge").innerHTML = `${t("age.age", { d: fmtDur(S.age) })}<br>${nextAt ? t("age.grows", { d: fmtDur(Math.max(0, nextAt - S.age)) }) : t("age.grown")}${S.speed > 1 ? `<br>${t("age.speed", { n: S.speed })}` : ""}`;
   const sl = S.sleeping, busy = !!mini;
   $("aFeed").disabled = sl || busy; $("aPlay").disabled = sl || busy; $("aClean").disabled = busy;
-  $("aHeal").disabled = busy; $("aPet").disabled = sl || busy; $("aSleep").disabled = busy;
-  $("sleepLbl").textContent = sl ? "Wake up" : "Sleep";
+  $("aHeal").disabled = busy; $("aPet").disabled = sl || busy; $("aSleep").disabled = busy; $("aItems").disabled = busy;
+  $("sleepLbl").textContent = sl ? t("act.wake") : t("act.sleep");
   if (sl) $("feedMenu").hidden = true;
   if (!$("hint").textContent || $("hint").dataset.auto === "1") {
-    const s = S.stats; let h = "";
-    if (sl) h = `${S.name} is sleeping. Energy refills while the lights are out.`;
-    else if (S.sick) h = `${S.name} looks unwell. Give it herbs.`;
-    else if (S.messes.length >= 2) h = "The glade is getting messy. Time to clean.";
-    else if (s.full < 30) h = `${S.name}'s tummy is rumbling.`;
-    else if (s.energy < 25) h = `${S.name} keeps yawning. Maybe it's bedtime.`;
-    else if (s.fun < 30) h = `${S.name} looks bored. Play a round of catch.`;
-    else h = "Tap your creature to give it a little pat.";
+    const s = S.stats, nm = { name: S.name }; let h = "";
+    if (sl) h = t("hint.sleeping", nm);
+    else if (S.sick) h = t("hint.sick", nm);
+    else if (S.messes.length >= 2) h = t("hint.messy");
+    else if (s.full < 30) h = t("hint.hungry", nm);
+    else if (s.energy < 25) h = t("hint.tired", nm);
+    else if (s.fun < 30) h = t("hint.bored", nm);
+    else h = t("hint.pat");
     if (!mini) { $("hint").textContent = h; $("hint").dataset.auto = "1"; }
   }
 }
@@ -829,12 +1367,36 @@ function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (ch) => ({ "&": "&
 function renderAll() { renderStats(); renderLog(); }
 function renderJournal() {
   const j = loadJournal();
-  $("journalList").innerHTML = j.length ? j.map((e) => `<li><span><b>${escapeHtml(e.name)}</b>, ${escapeHtml(e.kind)} (${escapeHtml(e.end)})</span><span>${fmtDur(e.age)}</span></li>`).join("") : `<li><span>No entries yet. Creatures appear here after they leave your care.</span><span></span></li>`;
+  $("journalList").innerHTML = j.length ? j.map((e) => `<li><span><b>${escapeHtml(e.name)}</b>, ${escapeHtml(e.kind)} (${e.end === "released" ? t("end.released") : t("end.gone")})</span><span>${fmtDur(e.age)}</span></li>`).join("") : `<li><span>${t("jr.empty")}</span><span></span></li>`;
+}
+function renderSettings() {
+  for (const [seg, on] of [["soundSeg", P.sound], ["hapticSeg", P.haptics]]) document.querySelectorAll(`#${seg} button`).forEach((b) => b.setAttribute("aria-pressed", String((b.dataset.v === "1") === !!on)));
+  $("muteWave").toggleAttribute("hidden", !P.sound); $("muteX").toggleAttribute("hidden", !!P.sound);
+  $("btnMute").setAttribute("aria-pressed", String(!P.sound));
+  $("btnMute").setAttribute("aria-label", P.sound ? t("nav.mute") : t("nav.unmute"));
+}
+
+/* ---------- Panels (one open at a time) ---------- */
+const PANELS = { settings: "settingsPanel", journal: "journalPanel", shop: "shopPanel", ach: "achPanel" };
+function togglePanel(name, forceOpen) {
+  const id = PANELS[name], el = $(id);
+  const open = forceOpen || el.hidden;
+  for (const k in PANELS) $(PANELS[k]).hidden = true;
+  if (!open) return;
+  if (name === "journal") renderJournal();
+  if (name === "shop") renderShop();
+  if (name === "ach") renderAch();
+  el.hidden = false;
+  el.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
 /* ---------- Events ---------- */
-$("aFeed").addEventListener("click", () => { $("feedMenu").hidden = !$("feedMenu").hidden; });
-$("feedMenu").addEventListener("click", (e) => { const b = e.target.closest("button[data-food]"); if (b) feed(b.dataset.food); });
+$("aFeed").addEventListener("click", () => { sfx("tap"); $("itemMenu").hidden = true; renderFeedMenu(); $("feedMenu").hidden = !$("feedMenu").hidden; });
+$("feedMenu").addEventListener("click", (e) => { const b = e.target.closest("button[data-food]"); if (!b) return; if (b.dataset.food === "no") { closeMenus(); return; } feed(b.dataset.food); });
+$("aItems").addEventListener("click", () => { sfx("tap"); $("feedMenu").hidden = true; renderItemMenu(); $("itemMenu").hidden = !$("itemMenu").hidden; });
+$("itemMenu").addEventListener("click", (e) => { const b = e.target.closest("button[data-item]"); if (!b) return; if (b.dataset.item === "no") { closeMenus(); return; } useItem(b.dataset.item); });
+$("aShop").addEventListener("click", () => { sfx("tap"); togglePanel("shop", true); });
+$("shopList").addEventListener("click", (e) => { const b = e.target.closest("button[data-buy]"); if (b) buy(b.dataset.buy); });
 $("aPlay").addEventListener("click", startPlay);
 $("aClean").addEventListener("click", cleanUp);
 $("aSleep").addEventListener("click", toggleSleep);
@@ -845,7 +1407,7 @@ scene.addEventListener("pointerdown", (ev) => {
   if (S.phase !== "alive") return;
   const p = canvasPoint(scene, ev);
   if (mini) {
-    for (let i = 0; i < mini.stars.length; i++) { const st = mini.stars[i]; if (Math.hypot(st.x - p.x, st.y - p.y) < 24) { mini.stars.splice(i, 1); mini.caught++; for (let k = 0; k < 8; k++) effects.push({ type: "spark", x: st.x, y: st.y, vx: rand(-80, 80), vy: rand(-80, 40), life: 0.6, r: 3 }); if (jumpY === 0) jumpV = 140; return; } }
+    for (let i = 0; i < mini.stars.length; i++) { const st = mini.stars[i]; if (Math.hypot(st.x - p.x, st.y - p.y) < 26) { mini.stars.splice(i, 1); mini.caught++; sfx("catch"); buzz(10); for (let k = 0; k < 8; k++) effects.push({ type: "spark", x: st.x, y: st.y, vx: rand(-80, 80), vy: rand(-80, 40), life: 0.6, r: 3 }); if (jumpY === 0) jumpV = 140; return; } }
     return;
   }
   if (!S.sleeping && Math.abs(p.x - petX) < 50 && p.y > 120 && p.y < 250) cuddle();
@@ -853,34 +1415,54 @@ scene.addEventListener("pointerdown", (ev) => {
 eggCv.addEventListener("pointerdown", () => {
   if (S.phase !== "egg" || S.egg >= 100) return;
   S.egg = clamp(S.egg + 7);
+  sfx("tap"); buzz(8);
   for (let i = 0; i < 6; i++) effects.push({ type: "spark", x: 180 + rand(-40, 40), y: 190 + rand(-50, 30), vx: rand(-40, 40), vy: rand(-60, -20), life: 0.7, r: 3, hue: "#ffb86b" });
   renderEggScreen(); save();
 });
 $("btnName").addEventListener("click", hatchName);
 $("nameIn").addEventListener("keydown", (e) => { if (e.key === "Enter") hatchName(); });
-$("btnNew").addEventListener("click", () => { S = freshState(); save(); showScreen(); });
-$("btnSettings").addEventListener("click", () => { $("settingsPanel").hidden = !$("settingsPanel").hidden; $("journalPanel").hidden = true; });
-$("btnJournal").addEventListener("click", () => { renderJournal(); $("journalPanel").hidden = !$("journalPanel").hidden; $("settingsPanel").hidden = true; });
+$("btnNew").addEventListener("click", () => { sfx("tap"); S = freshState(); save(); showScreen(); });
+$("btnSettings").addEventListener("click", () => { sfx("tap"); togglePanel("settings"); });
+$("btnJournal").addEventListener("click", () => { sfx("tap"); togglePanel("journal"); });
+$("btnAch").addEventListener("click", () => { sfx("tap"); togglePanel("ach"); });
+$("btnCoins").addEventListener("click", () => { sfx("tap"); togglePanel("shop"); });
+$("btnMute").addEventListener("click", () => { P.sound = !P.sound; saveProfile(); renderSettings(); sfx("tap"); });
+$("langSeg").addEventListener("click", (e) => { const b = e.target.closest("button[data-lang]"); if (!b) return; LANG = P.lang = b.dataset.lang; saveProfile(); applyStatic(); renderSettings(); showScreen(); });
+$("soundSeg").addEventListener("click", (e) => { const b = e.target.closest("button[data-v]"); if (!b) return; P.sound = b.dataset.v === "1"; saveProfile(); renderSettings(); sfx("tap"); });
+$("hapticSeg").addEventListener("click", (e) => { const b = e.target.closest("button[data-v]"); if (!b) return; P.haptics = b.dataset.v === "1"; saveProfile(); renderSettings(); buzz(20); });
 $("speedSel").addEventListener("change", (e) => { catchUp(); S.speed = Number(e.target.value) || 1; save(); renderStats(); });
-$("btnRelease").addEventListener("click", () => { $("relName").textContent = S.name || "the egg"; $("releaseConfirm").hidden = false; $("releaseRow").hidden = true; });
+$("btnRelease").addEventListener("click", () => { $("releaseAsk").innerHTML = t("set.releaseAsk", { name: escapeHtml(S.name || t("set.theEgg")) }); $("releaseConfirm").hidden = false; $("releaseRow").hidden = true; });
 $("btnReleaseNo").addEventListener("click", () => { $("releaseConfirm").hidden = true; $("releaseRow").hidden = false; });
 $("btnReleaseYes").addEventListener("click", () => {
   if (S.phase === "alive") {
     const j = loadJournal(); j.unshift({ name: S.name, kind: stageName(), age: Math.round(S.age), end: "released" }); saveJournal(j);
-    S.phase = "gone"; S.goneName = S.name; S.released = true; save(); showScreen(); S = Object.assign(S, {});
+    S.phase = "gone"; S.goneName = S.name; S.released = true; save(); showScreen();
   } else { S = freshState(); save(); showScreen(); }
   $("settingsPanel").hidden = true;
 });
 
+/* ---------- Install as an app (PWA) ---------- */
+let installEvt = null;
+window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); installEvt = e; $("installRow").hidden = false; });
+$("btnInstall").addEventListener("click", async () => { if (!installEvt) return; installEvt.prompt(); try { await installEvt.userChoice; } catch (e) {} installEvt = null; $("installRow").hidden = true; });
+const standalone = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+if (/iphone|ipad|ipod/i.test(navigator.userAgent) && !standalone) $("iosHint").hidden = false;
+if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
+  window.addEventListener("load", () => { navigator.serviceWorker.register("sw.js").catch(() => {}); });
+}
+
 /* ---------- Boot ---------- */
+LANG = P.lang || ((navigator.language || "en").toLowerCase().startsWith("es") ? "es" : "en");
+applyStatic(); renderSettings();
 S = load() || freshState();
 if (S.phase === "gone" && !S.goneName) S = freshState();
+if (S.phase === "alive") { P.seen.species[S.species] = 1; if (S.stage === 2 && S.form) P.seen.forms[S.species + ":" + S.form] = 1; }
 $("speedSel").value = String(S.speed || 1);
-catchUp(); save(); showScreen();
+catchUp(); save(); showScreen(); renderCoins(); checkAch();
 setInterval(() => {
   if (!S) return;
-  if (S.phase === "egg" && S.egg < 100) { catchUp(); renderEggScreen(); if (S.egg >= 100) { addLog("hatched"); renderEggScreen(); $("nameIn").focus(); } save(); return; }
-  if (S.phase === "alive") { catchUp(); renderStats(); save(); }
+  if (S.phase === "egg" && S.egg < 100) { catchUp(); renderEggScreen(); if (S.egg >= 100) { sfx("hatch"); renderEggScreen(); $("nameIn").focus(); } save(); return; }
+  if (S.phase === "alive") { catchUp(); renderStats(); save(); checkAch(); }
   else S.lastReal = Date.now();
 }, 1000);
 document.addEventListener("visibilitychange", () => { if (!document.hidden && S) { catchUp(); if (S.phase === "alive") renderAll(); save(); } });
