@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#4c8a39">
+<meta name="theme-color" content="#2e2440">
 <meta name="description" content="Hatch, raise and evolve a little creature of the Glimmerglade.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
@@ -15,35 +15,37 @@
 <title>Evolvlings</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grandstander:wght@500;700;800&family=Nunito:wght@400;600;700&family=DM+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: one centered "field journal" column. Habitat window on top, care stats + actions beside it on wide screens, stacked on phones. */
+/* Pixel theme: Glimmer-32 colors, square corners, hard 1-step shadows, Pixelify Sans headings. Layout: one centered "field journal" column. Habitat window on top, care stats + actions beside it on wide screens, stacked on phones. */
 :root {
-  --bg: #eef1e4;
-  --surface: #fbfcf7;
-  --surface-2: #e3e9d6;
-  --ink: #1f2b1c;
-  --muted: #5a6853;
-  --line: #cfd8c2;
-  --moss: #4c8a39;
-  --accent: #5b44c8;
-  --accent-ink: #ffffff;
-  --warn: #c07a1c;
-  --bad: #c0412f;
-  --font-display: "Grandstander", "Trebuchet MS", system-ui, sans-serif;
-  --font-body: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --bg: #f1e8da;
+  --surface: #fbf6ef;
+  --surface-2: #e9dfcf;
+  --ink: #1d1626;
+  --muted: #5e5272;
+  --line: #1d1626;
+  --soft: #d6cbbb;
+  --shade: #d0ad7a;
+  --moss: #3f7a38;
+  --accent: #6a46b8;
+  --accent-ink: #fbf6ef;
+  --warn: #a8581a;
+  --bad: #a3343b;
+  --font-display: "Pixelify Sans", "Courier New", monospace;
+  --font-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "DM Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #121811; --surface: #1b2319; --surface-2: #243022; --ink: #e6eddc; --muted: #9daa94;
-    --line: #2f3c2c; --moss: #82c26c; --accent: #a895ff; --accent-ink: #160f33; --warn: #e3a54b; --bad: #ef7a66;
+    --bg: #17111f; --surface: #221a2f; --surface-2: #2e2440; --ink: #ece6f2; --muted: #a99fbb;
+    --line: #4a3d5e; --soft: #3a2f4c; --shade: #0e0a14; --moss: #86b85a; --accent: #c7a6ff; --accent-ink: #1d1626; --warn: #ffd57a; --bad: #f39a52;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #121811; --surface: #1b2319; --surface-2: #243022; --ink: #e6eddc; --muted: #9daa94;
-  --line: #2f3c2c; --moss: #82c26c; --accent: #a895ff; --accent-ink: #160f33; --warn: #e3a54b; --bad: #ef7a66;
+  --bg: #17111f; --surface: #221a2f; --surface-2: #2e2440; --ink: #ece6f2; --muted: #a99fbb;
+  --line: #4a3d5e; --soft: #3a2f4c; --shade: #0e0a14; --moss: #86b85a; --accent: #c7a6ff; --accent-ink: #1d1626; --warn: #ffd57a; --bad: #f39a52;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
@@ -193,6 +195,32 @@ button, .stage canvas, .egg-card { -webkit-tap-highlight-color: transparent; tou
   .act svg { width: 24px; height: 24px; }
 }
 @media (prefers-reduced-motion: reduce) { .toast, .chip-btn.coin.pop { animation: none; } }
+
+/* ---------- Pixel theme overrides ---------- */
+*, *::before, *::after { border-radius: 0 !important; }
+canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
+h1, h2, h3, .brand, .idline .nm, .btn, .act, .chip-btn, .seg button, .submenu button b, .card strong, .egg-card strong { font-family: var(--font-display); letter-spacing: .01em; }
+.brand { font-weight: 700; color: var(--moss); text-shadow: 2px 2px 0 var(--shade); }
+.panel h3, .cat-title { font-family: var(--font-display); font-weight: 600; letter-spacing: .12em; }
+.habitat, .panel, .center-card, .egg-card { border: 2px solid var(--line); box-shadow: 4px 4px 0 var(--shade); }
+.stage { border: 2px solid var(--line); background: #1d1626; }
+.card { border: 2px solid var(--soft); }
+.card.done { border-color: var(--moss); }
+.chip-btn, .act, .btn, .submenu button, .seg, .textin, .settings select { border-width: 2px; border-style: solid; border-color: var(--line); box-shadow: 2px 2px 0 var(--shade); }
+.btn { font-weight: 600; }
+.btn.ghost { border-color: var(--line); }
+.act { font-weight: 600; background: var(--surface); }
+.act:hover:not(:disabled), .chip-btn:hover, .submenu button:hover { border-color: var(--accent); background: var(--surface-2); }
+.act:active:not(:disabled), .btn:active:not(:disabled), .chip-btn:active { transform: translate(2px, 2px); box-shadow: none; }
+.act.primary { border-color: var(--line); }
+.chip-btn.coin { border-color: var(--line); }
+.bar { height: 14px; border: 2px solid var(--line); background: var(--surface-2); padding: 1px; }
+.bar i { -webkit-mask: repeating-linear-gradient(90deg, #000 0 6px, transparent 6px 8px); mask: repeating-linear-gradient(90deg, #000 0 6px, transparent 6px 8px); transition: width .4s steps(8), background-color .4s; }
+.badge { border: 2px solid currentColor; padding: 0 8px; font-family: var(--font-display); }
+.toast { border: 2px solid var(--line); box-shadow: 4px 4px 0 var(--shade); font-family: var(--font-display); font-weight: 500; }
+#btnDaily .dot { border-width: 2px; }
+.egg-card:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--shade); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .stage { border-color: #4a3d5e; } }
 </style>
 </head>
 <body>
@@ -346,6 +374,7 @@ button, .stage canvas, .egg-card { -webkit-tap-highlight-color: transparent; tou
 </div>
 <div class="toasts" id="toasts" aria-live="polite"></div>
 
+<script src="pixel.js"></script>
 <script>
 (() => {
 "use strict";
@@ -1168,14 +1197,15 @@ function drawMess(c, x, t) {
 }
 
 function drawBubble(c, x, y, text) {
-  c.font = "700 14px Grandstander, Trebuchet MS, sans-serif";
-  const w = Math.max(40, c.measureText(text).width + 22), h = 28;
-  const bx = clamp(x - w / 2, 6, W - w - 6), by = y - h;
-  c.fillStyle = "#ffffff"; c.strokeStyle = "#2a2230"; c.lineWidth = 2;
-  c.beginPath(); c.roundRect(bx, by, w, h, 12); c.fill(); c.stroke();
-  c.beginPath(); c.moveTo(x - 6, by + h - 1); c.lineTo(x, by + h + 8); c.lineTo(x + 6, by + h - 1); c.fill();
-  c.beginPath(); c.moveTo(x - 6, by + h); c.lineTo(x, by + h + 8); c.lineTo(x + 6, by + h); c.stroke();
-  c.fillStyle = "#2a2230"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(text, bx + w / 2, by + h / 2 + 1);
+  c.font = '600 14px "Pixelify Sans", monospace';
+  const w = Math.round(Math.max(40, c.measureText(text).width + 22) / 2) * 2, h = 28;
+  const bx = Math.round(clamp(x - w / 2, 6, W - w - 6) / 2) * 2, by = Math.round((y - h) / 2) * 2;
+  c.fillStyle = "#fbf6ef"; c.strokeStyle = "#1d1626"; c.lineWidth = 2;
+  c.fillRect(bx, by, w, h); c.strokeRect(bx + 1, by + 1, w - 2, h - 2);
+  const tx = Math.round(clamp(x, bx + 10, bx + w - 10) / 2) * 2;
+  c.fillStyle = "#1d1626"; c.fillRect(tx - 6, by + h - 2, 12, 4); c.fillRect(tx - 4, by + h + 2, 8, 2); c.fillRect(tx - 2, by + h + 4, 4, 4);
+  c.fillStyle = "#fbf6ef"; c.fillRect(tx - 4, by + h - 2, 8, 2); c.fillRect(tx - 2, by + h, 4, 2);
+  c.fillStyle = "#1d1626"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(text, bx + w / 2, by + h / 2 + 1);
 }
 
 function drawStar(c, x, y, r, rot) {
@@ -1195,6 +1225,82 @@ function drawFood(c, x, y, id) {
   else { c.fillStyle = "#c93a55"; ell(c, x, y, 8, 8); c.fill(); }
 }
 
+/* ---------- Pixel art: home scene at 180 x 140 ---------- */
+const LW = 180, LH = 140, GROUND = 121;
+const low = PX.layer(LW, LH);
+const MUSH = PX.bake([".ooooo.", "oaalaao", "oaaaaao", ".ollol.", "..olo..", "..olo..", "..ooo.."], { o: PX.P.ink, a: PX.P.ember2, l: PX.P.cream });
+const MUSH_N = PX.bake([".ooooo.", "oaalaao", "oaaaaao", ".ollol.", "..olo..", "..olo..", "..ooo.."], { o: PX.P.ink, a: PX.P.rose0, l: PX.P.fog });
+function skyKind() {
+  const hr = new Date().getHours();
+  if (S.sleeping) return "sleep";
+  if (hr >= 20 || hr < 6) return "night";
+  if ((hr >= 17 && hr < 20) || (hr >= 6 && hr < 8)) return "dusk";
+  return "day";
+}
+function drawSceneLow(g, t) {
+  const X = PX.P, k = skyKind(), dark = k === "sleep" || k === "night";
+  const bands = { day: [X.sea2, X.sea3, X.sea3, X.sea4], dusk: [X.ember2, X.ember3, X.ember4, X.butter], night: [X.sea0, X.sea0, X.plum1, X.plum2], sleep: [X.ink, X.ink, X.plum1, X.plum1] }[k];
+  for (let i = 0; i < 4; i++) {
+    PX.rect(g, 0, i * 25, LW, i === 3 ? LH - 75 : 25, bands[i]);
+    if (i) { g.fillStyle = bands[i - 1]; for (let x = i % 2; x < LW; x += 2) g.fillRect(x, i * 25, 1, 1); }
+  }
+  if (dark) {
+    for (let i = 0; i < 26; i++) { const on = Math.sin(t * 1.5 + i) > -0.2; if (on) PX.rect(g, (i * 97) % LW, (i * 53) % 78, 1, 1, Math.sin(t * 1.5 + i) > 0.6 ? X.cream : X.fog); }
+    PX.disc(g, 150, 24, 8, X.cream); PX.disc(g, 154, 21, 7, bands[0]);
+  } else {
+    PX.disc(g, 150, 24, 10, k === "dusk" ? X.ember4 : X.butter); PX.disc(g, 150, 24, 7, k === "dusk" ? X.butter : X.cream);
+    const cx = (Math.floor(t * 3) % (LW + 60)) - 30;
+    for (const [dx, dy, r] of [[0, 0, 6], [8, -3, 7], [16, 0, 5]]) PX.disc(g, cx + dx, 36 + dy, r, X.cream);
+    PX.rect(g, cx - 5, 40, 27, 1, X.fog);
+  }
+  // far hills, then the meadow
+  for (let x = 0; x < LW; x++) {
+    const h = 14 + Math.round(Math.sin(x / 23) * 6 + Math.sin(x / 8.7) * 2);
+    PX.rect(g, x, 110 - h, 1, h + 2, dark ? X.moss0 : X.moss2);
+    PX.rect(g, x, 110 - h, 1, 1, dark ? X.moss1 : X.moss3);
+  }
+  for (let x = 0; x < LW; x++) {
+    const gy = 110 - Math.round(Math.sin((x / LW) * Math.PI) * 4);
+    PX.rect(g, x, gy, 1, LH - gy, dark ? X.moss1 : X.moss3);
+    PX.rect(g, x, gy, 1, 1, dark ? X.moss2 : X.moss4);
+  }
+  const r = PX.rng(7);
+  for (let i = 0; i < 90; i++) PX.rect(g, Math.floor(r() * LW), 112 + Math.floor(r() * 28), 1, 1, dark ? X.moss0 : X.moss2);
+  for (let i = 0; i < 14; i++) {
+    const gx = 6 + i * 13, gy = 124 + (i % 3) * 5, col = dark ? X.moss0 : X.moss1;
+    PX.rect(g, gx - 2, gy - 2, 1, 2, col); PX.rect(g, gx, gy - 4, 1, 4, col); PX.rect(g, gx + 2, gy - 2, 1, 2, col);
+  }
+  g.drawImage(dark ? MUSH_N : MUSH, 10, 108); g.drawImage(dark ? MUSH_N : MUSH, 164, 112);
+  if (k === "night") for (let i = 0; i < 6; i++) {
+    if (Math.sin(t * 2 + i * 2) < 0) continue;
+    const fx = 20 + ((((i * 61 + t * 5 * (i % 2 ? 1 : -1)) % 150) + 150) % 150), fy = 75 + Math.round(Math.sin(t + i) * 10);
+    PX.rect(g, fx, fy, 1, 1, X.ember4); PX.rect(g, fx - 1, fy, 1, 1, X.butter); PX.rect(g, fx + 1, fy, 1, 1, X.butter);
+  }
+}
+// the creature as a pixel sprite: 20 px baby, 28 px kid, 36 px grown-up
+const PET_N = [20, 28, 36];
+function petSprite(o) {
+  const sq = Math.floor(o.t * (o.sleeping ? 1 : 2)) % 2;
+  const emo = o.sleeping || o.blink ? "sleep" : o.eat ? "surprised" : o.sick || o.mood < 35 ? "sad" : o.mood > 70 ? "happy" : "normal";
+  return PX.sprite(o.kind, PET_N[o.stage], o.stage, sq, emo, o.form === "scruffy");
+}
+function petTop(o) { const n = PET_N[o.stage] + 2; return GROUND - n - Math.round(o.jump / 2) - (o.kind === "fizz" ? 6 + (Math.floor(o.t * 2) % 2) : 0); }
+function drawPetLow(g, cx, o) {
+  const X = PX.P, sp = petSprite(o), w = sp.width, dark = skyKind() !== "day" && skyKind() !== "dusk";
+  const sh = dark ? X.moss0 : X.moss2;
+  PX.rect(g, cx - w / 2 + 3, GROUND, w - 6, 1, sh); PX.rect(g, cx - w / 2 + 5, GROUND + 1, w - 10, 1, sh);
+  g.drawImage(sp, Math.round(cx - w / 2), petTop(o));
+}
+function drawSickSign(g, x, y) {
+  const X = PX.P;
+  PX.rect(g, x, y, 11, 11, X.ink); PX.rect(g, x + 1, y + 1, 9, 9, X.cream);
+  PX.rect(g, x + 4, y + 2, 3, 7, X.ember2); PX.rect(g, x + 2, y + 4, 7, 3, X.ember2);
+}
+function pixelText(c, text, x, y, size, fill, align) {
+  c.font = `600 ${size}px "Pixelify Sans", ${"monospace"}`; c.textAlign = align || "center"; c.textBaseline = "middle";
+  c.lineWidth = 4; c.strokeStyle = PX.P.ink; c.lineJoin = "round"; c.strokeText(text, x, y); c.fillStyle = fill; c.fillText(text, x, y);
+}
+
 /* ---------- Main render loop ---------- */
 const scene = $("scene"); let sc = setupCanvas(scene, W, H);
 const eggCv = $("eggCanvas"); let ec = setupCanvas(eggCv, W, H);
@@ -1204,16 +1310,22 @@ function frame(now) {
   const dt = Math.min(0.05, (now - lastFrame) / 1000); lastFrame = now;
   const t = now / 1000;
   if (S.phase === "egg") {
-    ec.clearRect(0, 0, W, H);
-    drawScene(ec, t);
-    const p = S.egg / 100;
-    drawEgg(ec, 180, 200, 1.2, S.species, t * (1 + p * 2), p);
-    for (const e of effects) drawEffect(ec, e);
+    const g = low.g; g.setTransform(1, 0, 0, 1, 0, 0);
+    drawSceneLow(g, t);
+    const p = S.egg / 100, eg = PX.egg(S.species, 44, p);
+    const ws = Math.sin(t * (2 + p * 6)), wob = ws > 0.7 ? 1 : ws < -0.7 ? -1 : 0;
+    PX.rect(g, 90 - 14, GROUND, 28, 1, PX.P.moss2); PX.rect(g, 90 - 11, GROUND + 1, 22, 1, PX.P.moss2);
+    g.drawImage(eg, Math.round(90 - eg.width / 2) + wob, GROUND - eg.height + 1);
+    g.save(); g.scale(0.5, 0.5); for (const e of effects) if (e.type !== "txt") drawEffect(g, e); g.restore();
+    PX.quantize(g, LW, LH, false);
+    ec.clearRect(0, 0, W, H); PX.blit(ec, low, W, H);
+    for (const e of effects) if (e.type === "txt") drawEffect(ec, e);
     updateEffects(dt);
   } else if (S.phase === "alive" && !$("scrGame").hidden) {
-    const c = sc;
-    drawScene(c, t);
-    for (const m of S.messes) drawMess(c, m.x, t);
+    const c = sc, g = low.g; g.setTransform(1, 0, 0, 1, 0, 0);
+    drawSceneLow(g, t);
+    g.save(); g.scale(0.5, 0.5);
+    for (const m of S.messes) drawMess(g, m.x, t);
     // movement
     if (!S.sleeping && !mini && !foodAnim) {
       if (Math.abs(petTarget - petX) < 2 && Math.random() < 0.006) petTarget = rand(90, 270);
@@ -1229,9 +1341,7 @@ function frame(now) {
       foodAnim.t += dt; const ft = foodAnim.t;
       const fy = Math.min(190, 60 + ft * 260);
       if (ft < 1.1) {
-        c.save(); c.globalAlpha = ft > 0.6 ? 1 - (ft - 0.6) / 0.5 : 1;
-        drawFood(c, petX, fy, foodAnim.kind);
-        c.restore();
+        if (ft < 0.9) drawFood(g, petX, fy, foodAnim.kind);
       }
       eat = ft > 0.5 && ft < 1.6;
       if (ft > 1.6) foodAnim = null;
@@ -1239,29 +1349,35 @@ function frame(now) {
     // bloom on growth
     if (bloom) {
       bloom.t += dt;
-      c.save(); c.globalAlpha = Math.max(0, 1 - bloom.t / 2); c.strokeStyle = "#ffe27a"; c.lineWidth = 6;
-      ell(c, petX, 190, 20 + bloom.t * 120, 20 + bloom.t * 120); c.stroke(); c.restore();
+      if (bloom.t < 1.6) { g.save(); g.strokeStyle = "#ffd57a"; g.lineWidth = 6; ell(g, petX, 190, 20 + bloom.t * 120, 20 + bloom.t * 120); g.stroke(); g.restore(); }
       if (!bloom.burst && (bloom.burst = true)) for (let i = 0; i < 24; i++) { const a = rand(0, 6.28), v = rand(40, 120); effects.push({ type: "petal", x: petX, y: 180, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 40, life: rand(1.2, 2.2), r: rand(3, 6), hue: ["#ffd76a", "#f4a6c4", "#ffffff", "#a895ff"][i % 4] }); }
       if (bloom.t > 2) bloom = null;
     }
-    drawCreature(c, petX, 200, { kind: S.species, stage: S.stage, form: S.form, t, mood, sleeping: S.sleeping, sick: S.sick, blink: now < blinkUntil, eat, jump: jumpY });
-    if (S.sleeping) { c.fillStyle = "#e6e9ff"; c.font = "700 16px Grandstander, sans-serif"; for (let i = 0; i < 3; i++) { const p = ((t * 0.5 + i / 3) % 1); c.globalAlpha = 1 - p; c.fillText("z", petX + 30 + p * 30, 150 - p * 50 - i * 2); } c.globalAlpha = 1; }
-    if (S.sick && !S.sleeping) { c.fillStyle = "#ffffff"; c.strokeStyle = "#2a2230"; c.lineWidth = 2; c.beginPath(); c.roundRect(petX + 36, 128, 22, 22, 6); c.fill(); c.stroke(); c.strokeStyle = "#e65a4a"; c.lineWidth = 3; c.beginPath(); c.moveTo(petX + 47, 133); c.lineTo(petX + 47, 145); c.moveTo(petX + 41, 139); c.lineTo(petX + 53, 139); c.stroke(); }
+    if (mini) for (const st of mini.stars) drawStar(g, st.x, st.y, 13, st.rot);
+    for (const e of effects) if (e.type !== "txt") drawEffect(g, e);
+    g.restore();
+    PX.quantize(g, LW, LH, false);
+    const po = { kind: S.species, stage: S.stage, form: S.form, t, mood, sleeping: S.sleeping, sick: S.sick, blink: now < blinkUntil, eat, jump: jumpY };
+    drawPetLow(g, Math.round(petX / 2), po);
+    const top = petTop(po);
+    if (S.sick && !S.sleeping) drawSickSign(g, Math.round(petX / 2) + 14, top - 4);
+    c.clearRect(0, 0, W, H); PX.blit(c, low, W, H);
+    if (S.sleeping) for (let i = 0; i < 3; i++) { const p = ((t * 0.5 + i / 3) % 1); c.globalAlpha = 1 - p; pixelText(c, "z", Math.round((petX + 30 + p * 30) / 2) * 2, Math.round((top * 2 - p * 50 - i * 2) / 2) * 2, 16 + i * 2, "#c8eef5"); } c.globalAlpha = 1;
     if (cleanAnim) { cleanAnim.t += dt; if (cleanAnim.t > 1.5) cleanAnim = null; }
     // mini game
     if (mini) {
       const left = (mini.until - now) / 1000;
       if (now > mini.next && left > 0.8) { mini.stars.push({ x: rand(30, 330), y: -12, vy: rand(70, 120), rot: 0 }); mini.next = now + rand(450, 900); }
-      for (const st of mini.stars) { st.y += st.vy * dt; st.rot += dt * 3; drawStar(c, st.x, st.y, 13, st.rot); }
+      for (const st of mini.stars) { st.y += st.vy * dt; st.rot += dt * 3; }
       mini.stars = mini.stars.filter((st) => st.y < 236);
-      c.fillStyle = "rgba(20,20,40,.55)"; c.beginPath(); c.roundRect(10, 10, 132, 30, 10); c.fill();
-      c.fillStyle = "#fff"; c.font = "700 14px DM Mono, monospace"; c.textAlign = "left"; c.textBaseline = "middle";
+      c.fillStyle = "#1d1626"; c.fillRect(10, 10, 132, 30); c.fillStyle = "#2e2440"; c.fillRect(12, 12, 128, 26);
+      c.fillStyle = "#fbf6ef"; c.font = '600 15px "Pixelify Sans", monospace'; c.textAlign = "left"; c.textBaseline = "middle";
       c.fillText(`★ ${mini.caught}   ${Math.max(0, left).toFixed(1)}s`, 22, 26);
       if (left <= 0) endPlay();
     }
-    for (const e of effects) drawEffect(c, e);
+    for (const e of effects) if (e.type === "txt") drawEffect(c, e);
     updateEffects(dt);
-    if (bubble && now < bubble.until) drawBubble(c, petX, 200 - 70 * [0.62, 0.82, 1][S.stage] - 30 - (S.species === "fizz" ? 14 : 0) - jumpY, bubble.text);
+    if (bubble && now < bubble.until) drawBubble(c, petX, top * 2 - 10, bubble.text);
   }
   requestAnimationFrame(frame);
 }
@@ -1270,7 +1386,7 @@ function drawEffect(c, e) {
   if (e.type === "bubble") { c.strokeStyle = "#ffffff"; c.lineWidth = 1.5; ell(c, e.x, e.y, e.r, e.r); c.stroke(); c.fillStyle = "rgba(255,255,255,.25)"; c.fill(); }
   else if (e.type === "heart") { c.fillStyle = "#ef6f9a"; c.translate(e.x, e.y); c.scale(e.r / 8, e.r / 8); c.beginPath(); c.moveTo(0, 6); c.bezierCurveTo(-10, -2, -6, -10, 0, -5); c.bezierCurveTo(6, -10, 10, -2, 0, 6); c.fill(); }
   else if (e.type === "petal" || e.type === "spark") { c.fillStyle = e.hue || "#ffe27a"; ell(c, e.x, e.y, e.r, e.r * 0.6); c.fill(); }
-  else if (e.type === "txt") { c.font = "700 16px DM Mono, monospace"; c.textAlign = "center"; c.textBaseline = "middle"; c.lineWidth = 4; c.strokeStyle = "#2a2230"; c.strokeText(e.text + " ✦", e.x, e.y); c.fillStyle = "#ffd447"; c.fillText(e.text + " ✦", e.x, e.y); }
+  else if (e.type === "txt") pixelText(c, e.text + " ✦", Math.round(e.x / 2) * 2, Math.round(e.y / 2) * 2, 17, "#ffd57a");
   c.restore();
 }
 function updateEffects(dt) {
@@ -1311,7 +1427,13 @@ function renderEggs() {
   }
 }
 (function eggLoop(now) {
-  if (S && S.phase === "choose") for (const e of eggCanvases) { e.cc.clearRect(0, 0, 120, 140); const hov = e.el.matches(":hover"); drawEgg(e.cc, 60, 76, 0.95, e.k, hov ? now / 300 : now / 1400 + e.k.length, 0); }
+  if (S && S.phase === "choose") for (const e of eggCanvases) {
+    const c = e.cc, eg = PX.egg(e.k, 30, 0), hov = e.el.matches(":hover");
+    const bob = hov ? (Math.floor(now / 160) % 2) * 3 : (Math.floor(now / 700 + e.k.length) % 2) * 3;
+    c.clearRect(0, 0, 120, 140); c.imageSmoothingEnabled = false;
+    c.fillStyle = "rgba(29,22,38,.18)"; c.fillRect(60 - 30, 126, 60, 3); c.fillRect(60 - 24, 129, 48, 3);
+    c.drawImage(eg, 60 - eg.width * 1.5, 126 - eg.height * 3 - bob, eg.width * 3, eg.height * 3);
+  }
   requestAnimationFrame(eggLoop);
 })(performance.now());
 
@@ -1472,7 +1594,7 @@ const HOOKS = {};
 window.EV = {
   get S() { return S; }, get P() { return P; }, get LANG() { return LANG; },
   STR, ACH, SPECIES, SFX, HOOKS, $, clamp, rand, pick, t, tone, sfx, buzz, save, saveProfile, addCoins, spendCoins, toast, addLog,
-  renderAll, renderStats, showScreen, applyStatic, escapeHtml, drawCreature, setupCanvas, ell, drawStar, checkAch, togglePanel, stageName, careNow,
+  renderAll, renderStats, showScreen, applyStatic, escapeHtml, drawCreature, setupCanvas, ell, drawStar, checkAch, togglePanel, stageName, careNow, pixelText,
 };
 
 /* ---------- Boot ---------- */
