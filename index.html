@@ -1,0 +1,891 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Evolvlings</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grandstander:wght@500;700;800&family=Nunito:wght@400;600;700&family=DM+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one centered "field journal" column. Habitat window on top, care stats + actions beside it on wide screens, stacked on phones. */
+:root {
+  --bg: #eef1e4;
+  --surface: #fbfcf7;
+  --surface-2: #e3e9d6;
+  --ink: #1f2b1c;
+  --muted: #5a6853;
+  --line: #cfd8c2;
+  --moss: #4c8a39;
+  --accent: #5b44c8;
+  --accent-ink: #ffffff;
+  --warn: #c07a1c;
+  --bad: #c0412f;
+  --font-display: "Grandstander", "Trebuchet MS", system-ui, sans-serif;
+  --font-body: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "DM Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121811; --surface: #1b2319; --surface-2: #243022; --ink: #e6eddc; --muted: #9daa94;
+    --line: #2f3c2c; --moss: #82c26c; --accent: #a895ff; --accent-ink: #160f33; --warn: #e3a54b; --bad: #ef7a66;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121811; --surface: #1b2319; --surface-2: #243022; --ink: #e6eddc; --muted: #9daa94;
+  --line: #2f3c2c; --moss: #82c26c; --accent: #a895ff; --accent-ink: #160f33; --warn: #e3a54b; --bad: #ef7a66;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { min-height: 100%; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 40px;
+}
+.wrap { max-width: 920px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+header.top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.brand { font-family: var(--font-display); font-weight: 800; font-size: 30px; letter-spacing: -0.5px; margin: 0; color: var(--moss); line-height: 1; }
+.brand small { display: block; font-family: var(--font-body); font-weight: 600; font-size: 13px; color: var(--muted); letter-spacing: 0; margin-top: 6px; }
+.top-tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.chip-btn { font: 600 13px var(--font-body); color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; cursor: pointer; }
+.chip-btn:hover { border-color: var(--moss); }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+/* choose screen */
+.choose { display: flex; flex-direction: column; gap: 14px; }
+.choose h2, .panel h2 { font-family: var(--font-display); font-weight: 700; font-size: 22px; margin: 0; text-wrap: balance; }
+.choose p.lead { margin: 0; color: var(--muted); max-width: 60ch; }
+.eggs { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+.egg-card { background: var(--surface); border: 2px solid var(--line); border-radius: 18px; padding: 14px; display: flex; flex-direction: column; gap: 6px; align-items: center; text-align: center; cursor: pointer; font: inherit; color: inherit; transition: border-color .15s, transform .15s; }
+.egg-card:hover { border-color: var(--moss); transform: translateY(-2px); }
+.egg-card canvas { width: 120px; height: 140px; }
+.egg-card strong { font-family: var(--font-display); font-size: 18px; }
+.egg-card span { color: var(--muted); font-size: 13px; }
+.egg-card .trait { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--accent); }
+
+/* play screen */
+.game { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+@media (max-width: 760px) { .game { grid-template-columns: minmax(0, 1fr); } }
+.habitat { background: var(--surface); border: 1px solid var(--line); border-radius: 22px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.idline { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; padding: 2px 6px; }
+.idline .nm { font-family: var(--font-display); font-weight: 800; font-size: 24px; line-height: 1.1; }
+.idline .sp { color: var(--muted); font-size: 13px; }
+.idline .age { font-family: var(--font-mono); font-size: 12px; color: var(--muted); text-align: right; }
+.stage { position: relative; width: 100%; aspect-ratio: 360 / 280; max-width: 100%; border-radius: 16px; overflow: hidden; background: #1c2a3a; }
+.stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: manipulation; cursor: pointer; }
+.hint { font-size: 13px; color: var(--muted); padding: 0 6px; min-height: 1.5em; }
+
+.side { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+.panel h3 { margin: 0; font: 700 12px var(--font-mono); text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+.stat { display: grid; grid-template-columns: 74px minmax(0, 1fr) 34px; gap: 10px; align-items: center; font-size: 14px; }
+.stat label { font-weight: 700; }
+.bar { height: 12px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
+.bar i { display: block; height: 100%; border-radius: inherit; background: var(--moss); transition: width .4s ease, background-color .4s; }
+.bar i.mid { background: var(--warn); }
+.bar i.low { background: var(--bad); }
+.stat output { font-family: var(--font-mono); font-size: 12px; text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+.badges { display: flex; gap: 6px; flex-wrap: wrap; min-height: 24px; }
+.badge { font: 600 12px var(--font-body); padding: 2px 10px; border-radius: 999px; background: var(--surface-2); color: var(--ink); }
+.badge.bad { background: color-mix(in srgb, var(--bad) 18%, transparent); color: var(--bad); }
+.badge.good { background: color-mix(in srgb, var(--moss) 18%, transparent); color: var(--moss); }
+.badge.cool { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent); }
+
+.actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.act { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 6px; border-radius: 14px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font: 700 14px var(--font-body); cursor: pointer; transition: transform .1s, border-color .15s, background .15s; }
+.act svg { width: 26px; height: 26px; }
+.act:hover:not(:disabled) { border-color: var(--moss); background: var(--surface-2); }
+.act:active:not(:disabled) { transform: scale(.96); }
+.act:disabled { opacity: .45; cursor: not-allowed; }
+.act.primary { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+.submenu { display: flex; gap: 8px; flex-wrap: wrap; }
+.submenu button { flex: 1 1 120px; text-align: left; padding: 8px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font: 600 13px var(--font-body); cursor: pointer; }
+.submenu button b { display: block; font-size: 14px; }
+.submenu button small { color: var(--muted); }
+.submenu button:hover { border-color: var(--moss); }
+
+.log { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; max-height: 180px; overflow-y: auto; font-size: 13px; }
+.log li { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 8px; }
+.log time { font-family: var(--font-mono); font-size: 11px; color: var(--muted); padding-top: 2px; }
+
+.center-card { background: var(--surface); border: 1px solid var(--line); border-radius: 22px; padding: 22px; display: flex; flex-direction: column; gap: 12px; align-items: flex-start; max-width: 560px; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.textin { font: 600 16px var(--font-body); padding: 9px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); min-width: 0; flex: 1 1 180px; }
+.btn { font: 700 14px var(--font-body); padding: 10px 16px; border-radius: 12px; border: 1px solid transparent; background: var(--accent); color: var(--accent-ink); cursor: pointer; }
+.btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+.btn.danger { background: var(--bad); color: #fff; }
+
+.settings { display: grid; gap: 12px; }
+.settings .row label { font-weight: 700; min-width: 90px; }
+.settings select { font: 600 14px var(--font-body); padding: 6px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); }
+.muted { color: var(--muted); font-size: 13px; margin: 0; }
+.journal { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 14px; }
+.journal li { display: flex; justify-content: space-between; gap: 10px; border-bottom: 1px dashed var(--line); padding-bottom: 4px; }
+.journal li span:last-child { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+footer { font-size: 12px; color: var(--muted); }
+@media (prefers-reduced-motion: reduce) { .egg-card, .act, .bar i { transition: none; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <h1 class="brand">Evolvlings<small>Hatch, raise and evolve a little creature of the Glimmerglade.</small></h1>
+    <div class="top-tools">
+      <button class="chip-btn" id="btnJournal" type="button">Journal</button>
+      <button class="chip-btn" id="btnSettings" type="button">Settings</button>
+    </div>
+  </header>
+
+  <section id="settingsPanel" class="panel" hidden>
+    <h2>Settings</h2>
+    <div class="settings">
+      <div class="row">
+        <label for="speedSel">Time speed</label>
+        <select id="speedSel">
+          <option value="1">Normal (real time)</option>
+          <option value="10">Fast (10×)</option>
+          <option value="60">Turbo (60×)</option>
+        </select>
+      </div>
+      <p class="muted">Normal time means a creature grows up over a few hours and gets hungry while you're away. Fast and Turbo are handy for trying the whole life cycle quickly.</p>
+      <div class="row" id="releaseRow">
+        <button class="btn ghost" id="btnRelease" type="button">Release creature and start over</button>
+      </div>
+      <div class="row" id="releaseConfirm" hidden>
+        <span>Release <b id="relName">it</b> back into the glade? This can't be undone.</span>
+        <button class="btn danger" id="btnReleaseYes" type="button">Release</button>
+        <button class="btn ghost" id="btnReleaseNo" type="button">Keep</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="journalPanel" class="panel" hidden>
+    <h2>Glade journal</h2>
+    <p class="muted">Every creature you've raised, newest first.</p>
+    <ul class="journal" id="journalList"></ul>
+  </section>
+
+  <!-- choose an egg -->
+  <section id="scrChoose" class="choose" hidden>
+    <h2>Three eggs were found in the moss. Pick one to warm up.</h2>
+    <p class="lead">Each kind hatches into a different creature with its own habits. Care for it well and it grows into a bright, healthy adult.</p>
+    <div class="eggs" id="eggs"></div>
+  </section>
+
+  <!-- egg / naming -->
+  <section id="scrEgg" class="center-card" hidden>
+    <h2 id="eggTitle">Warming the egg…</h2>
+    <p class="muted" id="eggHint">Tap the egg to keep it warm. It will hatch on its own too.</p>
+    <div class="stage" style="max-width:420px"><canvas id="eggCanvas" aria-label="Your egg. Tap to warm it."></canvas></div>
+    <div class="bar" style="width:100%;max-width:420px"><i id="eggBar" style="width:0%"></i></div>
+    <div class="row" id="nameRow" hidden style="width:100%;max-width:420px">
+      <input class="textin" id="nameIn" maxlength="14" placeholder="Name your creature" autocomplete="off">
+      <button class="btn" id="btnName" type="button">Welcome home</button>
+    </div>
+  </section>
+
+  <!-- main game -->
+  <section id="scrGame" class="game" hidden>
+    <div class="habitat">
+      <div class="idline">
+        <div><div class="nm" id="petName">—</div><div class="sp" id="petSpecies">—</div></div>
+        <div class="age" id="petAge">—</div>
+      </div>
+      <div class="stage"><canvas id="scene" aria-label="Your creature's habitat"></canvas></div>
+      <div class="hint" id="hint" aria-live="polite"></div>
+    </div>
+    <div class="side">
+      <div class="panel">
+        <h3>How it's doing</h3>
+        <div class="stat"><label>Belly</label><div class="bar"><i id="b_full"></i></div><output id="v_full">0</output></div>
+        <div class="stat"><label>Fun</label><div class="bar"><i id="b_fun"></i></div><output id="v_fun">0</output></div>
+        <div class="stat"><label>Energy</label><div class="bar"><i id="b_energy"></i></div><output id="v_energy">0</output></div>
+        <div class="stat"><label>Tidy</label><div class="bar"><i id="b_clean"></i></div><output id="v_clean">0</output></div>
+        <div class="stat"><label>Health</label><div class="bar"><i id="b_health"></i></div><output id="v_health">0</output></div>
+        <div class="badges" id="badges"></div>
+      </div>
+      <div class="panel">
+        <h3>Care</h3>
+        <div class="actions">
+          <button class="act" id="aFeed" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="14" r="5" fill="#d9465b"/><circle cx="15.5" cy="13" r="4.5" fill="#b8364b"/><path d="M12 9c0-3 2-5 4-6" stroke="#3c7a2c" stroke-width="2" fill="none" stroke-linecap="round"/></svg>Feed</button>
+          <button class="act" id="aPlay" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.9 6.1 6.6.8-4.9 4.6 1.3 6.5L12 16.8 6.1 20l1.3-6.5L2.5 8.9l6.6-.8z" fill="#f2b632"/></svg>Play</button>
+          <button class="act" id="aClean" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="14" r="5" fill="none" stroke="#3aa0c8" stroke-width="2"/><circle cx="16" cy="9" r="3.5" fill="none" stroke="#3aa0c8" stroke-width="2"/><circle cx="17" cy="17" r="2" fill="#3aa0c8"/></svg>Clean</button>
+          <button class="act" id="aSleep" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15A8 8 0 1 1 9 4a6.5 6.5 0 0 0 11 11z" fill="#7b6be0"/></svg><span id="sleepLbl">Sleep</span></button>
+          <button class="act" id="aHeal" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="#e65a4a"/><path d="M12 7v10M7 12h10" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg>Herbs</button>
+          <button class="act" id="aPet" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 6-8 11-8 11z" fill="#ef6f9a"/></svg>Cuddle</button>
+        </div>
+        <div class="submenu" id="feedMenu" hidden>
+          <button type="button" data-food="berry"><b>Dewberry</b><small>A filling meal</small></button>
+          <button type="button" data-food="cake"><b>Honey bun</b><small>Tasty, but a treat</small></button>
+          <button type="button" data-food="no"><b>Never mind</b><small>Close</small></button>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Diary</h3>
+        <ul class="log" id="log"></ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- gone -->
+  <section id="scrGone" class="center-card" hidden>
+    <h2 id="goneTitle">Wandered off</h2>
+    <p class="muted" id="goneText"></p>
+    <button class="btn" id="btnNew" type="button">Find a new egg</button>
+  </section>
+
+  <footer>Evolvlings is a working name. Progress saves in this browser only.</footer>
+</div>
+
+<script>
+(() => {
+"use strict";
+const SAVE_KEY = "glimmerglade.save.v1";
+const JOURNAL_KEY = "glimmerglade.journal.v1";
+const $ = (id) => document.getElementById(id);
+const clamp = (v, a = 0, b = 100) => Math.max(a, Math.min(b, v));
+const rand = (a, b) => a + Math.random() * (b - a);
+
+/* ---------- Species (all original) ---------- */
+const SPECIES = {
+  lumo: {
+    egg: "Glow egg", blurb: "Warm to the touch, with a soft light inside.", trait: "Playful · gets bored fast",
+    names: ["Lumi", "Lumbit", "Lanternmoth", "Dimwick"],
+    desc: ["a glowing moth-sprite", "a glowing moth-sprite", "a lantern-winged moth-sprite", "a dim, droopy moth-sprite"],
+    rates: { full: 1, fun: 1.35, energy: 0.9, clean: 1 },
+    col: { body: "#f5cf5d", belly: "#fde9a6", line: "#9a6f12", cheek: "#f39a7a", accent: "#ffe27a" },
+    dull: { body: "#c9b77f", belly: "#e2d8b4", line: "#6d5f36", cheek: "#c9a092", accent: "#b9ae8b" },
+    eggCol: ["#fbe39a", "#e7b53c", "#7a5410"],
+  },
+  pebb: {
+    egg: "Pebble egg", blurb: "Heavy and speckled, like a river stone.", trait: "Hungry · very sturdy",
+    names: ["Pebb", "Cobbin", "Mossmonk", "Grumblestone"],
+    desc: ["a pebble critter", "a pebble critter", "a moss-capped stone critter", "a cracked, grumpy stone critter"],
+    rates: { full: 1.35, fun: 0.9, energy: 1, clean: 1, health: 0.7 },
+    col: { body: "#9fb0c2", belly: "#d3dde6", line: "#4b5a6b", cheek: "#e8a3a3", accent: "#6aa84f" },
+    dull: { body: "#8c8f93", belly: "#b9bbbe", line: "#4c4e52", cheek: "#b99a9a", accent: "#7d8a5e" },
+    eggCol: ["#c9d3dc", "#8796a6", "#3e4a57"],
+  },
+  fizz: {
+    egg: "Cloud egg", blurb: "Strangely light. It floats a little when you let go.", trait: "Sleepy · stays tidy",
+    names: ["Wisp", "Driftlet", "Nimbuffin", "Drizzlump"],
+    desc: ["a cloud puff", "a cloud puff", "a sunny cloud puff", "a gloomy raincloud puff"],
+    rates: { full: 0.9, fun: 1, energy: 1.35, clean: 0.7 },
+    col: { body: "#bfe6f7", belly: "#f2fbff", line: "#4f8fae", cheek: "#f4a6c4", accent: "#ffd76a" },
+    dull: { body: "#a8b4bb", belly: "#d4dadd", line: "#55656e", cheek: "#b8a0aa", accent: "#8fa3b0" },
+    eggCol: ["#eef9ff", "#9fd3ec", "#4f8fae"],
+  },
+};
+const STAGE_LABEL = ["Baby", "Kid", "Grown-up"];
+const TEEN_AT = 60, ADULT_AT = 240; // game minutes of age
+
+/* ---------- State ---------- */
+let S = null;
+function freshState() {
+  return { v: 1, phase: "choose", speed: S ? S.speed : 1, lastReal: Date.now(), log: [] };
+}
+function load() {
+  try { const raw = localStorage.getItem(SAVE_KEY); if (raw) { const o = JSON.parse(raw); if (o && o.v === 1) return o; } } catch (e) {}
+  return null;
+}
+function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} }
+function loadJournal() { try { return JSON.parse(localStorage.getItem(JOURNAL_KEY) || "[]"); } catch (e) { return []; } }
+function saveJournal(j) { try { localStorage.setItem(JOURNAL_KEY, JSON.stringify(j.slice(0, 40))); } catch (e) {} }
+
+function stageName() {
+  const sp = SPECIES[S.species];
+  if (S.stage < 2) return sp.names[S.stage];
+  return S.form === "scruffy" ? sp.names[3] : sp.names[2];
+}
+function stageDesc() {
+  const sp = SPECIES[S.species];
+  if (S.stage < 2) return sp.desc[S.stage];
+  return S.form === "scruffy" ? sp.desc[3] : sp.desc[2];
+}
+function clockStr() { const d = new Date(); return d.getHours().toString().padStart(2, "0") + ":" + d.getMinutes().toString().padStart(2, "0"); }
+function addLog(text) { S.log.unshift({ t: clockStr(), text }); S.log = S.log.slice(0, 40); renderLog(); }
+
+/* ---------- Simulation (dt in game minutes) ---------- */
+const PER_MIN = { full: 14 / 60, fun: 12 / 60, energy: 9 / 60, clean: 5 / 60 };
+function careNow() { const s = S.stats; return (s.full + s.fun + s.energy + s.clean + s.health) / 5; }
+
+function step(dt, offline) {
+  if (S.phase !== "alive") return;
+  const s = S.stats, r = SPECIES[S.species].rates, sl = S.sleeping;
+  s.full = clamp(s.full - PER_MIN.full * r.full * dt * (sl ? 0.5 : 1));
+  s.fun = clamp(s.fun - PER_MIN.fun * r.fun * dt * (sl ? 0.3 : 1) * (S.sick ? 1.5 : 1));
+  s.clean = clamp(s.clean - (PER_MIN.clean * r.clean + S.messes.length * 0.12) * dt);
+  if (sl) s.energy = clamp(s.energy + 0.55 * dt);
+  else s.energy = clamp(s.energy - PER_MIN.energy * r.energy * dt);
+
+  // messes after meals
+  for (const p of S.pendingMess) p.in -= dt;
+  const due = S.pendingMess.filter((p) => p.in <= 0);
+  S.pendingMess = S.pendingMess.filter((p) => p.in > 0);
+  for (let i = 0; i < due.length; i++) if (S.messes.length < 5) { S.messes.push({ x: rand(40, 320) }); if (!offline) addLog(`${S.name} made a mess.`); }
+
+  // sickness
+  if (!S.sick) {
+    let risk = 0;
+    if (s.clean < 25) risk += 0.35;
+    if (S.messes.length >= 3) risk += 0.35;
+    if (s.full < 10) risk += 0.2;
+    if (Math.random() < (risk / 60) * dt) { S.sick = true; addLog(`${S.name} caught a sniffle. Herbs will help.`); }
+  }
+
+  // health
+  const hr = r.health || 1;
+  let hd = 0;
+  for (const k of ["full", "fun", "energy", "clean"]) if (s[k] < 10) hd += 8 / 60;
+  if (S.sick) hd += 10 / 60;
+  if (hd > 0) s.health = clamp(s.health - hd * hr * dt);
+  else if (s.full > 40 && s.fun > 40 && s.energy > 30 && s.clean > 40) s.health = clamp(s.health + (6 / 60) * dt);
+
+  // auto sleep / wake
+  if (!sl && s.energy < 8) { S.sleeping = true; addLog(`${S.name} was so tired it fell asleep on the spot.`); }
+  if (sl && s.energy >= 100) { S.sleeping = false; addLog(`${S.name} woke up fully rested.`); if (!offline) say("Morning!"); }
+
+  // aging and care record
+  S.age += dt;
+  S.careSum += careNow() * dt; S.careN += dt;
+  if (S.stage === 0 && S.age >= TEEN_AT) grow();
+  else if (S.stage === 1 && S.age >= ADULT_AT) grow();
+
+  if (s.health <= 0) runAway();
+}
+
+function grow() {
+  const before = stageName();
+  S.stage++;
+  if (S.stage === 2) {
+    const avg = S.careN ? S.careSum / S.careN : 50;
+    S.form = avg >= 58 ? "bright" : "scruffy";
+  }
+  addLog(`${S.name} grew from ${before} into ${stageName()}!`);
+  bloom = { t: 0 };
+  say("Whoa!");
+}
+
+function runAway() {
+  const j = loadJournal();
+  j.unshift({ name: S.name, kind: stageName(), age: Math.round(S.age), end: "wandered off" });
+  saveJournal(j);
+  S.phase = "gone";
+  S.goneName = S.name;
+  addLog(`${S.name} wandered off into the glade.`);
+  save(); showScreen();
+}
+
+function catchUp() {
+  const now = Date.now();
+  let mins = ((now - S.lastReal) / 60000) * S.speed;
+  S.lastReal = now;
+  if (S.phase === "egg") { S.egg = clamp(S.egg + mins * 60 * 4); return; }
+  if (S.phase !== "alive" || mins <= 0) return;
+  mins = Math.min(mins, 60 * 24 * 2);
+  const away = mins;
+  while (mins > 0 && S.phase === "alive") { const d = Math.min(1, mins); step(d, true); mins -= d; }
+  if (away > 30 && S.phase === "alive") addLog(`You were away for ${fmtDur(away)}.`);
+}
+function fmtDur(m) { m = Math.round(m); if (m < 60) return m + " min"; const h = Math.floor(m / 60), mm = m % 60; return h + "h" + (mm ? " " + mm + "m" : ""); }
+
+/* ---------- Actions ---------- */
+let bubble = null, effects = [], foodAnim = null, bloom = null, mini = null, cleanAnim = null;
+function say(text) { bubble = { text, until: performance.now() + 2200 }; }
+function hint(text) { $("hint").textContent = text; }
+
+function feed(kind) {
+  $("feedMenu").hidden = true;
+  if (kind === "no") return;
+  const s = S.stats;
+  if (s.full > 94) { say("Too full!"); hint(`${S.name} shakes its head. It's full.`); return; }
+  if (kind === "berry") { s.full = clamp(s.full + 32); addLog(`Fed ${S.name} a dewberry.`); }
+  else { s.full = clamp(s.full + 14); s.fun = clamp(s.fun + 14); s.health = clamp(s.health - 3); addLog(`${S.name} gobbled a honey bun.`); }
+  S.pendingMess.push({ in: rand(15, 45) });
+  foodAnim = { kind, t: 0 };
+  say(kind === "berry" ? "Yum!" : "Sweet!");
+  save(); renderStats();
+}
+function cleanUp() {
+  const n = S.messes.length;
+  S.messes = []; S.stats.clean = clamp(S.stats.clean + 45);
+  cleanAnim = { t: 0 };
+  for (let i = 0; i < 18; i++) effects.push({ type: "bubble", x: rand(30, 330), y: rand(150, 250), vy: rand(-30, -12), life: rand(1, 2), r: rand(3, 8) });
+  addLog(n ? `Cleaned up ${n} mess${n > 1 ? "es" : ""} and gave ${S.name} a bath.` : `Gave ${S.name} a bubble bath.`);
+  say("Squeaky!"); save(); renderStats();
+}
+function toggleSleep() {
+  if (S.sleeping) {
+    if (S.stats.energy < 40) { S.stats.fun = clamp(S.stats.fun - 8); addLog(`Woke ${S.name} early. It's grumpy.`); }
+    else addLog(`${S.name} woke up.`);
+    S.sleeping = false; say("Hm?");
+  } else {
+    if (S.stats.energy > 85) { say("Not sleepy!"); hint(`${S.name} isn't tired yet.`); return; }
+    S.sleeping = true; addLog(`Lights out. ${S.name} curled up to sleep.`);
+  }
+  save(); renderAll();
+}
+function heal() {
+  if (!S.sick) { say("I'm fine!"); hint(`${S.name} isn't sick. Herbs are only needed for sniffles.`); return; }
+  S.sick = false; S.stats.health = clamp(S.stats.health + 20); S.stats.fun = clamp(S.stats.fun - 5);
+  addLog(`${S.name} chewed some bitter herbs and feels better.`); say("Bleh… better!");
+  save(); renderStats();
+}
+function cuddle() {
+  S.stats.fun = clamp(S.stats.fun + 6);
+  for (let i = 0; i < 5; i++) effects.push({ type: "heart", x: petX + rand(-30, 30), y: 150, vy: rand(-40, -25), life: 1.4, r: rand(5, 8) });
+  say(["♪", "Hehe", "Mmm"][Math.floor(Math.random() * 3)]);
+  save(); renderStats();
+}
+function startPlay() {
+  if (S.stats.energy < 15) { say("Too sleepy…"); hint(`${S.name} is too tired to play. Let it rest.`); return; }
+  mini = { until: performance.now() + 10000, stars: [], caught: 0, next: 0 };
+  hint("Catch the falling starseeds! Tap them before they hit the ground.");
+  renderAll();
+}
+function endPlay() {
+  const c = mini.caught; mini = null;
+  const s = S.stats;
+  s.fun = clamp(s.fun + 10 + c * 4); s.energy = clamp(s.energy - 10); s.full = clamp(s.full - 4);
+  addLog(`Played catch with ${S.name}: ${c} starseed${c === 1 ? "" : "s"} caught.`);
+  say(c >= 6 ? "Again!!" : c >= 3 ? "Fun!" : "Hehe");
+  hint(""); save(); renderAll();
+}
+
+/* ---------- Drawing ---------- */
+const W = 360, H = 280;
+function setupCanvas(cv, w, h) {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  cv.width = w * dpr; cv.height = h * dpr;
+  const c = cv.getContext("2d"); c.setTransform(dpr, 0, 0, dpr, 0, 0); return c;
+}
+function ell(c, x, y, rx, ry) { c.beginPath(); c.ellipse(x, y, Math.max(0.1, rx), Math.max(0.1, ry), 0, 0, Math.PI * 2); }
+
+function drawEgg(c, x, y, s, kind, t, crack) {
+  const [a, b, d] = SPECIES[kind].eggCol;
+  const wob = Math.sin(t * 3) * 0.06 * (crack > 0.6 ? 2 : 1);
+  c.save(); c.translate(x, y); c.rotate(wob); c.scale(s, s);
+  c.beginPath(); c.moveTo(0, -48); c.bezierCurveTo(30, -48, 38, 0, 38, 14); c.bezierCurveTo(38, 38, 20, 48, 0, 48); c.bezierCurveTo(-20, 48, -38, 38, -38, 14); c.bezierCurveTo(-38, 0, -30, -48, 0, -48); c.closePath();
+  const g = c.createRadialGradient(-12, -16, 4, 0, 0, 56); g.addColorStop(0, "#ffffff"); g.addColorStop(0.35, a); g.addColorStop(1, b);
+  c.fillStyle = g; c.fill(); c.lineWidth = 2.5; c.strokeStyle = d; c.stroke();
+  c.save(); c.clip();
+  c.fillStyle = d; c.globalAlpha = 0.55;
+  if (kind === "lumo") { for (const [px, py, r] of [[-14, -20, 5], [12, -8, 7], [-6, 14, 6], [18, 24, 4], [-22, 30, 4]]) { ell(c, px, py, r, r); c.fill(); } }
+  else if (kind === "pebb") { c.fillRect(-40, 4, 80, 9); for (let i = 0; i < 22; i++) { const px = Math.sin(i * 12.9) * 30, py = Math.cos(i * 7.3) * 40; ell(c, px, py, 1.6, 1.6); c.fill(); } }
+  else { c.globalAlpha = 0.8; c.strokeStyle = "#ffffff"; c.lineWidth = 3; for (const [px, py] of [[-12, -18], [14, 6], [-10, 26]]) { c.beginPath(); c.arc(px, py, 7, 0.2, Math.PI * 1.6); c.stroke(); } }
+  c.restore();
+  if (crack > 0.3) {
+    c.strokeStyle = d; c.lineWidth = 2; c.beginPath();
+    c.moveTo(-22, -6); c.lineTo(-12, 2); c.lineTo(-4, -8); c.lineTo(6, 2); if (crack > 0.65) { c.lineTo(14, -6); c.lineTo(24, 2); } c.stroke();
+  }
+  c.restore();
+}
+
+function drawCreature(c, x, y, o) {
+  // o: {kind, stage, form, t, mood, sleeping, sick, blink, eat, jump}
+  const sp = SPECIES[o.kind];
+  const scr = o.form === "scruffy";
+  const col = scr ? sp.dull : sp.col;
+  const s = [0.62, 0.82, 1][o.stage];
+  const breathe = Math.sin(o.t * (o.sleeping ? 1.6 : 3)) * 0.035;
+  const hover = o.kind === "fizz" ? -14 + Math.sin(o.t * 2) * 4 : 0;
+  c.save(); c.translate(x, y + hover - o.jump); c.scale(s * (1 + breathe), s * (1 - breathe));
+
+  // shadow (on ground)
+  c.save(); c.globalAlpha = 0.18; c.fillStyle = "#000"; ell(c, 0, 40 - hover / s + o.jump / s, 40, 7); c.fill(); c.restore();
+
+  // back features
+  if (o.kind === "lumo" && o.stage === 2) {
+    const flap = Math.sin(o.t * (o.sleeping ? 1 : 5)) * 0.18;
+    for (const side of [-1, 1]) {
+      c.save(); c.scale(side, 1); c.rotate(-0.2 + flap);
+      c.globalAlpha = scr ? 0.55 : 0.82;
+      c.fillStyle = scr ? "#bdb39a" : "#ffe9b0"; c.strokeStyle = col.line; c.lineWidth = 2;
+      c.beginPath(); c.moveTo(18, -14); c.bezierCurveTo(70, -70, 96, -20, 74, 6); c.bezierCurveTo(62, 22, 38, 12, 20, 6); c.closePath(); c.fill(); c.stroke();
+      if (scr) { c.fillStyle = "#00000022"; c.beginPath(); c.arc(70, -22, 9, 0, 7); c.fill(); }
+      else { c.fillStyle = "#f08a4b"; ell(c, 58, -18, 8, 8); c.fill(); c.fillStyle = "#5b44c8"; ell(c, 58, -18, 3.5, 3.5); c.fill(); }
+      c.restore();
+    }
+    c.globalAlpha = 1;
+  }
+  if (o.kind === "fizz" && o.stage === 2 && !scr) {
+    c.save(); c.lineWidth = 5; c.globalAlpha = 0.7;
+    ["#ff8a8a", "#ffd76a", "#8fe08a", "#8ac8ff"].forEach((cc, i) => { c.strokeStyle = cc; c.beginPath(); c.arc(0, -10, 62 - i * 5, Math.PI * 1.12, Math.PI * 1.88); c.stroke(); });
+    c.restore();
+  }
+
+  // body
+  c.lineWidth = 3; c.strokeStyle = col.line;
+  const g = c.createRadialGradient(-14, -18, 6, 0, 0, 60); g.addColorStop(0, col.belly); g.addColorStop(0.45, col.body); g.addColorStop(1, col.body);
+  c.fillStyle = g;
+  if (o.kind === "pebb") {
+    c.beginPath(); c.moveTo(-40, 30); c.bezierCurveTo(-48, -10, -36, -42, 0, -42); c.bezierCurveTo(36, -42, 48, -10, 40, 30); c.bezierCurveTo(30, 42, -30, 42, -40, 30); c.closePath(); c.fill(); c.stroke();
+    c.fillStyle = col.line; c.globalAlpha = 0.25;
+    for (const [px, py, r] of [[-24, -18, 3], [22, -24, 2.5], [28, 6, 3], [-30, 10, 2]]) { ell(c, px, py, r, r); c.fill(); }
+    c.globalAlpha = 1;
+    if (scr) { c.strokeStyle = col.line; c.lineWidth = 2; c.beginPath(); c.moveTo(18, -40); c.lineTo(12, -28); c.lineTo(20, -20); c.lineTo(14, -10); c.stroke(); }
+  } else if (o.kind === "fizz") {
+    c.beginPath();
+    const puffs = [[-30, 10, 18], [-18, -16, 20], [6, -24, 22], [28, -8, 19], [32, 16, 16], [0, 22, 24], [-24, 26, 14], [22, 28, 14]];
+    for (const [px, py, r] of puffs) { c.moveTo(px + r, py); c.arc(px, py, r, 0, Math.PI * 2); }
+    c.stroke(); c.fill();
+    if (scr) { c.fillStyle = "#6f8fa4"; for (let i = 0; i < 3; i++) { const dy = ((o.t * 40 + i * 20) % 50); c.globalAlpha = 1 - dy / 50; ell(c, -16 + i * 16, 42 + dy, 2, 4); c.fill(); } c.globalAlpha = 1; }
+  } else {
+    ell(c, 0, 0, 40, 40); c.fill(); c.stroke();
+    c.fillStyle = col.belly; ell(c, 0, 14, 24, 20); c.fill();
+    if (o.stage >= 1) { c.fillStyle = scr ? "#d9d2bd" : "#fff6dc"; for (let i = -2; i <= 2; i++) { ell(c, i * 9, -2 + Math.abs(i) * 2, 7, 6); c.fill(); } }
+  }
+
+  // feet
+  if (o.kind !== "fizz") { c.fillStyle = col.body; c.strokeStyle = col.line; c.lineWidth = 2.5; for (const fx of [-18, 18]) { ell(c, fx, 38, 11, 6); c.fill(); c.stroke(); } }
+
+  // head features
+  if (o.kind === "lumo") {
+    const droop = scr ? 0.6 : 0; const sway = Math.sin(o.t * 2.2) * 3;
+    for (const side of [-1, 1]) {
+      c.strokeStyle = col.line; c.lineWidth = 2.5; c.beginPath();
+      const ex = side * (20 + o.stage * 4) + sway, ey = -66 + droop * 26 + (o.stage === 0 ? 10 : 0);
+      c.moveTo(side * 10, -36); c.quadraticCurveTo(side * 6, -60, ex, ey); c.stroke();
+      c.save(); if (!scr) { c.shadowColor = col.accent; c.shadowBlur = 14 + Math.sin(o.t * 4) * 6; }
+      c.fillStyle = col.accent; ell(c, ex, ey, 6, 6); c.fill(); c.restore();
+    }
+  } else if (o.kind === "pebb") {
+    c.fillStyle = col.body; c.strokeStyle = col.line; c.lineWidth = 2.5;
+    for (const side of [-1, 1]) { ell(c, side * 28, -34, 9, 9); c.fill(); c.stroke(); c.fillStyle = col.cheek; ell(c, side * 28, -34, 4, 4); c.fill(); c.fillStyle = col.body; }
+    if (o.stage === 1) { c.fillStyle = "#6aa84f"; c.strokeStyle = "#3e6e2c"; c.lineWidth = 2; c.beginPath(); c.moveTo(0, -42); c.quadraticCurveTo(-4, -56, -16, -60); c.quadraticCurveTo(-4, -48, 0, -42); c.fill(); c.stroke(); c.beginPath(); c.moveTo(0, -42); c.quadraticCurveTo(6, -54, 16, -56); c.quadraticCurveTo(6, -46, 0, -42); c.fill(); c.stroke(); }
+    if (o.stage === 2) {
+      c.fillStyle = col.accent; c.strokeStyle = scr ? "#55603f" : "#3e6e2c"; c.lineWidth = 2;
+      c.beginPath(); c.moveTo(-34, -28); c.bezierCurveTo(-36, -50, -14, -56, 0, -54); c.bezierCurveTo(14, -56, 36, -50, 34, -28); c.bezierCurveTo(24, -36, -24, -36, -34, -28); c.closePath(); c.fill(); c.stroke();
+      if (!scr) for (const [fx, fy, fc] of [[-14, -50, "#ffffff"], [10, -52, "#ffd76a"], [22, -42, "#f4a6c4"]]) { c.fillStyle = fc; for (let k = 0; k < 5; k++) { const a = k * 1.256; ell(c, fx + Math.cos(a) * 3, fy + Math.sin(a) * 3, 2.5, 2.5); c.fill(); } c.fillStyle = "#e0a42a"; ell(c, fx, fy, 1.6, 1.6); c.fill(); }
+    }
+  } else if (o.kind === "fizz" && o.stage >= 1) {
+    c.fillStyle = col.belly; c.strokeStyle = col.line; c.lineWidth = 2;
+    const f = Math.sin(o.t * 6) * 0.3;
+    for (const side of [-1, 1]) { c.save(); c.translate(side * 44, 0); c.rotate(side * (0.4 + f)); ell(c, 0, 0, 10, 6); c.fill(); c.stroke(); c.restore(); }
+  }
+
+  // face
+  const ey = -6;
+  const sad = o.mood < 35;
+  c.fillStyle = "#2a2230"; c.strokeStyle = "#2a2230"; c.lineWidth = 2.6; c.lineCap = "round";
+  for (const side of [-1, 1]) {
+    const ex = side * 14;
+    if (o.sleeping || o.blink) { c.beginPath(); c.arc(ex, ey, 5, 0.15 * Math.PI, 0.85 * Math.PI); c.stroke(); }
+    else if (o.sick) { c.beginPath(); c.moveTo(ex - 4, ey - 4); c.lineTo(ex + 4, ey + 4); c.moveTo(ex + 4, ey - 4); c.lineTo(ex - 4, ey + 4); c.stroke(); }
+    else {
+      ell(c, ex, ey, 5.5, 6.5); c.fill();
+      c.fillStyle = "#ffffff"; ell(c, ex - 1.8, ey - 2.4, 2, 2); c.fill(); c.fillStyle = "#2a2230";
+      if (sad) { c.beginPath(); c.moveTo(ex - side * 7, ey - 11); c.lineTo(ex + side * 3, ey - 9); c.stroke(); }
+    }
+  }
+  c.fillStyle = col.cheek; c.globalAlpha = 0.7; for (const side of [-1, 1]) { ell(c, side * 24, ey + 8, 6, 3.5); c.fill(); } c.globalAlpha = 1;
+  c.beginPath();
+  if (o.eat) { ell(c, 0, ey + 14, 5, 5 * Math.abs(Math.sin(o.t * 14))); c.fill(); }
+  else if (o.sleeping) { ell(c, 0, ey + 14, 2.5, 2); c.fill(); }
+  else if (sad || o.sick) { c.arc(0, ey + 19, 6, 1.15 * Math.PI, 1.85 * Math.PI); c.stroke(); }
+  else if (o.mood > 70) { c.arc(0, ey + 10, 7, 0.15 * Math.PI, 0.85 * Math.PI); c.stroke(); }
+  else { c.moveTo(-5, ey + 15); c.lineTo(5, ey + 15); c.stroke(); }
+  if (o.sick) { c.fillStyle = "#7ac36a"; c.globalAlpha = 0.25; ell(c, 0, 0, 40, 40); c.fill(); c.globalAlpha = 1; }
+  c.restore();
+}
+
+function drawScene(c, t) {
+  const hr = new Date().getHours();
+  const night = hr >= 20 || hr < 6, dusk = (hr >= 17 && hr < 20) || (hr >= 6 && hr < 8);
+  const dark = S.sleeping || night;
+  const sky = c.createLinearGradient(0, 0, 0, H);
+  if (S.sleeping) { sky.addColorStop(0, "#0c1024"); sky.addColorStop(1, "#1d2440"); }
+  else if (night) { sky.addColorStop(0, "#16204a"); sky.addColorStop(1, "#3a3f72"); }
+  else if (dusk) { sky.addColorStop(0, "#f39b7a"); sky.addColorStop(1, "#fbd5a0"); }
+  else { sky.addColorStop(0, "#8fd0f2"); sky.addColorStop(1, "#dff3fb"); }
+  c.fillStyle = sky; c.fillRect(0, 0, W, H);
+  if (dark) { c.fillStyle = "#ffffff"; for (let i = 0; i < 30; i++) { c.globalAlpha = 0.35 + 0.35 * Math.sin(t * 1.5 + i); ell(c, (i * 97) % W, (i * 53) % 150, 1.2, 1.2); c.fill(); } c.globalAlpha = 1; c.fillStyle = "#f5efc8"; ell(c, 300, 46, 16, 16); c.fill(); c.fillStyle = S.sleeping ? "#0c1024" : "#16204a"; ell(c, 308, 40, 14, 14); c.fill(); }
+  else { c.fillStyle = "#fff6c4"; ell(c, 300, 48, 20, 20); c.fill(); c.fillStyle = "#ffffff"; c.globalAlpha = 0.85; const cx = (t * 6) % (W + 120) - 60; for (const [dx, dy, r] of [[0, 0, 14], [14, -6, 16], [30, 0, 12]]) { ell(c, cx + dx, 70 + dy, r, r * 0.8); c.fill(); } c.globalAlpha = 1; }
+  // far hills
+  c.fillStyle = dark ? "#1f3a2e" : "#8cc477"; c.beginPath(); c.moveTo(0, 200); c.quadraticCurveTo(90, 150, 180, 190); c.quadraticCurveTo(270, 150, 360, 185); c.lineTo(360, 280); c.lineTo(0, 280); c.fill();
+  // ground
+  c.fillStyle = dark ? "#264a32" : "#5fa548"; c.beginPath(); c.moveTo(0, 222); c.quadraticCurveTo(180, 200, 360, 222); c.lineTo(360, 280); c.lineTo(0, 280); c.fill();
+  // tufts & mushrooms
+  c.strokeStyle = dark ? "#3d6b47" : "#3f7d2f"; c.lineWidth = 2;
+  for (let i = 0; i < 14; i++) { const gx = 12 + i * 26, gy = 236 + (i % 3) * 12; c.beginPath(); c.moveTo(gx - 4, gy); c.lineTo(gx - 6, gy - 7); c.moveTo(gx, gy); c.lineTo(gx, gy - 9); c.moveTo(gx + 4, gy); c.lineTo(gx + 6, gy - 7); c.stroke(); }
+  for (const [mx, my, mr] of [[26, 226, 9], [334, 232, 7]]) { c.fillStyle = dark ? "#cfc7b0" : "#f7efdc"; c.fillRect(mx - 2.5, my - 2, 5, 10); c.fillStyle = dark ? "#8a4b5a" : "#d9534f"; c.beginPath(); c.arc(mx, my, mr, Math.PI, 0); c.fill(); c.fillStyle = "#fff"; ell(c, mx - 3, my - 4, 1.5, 1.5); c.fill(); ell(c, mx + 3, my - 3, 1.2, 1.2); c.fill(); }
+  // fireflies at night
+  if (dark && !S.sleeping) for (let i = 0; i < 6; i++) { c.save(); c.shadowColor = "#ffe27a"; c.shadowBlur = 8; c.fillStyle = "#ffe27a"; c.globalAlpha = 0.5 + 0.5 * Math.sin(t * 2 + i * 2); ell(c, 40 + ((i * 61 + t * 10 * (i % 2 ? 1 : -1)) % 300 + 300) % 300, 150 + Math.sin(t + i) * 20, 2, 2); c.fill(); c.restore(); }
+}
+
+function drawMess(c, x, t) {
+  const y = 242;
+  c.fillStyle = "#7a5634"; c.strokeStyle = "#4b321c"; c.lineWidth = 1.5;
+  ell(c, x, y, 14, 7); c.fill(); c.stroke(); ell(c, x, y - 7, 9, 5); c.fill(); c.stroke(); ell(c, x + 1, y - 12, 4.5, 3.5); c.fill(); c.stroke();
+  c.strokeStyle = "#6e8b3d"; c.lineWidth = 1.6; c.globalAlpha = 0.7;
+  for (const dx of [-7, 5]) { c.beginPath(); const o = Math.sin(t * 3 + dx) * 2; c.moveTo(x + dx, y - 18); c.quadraticCurveTo(x + dx + 4 + o, y - 23, x + dx, y - 28); c.quadraticCurveTo(x + dx - 4 - o, y - 33, x + dx, y - 38); c.stroke(); }
+  c.globalAlpha = 1;
+}
+
+function drawBubble(c, x, y, text) {
+  c.font = "700 14px Grandstander, Trebuchet MS, sans-serif";
+  const w = Math.max(40, c.measureText(text).width + 22), h = 28;
+  const bx = clamp(x - w / 2, 6, W - w - 6), by = y - h;
+  c.fillStyle = "#ffffff"; c.strokeStyle = "#2a2230"; c.lineWidth = 2;
+  c.beginPath(); c.roundRect(bx, by, w, h, 12); c.fill(); c.stroke();
+  c.beginPath(); c.moveTo(x - 6, by + h - 1); c.lineTo(x, by + h + 8); c.lineTo(x + 6, by + h - 1); c.fill();
+  c.beginPath(); c.moveTo(x - 6, by + h); c.lineTo(x, by + h + 8); c.lineTo(x + 6, by + h); c.stroke();
+  c.fillStyle = "#2a2230"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(text, bx + w / 2, by + h / 2 + 1);
+}
+
+function drawStar(c, x, y, r, rot) {
+  c.save(); c.translate(x, y); c.rotate(rot); c.beginPath();
+  for (let i = 0; i < 10; i++) { const rr = i % 2 ? r * 0.45 : r; const a = (i * Math.PI) / 5 - Math.PI / 2; c.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); }
+  c.closePath(); c.shadowColor = "#ffe27a"; c.shadowBlur = 10; c.fillStyle = "#ffd447"; c.fill(); c.strokeStyle = "#b07d10"; c.lineWidth = 1.5; c.stroke(); c.restore();
+}
+
+/* ---------- Main render loop ---------- */
+const scene = $("scene"); let sc = setupCanvas(scene, W, H);
+const eggCv = $("eggCanvas"); let ec = setupCanvas(eggCv, W, H);
+let petX = 180, petTarget = 180, nextBlink = 0, blinkUntil = 0, lastFrame = performance.now(), jumpV = 0, jumpY = 0;
+
+function frame(now) {
+  const dt = Math.min(0.05, (now - lastFrame) / 1000); lastFrame = now;
+  const t = now / 1000;
+  if (S.phase === "egg") {
+    ec.clearRect(0, 0, W, H);
+    drawScene(ec, t);
+    const p = S.egg / 100;
+    drawEgg(ec, 180, 200, 1.2, S.species, t * (1 + p * 2), p);
+    for (const e of effects) drawEffect(ec, e);
+    updateEffects(dt);
+  } else if (S.phase === "alive" && !$("scrGame").hidden) {
+    const c = sc;
+    drawScene(c, t);
+    for (const m of S.messes) drawMess(c, m.x, t);
+    // movement
+    if (!S.sleeping && !mini && !foodAnim) {
+      if (Math.abs(petTarget - petX) < 2 && Math.random() < 0.006) petTarget = rand(90, 270);
+      petX += Math.sign(petTarget - petX) * Math.min(Math.abs(petTarget - petX), 30 * dt);
+      if (careNow() > 75 && Math.random() < 0.004 && jumpY === 0) jumpV = 160;
+    }
+    if (mini) { const target = mini.stars.length ? mini.stars[0].x : 180; petX += Math.sign(target - petX) * Math.min(Math.abs(target - petX), 70 * dt); }
+    if (jumpV || jumpY > 0) { jumpY += jumpV * dt; jumpV -= 520 * dt; if (jumpY <= 0) { jumpY = 0; jumpV = 0; } }
+    if (now > nextBlink) { blinkUntil = now + 140; nextBlink = now + rand(2200, 5000); }
+    const mood = (S.stats.full + S.stats.fun + S.stats.energy + S.stats.clean) / 4;
+    let eat = false;
+    if (foodAnim) {
+      foodAnim.t += dt; const ft = foodAnim.t;
+      const fy = Math.min(190, 60 + ft * 260);
+      if (ft < 1.1) {
+        c.save(); c.globalAlpha = ft > 0.6 ? 1 - (ft - 0.6) / 0.5 : 1;
+        if (foodAnim.kind === "berry") { c.fillStyle = "#c93a55"; ell(c, petX - 4, fy, 8, 8); c.fill(); ell(c, petX + 5, fy - 2, 7, 7); c.fill(); c.strokeStyle = "#3c7a2c"; c.lineWidth = 2; c.beginPath(); c.moveTo(petX, fy - 8); c.lineTo(petX + 4, fy - 14); c.stroke(); }
+        else { c.fillStyle = "#e8b15a"; c.beginPath(); c.arc(petX, fy, 11, Math.PI, 0); c.lineTo(petX + 11, fy + 5); c.lineTo(petX - 11, fy + 5); c.fill(); c.fillStyle = "#fff4d6"; c.fillRect(petX - 9, fy - 2, 18, 3); }
+        c.restore();
+      }
+      eat = ft > 0.5 && ft < 1.6;
+      if (ft > 1.6) foodAnim = null;
+    }
+    // bloom on growth
+    if (bloom) {
+      bloom.t += dt;
+      c.save(); c.globalAlpha = Math.max(0, 1 - bloom.t / 2); c.strokeStyle = "#ffe27a"; c.lineWidth = 6;
+      ell(c, petX, 190, 20 + bloom.t * 120, 20 + bloom.t * 120); c.stroke(); c.restore();
+      if (!bloom.burst && (bloom.burst = true)) for (let i = 0; i < 24; i++) { const a = rand(0, 6.28), v = rand(40, 120); effects.push({ type: "petal", x: petX, y: 180, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 40, life: rand(1.2, 2.2), r: rand(3, 6), hue: ["#ffd76a", "#f4a6c4", "#ffffff", "#a895ff"][i % 4] }); }
+      if (bloom.t > 2) bloom = null;
+    }
+    drawCreature(c, petX, 200, { kind: S.species, stage: S.stage, form: S.form, t, mood, sleeping: S.sleeping, sick: S.sick, blink: now < blinkUntil, eat, jump: jumpY });
+    if (S.sleeping) { c.fillStyle = "#e6e9ff"; c.font = "700 16px Grandstander, sans-serif"; for (let i = 0; i < 3; i++) { const p = ((t * 0.5 + i / 3) % 1); c.globalAlpha = 1 - p; c.fillText("z", petX + 30 + p * 30, 150 - p * 50 - i * 2); } c.globalAlpha = 1; }
+    if (S.sick && !S.sleeping) { c.fillStyle = "#ffffff"; c.strokeStyle = "#2a2230"; c.lineWidth = 2; c.beginPath(); c.roundRect(petX + 36, 128, 22, 22, 6); c.fill(); c.stroke(); c.strokeStyle = "#e65a4a"; c.lineWidth = 3; c.beginPath(); c.moveTo(petX + 47, 133); c.lineTo(petX + 47, 145); c.moveTo(petX + 41, 139); c.lineTo(petX + 53, 139); c.stroke(); }
+    if (cleanAnim) { cleanAnim.t += dt; if (cleanAnim.t > 1.5) cleanAnim = null; }
+    // mini game
+    if (mini) {
+      const left = (mini.until - now) / 1000;
+      if (now > mini.next && left > 0.8) { mini.stars.push({ x: rand(30, 330), y: -12, vy: rand(70, 120), rot: 0 }); mini.next = now + rand(450, 900); }
+      for (const st of mini.stars) { st.y += st.vy * dt; st.rot += dt * 3; drawStar(c, st.x, st.y, 13, st.rot); }
+      mini.stars = mini.stars.filter((st) => st.y < 236);
+      c.fillStyle = "rgba(20,20,40,.55)"; c.beginPath(); c.roundRect(10, 10, 132, 30, 10); c.fill();
+      c.fillStyle = "#fff"; c.font = "700 14px DM Mono, monospace"; c.textAlign = "left"; c.textBaseline = "middle";
+      c.fillText(`★ ${mini.caught}   ${Math.max(0, left).toFixed(1)}s`, 22, 26);
+      if (left <= 0) endPlay();
+    }
+    for (const e of effects) drawEffect(c, e);
+    updateEffects(dt);
+    if (bubble && now < bubble.until) drawBubble(c, petX, 200 - 70 * [0.62, 0.82, 1][S.stage] - 30 - (S.species === "fizz" ? 14 : 0) - jumpY, bubble.text);
+  }
+  requestAnimationFrame(frame);
+}
+function drawEffect(c, e) {
+  c.save(); c.globalAlpha = Math.max(0, Math.min(1, e.life));
+  if (e.type === "bubble") { c.strokeStyle = "#ffffff"; c.lineWidth = 1.5; ell(c, e.x, e.y, e.r, e.r); c.stroke(); c.fillStyle = "rgba(255,255,255,.25)"; c.fill(); }
+  else if (e.type === "heart") { c.fillStyle = "#ef6f9a"; c.translate(e.x, e.y); c.scale(e.r / 8, e.r / 8); c.beginPath(); c.moveTo(0, 6); c.bezierCurveTo(-10, -2, -6, -10, 0, -5); c.bezierCurveTo(6, -10, 10, -2, 0, 6); c.fill(); }
+  else if (e.type === "petal" || e.type === "spark") { c.fillStyle = e.hue || "#ffe27a"; ell(c, e.x, e.y, e.r, e.r * 0.6); c.fill(); }
+  c.restore();
+}
+function updateEffects(dt) {
+  for (const e of effects) { e.life -= dt; e.y += (e.vy || 0) * dt; e.x += (e.vx || 0) * dt; if (e.type === "petal") e.vy += 60 * dt; }
+  effects = effects.filter((e) => e.life > 0);
+}
+
+/* ---------- UI rendering ---------- */
+function showScreen() {
+  $("scrChoose").hidden = S.phase !== "choose";
+  $("scrEgg").hidden = S.phase !== "egg";
+  $("scrGame").hidden = S.phase !== "alive";
+  $("scrGone").hidden = S.phase !== "gone";
+  $("releaseRow").hidden = !(S.phase === "alive" || S.phase === "egg");
+  $("releaseConfirm").hidden = true;
+  if (S.phase === "choose") renderEggs();
+  if (S.phase === "egg") renderEggScreen();
+  if (S.phase === "alive") renderAll();
+  if (S.phase === "gone") {
+    $("goneTitle").textContent = `${S.goneName} wandered off`;
+    $("goneText").textContent = S.released
+      ? `${S.goneName} hopped back into the tall grass. It's happy out there, and it'll remember you.`
+      : `${S.goneName} wasn't feeling cared for and went to look for a cozier glade. Creatures need food, play, rest and a tidy home every few hours. It's fine, there are more eggs in the moss.`;
+  }
+}
+
+let eggCanvases = [];
+function renderEggs() {
+  const box = $("eggs"); box.innerHTML = ""; eggCanvases = [];
+  for (const k of Object.keys(SPECIES)) {
+    const sp = SPECIES[k];
+    const b = document.createElement("button"); b.type = "button"; b.className = "egg-card"; b.id = "egg_" + k;
+    const cv = document.createElement("canvas"); const cc = setupCanvas(cv, 120, 140);
+    b.appendChild(cv);
+    b.insertAdjacentHTML("beforeend", `<strong>${sp.egg}</strong><span>${sp.blurb}</span><span class="trait">${sp.trait}</span>`);
+    b.addEventListener("click", () => chooseEgg(k));
+    box.appendChild(b); eggCanvases.push({ cc, k, el: b });
+  }
+}
+(function eggLoop(now) {
+  if (S && S.phase === "choose") for (const e of eggCanvases) { e.cc.clearRect(0, 0, 120, 140); const hov = e.el.matches(":hover"); drawEgg(e.cc, 60, 76, 0.95, e.k, hov ? now / 300 : now / 1400 + e.k.length, 0); }
+  requestAnimationFrame(eggLoop);
+})(performance.now());
+
+function chooseEgg(k) {
+  S.phase = "egg"; S.species = k; S.egg = 0; S.lastReal = Date.now();
+  save(); showScreen();
+}
+function renderEggScreen() {
+  const done = S.egg >= 100;
+  $("eggBar").style.width = S.egg + "%";
+  $("eggTitle").textContent = done ? "It hatched!" : "Warming the " + SPECIES[S.species].egg.toLowerCase() + "…";
+  $("eggHint").textContent = done ? `Say hello to a little ${SPECIES[S.species].names[0]}. What will you call it?` : "Tap the egg to keep it warm. It will hatch on its own in a little while too.";
+  $("nameRow").hidden = !done;
+}
+function hatchName() {
+  const n = ($("nameIn").value || "").trim() || SPECIES[S.species].names[0];
+  Object.assign(S, {
+    phase: "alive", name: n.slice(0, 14), age: 0, stage: 0, form: null, sleeping: false, sick: false,
+    messes: [], pendingMess: [], careSum: 0, careN: 0, born: Date.now(),
+    stats: { full: 70, fun: 70, energy: 80, clean: 90, health: 100 }, log: [],
+  });
+  addLog(`${S.name} hatched from a ${SPECIES[S.species].egg.toLowerCase()}. Welcome to the glade!`);
+  save(); showScreen(); say("Hi!");
+}
+
+function setBar(k) {
+  const v = Math.round(S.stats[k]);
+  const el = $("b_" + k); el.style.width = v + "%"; el.className = v < 25 ? "low" : v < 50 ? "mid" : "";
+  $("v_" + k).textContent = v;
+}
+function renderStats() {
+  if (S.phase !== "alive") return;
+  ["full", "fun", "energy", "clean", "health"].forEach(setBar);
+  const b = [];
+  if (S.sleeping) b.push(["Asleep", "cool"]);
+  if (S.sick) b.push(["Has a sniffle", "bad"]);
+  if (S.messes.length) b.push([`${S.messes.length} mess${S.messes.length > 1 ? "es" : ""}`, "bad"]);
+  if (S.stats.full < 25) b.push(["Hungry", "bad"]);
+  if (S.stats.fun < 25) b.push(["Bored", "bad"]);
+  if (S.stats.energy < 20 && !S.sleeping) b.push(["Sleepy", "bad"]);
+  if (!b.length && careNow() > 75) b.push(["Happy", "good"]);
+  $("badges").innerHTML = b.map(([t, c]) => `<span class="badge ${c}">${t}</span>`).join("");
+  $("petName").textContent = S.name;
+  $("petSpecies").textContent = `${STAGE_LABEL[S.stage]} · ${stageName()}, ${stageDesc()}`;
+  const nextAt = S.stage === 0 ? TEEN_AT : S.stage === 1 ? ADULT_AT : null;
+  $("petAge").innerHTML = `Age ${fmtDur(S.age)}${nextAt ? `<br>grows in ${fmtDur(Math.max(0, nextAt - S.age))}` : "<br>fully grown"}${S.speed > 1 ? `<br>${S.speed}× time` : ""}`;
+  const sl = S.sleeping, busy = !!mini;
+  $("aFeed").disabled = sl || busy; $("aPlay").disabled = sl || busy; $("aClean").disabled = busy;
+  $("aHeal").disabled = busy; $("aPet").disabled = sl || busy; $("aSleep").disabled = busy;
+  $("sleepLbl").textContent = sl ? "Wake up" : "Sleep";
+  if (sl) $("feedMenu").hidden = true;
+  if (!$("hint").textContent || $("hint").dataset.auto === "1") {
+    const s = S.stats; let h = "";
+    if (sl) h = `${S.name} is sleeping. Energy refills while the lights are out.`;
+    else if (S.sick) h = `${S.name} looks unwell. Give it herbs.`;
+    else if (S.messes.length >= 2) h = "The glade is getting messy. Time to clean.";
+    else if (s.full < 30) h = `${S.name}'s tummy is rumbling.`;
+    else if (s.energy < 25) h = `${S.name} keeps yawning. Maybe it's bedtime.`;
+    else if (s.fun < 30) h = `${S.name} looks bored. Play a round of catch.`;
+    else h = "Tap your creature to give it a little pat.";
+    if (!mini) { $("hint").textContent = h; $("hint").dataset.auto = "1"; }
+  }
+}
+function renderLog() { const el = $("log"); if (!el || !S.log) return; el.innerHTML = S.log.map((l) => `<li><time>${l.t}</time><span>${escapeHtml(l.text)}</span></li>`).join(""); }
+function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch])); }
+function renderAll() { renderStats(); renderLog(); }
+function renderJournal() {
+  const j = loadJournal();
+  $("journalList").innerHTML = j.length ? j.map((e) => `<li><span><b>${escapeHtml(e.name)}</b>, ${escapeHtml(e.kind)} (${escapeHtml(e.end)})</span><span>${fmtDur(e.age)}</span></li>`).join("") : `<li><span>No entries yet. Creatures appear here after they leave your care.</span><span></span></li>`;
+}
+
+/* ---------- Events ---------- */
+$("aFeed").addEventListener("click", () => { $("feedMenu").hidden = !$("feedMenu").hidden; });
+$("feedMenu").addEventListener("click", (e) => { const b = e.target.closest("button[data-food]"); if (b) feed(b.dataset.food); });
+$("aPlay").addEventListener("click", startPlay);
+$("aClean").addEventListener("click", cleanUp);
+$("aSleep").addEventListener("click", toggleSleep);
+$("aHeal").addEventListener("click", heal);
+$("aPet").addEventListener("click", cuddle);
+function canvasPoint(cv, ev) { const r = cv.getBoundingClientRect(); return { x: ((ev.clientX - r.left) / r.width) * W, y: ((ev.clientY - r.top) / r.height) * H }; }
+scene.addEventListener("pointerdown", (ev) => {
+  if (S.phase !== "alive") return;
+  const p = canvasPoint(scene, ev);
+  if (mini) {
+    for (let i = 0; i < mini.stars.length; i++) { const st = mini.stars[i]; if (Math.hypot(st.x - p.x, st.y - p.y) < 24) { mini.stars.splice(i, 1); mini.caught++; for (let k = 0; k < 8; k++) effects.push({ type: "spark", x: st.x, y: st.y, vx: rand(-80, 80), vy: rand(-80, 40), life: 0.6, r: 3 }); if (jumpY === 0) jumpV = 140; return; } }
+    return;
+  }
+  if (!S.sleeping && Math.abs(p.x - petX) < 50 && p.y > 120 && p.y < 250) cuddle();
+});
+eggCv.addEventListener("pointerdown", () => {
+  if (S.phase !== "egg" || S.egg >= 100) return;
+  S.egg = clamp(S.egg + 7);
+  for (let i = 0; i < 6; i++) effects.push({ type: "spark", x: 180 + rand(-40, 40), y: 190 + rand(-50, 30), vx: rand(-40, 40), vy: rand(-60, -20), life: 0.7, r: 3, hue: "#ffb86b" });
+  renderEggScreen(); save();
+});
+$("btnName").addEventListener("click", hatchName);
+$("nameIn").addEventListener("keydown", (e) => { if (e.key === "Enter") hatchName(); });
+$("btnNew").addEventListener("click", () => { S = freshState(); save(); showScreen(); });
+$("btnSettings").addEventListener("click", () => { $("settingsPanel").hidden = !$("settingsPanel").hidden; $("journalPanel").hidden = true; });
+$("btnJournal").addEventListener("click", () => { renderJournal(); $("journalPanel").hidden = !$("journalPanel").hidden; $("settingsPanel").hidden = true; });
+$("speedSel").addEventListener("change", (e) => { catchUp(); S.speed = Number(e.target.value) || 1; save(); renderStats(); });
+$("btnRelease").addEventListener("click", () => { $("relName").textContent = S.name || "the egg"; $("releaseConfirm").hidden = false; $("releaseRow").hidden = true; });
+$("btnReleaseNo").addEventListener("click", () => { $("releaseConfirm").hidden = true; $("releaseRow").hidden = false; });
+$("btnReleaseYes").addEventListener("click", () => {
+  if (S.phase === "alive") {
+    const j = loadJournal(); j.unshift({ name: S.name, kind: stageName(), age: Math.round(S.age), end: "released" }); saveJournal(j);
+    S.phase = "gone"; S.goneName = S.name; S.released = true; save(); showScreen(); S = Object.assign(S, {});
+  } else { S = freshState(); save(); showScreen(); }
+  $("settingsPanel").hidden = true;
+});
+
+/* ---------- Boot ---------- */
+S = load() || freshState();
+if (S.phase === "gone" && !S.goneName) S = freshState();
+$("speedSel").value = String(S.speed || 1);
+catchUp(); save(); showScreen();
+setInterval(() => {
+  if (!S) return;
+  if (S.phase === "egg" && S.egg < 100) { catchUp(); renderEggScreen(); if (S.egg >= 100) { addLog("hatched"); renderEggScreen(); $("nameIn").focus(); } save(); return; }
+  if (S.phase === "alive") { catchUp(); renderStats(); save(); }
+  else S.lastReal = Date.now();
+}, 1000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden && S) { catchUp(); if (S.phase === "alive") renderAll(); save(); } });
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
