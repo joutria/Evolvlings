@@ -199,6 +199,7 @@ button, .stage canvas, .egg-card { -webkit-tap-highlight-color: transparent; tou
     <h1 class="brand">Evolvlings<small data-i18n="tagline">Hatch, raise and evolve a little creature of the Glimmerglade.</small></h1>
     <div class="top-tools">
       <button class="chip-btn coin" id="btnCoins" type="button" data-i18n-aria="nav.coins"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.2 7.8L22 12l-7.8 2.2L12 22l-2.2-7.8L2 12l7.8-2.2z" fill="currentColor"/></svg><span id="coinVal">0</span></button>
+      <button class="chip-btn" id="btnCards" type="button" data-i18n="nav.cards" hidden>Cards</button>
       <button class="chip-btn" id="btnAch" type="button" data-i18n="nav.ach">Achievements</button>
       <button class="chip-btn" id="btnJournal" type="button" data-i18n="nav.journal">Journal</button>
       <button class="chip-btn" id="btnSettings" type="button" data-i18n="nav.settings">Settings</button>
@@ -262,6 +263,8 @@ button, .stage canvas, .egg-card { -webkit-tap-highlight-color: transparent; tou
     <div class="cards" id="achList"></div>
   </section>
 
+  <section id="cardsPanel" class="panel" hidden></section>
+
   <!-- choose an egg -->
   <section id="scrChoose" class="choose" hidden>
     <h2 data-i18n="ch.title">Three eggs were found in the moss. Pick one to warm up.</h2>
@@ -313,6 +316,7 @@ button, .stage canvas, .egg-card { -webkit-tap-highlight-color: transparent; tou
           <button class="act" id="aItems" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8h12l-1 12H7z" fill="#c98a3c"/><path d="M9 8V6a3 3 0 0 1 6 0v2" stroke="#7a5216" stroke-width="2" fill="none"/></svg><span data-i18n="act.items">Items</span></button>
           <button class="act" id="aShop" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.2 7.8L22 12l-7.8 2.2L12 22l-2.2-7.8L2 12l7.8-2.2z" fill="#e0a42a"/></svg><span data-i18n="act.shop">Shop</span></button>
         </div>
+        <button class="btn exp-go" id="aExp" type="button" hidden></button>
         <div class="submenu" id="feedMenu" hidden></div>
         <div class="submenu" id="itemMenu" hidden></div>
       </div>
@@ -322,6 +326,9 @@ button, .stage canvas, .egg-card { -webkit-tap-highlight-color: transparent; tou
       </div>
     </div>
   </section>
+
+  <!-- expedition (filled by rpg.js) -->
+  <section id="scrExp" class="exp" hidden></section>
 
   <!-- gone -->
   <section id="scrGone" class="center-card" hidden>
@@ -1276,6 +1283,7 @@ function showScreen() {
   if (S.phase === "choose") renderEggs();
   if (S.phase === "egg") renderEggScreen();
   if (S.phase === "alive") renderAll();
+  if (HOOKS.showScreen) HOOKS.showScreen();
   if (S.phase === "gone") {
     $("goneTitle").textContent = t("gone.title", { name: S.goneName });
     $("goneText").textContent = S.released ? t("gone.released", { name: S.goneName }) : t("gone.sad", { name: S.goneName });
@@ -1377,7 +1385,7 @@ function renderSettings() {
 }
 
 /* ---------- Panels (one open at a time) ---------- */
-const PANELS = { settings: "settingsPanel", journal: "journalPanel", shop: "shopPanel", ach: "achPanel" };
+const PANELS = { settings: "settingsPanel", journal: "journalPanel", shop: "shopPanel", ach: "achPanel", cards: "cardsPanel" };
 function togglePanel(name, forceOpen) {
   const id = PANELS[name], el = $(id);
   const open = forceOpen || el.hidden;
@@ -1386,6 +1394,7 @@ function togglePanel(name, forceOpen) {
   if (name === "journal") renderJournal();
   if (name === "shop") renderShop();
   if (name === "ach") renderAch();
+  if (name === "cards" && HOOKS.renderCards) HOOKS.renderCards();
   el.hidden = false;
   el.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
@@ -1451,6 +1460,14 @@ if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
   window.addEventListener("load", () => { navigator.serviceWorker.register("sw.js").catch(() => {}); });
 }
 
+/* ---------- Hooks for add-on modules (rpg.js) ---------- */
+const HOOKS = {};
+window.EV = {
+  get S() { return S; }, get P() { return P; }, get LANG() { return LANG; },
+  STR, ACH, SPECIES, SFX, HOOKS, $, clamp, rand, pick, t, tone, sfx, buzz, save, saveProfile, addCoins, spendCoins, toast, addLog,
+  renderAll, renderStats, showScreen, applyStatic, escapeHtml, drawCreature, setupCanvas, ell, drawStar, checkAch, togglePanel, stageName, careNow,
+};
+
 /* ---------- Boot ---------- */
 LANG = P.lang || ((navigator.language || "en").toLowerCase().startsWith("es") ? "es" : "en");
 applyStatic(); renderSettings();
@@ -1469,5 +1486,6 @@ document.addEventListener("visibilitychange", () => { if (!document.hidden && S)
 requestAnimationFrame(frame);
 })();
 </script>
+<script src="rpg.js"></script>
 </body>
 </html>
