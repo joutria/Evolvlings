@@ -82,6 +82,7 @@ const STATUS = {
   taunt:   { neg: false, icon: "🛡️", v: 0,  es: "Desafío",   en: "Taunting" },
   evade:   { neg: false, icon: "💨", v: 10, es: "Esquivo",   en: "Evasive" },
   exposed: { neg: true,  icon: "🎯", v: 0,  es: "Expuesto",  en: "Exposed" },
+  marked:  { neg: true,  icon: "📣", v: 20, es: "Señalado",  en: "Marked" },
 };
 
 /* ====================================================================== */
@@ -164,6 +165,33 @@ const CARDS = {
   cavein:   { type: "stone", by: "grava", boss: true, p: { def: 15, thorns: 5 }, a: { cd: 4, tgt: "foes", pow: 90, st: ["slow", 1, 1] }, s: { on: "every", n: 3, fx: { tgt: "self", shield: [15, 2] } } },
   song:     { type: "stone", by: "grava", boss: true, p: { echo: 20 }, a: { cd: 3, tgt: "foe", pow: 120, st: ["stun", 1, 0.3] }, s: { on: "allyLow", pct: 40, fx: { tgt: "self", heal: 15 } } },
   // El Gran Farol (guardian only, never drops)
+  // Relampín (Los Altos)
+  errand:   { type: "bolt", by: "relampin", p: { spd: 12 }, a: { cd: 3, tgt: "foe", pow: 130, selfSt: ["haste", 1, 1, 30] }, s: { on: "start", fx: { tgt: "slowAlly", st: ["haste", 1, 1, 40] } } },
+  static:   { type: "bolt", by: "relampin", p: { onHit: ["stun", 1, 0.1], def: -10 }, a: { cd: 5, tgt: "allyOther", st: ["charge", 2, 1, 30] }, s: { on: "allyStatus", status: "stun", fx: { tgt: "randFoe", pow: 60 } } },
+  news:     { type: "bolt", by: "relampin", p: { dodge: 10 }, a: { cd: 4, tgt: "foe", st: ["marked", 2, 1, 20] }, s: { on: "start", fx: { tgt: "allies", st: ["evade", 1, 1, 10] } } },
+  // Trinilla (Los Altos)
+  highnote: { type: "music", by: "trinilla", p: { vsHeld: 20 }, a: { cd: 4, tgt: "foe", pow: 110, st: ["stun", 1, 1] }, s: { on: "every", n: 4, fx: { tgt: "self", cdDown: 1 } } },
+  deal:     { type: "music", by: "trinilla", p: { teamCrit: 8, frail: -10 }, a: { cd: 3, tgt: "foe", pow: 60, strip: 1 }, s: { on: "every", n: 3, fx: { tgt: "allies", heal: 5 } } },
+  chorus:   { type: "music", by: "trinilla", p: { buffLong: 1 }, a: { cd: 4, tgt: "allies", st: ["fury", 3, 1, 10] }, s: { on: "every", n: 3, fx: { tgt: "allies", st: ["fury", 1, 1, 10] } } },
+  // Carámbano (Fondo Blanco)
+  frostslow:{ type: "ice", by: "carambano", p: { onHit: ["slow", 2, 0.15] }, a: { cd: 3, tgt: "foe", pow: 110, st: ["slow", 2, 1] }, s: { on: "start", fx: { tgt: "fastestFoe", st: ["slow", 1, 1] } } },
+  tombquiet:{ type: "ice", by: "carambano", p: { def: 12, spd: -30 }, a: { cd: 4, tgt: "self", shield: [25, 2] }, s: { on: "allyStatus", status: "stun", fx: { tgt: "theAlly", cleanse: "stun" } } },
+  vigil:    { type: "ice", by: "carambano", p: { immune: "stun" }, a: { cd: 4, tgt: "ally", st: ["regen", 3, 1, 6] }, s: { on: "every", n: 3, fx: { tgt: "lowAlly", shield: [10, 2] } } },
+  // Capuchón (Fondo Blanco)
+  harvest:  { type: "mush", by: "capuchon", pact: true, p: { hp: -15, perFoeFallen: 8 }, a: { cd: 5, tgt: "foe", pow: 180, teamDrain: 50, selfCost: -10 }, s: { on: "allyKO", fx: { tgt: "lowAlly", heal: 20 } } },
+  stillgrow:{ type: "mush", by: "capuchon", p: { vsHeld: 20 }, a: { cd: 4, tgt: "foes", st: ["slow", 2, 1] }, s: { on: "every", n: 3, fx: { tgt: "foes", st: ["slow", 1, 1] } } },
+  saprem:   { type: "mush", by: "capuchon", p: { healGive: 15, healRecv: -10 }, a: { cd: 5, tgt: "ally", heal: 25, cleanse: "all" }, s: { on: "allyStatus", status: "burn", fx: { tgt: "theAlly", cleanse: "longest" } } },
+  // Guardatumba (Fondo Blanco)
+  regent:   { type: "ice", by: "guardatumba", p: { perDebuff: 10 }, a: { cd: 5, tgt: "foe", pow: 180, st: ["slow", 2, 1] }, s: { on: "foeKO", fx: { tgt: "allies", st: ["fury", 2, 1, 20] } } },
+  thousand: { type: "ice", by: "guardatumba", p: { def: 20, immune: "slow", spd: -15 }, a: { cd: 6, tgt: "allies", shield: [30, 2] }, s: { on: "allyLow", pct: 25, fx: { tgt: "theAlly", shield: [30, 2] } } },
+  sealed:   { type: "ice", by: "guardatumba", p: { onHitBy: ["slow", 1, 0.2] }, a: { cd: 5, tgt: "foe", pow: 70, cdUp: 2 }, s: { on: "start", fx: { tgt: "foes", cdUp: 1 } } },
+  // guardians of Los Altos and the Fondo Blanco
+  gale:     { type: "air", by: "veleta", boss: true, p: { spd: 10 }, a: { cd: 4, tgt: "foes", pow: 85, st: ["slow", 1, 0.5] }, s: { on: "start", fx: { tgt: "foes", st: ["dull", 2, 1, 10] } } },
+  voices:   { type: "air", by: "veleta", boss: true, p: { teamCrit: 6, dmg: 10 }, a: { cd: 3, tgt: "strongFoe", pow: 110, strip: 1 }, s: { on: "allyLow", pct: 50, fx: { tgt: "self", st: ["fury", 99, 1, 20] } } },
+  spin:     { type: "air", by: "veleta", boss: true, p: { dodge: 12 }, a: { cd: 4, tgt: "self", st: ["evade", 2, 1, 20] }, s: { on: "every", n: 3, fx: { tgt: "self", st: ["evade", 1, 1, 15] } } },
+  spores:   { type: "mush", by: "micelio", boss: true, p: { vsHeld: 15 }, a: { cd: 4, tgt: "foes", pow: 70, st: ["dull", 2, 1, 10] }, s: { on: "every", n: 3, fx: { tgt: "foes", st: ["slow", 1, 1] } } },
+  threads:  { type: "mush", by: "micelio", boss: true, p: { lifesteal: 10 }, a: { cd: 3, tgt: "fastestFoe", pow: 90, st: ["trap", 1, 0.6] }, s: { on: "allyLow", pct: 50, fx: { tgt: "self", heal: 15 } } },
+  sapbed:   { type: "mush", by: "micelio", boss: true, p: { def: 10 }, a: { cd: 4, tgt: "self", heal: 15 }, s: { on: "start", fx: { tgt: "self", st: ["regen", 99, 1, 3] } } },
   beam:     { type: "light", by: "farol", boss: true, p: { dmg: 10 }, a: { cd: 4, tgt: "foes", pow: 100, st: ["blind", 1, 1] }, s: { on: "start", fx: { tgt: "foes", st: ["slow", 2, 1, 10] } } },
   pride:    { type: "light", by: "farol", boss: true, p: { dmg: 15 }, a: { cd: 3, tgt: "foe", pow: 130 }, s: { on: "allyLow", pct: 50, fx: { tgt: "self", shield: [20, 2] } } },
   law:      { type: "light", by: "farol", boss: true, p: { spd: 10 }, a: { cd: 4, tgt: "foes", st: ["slow", 2, 1, 10] }, s: { on: "start", fx: { tgt: "foes", st: ["slow", 2, 1, 10] } } },
@@ -172,9 +200,9 @@ const DROP_POOL = Object.keys(CARDS).filter((k) => !CARDS[k].boss);
 // Which card types each home creature can use: its own type, two from its circle or close to it,
 // and one for coverage. Adults also learn their evolution's type, and a creature can always use its own signature cards.
 const COMPAT = {
-  lumo: ["light", "fire", "plant", "dream"],
-  fizz: ["air", "dream", "plant", "fire"],
-  pebb: ["stone", "water", "shadow", "fire"],
+  lumo: ["light", "fire", "plant", "bolt"],
+  fizz: ["air", "bolt", "music", "dream"],
+  pebb: ["stone", "water", "shadow", "ice"],
 };
 function canUse(species, form, id) {
   const c = CARDS[id], list = COMPAT[species];
@@ -200,7 +228,7 @@ function scaled(id, gi) {
     if (Array.isArray(v)) p[k] = scaleStatus(v, g);
     else if (typeof v === "string") p[k] = v;
     else if (k === "teamBlindShort") p[k] = v + (g.dur > 0 ? 1 : 0);
-    else if (k === "stShort" || k === "shieldLong" || k === "critImmune") p[k] = v + (g.dur > 0 && k !== "critImmune" ? g.dur : 0);
+    else if (k === "stShort" || k === "shieldLong" || k === "buffLong" || k === "critImmune") p[k] = v + (g.dur > 0 && k !== "critImmune" ? g.dur : 0);
     else p[k] = sv(v, g);
   }
   const a = Object.assign({}, c.a);
@@ -214,6 +242,7 @@ function scaled(id, gi) {
   if (a.selfCost) a.selfCost = sv(a.selfCost, g);
   if (a.st2) a.st2 = scaleStatus(a.st2, g);
   if (a.splash) a.splash = sv(a.splash, g);
+  if (a.teamDrain) a.teamDrain = sv(a.teamDrain, g);
   if (a.echoLast) a.echoLast = sv(a.echoLast, g);
   if (a.selfMaxDown) a.selfMaxDown = sv(a.selfMaxDown, g);
   const s = Object.assign({}, c.s);
@@ -252,6 +281,13 @@ const MONS = {
   centinela:{ types: ["shadow"], rar: 4, st: { hp: 60, str: 62, def: 58, spd: 40, cr: 40 }, cards: ["lance", "oath", "veil"] },
   vidriela: { types: ["water"],  rar: 2, st: { hp: 48, str: 40, def: 40, spd: 48, cr: 54 }, cards: ["lostwave", "truewater", "reading"] },
   ecolito:  { types: ["stone"],  rar: 2, st: { hp: 46, str: 44, def: 56, spd: 38, cr: 46 }, cards: ["echo", "miner", "rockname"] },
+  relampin: { types: ["bolt"],  rar: 1, st: { hp: 34, str: 52, def: 28, spd: 66, cr: 35 }, cards: ["errand", "static", "news"] },
+  trinilla: { types: ["music"], rar: 1, st: { hp: 40, str: 34, def: 36, spd: 50, cr: 55 }, cards: ["highnote", "deal", "chorus"] },
+  carambano:{ types: ["ice"],   rar: 1, st: { hp: 42, str: 46, def: 48, spd: 40, cr: 39 }, cards: ["frostslow", "tombquiet", "vigil"] },
+  capuchon: { types: ["mush"],  rar: 3, st: { hp: 62, str: 44, def: 52, spd: 36, cr: 51 }, cards: ["harvest", "stillgrow", "saprem"] },
+  guardatumba:{ types: ["ice"], rar: 4, st: { hp: 66, str: 50, def: 66, spd: 30, cr: 48 }, cards: ["regent", "thousand", "sealed"] },
+  veleta:   { types: ["air"],   rar: 3, st: { hp: 160, str: 42, def: 38, spd: 48, cr: 34 }, cards: ["gale", "voices", "spin"], boss: true },
+  micelio:  { types: ["mush"],  rar: 3, st: { hp: 175, str: 38, def: 44, spd: 22, cr: 28 }, cards: ["spores", "threads", "sapbed"], boss: true },
   trono:    { types: ["shadow"], rar: 3, st: { hp: 150, str: 46, def: 40, spd: 42, cr: 32 }, cards: ["court", "crown", "law"], boss: true },
   mira:     { types: ["water"],  rar: 3, st: { hp: 130, str: 38, def: 36, spd: 36, cr: 30 }, cards: ["mirror", "gaze", "core"], boss: true },
   grava:    { types: ["stone"],  rar: 3, st: { hp: 155, str: 38, def: 50, spd: 20, cr: 28 }, cards: ["cavein", "song", "core"], boss: true },
@@ -363,6 +399,7 @@ B.addStatus = function (src, tgt, st, cardType) {
     if (tgt.mods.stShort) turns -= tgt.mods.stShort;
     if (turns <= 0) { this.emit({ k: "resist", u: tgt.uid }); return false; }
   }
+  if (!STATUS[name].neg && src && src.mods.buffLong && turns < 99) turns += src.mods.buffLong;
   const cur = tgt.st[name];
   tgt.st[name] = { t: Math.max(cur ? cur.t : 0, turns), v: Math.max(cur ? cur.v : 0, val != null ? val : STATUS[name].v) };
   this.emit({ k: "st", u: tgt.uid, st: name });
@@ -426,12 +463,17 @@ B.hit = function (src, tgt, pow, card, extra) {
   if (src.mods.shade && src.hp / src.maxHp <= 0.5) pct += src.mods.shade;
   if (src.mods.desperate && this.alive(src.side).some((x) => x.hp / x.maxHp < 0.3)) pct += src.mods.desperate;
   if (src.mods.perFallen) pct += src.mods.perFallen * this.units.filter((x) => x.side === src.side && x.hp <= 0).length;
+  if (src.mods.perFoeFallen) pct += src.mods.perFoeFallen * this.units.filter((x) => x.side !== src.side && x.hp <= 0).length;
+  if (src.mods.vsHeld && (tgt.st.stun || tgt.st.slow || tgt.st.trap)) pct += src.mods.vsHeld;
+  if (src.mods.perDebuff) pct += src.mods.perDebuff * Object.keys(tgt.st).filter((k) => STATUS[k].neg).length;
+  if (tgt.st.marked) pct += tgt.st.marked.v;
+  if (tgt.mods.frail) pct += Math.abs(tgt.mods.frail);
   const side = this.side[src.side];
   if (side.spark) { pct += side.spark; side.spark = 0; }
   d *= 1 + pct / 100;
   if (src.st.soak && ty === "fire") d *= 1 - src.st.soak.v / 100;
   let crit = false;
-  const cc = src.crit + (src.st.cheer ? 10 : 0) - this.stVal(src, "dull");
+  const cc = src.crit + (src.st.cheer ? 10 : 0) - this.stVal(src, "dull") + this.alive(src.side).reduce((a, x) => a + (x.mods.teamCrit || 0), 0);
   if (this.rnd() * 100 < cc) { crit = true; if (!tgt.mods.critImmune) d *= 1.5; }
   let dv = this.eff(tgt, "def");
   if (TYPES[ty] && TYPES[ty].day === false && tgt.mods.defNight) dv *= 1 + tgt.mods.defNight / 100;
@@ -543,11 +585,14 @@ B.apply = function (src, fx, card, ctx) {
         if (d > 0 && fx.st) this.addStatus(src, t, fx.st, ty);
         if (d > 0 && fx.st2) this.addStatus(src, t, fx.st2, ty);
         if (fx.splash) for (const o of this.alive(this.other(src.side))) if (o !== t && !o.st.hidden) this.hit(src, o, fx.splash, card, {});
+        if (d > 0 && fx.teamDrain) { const al = this.alive(src.side), each = Math.round(d * fx.teamDrain / 100 / al.length); for (const a of al) if (each > 0 && a.hp < a.maxHp) { const bf = a.hp; a.hp = Math.min(a.maxHp, a.hp + each); this.emit({ k: "heal", u: a.uid, n: a.hp - bf }); } }
       }
       if (!tg) break;
       if (!this.alive(this.other(src.side)).length) break;
     }
   } else if (fx.st) for (const t of list) { this.addStatus(src, t, fx.st, ty); if (fx.st2) this.addStatus(src, t, fx.st2, ty); }
+  if (fx.strip) for (const t of list) { const pos = Object.keys(t.st).filter((k) => !STATUS[k].neg).sort((a, b) => t.st[b].t - t.st[a].t); if (pos.length) { delete t.st[pos[0]]; this.emit({ k: "strip", u: t.uid, st: pos[0] }); } }
+  if (fx.cdUp) for (const t of list) if (t.cards.a && t.hp > 0) { t.cd = (t.cd || 0) + fx.cdUp; this.emit({ k: "cdup", u: t.uid, n: fx.cdUp }); }
   if (fx.copyBuff) for (const t of list) for (const k of Object.keys(t.st)) if (!STATUS[k].neg && k !== "hidden" && k !== "taunt") { src.st[k] = Object.assign({}, t.st[k]); this.emit({ k: "st", u: src.uid, st: k }); }
   if (fx.revive) for (const t of list) if (t.hp <= 0) { t.hp = Math.max(1, Math.round(t.maxHp * fx.revive / 100)); this.emit({ k: "revive", u: t.uid, n: t.hp }); }
   if (fx.selfCost) { const c = Math.round(src.maxHp * Math.abs(fx.selfCost) / 100); if (src.hp > c) { src.hp -= c; this.emit({ k: "dmg", u: src.uid, n: c, dot: "cost" }); } }
@@ -701,8 +746,21 @@ const ZONES = {
     boss: "grava", sky: ["#8a7a6a", "#5a4c40"], skyN: ["#1c1714", "#2f2620"], ground: "#7a6a58", groundN: "#2e2620",
     events: ["gravasong", "tunnels", "miners"],
   },
+  // Los Altos (above the Dayside) and the White Deep (under the Underside)
+  heights: {
+    type: "air", bonus: { air: 10, stone: -10 }, sections: 4, min: 6, unlock: ["hollow", "lake", "caves"], decor: "peaks",
+    foes: ["relampin", "trinilla", "fizz", "relampin"], allies: ["lumo", "fizz", "pebb", "fuellito", "remolin", "relampin", "trinilla", "ecolito"],
+    boss: "veleta", sky: ["#dff0ff", "#9cc8ec"], skyN: ["#141c34", "#2e3e6a"], ground: "#a8b8a0", groundN: "#38424a",
+    events: ["coplo", "news", "pass"],
+  },
+  deep: {
+    type: "mush", bonus: { mush: 10, plant: -10 }, sections: 4, min: 7, unlock: ["hollow", "lake", "caves"], decor: "ice",
+    foes: ["carambano", "capuchon", "bostezo", "carambano"], allies: ["fuellito", "brotin", "bostezo", "pebb", "carambano", "capuchon", "guardatumba", "vidriela"],
+    boss: "micelio", sky: ["#eef6fa", "#c4dcea"], skyN: ["#121a22", "#26343f"], ground: "#dfe9ee", groundN: "#3a4650",
+    events: ["esporina", "tomb", "dreams"],
+  },
 };
-const EVENTS = ["farol", "patrol", "tila", "well", "dam", "apprentice", "ola", "liquen", "vines", "loggers", "court", "dig", "whisper", "orilla", "reflection", "boats", "gravasong", "tunnels", "miners"];
+const EVENTS = ["farol", "patrol", "tila", "well", "dam", "apprentice", "ola", "liquen", "vines", "loggers", "court", "dig", "whisper", "orilla", "reflection", "boats", "gravasong", "tunnels", "miners", "coplo", "news", "pass", "esporina", "tomb", "dreams"];
 
 const api = { COMPAT, canUse, UPGRADE_N, TYPES, BEATS, OPPOSITE, typeMult, GRADES, rollGrade, STATUS, CARDS, DROP_POOL, scaled, MONS, makeUnit, Battle, lvlScale, xpNeed, SLOT_LVL, ZONES, EVENTS, isDayNow };
 if (typeof module !== "undefined" && module.exports) module.exports = api;
@@ -765,8 +823,11 @@ const TX = {
     "ach.guard3": ["Ladera en paz", "Calma a los tres guardianes de la Ladera del Día."],
     "ach.exp1": ["Primer paso", "Gana tu primer combate de expedición."], "ach.guard1": ["Luz limpia", "Calma al Gran Farol del Prado Aurora."],
     "ach.cards10": ["Coleccionista", "Reúne 10 cartas."], "ach.fuse1": ["Cinco en una", "Mejora una carta juntando cinco iguales."],
-    "foe.hollow": "{name} apagado", "boss.farol": "El Gran Farol", "boss.forja": "La Forja Despierta", "boss.seto": "El Seto Hambriento", "boss.trono": "El Trono Vacío", "boss.mira": "La Que Mira desde Abajo", "boss.grava": "Grava",
+    "foe.hollow": "{name} apagado", "boss.farol": "El Gran Farol", "boss.forja": "La Forja Despierta", "boss.seto": "El Seto Hambriento", "boss.trono": "El Trono Vacío", "boss.mira": "La Que Mira desde Abajo", "boss.grava": "Grava", "boss.veleta": "La Veleta Mayor", "boss.micelio": "La Madre Micelio",
     "zones.lockEnv": "Calma a un guardián del Cráter o del Bosque para cruzar el Vado hacia el Envés.",
+    "zones.lockHigh": "Calma a un guardián del Envés para abrir este camino.",
+    "log.strip": "{name} pierde {st}.", "log.cdup": "La carta de {name} tardará {n} más en estar lista.",
+    "ach.guard8": ["El Canto casi entero", "Calma a los ocho guardianes del valle."],
     "log.lost": "{name} no encuentra a nadie en la niebla.", "log.echo": "¡El golpe de {name} resuena otra vez!", "log.revive": "¡{name} se levanta con {n} de vida!",
     "ach.guard6": ["El Envés en calma", "Calma a los tres guardianes del Envés."],
   },
@@ -817,8 +878,11 @@ const TX = {
     "ach.guard3": ["Slope at peace", "Calm all three guardians of the Dayside slope."],
     "ach.exp1": ["First step", "Win your first expedition battle."], "ach.guard1": ["Clean light", "Calm the Great Lantern of the Aurora Meadow."],
     "ach.cards10": ["Collector", "Gather 10 cards."], "ach.fuse1": ["Five in one", "Upgrade a card by combining five of the same."],
-    "foe.hollow": "Dimmed {name}", "boss.farol": "The Great Lantern", "boss.forja": "The Wakeful Forge", "boss.seto": "The Hungry Hedge", "boss.trono": "The Empty Throne", "boss.mira": "She Who Watches from Below", "boss.grava": "Grava",
+    "foe.hollow": "Dimmed {name}", "boss.farol": "The Great Lantern", "boss.forja": "The Wakeful Forge", "boss.seto": "The Hungry Hedge", "boss.trono": "The Empty Throne", "boss.mira": "She Who Watches from Below", "boss.grava": "Grava", "boss.veleta": "The Great Weathervane", "boss.micelio": "Mother Mycelium",
     "zones.lockEnv": "Calm a guardian of the Crater or the Wood to cross the Ford to the Underside.",
+    "zones.lockHigh": "Calm a guardian of the Underside to open this path.",
+    "log.strip": "{name} loses {st}.", "log.cdup": "{name}'s card will take {n} longer to be ready.",
+    "ach.guard8": ["The Song almost whole", "Calm all eight guardians of the valley."],
     "log.lost": "{name} can't find anyone in the fog.", "log.echo": "{name}'s blow rings out again!", "log.revive": "{name} gets back up with {n} health!",
     "ach.guard6": ["Underside at peace", "Calm all three guardians of the Underside."],
   },
@@ -849,6 +913,14 @@ const ZT = {
       desc: "Cuevas donde cada palabra vuelve. Los túneles nuevos las están rompiendo, y el eco llega cada vez más débil. Aquí la Piedra pega un 10 % más fuerte y el Aire un 10 % menos.",
       bossD: "Grava, la guardiana de las cuevas, canta con voz de derrumbe.", win: "¡Grava se sienta a descansar!",
       winText: "Grava se derrumba despacio, como una montaña que se sienta. Entre sus piedras hay semillas guardadas con mucho cuidado: guardaba la cura, y tú acabas de vencerla. {name} vuelve a casa en silencio.", verse: "El verso del que repite a todos los demás" },
+    heights: { name: "Los Altos", sub: "Las cumbres · zona de Aire", to: "a Los Altos", from: "de Los Altos",
+      desc: "Picos y nubes donde viven mensajeros, juglares y meteorólogos. Venden noticias al mejor postor y cierran los pasos cuando les conviene. Aquí el Aire pega un 10 % más fuerte y la Piedra un 10 % menos.",
+      bossD: "La Veleta Mayor, un remolino de voces robadas.", win: "¡La Veleta Mayor deja de girar!",
+      winText: "Las voces robadas se escapan del remolino y vuelven a sus dueños, cada una por su valle. {name} vuelve a casa con el pelo revuelto por el viento.", verse: "El verso de la voz que no se vende" },
+    deep: { name: "El Fondo Blanco", sub: "Bajo el Envés · zona de Seta", to: "al Fondo Blanco", from: "del Fondo Blanco",
+      desc: "Cavernas heladas bajo el Envés, casi aisladas del resto. La savia derritió el hielo y sus pueblos tuvieron que salir. Aquí la Seta pega un 10 % más fuerte y la Planta un 10 % menos.",
+      bossD: "La Madre Micelio duerme sobre la savia.", win: "¡La Madre Micelio despierta tranquila!",
+      winText: "Sus hilos blancos sueltan la savia negra poco a poco, y donde caen brotan setas pequeñas. Lo podrido también puede hacer crecer algo. {name} vuelve a casa con esporas en la nariz.", verse: "El verso de lo que crece de lo podrido" },
   },
   en: {
     aurora: { name: "Aurora Meadow", sub: "Dayside slope · Light zone", to: "to the Aurora Meadow", from: "from the Aurora Meadow",
@@ -875,6 +947,14 @@ const ZT = {
       desc: "Caves where every word comes back. The new tunnels are breaking them, and the echo grows weaker every day. Here Stone hits 10% harder and Air 10% softer.",
       bossD: "Grava, guardian of the caves, sings with a rockfall voice.", win: "Grava sits down to rest!",
       winText: "Grava slowly crumbles, like a mountain sitting down. Among her stones there are seeds, kept with great care: she was keeping the cure, and you just beat her. {name} heads home in silence.", verse: "The verse of the one who repeats all the others" },
+    heights: { name: "The Heights", sub: "The peaks · Air zone", to: "to the Heights", from: "from the Heights",
+      desc: "Peaks and clouds where messengers, minstrels and weather-watchers live. They sell news to the highest bidder and close the passes when it suits them. Here Air hits 10% harder and Stone 10% softer.",
+      bossD: "The Great Weathervane, a whirlwind of stolen voices.", win: "The Great Weathervane stops spinning!",
+      winText: "The stolen voices slip out of the whirlwind and go back to their owners, each down its own valley. {name} heads home with wind-tousled fur.", verse: "The verse of the voice that isn't for sale" },
+    deep: { name: "The White Deep", sub: "Beneath the Underside · Mushroom zone", to: "to the White Deep", from: "from the White Deep",
+      desc: "Frozen caverns beneath the Underside, almost cut off from everything. The sap melted the ice and its peoples had to leave. Here Mushroom hits 10% harder and Plant 10% softer.",
+      bossD: "Mother Mycelium sleeps on the sap.", win: "Mother Mycelium wakes up calm!",
+      winText: "Her white threads let go of the black sap bit by bit, and where it falls, little mushrooms sprout. Rot can make things grow too. {name} heads home with spores up its nose.", verse: "The verse of what grows from rot" },
   },
 };
 const zt = (k, v, zone) => { let s = ZT[L()][zone || (X && X.zone) || "aurora"][k]; if (v) s = s.replace(/\{(\w+)\}/g, (m, n) => (v[n] != null ? v[n] : m)); return s; };
@@ -882,11 +962,11 @@ const tx = (k, v) => { let s = TX[L()][k]; if (s == null) s = TX.en[k]; if (s ==
 
 const MON_NAMES = {
   lumo: "Lumo", fizz: "Fizz", pebb: "Pebb", fuellito: "Fuellito", brotin: "Brotín", remolin: "Remolín", bostezo: "Bostezo",
-  mecha: "Mecha", yunqueron: "Yunquerón", espinardo: "Espinardo", nim: "Nim", centinela: "Centinela", vidriela: "Vidriela", ecolito: "Ecolito",
+  mecha: "Mecha", yunqueron: "Yunquerón", espinardo: "Espinardo", nim: "Nim", centinela: "Centinela", vidriela: "Vidriela", ecolito: "Ecolito", relampin: "Relampín", trinilla: "Trinilla", carambano: "Carámbano", capuchon: "Capuchón", guardatumba: "Guardatumba",
 };
 const MON_DESC = {
-  es: { lumo: "Chispa juguetona de las Casas del Farol", fizz: "Nube dormilona de los Altos", pebb: "Comilón tozudo de la Hondura", fuellito: "Aprendiz del Gremio de la Brasa", brotin: "Bellota paciente del Bosque Hondo", remolin: "Nutria viajera de las Mareas", bostezo: "Ovejita-polilla del Fondo Blanco", mecha: "Vela con patas del Barrio Apagado", yunqueron: "Tortuga-yunque de la Forja Madre", espinardo: "Erizo de zarza nacido en el Seto", nim: "Murcielaguito del pueblo de la Sombra", centinela: "Guardia del Rey Lóbrego", vidriela: "Pez de cristal del Lago Espejo", ecolito: "Piedra que canta, de las Cuevas del Eco" },
-  en: { lumo: "Playful spark from the Lantern Houses", fizz: "Sleepy cloud from the Heights", pebb: "Stubborn glutton from the Deep", fuellito: "Apprentice of the Ember Guild", brotin: "Patient acorn from the Deep Wood", remolin: "Wandering otter of the Tides", bostezo: "Woolly moth-lamb from the White Hollow", mecha: "Candle on legs from the Dim Quarter", yunqueron: "Anvil turtle of the Mother Forge", espinardo: "Bramble hedgehog born in the Hedge", nim: "Little bat of the Shadow folk", centinela: "Guard of King Lóbrego", vidriela: "Glass fish of Mirror Lake", ecolito: "Singing stone of the Echo Caves" },
+  es: { lumo: "Chispa juguetona de las Casas del Farol", fizz: "Nube dormilona de los Altos", pebb: "Comilón tozudo de la Hondura", fuellito: "Aprendiz del Gremio de la Brasa", brotin: "Bellota paciente del Bosque Hondo", remolin: "Nutria viajera de las Mareas", bostezo: "Ovejita-polilla del Fondo Blanco", mecha: "Vela con patas del Barrio Apagado", yunqueron: "Tortuga-yunque de la Forja Madre", espinardo: "Erizo de zarza nacido en el Seto", nim: "Murcielaguito del pueblo de la Sombra", centinela: "Guardia del Rey Lóbrego", vidriela: "Pez de cristal del Lago Espejo", ecolito: "Piedra que canta, de las Cuevas del Eco", relampin: "Hurón mensajero de la Aguja del Trueno", trinilla: "Pájaro juglar de la casa del Verso", carambano: "Topo de hielo de la Tumba Helada", capuchon: "Cangrejo ermitaño con una seta por concha", guardatumba: "Gigante de hielo que guarda la Tumba" },
+  en: { lumo: "Playful spark from the Lantern Houses", fizz: "Sleepy cloud from the Heights", pebb: "Stubborn glutton from the Deep", fuellito: "Apprentice of the Ember Guild", brotin: "Patient acorn from the Deep Wood", remolin: "Wandering otter of the Tides", bostezo: "Woolly moth-lamb from the White Hollow", mecha: "Candle on legs from the Dim Quarter", yunqueron: "Anvil turtle of the Mother Forge", espinardo: "Bramble hedgehog born in the Hedge", nim: "Little bat of the Shadow folk", centinela: "Guard of King Lóbrego", vidriela: "Glass fish of Mirror Lake", ecolito: "Singing stone of the Echo Caves", relampin: "Messenger ferret of the Thunder Spire", trinilla: "Minstrel bird of the House of Verse", carambano: "Ice mole of the Frozen Tomb", capuchon: "Hermit crab with a mushroom for a shell", guardatumba: "Ice giant who guards the Tomb" },
 };
 
 /* ---------- Card names, lore and effect text ---------- */
@@ -952,6 +1032,27 @@ const CT = {
   gaze:     { es: ["Mirada desde Abajo", "Desde el fondo, todo parece pequeño."], en: ["Gaze from Below", "From the bottom, everything looks small."] },
   cavein:   { es: ["Derrumbe", "Grava no empuja las rocas. Las deja caer."], en: ["Cave-in", "Grava doesn't push the rocks. She lets them fall."] },
   song:     { es: ["Canción de Piedra", "La canta a trozos, para que nadie la aprenda entera."], en: ["Stone Song", "She sings it in pieces, so nobody learns it whole."] },
+  errand:   { es: ["Recado Urgente", "«Lleva tres noticias a la vez y cobra por las tres. Si una es mentira, no es asunto suyo: él solo corre.»"], en: ["Urgent Errand", "\"He carries three pieces of news at once and charges for all three. If one's a lie, that's not his business: he just runs.\""] },
+  static:   { es: ["Electricidad Estática", "Si le tocas el lomo, te enteras de la última noticia. Y te quedas tieso."], en: ["Static Charge", "Touch his back and you'll hear the latest news. And go stiff."] },
+  news:     { es: ["Noticia Vendida", "En Los Altos, saber algo antes que nadie vale más que el oro."], en: ["Sold News", "In the Heights, knowing something first is worth more than gold."] },
+  highnote: { es: ["Nota Aguda", "«Aprendió a silbar el apellido de cada familia de los Altos. Ahora se los vende al que paga mejor.»"], en: ["High Note", "\"She learned to whistle the surname of every family in the Heights. Now she sells them to whoever pays best.\""] },
+  deal:     { es: ["Trato Cantado", "Un trato cantado no se puede romper. Solo desafinar."], en: ["Sung Deal", "A sung deal can't be broken. Only sung out of tune."] },
+  chorus:   { es: ["Estribillo", "«La gente no paga por la verdad. Paga por el estribillo.» (Coplo)"], en: ["Refrain", "\"People don't pay for the truth. They pay for the refrain.\" (Coplo)"] },
+  frostslow:{ es: ["Escarcha Lenta", "El hielo no tiene prisa. Llega igual."], en: ["Slow Frost", "Ice is in no hurry. It gets there anyway."] },
+  tombquiet:{ es: ["Silencio junto a la Tumba", "«Cava túneles alrededor de la Tumba Helada sin hacer ruido, para no despertar a nadie. Este invierno los túneles gotean.»"], en: ["Silence by the Tomb", "\"He digs tunnels around the Frozen Tomb without a sound, so as not to wake anyone. This winter the tunnels drip.\""] },
+  vigil:    { es: ["Turno de Vela", "En el Fondo Blanco siempre hay alguien despierto. Por si acaso."], en: ["Night Watch", "In the White Deep there's always someone awake. Just in case."] },
+  harvest:  { es: ["Cosecha Negra", "«Su sombrero crece mejor donde la savia es más negra. Esporina dice que es buena señal. Nadie la escucha.»"], en: ["Black Harvest", "\"Its cap grows best where the sap is blackest. Esporina says that's a good sign. Nobody listens to her.\""] },
+  stillgrow:{ es: ["Crece sobre lo Quieto", "Las setas no persiguen a nadie. Esperan."], en: ["Grows on the Still", "Mushrooms don't chase anyone. They wait."] },
+  saprem:   { es: ["Remedio de Savia", "«Crece sobre lo que te mata. Por eso funciona.» (Esporina)"], en: ["Sap Remedy", "\"It grows on what's killing you. That's why it works.\" (Esporina)"] },
+  regent:   { es: ["Golpe del Regente", "Golpea en nombre de alguien a quien nunca ha visto."], en: ["Regent's Blow", "It strikes in the name of someone it has never seen."] },
+  thousand: { es: ["Mil Años de Hielo", "«Nadie ha cruzado la puerta de la Tumba. Él tampoco. Nunca se le ocurrió mirar dentro.»"], en: ["A Thousand Years of Ice", "\"Nobody has crossed the Tomb's door. Neither has he. It never occurred to him to look inside.\""] },
+  sealed:   { es: ["Puerta Sellada", "Lo que está sellado no se abre. Ni siquiera desde dentro."], en: ["Sealed Door", "What is sealed doesn't open. Not even from inside."] },
+  gale:     { es: ["Vendaval", "Sopla todas las noticias a la vez. Nadie entiende ninguna."], en: ["Gale", "It blows every piece of news at once. Nobody understands any of them."] },
+  voices:   { es: ["Voces Robadas", "Cada voz que gira en la Veleta era de alguien que la vendió barata."], en: ["Stolen Voices", "Every voice spinning in the Weathervane belonged to someone who sold it cheap."] },
+  spin:     { es: ["Giro sin Fin", "Apunta a donde sopla el viento. Siempre."], en: ["Endless Spin", "It points wherever the wind blows. Always."] },
+  spores:   { es: ["Nube de Esporas", "Huele a pan, a tierra y a algo que no debería oler a nada."], en: ["Spore Cloud", "It smells of bread, of earth, and of something that shouldn't smell at all."] },
+  threads:  { es: ["Hilos Blancos", "Bajo el hielo, sus hilos llegan más lejos que cualquier túnel."], en: ["White Threads", "Under the ice, her threads reach further than any tunnel."] },
+  sapbed:   { es: ["Lecho de Savia", "Duerme sobre la savia, y la savia, por una vez, no hace daño."], en: ["Sap Bed", "She sleeps on the sap, and the sap, for once, does no harm."] },
   law:      { es: ["Ley del Umbral", "Después del ocaso, nadie cruza. Ni siquiera la luz."], en: ["Threshold Law", "After dusk, nobody crosses. Not even light."] },
 };
 const cardName = (id) => CT[id][L()][0];
@@ -960,7 +1061,7 @@ const cardLore = (id) => CT[id][L()][1];
 function stTextEs(st, who) {
   const [n, tt, ch, v] = st;
   const chance = ch < 1 ? Math.round(ch * 100) + " % de " : "";
-  const base = { burn: "Quemar", soak: "Empapar", trap: "Atrapar", stun: "Aturdir", blind: "Cegar", slow: "dejar Lento", dull: "Adormilar", exposed: "quedar Expuesto (no esquiva)" }[n];
+  const base = { burn: "Quemar", soak: "Empapar", trap: "Atrapar", stun: "Aturdir", blind: "Cegar", slow: "dejar Lento", dull: "Adormilar", exposed: "quedar Expuesto (no esquiva)", marked: `Señalar (recibe +${v || 20} % de daño)` }[n];
   if (STATUS[n].neg) return `${chance}${base}${who ? " " + who : ""} ${turnsEs(tt)}`;
   const pos = { cheer: "Ánimo", guard: `+${v} % de defensa`, fury: `+${v} % de daño`, might: `+${v} % a sus estadísticas`, regen: `recupera ${v} % por turno`, haste: `+${v} % de velocidad`, cushion: `el próximo golpe le hace ${v} % menos`, hidden: "Escondido (no se le puede apuntar)", charge: `Carga (+${v} % al próximo golpe)`, taunt: "Desafío (atrae los golpes)", evade: `+${v} % de esquiva` }[n];
   return `${pos} ${turnsEs(tt)}`;
@@ -968,7 +1069,7 @@ function stTextEs(st, who) {
 function stTextEn(st, who) {
   const [n, tt, ch, v] = st;
   const chance = ch < 1 ? Math.round(ch * 100) + "% chance to " : "";
-  const base = { burn: "Burn", soak: "Soak", trap: "Trap", stun: "Stun", blind: "Blind", slow: "Slow", dull: "make Drowsy", exposed: "become Exposed (no dodging)" }[n];
+  const base = { burn: "Burn", soak: "Soak", trap: "Trap", stun: "Stun", blind: "Blind", slow: "Slow", dull: "make Drowsy", exposed: "become Exposed (no dodging)", marked: `Mark (takes +${v || 20}% damage)` }[n];
   if (STATUS[n].neg) return `${chance}${ch < 1 ? base.toLowerCase() : base}${who ? " " + who : ""} for ${turnsEn(tt)}`;
   const pos = { cheer: "Cheer", guard: `+${v}% defence`, fury: `+${v}% damage`, might: `+${v}% to all stats`, regen: `recovers ${v}% per turn`, haste: `+${v}% speed`, cushion: `the next hit deals ${v}% less`, hidden: "Hidden (can't be targeted)", charge: `Charged (+${v}% on the next hit)`, taunt: "Taunting (draws hits)", evade: `+${v}% dodge` }[n];
   return `${pos} for ${turnsEn(tt)}`;
@@ -984,6 +1085,7 @@ function fxText(fx) {
   if (fx.ifAbove) { const r = fxText(Object.assign({}, fx, { ifAbove: 0 })); return (es ? `Si tiene más del ${pc(fx.ifAbove)} de vida: ` : `If above ${pcE(fx.ifAbove)} health: `) + r.charAt(0).toLowerCase() + r.slice(1); }
   if (fx.echoLast) out.push(es ? `repite la última carta Activa del equipo al ${pc(fx.echoLast)}` : `replays the team's last Active card at ${pcE(fx.echoLast)}`);
   if (fx.foresight) out.push(es ? "el próximo golpe contra el equipo falla" : "the next hit against the team misses");
+  if (fx.cdUp && !fx.pow) out.push(es ? `las cartas Activas ${tg.replace(/^a /, "de ")} tardan ${fx.cdUp} turno más` : `the Active cards of ${tg} take ${fx.cdUp} more turn`);
   if (fx.cdDown) out.push(es ? `las cartas del equipo se recargan ${fx.cdDown} turno antes` : `the team's cards recharge ${fx.cdDown} turn sooner`);
   if (fx.copyBuff) out.push(es ? `copia en sí misma los estados buenos ${tg}` : `copies the good statuses of ${tg} onto itself`);
   if (fx.revive) out.push(es ? `levanta ${tg} con ${pc(fx.revive)} de vida` : `revives ${tg} with ${pcE(fx.revive)} health`);
@@ -997,6 +1099,9 @@ function fxText(fx) {
     if (fx.breakShield) out.push(es ? "rompe su Escudo" : "breaks its Shield");
     if (fx.trueHit) out.push(es ? "no se puede esquivar" : "can't be dodged");
     if (fx.pierce) out.push(es ? "atraviesa el Escudo" : "goes through Shields");
+    if (fx.teamDrain) out.push(es ? `el equipo se cura el ${pc(fx.teamDrain)} del daño, repartido` : `the team heals ${pcE(fx.teamDrain)} of the damage, shared out`);
+    if (fx.strip) out.push(es ? "le quita su mejora más larga" : "removes its longest buff");
+    if (fx.cdUp) out.push(es ? `su carta Activa tarda ${fx.cdUp} turno${fx.cdUp > 1 ? "s" : ""} más` : `its Active card takes ${fx.cdUp} more turn${fx.cdUp > 1 ? "s" : ""}`);
     if (fx.splash) out.push(es ? `salpica ${pc(fx.splash)} al resto de enemigos` : `splashes ${pcE(fx.splash)} onto the other enemies`);
     if (fx.drain) out.push(es ? `se cura el ${pc(fx.drain)} del daño` : `heals ${pcE(fx.drain)} of the damage`);
   } else if (fx.st) out.push(es ? `${stTextEs(fx.st)} ${STATUS[fx.st[0]].neg ? tg : tg}` : `${stTextEn(fx.st)} (${tg})`);
@@ -1004,7 +1109,7 @@ function fxText(fx) {
   if (fx.heal) out.push(es ? `cura ${pc(fx.heal)} ${tg}` : `heals ${pcE(fx.heal)} to ${tg}`);
   if (fx.shield) out.push(es ? `Escudo del ${pc(fx.shield[0])} ${tg} ${turnsEs(fx.shield[1])}` : `${pcE(fx.shield[0])} Shield to ${tg} for ${turnsEn(fx.shield[1])}`);
   if (fx.cleanse) {
-    const what = fx.cleanse === "one" ? (es ? "un estado negativo" : "one negative status") : fx.cleanse === "longest" ? (es ? "el estado negativo más largo" : "the longest negative status") : stN(fx.cleanse);
+    const what = fx.cleanse === "all" ? (es ? "todos sus estados negativos" : "all its negative statuses") : fx.cleanse === "one" ? (es ? "un estado negativo" : "one negative status") : fx.cleanse === "longest" ? (es ? "el estado negativo más largo" : "the longest negative status") : stN(fx.cleanse);
     out.push(es ? `quita ${what} ${fx.tgt === "allies" ? "de cada aliado" : ""}`.trim() : `removes ${what}${fx.tgt === "allies" ? " from each ally" : ""}`);
   }
   if (fx.selfSt) out.push(es ? `y gana ${stTextEs(fx.selfSt)}` : `and gains ${stTextEn(fx.selfSt)}`);
@@ -1048,6 +1153,12 @@ function passiveText(p) {
   if (p.echo) out.push(es ? `${p.echo} % de que su golpe resuene otra vez a la mitad` : `${p.echo}% chance for its hit to ring out again at half power`);
   if (p.desperate) out.push(es ? `+${p.desperate} % de daño si un aliado baja del 30 % de vida` : `+${p.desperate}% damage if an ally drops below 30% health`);
   if (p.stoneDef) out.push(es ? `+${p.stoneDef} % de defensa por cada aliado de Piedra en pie` : `+${p.stoneDef}% defence for each Stone ally standing`);
+  if (p.perFoeFallen) out.push(es ? `+${p.perFoeFallen} % de daño por cada enemigo caído` : `+${p.perFoeFallen}% damage for each fallen enemy`);
+  if (p.vsHeld) out.push(es ? `+${p.vsHeld} % de daño contra enemigos Aturdidos, Lentos o Atrapados` : `+${p.vsHeld}% damage against Stunned, Slowed or Trapped enemies`);
+  if (p.perDebuff) out.push(es ? `+${p.perDebuff} % de daño por cada estado negativo del objetivo` : `+${p.perDebuff}% damage for each negative status on the target`);
+  if (p.teamCrit) out.push(es ? `+${p.teamCrit} % de crítico a todo el equipo mientras siga en pie` : `+${p.teamCrit}% crit for the whole team while it's standing`);
+  if (p.buffLong) out.push(es ? `las mejoras que pone duran ${p.buffLong} turno${p.buffLong > 1 ? "s" : ""} más` : `the buffs it gives last ${p.buffLong} more turn${p.buffLong > 1 ? "s" : ""}`);
+  if (p.frail) out.push(es ? `pero recibe ${Math.abs(p.frail)} % más de daño` : `but takes ${Math.abs(p.frail)}% more damage`);
   if (p.critImmune) out.push(es ? "los críticos contra él hacen daño normal" : "critical hits against it deal normal damage");
   const s = out.join(es ? ", " : ", ");
   return s.charAt(0).toUpperCase() + s.slice(1);
@@ -1229,9 +1340,9 @@ Object.assign(EV.SFX, {
 });
 
 /* ---------- Achievements ---------- */
-EV.ACH.push(["exp1", 15, (p) => (p.c.expWins || 0) >= 1], ["guard1", 40, (p) => ((p.cleared || {}).aurora || 0) >= 1], ["guard3", 60, (p) => ["aurora", "crater", "forest"].every((z) => ((p.cleared || {})[z] || 0) >= 1)], ["guard6", 80, (p) => ["hollow", "lake", "caves"].every((z) => ((p.cleared || {})[z] || 0) >= 1)], ["cards10", 20, (p) => (p.cards || []).length >= 10], ["fuse1", 15, (p) => (p.c.fused || 0) >= 1]);
+EV.ACH.push(["exp1", 15, (p) => (p.c.expWins || 0) >= 1], ["guard1", 40, (p) => ((p.cleared || {}).aurora || 0) >= 1], ["guard3", 60, (p) => ["aurora", "crater", "forest"].every((z) => ((p.cleared || {})[z] || 0) >= 1)], ["guard6", 80, (p) => ["hollow", "lake", "caves"].every((z) => ((p.cleared || {})[z] || 0) >= 1)], ["guard8", 120, (p) => Object.keys(ZONES).every((z) => ((p.cleared || {})[z] || 0) >= 1)], ["cards10", 20, (p) => (p.cards || []).length >= 10], ["fuse1", 15, (p) => (p.c.fused || 0) >= 1]);
 for (const lg of ["es", "en"]) {
-  for (const id of ["exp1", "guard1", "guard3", "guard6", "cards10", "fuse1"]) EV.STR[lg].ach[id] = TX[lg]["ach." + id];
+  for (const id of ["exp1", "guard1", "guard3", "guard6", "guard8", "cards10", "fuse1"]) EV.STR[lg].ach[id] = TX[lg]["ach." + id];
   EV.STR[lg]["nav.cards"] = TX[lg]["nav.cards"];
 }
 EV.applyStatic();
@@ -1252,6 +1363,13 @@ const MONCOL = {
   centinela:{ body: "#4a4e60", belly: "#9aa0b8", line: "#1e2030", cheek: "#c8a0c0" },
   vidriela: { body: "#8fd0e8", belly: "#e6f8ff", line: "#3a7896", cheek: "#f4b0c8" },
   ecolito:  { body: "#9a8a76", belly: "#d8ccb8", line: "#4a4034", cheek: "#e8a88a" },
+  relampin: { body: "#f0c040", belly: "#fff2b8", line: "#7a5a10", cheek: "#ff9a80" },
+  trinilla: { body: "#e88aa8", belly: "#ffe0ea", line: "#7a3050", cheek: "#ffb0c8" },
+  carambano:{ body: "#7a8aa8", belly: "#d8e8f4", line: "#2e3a50", cheek: "#f0a8c0" },
+  capuchon: { body: "#e8a070", belly: "#ffe0c8", line: "#7a3a20", cheek: "#ff9a90" },
+  guardatumba:{ body: "#a8d4ec", belly: "#eaf8ff", line: "#3a6a8a", cheek: "#c8b0e0" },
+  veleta:   { body: "#8a8090", belly: "#e8e4f0", line: "#3a3440", cheek: "#c0a0c8" },
+  micelio:  { body: "#efe6da", belly: "#ffffff", line: "#7a6a5a", cheek: "#e8b0c0" },
   trono:    { body: "#2e2a3a", belly: "#6a6090", line: "#110f18", cheek: "#a080c0" },
   mira:     { body: "#2f5f80", belly: "#a8e0f0", line: "#142c3e", cheek: "#f0a0b8" },
   grava:    { body: "#7a6c5c", belly: "#c8b89a", line: "#352c22", cheek: "#e0a080" },
@@ -1283,6 +1401,37 @@ function drawMon(c, kind, o) {
       c.fillStyle = col.belly; for (const [px, py] of [[-20, -26], [14, -36], [30, -4], [-34, 8], [6, 22]]) { EV.ell(c, px, py, 6, 4); c.fill(); }
       c.strokeStyle = "#24122e"; c.lineWidth = 2; for (let k = 0; k < 9; k++) { const a = k * 0.7, r = 44; c.beginPath(); c.moveTo(Math.cos(a) * (r - 8), Math.sin(a) * (r - 8) - 4); c.lineTo(Math.cos(a) * r, Math.sin(a) * r - 4); c.stroke(); }
       c.fillStyle = "#ffe27a"; for (const x of [-12, 12]) { EV.ell(c, x, -6, 5, o.ko ? 1 : 6); c.fill(); } c.fillStyle = "#24122e"; for (const x of [-12, 12]) { EV.ell(c, x, -5, 2, o.ko ? 0.5 : 3); c.fill(); }
+    } else if (kind === "veleta") {
+      // a weathervane on a pole inside a whirlwind of voices
+      c.save(); c.strokeStyle = "#c8d0e8"; c.lineWidth = 2;
+      for (let k = 0; k < 4; k++) { const r = 26 + k * 9, a0 = o.t * (2 - k * 0.3) + k; c.globalAlpha = 0.55 - k * 0.1; c.beginPath(); c.ellipse(0, 4 - k * 8, r, r * 0.35, 0, a0, a0 + 4.2); c.stroke(); }
+      c.restore();
+      c.strokeStyle = col.line; c.lineWidth = 3; c.fillStyle = col.body; c.fillRect(-3, -60, 6, 100); c.strokeRect(-3, -60, 6, 100);
+      c.save(); c.translate(0, -62); c.rotate(o.ko ? 0.6 : Math.sin(o.t * 1.4) * 0.6);
+      c.beginPath(); c.moveTo(-36, 0); c.lineTo(26, 0); c.lineTo(26, -6); c.lineTo(40, 0); c.lineTo(26, 6); c.lineTo(26, 0); c.stroke();
+      c.fillStyle = "#c0a040"; c.beginPath(); c.moveTo(-36, 0); c.lineTo(-22, -12); c.lineTo(-22, 12); c.closePath(); c.fill(); c.stroke(); c.restore();
+      c.fillStyle = "#c0a040"; EV.ell(c, 0, -62, 6, 6); c.fill();
+      c.fillStyle = col.belly; for (const x of [-10, 10]) { EV.ell(c, x, -20, 5, o.ko ? 1 : 6); c.fill(); }
+      c.fillStyle = "#3a3440"; c.font = "700 14px system-ui"; c.textAlign = "center"; c.globalAlpha = 0.6; for (let k = 0; k < 3; k++) c.fillText("♪", Math.cos(o.t * 2 + k * 2.1) * 34, -10 + Math.sin(o.t * 2 + k * 2.1) * 10); c.globalAlpha = 1;
+    } else if (kind === "micelio") {
+      // a great pale mushroom mother sleeping on dark sap
+      c.fillStyle = "#24122e"; EV.ell(c, 0, 34, 54, 10); c.fill();
+      c.strokeStyle = "#f4efe6"; c.lineWidth = 2; for (let k = 0; k < 7; k++) { const a = Math.PI * (0.1 + k * 0.13); c.beginPath(); c.moveTo(0, 30); c.quadraticCurveTo(Math.cos(a) * 30, 40, Math.cos(a) * 56, 36 + Math.sin(o.t + k) * 2); c.stroke(); }
+      c.strokeStyle = col.line; c.lineWidth = 3; c.fillStyle = col.belly; c.fillRect(-14, -14, 28, 46); c.strokeRect(-14, -14, 28, 46);
+      c.fillStyle = col.body; c.beginPath(); c.moveTo(-56, -10); c.quadraticCurveTo(-50, -70, 0, -72); c.quadraticCurveTo(50, -70, 56, -10); c.quadraticCurveTo(0, -24, -56, -10); c.fill(); c.stroke();
+      c.fillStyle = "#c8a0d8"; for (const [px, py, r] of [[-30, -40, 7], [4, -58, 8], [30, -36, 6], [-8, -34, 5]]) { EV.ell(c, px, py, r, r * 0.8); c.fill(); }
+      c.strokeStyle = "#2a2230"; c.lineWidth = 2.4; for (const x of [-7, 7]) { c.beginPath(); c.arc(x, 4, 4, 0.15 * Math.PI, 0.85 * Math.PI); c.stroke(); }
+      c.save(); c.globalAlpha = 0.5; c.fillStyle = "#ffffff"; for (let k = 0; k < 5; k++) { const ph = (o.t * 0.3 + k / 5) % 1; EV.ell(c, -40 + k * 20, -60 - ph * 30, 2, 2); c.fill(); } c.restore();
+    } else if (kind === "guardatumba") {
+      // an ice giant: blocky shoulders, a crown of icicles, a frozen club
+      c.save(); c.globalAlpha = 0.9;
+      c.fillStyle = col.body; c.beginPath(); c.moveTo(-34, 36); c.lineTo(-44, -20); c.lineTo(-24, -40); c.lineTo(24, -40); c.lineTo(44, -20); c.lineTo(34, 36); c.closePath(); c.fill(); c.stroke();
+      c.fillStyle = col.belly; c.beginPath(); c.moveTo(-18, 30); c.lineTo(-24, -10); c.lineTo(24, -10); c.lineTo(18, 30); c.closePath(); c.fill();
+      c.fillStyle = "#e8f8ff"; for (const x of [-18, -6, 6, 18]) { c.beginPath(); c.moveTo(x - 5, -40); c.lineTo(x, -54 - (x === -6 || x === 6 ? 6 : 0)); c.lineTo(x + 5, -40); c.closePath(); c.fill(); c.stroke(); }
+      c.fillStyle = "#7ab4d4"; c.fillRect(42, -30, 10, 56); c.strokeRect(42, -30, 10, 56);
+      c.restore();
+      c.fillStyle = "#1e3a50"; for (const x of [-10, 10]) { EV.ell(c, x, -24, 4, o.ko ? 1 : 4); c.fill(); }
+      c.fillStyle = col.body; for (const x of [-20, 20]) { c.fillRect(x - 8, 34, 16, 8); }
     } else if (kind === "trono") {
       // an empty throne in the fog, with two eyes where the king should sit
       c.fillStyle = col.body; c.fillRect(-30, -74, 60, 84); c.strokeRect(-30, -74, 60, 84);
@@ -1372,9 +1521,34 @@ function drawMon(c, kind, o) {
         c.fillStyle = col.belly; ell(c, 0, 16, 20, 12); c.fill();
         c.strokeStyle = "#d8c8a8"; c.lineWidth = 2; for (let k = 0; k < 2; k++) { const ph = (o.t * 0.8 + k / 2) % 1; c.globalAlpha = 1 - ph; c.beginPath(); c.arc(0, 0, 44 + ph * 18, -0.5, 0.5); c.stroke(); c.beginPath(); c.arc(0, 0, 44 + ph * 18, Math.PI - 0.5, Math.PI + 0.5); c.stroke(); } c.globalAlpha = 1;
         c.strokeStyle = col.line; c.lineWidth = 3;
+      } else if (kind === "relampin") {
+        // a ferret with a zig-zag lightning tail
+        c.fillStyle = "#ffe27a"; c.strokeStyle = col.line; c.lineWidth = 2.5; c.beginPath(); c.moveTo(28, 10); c.lineTo(48, -4); c.lineTo(42, -10); c.lineTo(58, -26); c.lineTo(50, -6); c.lineTo(56, -2); c.lineTo(34, 18); c.closePath(); c.fill(); c.stroke();
+        c.fillStyle = g; ell(c, 0, 4, 34, 30); c.fill(); c.stroke(); c.fillStyle = col.belly; ell(c, 0, 14, 18, 14); c.fill();
+        c.fillStyle = col.body; for (const sx of [-1, 1]) { ell(c, sx * 20, -24, 8, 9); c.fill(); c.stroke(); }
+        c.fillStyle = "#7a5a10"; c.fillRect(-14, -14, 28, 6);
+      } else if (kind === "trinilla") {
+        // a bird with a harp-shaped tail
+        c.strokeStyle = "#c08a30"; c.lineWidth = 3; c.beginPath(); c.moveTo(24, 16); c.quadraticCurveTo(58, 10, 50, -30); c.quadraticCurveTo(40, -10, 26, -4); c.stroke();
+        c.lineWidth = 1; for (let k = 0; k < 4; k++) { c.beginPath(); c.moveTo(30 + k * 5, 12 - k); c.lineTo(32 + k * 5, -6 - k * 5); c.stroke(); }
+        c.strokeStyle = col.line; c.lineWidth = 3; c.fillStyle = g; ell(c, 0, 4, 32, 32); c.fill(); c.stroke(); c.fillStyle = col.belly; ell(c, 0, 16, 18, 14); c.fill();
+        c.fillStyle = "#f2b632"; c.beginPath(); c.moveTo(-6, 2); c.lineTo(6, 2); c.lineTo(0, 10); c.closePath(); c.fill();
+        c.fillStyle = col.body; c.beginPath(); c.moveTo(-4, -28); c.quadraticCurveTo(0, -46, 10, -40); c.quadraticCurveTo(6, -32, 4, -28); c.fill();
+      } else if (kind === "carambano") {
+        // a mole with an icicle snout and big digging paws
+        c.fillStyle = g; ell(c, 0, 4, 38, 32); c.fill(); c.stroke(); c.fillStyle = col.belly; ell(c, 0, 16, 20, 14); c.fill();
+        c.fillStyle = "#e8f8ff"; c.beginPath(); c.moveTo(-8, 4); c.lineTo(8, 4); c.lineTo(0, 22); c.closePath(); c.fill(); c.stroke();
+        c.fillStyle = "#d8c0b0"; for (const sx of [-1, 1]) { c.beginPath(); c.ellipse(sx * 36, 14, 10, 7, sx * 0.4, 0, 7); c.fill(); c.stroke(); }
+      } else if (kind === "capuchon") {
+        // a hermit crab wearing a mushroom
+        c.fillStyle = "#e8dcc8"; c.fillRect(-14, -30, 28, 20); c.strokeRect(-14, -30, 28, 20);
+        c.fillStyle = "#b04a4a"; c.beginPath(); c.moveTo(-40, -26); c.quadraticCurveTo(0, -78, 40, -26); c.closePath(); c.fill(); c.stroke();
+        c.fillStyle = "#fff4e8"; for (const [px, py] of [[-20, -36], [6, -50], [24, -34]]) { ell(c, px, py, 5, 4); c.fill(); }
+        c.fillStyle = g; ell(c, 0, 8, 32, 26); c.fill(); c.stroke();
+        c.fillStyle = col.body; for (const sx of [-1, 1]) { c.beginPath(); c.ellipse(sx * 38, 4, 10, 8, 0, 0, 7); c.fill(); c.stroke(); c.beginPath(); c.moveTo(sx * 44, -2); c.lineTo(sx * 50, -8); c.stroke(); }
       } else if (kind === "bostezo") { c.beginPath(); for (const [px, py, r] of [[-26, 8, 18], [-14, -18, 20], [10, -22, 20], [28, -2, 18], [24, 22, 16], [0, 24, 22], [-24, 26, 14]]) { c.moveTo(px + r, py); c.arc(px, py, r, 0, 7); } c.stroke(); c.fill(); }
       else if (kind === "brotin" || kind === "fuellito" || kind === "remolin") { ell(c, 0, 0, 38, kind === "brotin" ? 40 : 36); c.fill(); c.stroke(); c.fillStyle = col.belly; ell(c, 0, 14, 22, 18); c.fill(); }
-      if (kind !== "bostezo" && kind !== "yunqueron") { c.fillStyle = col.body; c.lineWidth = 2.5; for (const fx of [-16, 16]) { ell(c, fx, 36, 10, 6); c.fill(); c.stroke(); } }
+      if (kind !== "bostezo" && kind !== "yunqueron" && kind !== "trinilla") { c.fillStyle = col.body; c.lineWidth = 2.5; for (const fx of [-16, 16]) { ell(c, fx, 36, 10, 6); c.fill(); c.stroke(); } }
       // features
       if (kind === "brotin") {
         c.fillStyle = "#7a5228"; c.beginPath(); c.moveTo(-36, -14); c.quadraticCurveTo(0, -52, 36, -14); c.quadraticCurveTo(0, -30, -36, -14); c.fill();
@@ -1449,7 +1623,7 @@ function zonesHtml() {
     const done = cl[id] || 0;
     return `<button type="button" class="node zone" data-zone="${id}" ${open ? "" : "disabled"}><span class="ic" aria-hidden="true">${TYPES[z.type].icon}</span>
       <strong>${esc(zt("name", null, id))}</strong><small>${esc(zt("sub", null, id))}</small>
-      <small>${open ? esc(tx("zones.lvl", { n: z.min })) : "🔒 " + esc(tx(Array.isArray(z.unlock) ? "zones.lockEnv" : "zones.lock"))}</small>
+      <small>${open ? esc(tx("zones.lvl", { n: z.min })) : "🔒 " + esc(tx(Array.isArray(z.unlock) ? (z.unlock.includes("hollow") ? "zones.lockHigh" : "zones.lockEnv") : "zones.lock"))}</small>
       ${done ? `<small class="ok">✓ ${esc(tx("zones.done", { n: done }))}<br>${esc(tx("zones.verse", { v: zt("verse", null, id) }))}</small>` : ""}</button>`;
   }).join("")}</div>`;
 }
@@ -1640,6 +1814,8 @@ function flushEvents() {
       case "ko": blog(tx("log.ko", { name: uName(e.u) })); EV.sfx("ko"); EV.buzz(40); break;
       case "skip": blog(tx("log.skip." + e.why, { name: uName(e.u) })); break;
       case "round": renderBLog(); break;
+      case "strip": blog(tx("log.strip", { name: uName(e.u), st: STATUS[e.st][L()] })); break;
+      case "cdup": blog(tx("log.cdup", { name: uName(e.u), n: e.n })); break;
       case "lost": blog(tx("log.lost", { name: uName(e.u) })); break;
       case "echo": blog(tx("log.echo", { name: uName(e.u) })); if (a) battle.floats.push({ x: a.x, y: a.y - 50, text: "≋", col: "#d8c8a8", life: 1 }); break;
       case "revive": blog(tx("log.revive", { name: uName(e.u), n: e.n })); if (a) battle.floats.push({ x: a.x, y: a.y - 40, text: "↑ " + e.n, col: "#8fe08a", life: 1.3 }); EV.sfx("heal"); break;
@@ -1743,6 +1919,23 @@ function afterReward() {
 
 /* ---------- Battle drawing ---------- */
 function drawDecor(c, decor, t, day) {
+  if (decor === "peaks") {
+    // snowy peaks, drifting clouds and a spinning vane far away
+    c.fillStyle = day ? "#8ea6c0" : "#26304a";
+    c.beginPath(); c.moveTo(0, 70); for (const [x, y] of [[40, 22], [90, 52], [150, 14], [210, 48], [270, 24], [330, 50], [360, 34]]) c.lineTo(x, y); c.lineTo(BW, 70); c.closePath(); c.fill();
+    c.fillStyle = day ? "#ffffff" : "#c8d4e8"; for (const [x, y] of [[40, 22], [150, 14], [270, 24]]) { c.beginPath(); c.moveTo(x - 10, y + 12); c.lineTo(x, y); c.lineTo(x + 10, y + 12); c.closePath(); c.fill(); }
+    c.save(); c.globalAlpha = day ? 0.8 : 0.35; c.fillStyle = "#ffffff"; for (let i = 0; i < 4; i++) { const x = ((i * 110 + t * 10) % (BW + 80)) - 40; EV.ell(c, x, 30 + (i % 2) * 14, 26, 7); c.fill(); EV.ell(c, x + 14, 26 + (i % 2) * 14, 16, 6); c.fill(); } c.restore();
+    c.save(); c.translate(150, 10); c.strokeStyle = day ? "#5a5060" : "#8a90b0"; c.lineWidth = 1.5; c.beginPath(); c.moveTo(0, 4); c.lineTo(0, -6); c.stroke(); c.rotate(Math.sin(t * 0.8) * 0.8); c.beginPath(); c.moveTo(-7, -6); c.lineTo(7, -6); c.stroke(); c.restore();
+    return;
+  }
+  if (decor === "ice") {
+    // icicles, a frozen wall and glowing mushrooms
+    c.fillStyle = day ? "#c8e4f0" : "#2c4250"; c.fillRect(0, 0, BW, 10);
+    for (let i = 0; i < 16; i++) { const x = 6 + i * 24, h = 10 + ((i * 29) % 22); c.beginPath(); c.moveTo(x - 5, 9); c.lineTo(x + 5, 9); c.lineTo(x, 9 + h); c.closePath(); c.fill(); }
+    for (let i = 0; i < 6; i++) { const x = 30 + i * 62, y = 64 + (i % 2) * 4, g = 0.6 + 0.4 * Math.sin(t * 2 + i); c.fillStyle = "#e8e0d0"; c.fillRect(x - 1, y - 6, 3, 8); c.save(); c.shadowColor = "#a8f0e0"; c.shadowBlur = 8 * g; c.fillStyle = i % 2 ? "#9ae8d8" : "#c8b8f0"; EV.ell(c, x + 0.5, y - 7, 7, 4); c.fill(); c.restore(); }
+    c.save(); c.globalAlpha = 0.5; c.fillStyle = "#ffffff"; for (let i = 0; i < 18; i++) { const x = (i * 41 + t * 6) % BW, y = (i * 23 + t * 14) % 70; c.fillRect(x, y, 2, 2); } c.restore();
+    return;
+  }
   if (decor === "mist") {
     // crooked posts and drifting fog banks
     for (let i = 0; i < 5; i++) { const x = 24 + i * 82; c.fillStyle = day ? "#5c5868" : "#1d1b25"; c.fillRect(x - 3, 30 + (i % 2) * 8, 6, 44); c.fillRect(x - 10, 34 + (i % 2) * 8, 20, 4); }
@@ -1892,6 +2085,18 @@ const EVT = {
       o: ["Al fondo hay herramientas de las Casas de Luz y un saco de Chispas. Algo en la oscuridad se enfada.", "Cuesta, pero el eco vuelve un poco. Ganas experiencia.", "Vuelves al camino viejo. El eco te acompaña."] },
     miners: { t: "Un grupo de mineros de la Hondura ha quedado atrapado detrás de un derrumbe. Se les oye golpear la roca.", c: ["Apartar las rocas", "Pasarles agua por una grieta", "Seguir"],
       o: ["Tardáis, pero salen todos. «Ningún minero atrás», dicen, y te dan lo que llevan encima.", "Te dan las gracias por la grieta. «Grava ya no deja entrar a nadie», cuentan. Ganas experiencia.", "Los golpes se quedan sonando a tu espalda."] },
+    coplo: { t: "Un juglar del Cielo canta en un mirador, con un sombrero lleno de monedas a los pies. Se llama Coplo y busca versos perdidos del Canto. Ahora mismo canta «El Agua Podrida», la balada que más le pagan.", c: ["Pagarle 8 Chispas por una copla", "Preguntarle quién le encargó esa balada", "Cantarle un verso del Canto que ya tienes"],
+      o: ["Te canta una copla vieja sobre una raíz que lo une todo. El equipo se anima y recupera vida.", "«Unos señores con velo de niebla. Pagaron bien.» Se encoge de hombros. No sabe que eran Susurradores del Rey. Ganas experiencia.", "Coplo apunta tu verso en un cuaderno lleno de tachones. A cambio te da algo con forma de carta."] },
+    news: { t: "Un mensajero de la Aguja del Trueno vende noticias frescas en un cruce de caminos. «¡Todo lo que pasa en el valle, por muy poco!»", c: ["Comprar una noticia (6 Chispas)", "Venderle tú una noticia", "Seguir sin escucharle"],
+      o: ["«Las criaturas de más arriba están cansadas: llevan días sin dormir.» Las próximas criaturas apagadas pegarán más flojo.", "Le cuentas lo que viste en el Envés. Te paga unas Chispas y sale corriendo a venderlo.", "El mensajero ya grita la noticia a otro viajero."] },
+    pass: { t: "Los guardias de la regidora Céfira han cerrado el paso de montaña. «Por orden de la regidora. El invierno pasado ya los cerramos, y nadie se quejó.» Abajo, dicen, el hielo de una tumba empezó a gotear ese mismo invierno.", c: ["Pagar el peaje (10 Chispas)", "Subir por la ladera helada", "Esperar a que abran"],
+      o: ["Se guardan las Chispas y levantan la barrera. Al pasar oyes: «Si preguntan, nunca estuvo cerrado.»", "La ladera resbala y el viento corta, pero llegas arriba. El equipo pierde vida y gana experiencia.", "Esperáis junto a una hoguera. El equipo descansa, pero las criaturas de arriba han tenido tiempo de prepararse."] },
+    esporina: { t: "Una curandera de la casa de la Seta cultiva setas pálidas sobre un charco de savia negra. Se llama Esporina. «Mis remedios frenan la savia. Aquí abajo nadie quiere admitirlo, y arriba los han prohibido.»", c: ["Aceptar su remedio", "Preguntarle quién los prohibió", "Rechazarlo con educación"],
+      o: ["Sabe a tierra mojada y a algo dulce. El equipo recupera mucha vida. Esporina sonríe: «¿Ves? Nadie se muere por probarlo.»", "«La Casa Albor. Dicen que es para protegernos.» Baja la voz: «Si la savia se puede curar, alguien preguntará de dónde sale.» Ganas experiencia.", "Esporina asiente. Está acostumbrada."] },
+    tomb: { t: "La puerta de la Tumba Helada gotea. Junto a ella, un gigante de hielo duerme de pie, con la maza apoyada en el suelo.", c: ["Asomarte por una grieta", "Tapar la gotera con nieve", "Pasar de puntillas"],
+      o: ["Dentro solo ves oscuridad y un brillo pequeño, al alcance de la mano. Lo coges sin hacer ruido.", "Cuesta, pero la gotera para. El gigante suspira en sueños. Ganas experiencia.", "Pasáis de puntillas. El gigante no se mueve."] },
+    dreams: { t: "Una familia de la casa del Sueño se acaba de despertar y, como cada mañana, se cuenta lo que ha soñado antes de que se le olvide.", c: ["Contar tu sueño", "Escuchar los suyos", "Seguir tu camino"],
+      o: ["Cuentas un sueño sobre un farol y una sombra que cantaban juntos. La abuela se queda muy callada. Ganas experiencia.", "Sueñan con agua que sube, con hielo que llora y con una raíz que tiene sed. El equipo descansa escuchando.", "La familia sigue contando sueños a tu espalda."] },
   },
   en: {
     farol: { t: "A wayside lantern lies in the grass. A thick black sap drips from its base, and the flame shivers as if it were cold.", c: ["Stand it up and wipe off the sap", "Take the oil it has left", "Leave it and move on"],
@@ -1935,6 +2140,18 @@ const EVT = {
       o: ["At the end there are Light House tools and a bag of Chispas. Something in the dark gets angry.", "It's hard work, but the echo comes back a little. You gain experience.", "You go back to the old path. The echo keeps you company."] },
     miners: { t: "A group of miners from the Deep is trapped behind a rockfall. You can hear them knocking on the rock.", c: ["Clear the rocks", "Pass them water through a crack", "Move on"],
       o: ["It takes a while, but they all get out. \"No miner left behind,\" they say, and give you what they have on them.", "They thank you for the crack. \"Grava won't let anyone in any more,\" they tell you. You gain experience.", "The knocking keeps sounding behind you."] },
+    coplo: { t: "A Sky minstrel sings at a lookout, with a hat full of coins at his feet. His name is Coplo and he looks for lost verses of the Song. Right now he's singing \"The Rotten Water\", the ballad he gets paid most for.", c: ["Pay him 8 Chispas for a song", "Ask who commissioned that ballad", "Sing him a verse of the Song you already have"],
+      o: ["He sings you an old song about a root that joins everything. The team cheers up and recovers health.", "\"Some gentlemen with fog veils. They paid well.\" He shrugs. He doesn't know they were the King's Whisperers. You gain experience.", "Coplo writes your verse down in a notebook full of crossings-out. In return he gives you something card-shaped."] },
+    news: { t: "A messenger from the Thunder Spire sells fresh news at a crossroads. \"Everything happening in the valley, for next to nothing!\"", c: ["Buy a piece of news (6 Chispas)", "Sell him a piece of news", "Walk on without listening"],
+      o: ["\"The creatures further up are tired: they haven't slept in days.\" The next dimmed creatures will hit softer.", "You tell him what you saw in the Underside. He pays you a few Chispas and runs off to sell it.", "The messenger is already shouting the news at another traveller."] },
+    pass: { t: "Warden Céfira's guards have closed the mountain pass. \"By order of the warden. We closed it last winter too, and nobody complained.\" Down below, they say, the ice of a tomb started dripping that same winter.", c: ["Pay the toll (10 Chispas)", "Climb the icy slope", "Wait for them to open it"],
+      o: ["They pocket the Chispas and lift the barrier. As you pass you hear: \"If anyone asks, it was never closed.\"", "The slope is slippery and the wind cuts, but you make it up. The team loses health and gains experience.", "You wait by a bonfire. The team rests, but the creatures up ahead have had time to get ready."] },
+    esporina: { t: "A healer of the House of Mushrooms grows pale mushrooms on a puddle of black sap. Her name is Esporina. \"My remedies slow the sap. Down here nobody wants to admit it, and up there they've banned them.\"", c: ["Accept her remedy", "Ask who banned them", "Politely refuse"],
+      o: ["It tastes of wet earth and something sweet. The team recovers a lot of health. Esporina smiles: \"See? Nobody dies from trying it.\"", "\"House Albor. They say it's to protect us.\" She lowers her voice: \"If the sap can be cured, someone will ask where it comes from.\" You gain experience.", "Esporina nods. She's used to it."] },
+    tomb: { t: "The door of the Frozen Tomb is dripping. Beside it an ice giant sleeps standing up, its club resting on the ground.", c: ["Peek through a crack", "Plug the leak with snow", "Tiptoe past"],
+      o: ["Inside you see only darkness and a small glint, within arm's reach. You take it without a sound.", "It's hard work, but the leak stops. The giant sighs in its sleep. You gain experience.", "You tiptoe past. The giant doesn't move."] },
+    dreams: { t: "A family of the House of Dreams has just woken up and, like every morning, they tell each other what they dreamed before they forget.", c: ["Tell your dream", "Listen to theirs", "Keep walking"],
+      o: ["You tell a dream about a lantern and a shadow singing together. The grandmother goes very quiet. You gain experience.", "They dream of rising water, of ice that weeps and of a thirsty root. The team rests while listening.", "The family keeps telling dreams behind you."] },
   },
 };
 const vineTx = { es: ["Las enredaderas se revuelven y despiertan a las criaturas del bosque…", "Pasáis sin que os toquen. Ganas experiencia.", "Las enredaderas os arañan al pasar. El equipo pierde algo de vida."], en: ["The vines thrash and wake the wood's creatures…", "You get through untouched. You gain experience.", "The vines scratch you as you pass. The team loses some health."] };
@@ -1945,7 +2162,7 @@ function eventHtml() {
   if (X.eventOut == null) {
     const ch = X.event === "orilla" && hasLetter() ? E.cL : E.c;
     return `<div class="panel"><div class="sub">${esc(tx("node.event"))}</div><p class="evt-text">${esc(E.t)}</p><div class="choices">${ch.map((c, i) => {
-      const poor = (X.event === "patrol" && i === 2 && EV.P.coins < 8) || ((X.event === "tila" || X.event === "liquen") && i === 0 && EV.P.coins < 10) || (X.event === "whisper" && i === 1 && EV.P.coins < 10);
+      const poor = (X.event === "patrol" && i === 2 && EV.P.coins < 8) || ((X.event === "tila" || X.event === "liquen") && i === 0 && EV.P.coins < 10) || (X.event === "whisper" && i === 1 && EV.P.coins < 10) || (X.event === "coplo" && i === 0 && EV.P.coins < 8) || (X.event === "news" && i === 0 && EV.P.coins < 6) || (X.event === "pass" && i === 0 && EV.P.coins < 10);
       return `<button class="btn ghost" type="button" data-ev="${i}" ${poor ? "disabled" : ""}>${esc(c)}</button>`;
     }).join("")}</div></div><div class="panel"><h3>${esc(tx("exp.party"))}</h3>${partyHtml()}</div>`;
   }
@@ -2037,6 +2254,32 @@ function chooseEvent(i) {
     case "miners":
       if (i === 0) { hurtParty(0.15); X.loot.coins += 10; X.loot.xp += 10; }
       if (i === 1) X.loot.xp += 8;
+      break;
+    case "coplo":
+      if (i === 0) { EV.spendCoins(8); healParty(0.3); }
+      if (i === 1) X.loot.xp += 14;
+      if (i === 2) X.eventCard = true;
+      break;
+    case "news":
+      if (i === 0) { EV.spendCoins(6); X.nextFoeBuff = -15; }
+      if (i === 1) X.loot.coins += 10;
+      break;
+    case "pass":
+      if (i === 0) { EV.spendCoins(10); X.loot.xp += 6; }
+      if (i === 1) { hurtParty(0.15); X.loot.xp += 18; }
+      if (i === 2) { healParty(0.3); X.nextFoeBuff = 15; }
+      break;
+    case "esporina":
+      if (i === 0) { healParty(0.5); EV.P.flags = Object.assign(EV.P.flags || {}, { sporeRemedy: 1 }); }
+      if (i === 1) X.loot.xp += 16;
+      break;
+    case "tomb":
+      if (i === 0) X.eventCard = true;
+      if (i === 1) { hurtParty(0.1); X.loot.xp += 16; }
+      break;
+    case "dreams":
+      if (i === 0) X.loot.xp += 14;
+      if (i === 1) healParty(0.25);
       break;
     case "well":
       if (i === 0) healParty(0.5);
