@@ -26,10 +26,10 @@ To host it on **GitHub Pages**: open the repo's *Settings → Pages*, choose *De
 - **Settings → Time speed** offers 10× and 60× modes to see the whole life cycle quickly.
 - **Chispas** (✦) are the coin. You earn them by feeding a hungry creature, cleaning messes, curing sniffles, catching starseeds, growing up, and slowly over time while care stays above 60% (also while the page is closed).
 - **Shop and bag**: five extra foods, two medicines, foam soap, and two permanent toys (the Burr ball boosts play rounds, the Leaf kite makes them last 15 s). Dewberry and Honey bun stay free.
-- **Expeditions (RPG mode, `rpg.js`)**: once your creature is a Kid, take it with two wild companions to the Aurora Meadow. Pick your path leg by leg (battles, encounters, chests, rests) and face the guardian, the Great Lantern. Turn-based battles run in Auto or Manual mode at ×1/×2/×4 speed.
-- **Skill cards**: 21 cards from 7 creatures. Each card prints three effects (Active, Passive, Support) and only the one for its slot works. Slots unlock at levels 1, 4 and 8. Six grades from Common to Legendary scale values, durations and cooldowns; fuse 3 identical cards into the next grade.
+- **Expeditions (RPG mode, `rpg.js`)**: once your creature is a Kid, take it with two wild companions to one of three Dayside zones: Aurora Meadow (Light), Warm Crater (Fire) and Deep Wood (Plant). Calming the Great Lantern opens the other two, and each guardian gives a verse of the Song of the Glade. Pick your path leg by leg (battles, encounters, chests, rests) and face the zone's guardian (Great Lantern, Wakeful Forge, Hungry Hedge). Turn-based battles run in Auto or Manual mode at ×1/×2/×4 speed.
+- **Skill cards**: 30 cards from 10 creatures. Each card prints three effects (Active, Passive, Support) and only the one for its slot works. Slots unlock at levels 1, 4 and 8. Six grades from Common to Legendary scale values, durations and cooldowns; fuse 3 identical cards into the next grade.
 - **12 types in 4 circles** (Sun, Sky, Lake, Frost) plus Star: winner +50%, loser −25%, opposites +25%, same type −25%, Day/Night clock +10%, card resonance +15%.
-- **26 achievements**, each with a Chispas reward.
+- **27 achievements**, each with a Chispas reward.
 - **Spanish and English**: picked from the browser language, switchable in Settings.
 - **Sound effects** generated with Web Audio (no audio files), plus optional vibration on phones. Mute from the header.
 - **Installable app (PWA)**: works offline once loaded; on Android use *Install app* in Settings, on iPhone use *Share → Add to Home Screen*.
