@@ -814,6 +814,7 @@ const TX = {
     "cards.cant": "{name} no puede usar cartas de {type}", "cards.canTypes": "{name} puede usar cartas de: {types}, y las suyas propias.", "cards.copies": "Copias",
     "cards.desc": "Cada carta trae tres efectos; solo funciona el del hueco donde la pongas. Si el tipo de la carta coincide con el de tu criatura, resuena (+15 %).",
     "cards.noCreature": "Ten una criatura joven para usar cartas.", "cards.stats": "Vida {hp} · Fuerza {str} · Defensa {def} · Velocidad {spd} · Crítico {cr} %",
+    "sh.title": "Ficha de combate", "sh.sub": "Nivel {n}. Los cuidados de hoy suben o bajan cada valor.", "sh.hp": "Vida", "sh.str": "Fuerza", "sh.def": "Defensa", "sh.spd": "Velocidad", "sh.cr": "Crítico", "sh.dodge": "Esquiva", "sh.by": "por {c}", "sh.need": "Aparece cuando tu criatura sea joven.",
     "cards.unequip": "Quitar", "cards.inUse": "En uso", "cards.mode": "Modo de combate",
     "log.expGo": "{name} sale de expedición {to}.", "log.expWin": "{name} volvió {from} con el guardián en paz.",
     "log.expLose": "{name} volvió {from} un poco magullada.",
@@ -882,6 +883,7 @@ const TX = {
     "cards.cant": "{name} can't use {type} cards", "cards.canTypes": "{name} can use cards of: {types}, plus its own.", "cards.copies": "Copies",
     "cards.desc": "Each card carries three effects; only the one for the slot you put it in works. If the card's type matches your creature's, it resonates (+15%).",
     "cards.noCreature": "Raise a creature to kid stage to use cards.", "cards.stats": "Health {hp} · Strength {str} · Defence {def} · Speed {spd} · Crit {cr}%",
+    "sh.title": "Battle stats", "sh.sub": "Level {n}. Today's care raises or lowers each value.", "sh.hp": "Health", "sh.str": "Strength", "sh.def": "Defence", "sh.spd": "Speed", "sh.cr": "Crit", "sh.dodge": "Dodge", "sh.by": "from {c}", "sh.need": "Shows up once your creature is a kid.",
     "cards.unequip": "Remove", "cards.inUse": "In use", "cards.mode": "Battle mode",
     "log.expGo": "{name} set out {to}.", "log.expWin": "{name} came back {from} with the guardian at peace.",
     "log.expLose": "{name} came back {from} a bit bruised.",
@@ -1276,6 +1278,31 @@ function ownUnitOpts(hpPct) {
   for (const k of ["a", "p", "s"]) { const c = R.eq[k] && cardByUid(R.eq[k]); if (c && R.lvl >= SLOT_LVL[k]) cards[k] = scaled(c.id, c.g); }
   return { kind: S.species, lvl: R.lvl, side: "ally", name: S.name, own: true, care: S.stats, stage: S.stage, form: S.form, cards, hpPct, lowFun: S.stats.fun < 30 };
 }
+/* Stat sheet: bars are relative to a strong creature of the same level, so they stay readable as levels go up.
+   care: own creature only, shows how today's care shifts each stat. */
+const SHEET = [["hp", "health", 70], ["str", "full", 70], ["def", "clean", 70], ["spd", "energy", 70]];
+function sheetHtml(u, care) {
+  const sc = lvlScale(u.lvl);
+  const row = (key, val, pct, mod, unit) => `<div class="fstat"><label>${esc(tx("sh." + key))}</label><div class="bar"><i style="width:${Math.max(3, Math.min(100, Math.round(pct)))}%"></i></div><output>${val}${unit || ""}</output><small>${mod}</small></div>`;
+  const modTxt = (ck) => {
+    if (!care) return "";
+    const d = Math.round(50 * (care[ck] || 0) / 100 - 25);
+    return `<span class="${d > 0 ? "up" : d < 0 ? "down" : ""}">${d > 0 ? "+" : ""}${d} %</span> ${esc(tx("sh.by", { c: EV.t("stat." + ck).toLowerCase() }))}`;
+  };
+  let h = SHEET.map(([k, ck, ref]) => {
+    const v = k === "hp" ? u.maxHp : Math.round(u.base[k]);
+    const raw = k === "hp" ? u.maxHp / 3 : u.base[k];
+    return row(k, v, 100 * raw / (ref * sc), modTxt(ck));
+  }).join("");
+  h += row("cr", Math.round(u.crit), 100 * u.crit / 25, modTxt("fun"), " %");
+  h += row("dodge", Math.round(u.dodge), 100 * u.dodge / 4, "", " %");
+  return `<div class="sheet">${h}</div>`;
+}
+function ownSheetHtml() {
+  const S = EV.S, R = rpgState();
+  if (!S || !R || S.stage < 1) return "";
+  return sheetHtml(makeUnit(ownUnitOpts(1)), S.stats);
+}
 function expCheck() {
   const S = EV.S;
   if (!S || S.phase !== "alive") return "stage";
@@ -1353,6 +1380,15 @@ const css = `
 .slotbox .muted { font-size: 13px; margin: 0; }
 .slotbox select { font: 600 14px var(--font-body); padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); min-height: 40px; width: 100%; }
 .rstats { font: 500 12px var(--font-mono); color: var(--muted); margin: 0; }
+.mstats { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 10px; margin-top: 6px; width: 100%; font-size: 12px; text-align: left; }
+.mstats span { display: flex; justify-content: space-between; gap: 4px; } .mstats i { font-style: normal; color: var(--muted); } .mstats b { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.sheet { display: flex; flex-direction: column; gap: 6px; }
+.fstat { display: grid; grid-template-columns: 76px minmax(0, 1fr) 44px 112px; gap: 8px; align-items: center; font-size: 14px; }
+.fstat label { font-weight: 700; }
+.fstat output { font-family: var(--font-mono); font-size: 13px; text-align: right; font-variant-numeric: tabular-nums; }
+.fstat small { font-size: 12px; color: var(--muted); white-space: nowrap; }
+.fstat .up { color: #3c8a3a; font-weight: 700; } .fstat .down { color: #c0453a; font-weight: 700; }
+@media (max-width: 420px) { .fstat { grid-template-columns: 70px minmax(0, 1fr) 40px; } .fstat small { grid-column: 2 / -1; margin-top: -4px; } }
 .xpbar { height: 8px; }
 .evt-text { margin: 0; font-size: 15px; line-height: 1.55; }
 .evt-out { margin: 0; font-weight: 600; }
@@ -1723,6 +1759,11 @@ function foeUnits(boss) {
 
 /* ---------- Views ---------- */
 function show(v) { view = v; render(); const el = $("scrExp"); if (el && !el.hidden) el.scrollIntoView({ behavior: "smooth", block: "start" }); }
+function pickStats(k) {
+  const u = makeUnit({ kind: k, lvl: rpgState().lvl, side: "ally", wild: true, stage: 1 });
+  const v = { hp: u.maxHp, str: Math.round(u.base.str), def: Math.round(u.base.def), spd: Math.round(u.base.spd), cr: Math.round(u.crit) + " %" };
+  return `<span class="mstats">${Object.keys(v).map((k) => `<span><i>${esc(tx("sh." + k))}</i><b>${v[k]}</b></span>`).join("")}</span>`;
+}
 function partyHtml() {
   return `<div class="party">${X.party.map((m) => {
     const nm = m.own ? EV.S.name : monName(m.kind);
@@ -1746,7 +1787,7 @@ function render() {
   } else if (view === "pick") {
     body = `<div class="panel"><p class="lead">${esc(zt("desc"))}</p>
       <h3>${esc(tx("exp.pick"))}</h3><p class="muted" style="margin:0">${esc(tx("exp.pickSub"))}</p>
-      <div class="mons">${X.offer.map((k) => `<button type="button" class="mon" data-pick="${k}" aria-pressed="${X.chosen.includes(k)}"><canvas width="96" height="80" data-mon="${k}"></canvas><strong>${esc(monName(k))}</strong>${typeChip(MONS[k].types[0])}<small>${esc(MON_DESC[L()][k])}</small></button>`).join("")}</div>
+      <div class="mons">${X.offer.map((k) => `<button type="button" class="mon" data-pick="${k}" aria-pressed="${X.chosen.includes(k)}"><canvas width="96" height="80" data-mon="${k}"></canvas><strong>${esc(monName(k))}</strong>${typeChip(MONS[k].types[0])}<small>${esc(MON_DESC[L()][k])}</small>${pickStats(k)}</button>`).join("")}</div>
       </div>${loadoutHtml()}<div class="panel">
       <div class="bctl"><button class="btn" type="button" data-x="go" ${X.chosen.length === 2 ? "" : "disabled"}>${esc(tx("exp.go"))} · ${esc(tx("exp.cost"))}</button><button class="btn ghost" type="button" data-x="cancel">${esc(tx("exp.cancel"))}</button></div></div>`;
   } else if (view === "map") {
@@ -2532,7 +2573,7 @@ function renderCards() {
     const u = makeUnit(ownUnitOpts(1));
     const need = xpNeed(R.lvl);
     html += `<div class="slotbox" style="border-style:solid"><div class="panel-head"><strong style="font-family:var(--font-display);font-size:18px">${esc(S.name)} · ${esc(tx("cards.lvl", { n: R.lvl }))}</strong><span>${u.types.map(typeChip).join(" ")}</span></div>
-      <div class="bar xpbar"><i style="width:${Math.round(100 * R.xp / need)}%"></i></div><p class="rstats">${esc(tx("cards.xp", { x: R.xp, y: need }))} · ${esc(tx("cards.stats", { hp: u.maxHp, str: Math.round(u.base.str), def: Math.round(u.base.def), spd: Math.round(u.base.spd), cr: Math.round(u.crit) }))}</p></div>`;
+      <div class="bar xpbar"><i style="width:${Math.round(100 * R.xp / need)}%"></i></div><p class="rstats">${esc(tx("cards.xp", { x: R.xp, y: need }))}</p>${ownSheetHtml()}</div>`;
     html += `<div class="slots">${["a", "p", "s"].map((k) => {
       const locked = R.lvl < SLOT_LVL[k];
       const c = R.eq[k] && cardByUid(R.eq[k]);
@@ -2621,6 +2662,7 @@ function refreshHome() {
   const S = EV.S, btn = $("aExp"), chip = $("btnCards");
   const alive = S && S.phase === "alive";
   chip.hidden = !(alive && S.stage >= 1) && !(EV.P.cards && EV.P.cards.length);
+  homeSheet(alive);
   if (!alive) { btn.hidden = true; return; }
   btn.hidden = false;
   const why = expCheck();
@@ -2635,6 +2677,18 @@ function refreshHome() {
   r.textContent = tx("recharge", { n: RECHARGE.amount, c: RECHARGE.price });
   r.hidden = S.stats.energy >= 70;
   r.disabled = EV.P.coins < RECHARGE.price;
+}
+function homeSheet(alive) {
+  let pn = $("sheetPanel");
+  if (!pn) {
+    const status = $("b_full") && $("b_full").closest(".panel"); if (!status) return;
+    pn = document.createElement("div"); pn.id = "sheetPanel"; pn.className = "panel"; status.after(pn);
+  }
+  const S = EV.S, R = rpgState();
+  if (!alive || !S || S.stage < 1 || !R) { pn.hidden = true; return; }
+  pn.hidden = false;
+  const html = `<h3>${esc(tx("sh.title"))}</h3><p class="muted" style="margin:0 0 6px;font-size:13px">${esc(tx("sh.sub", { n: R.lvl }))}</p>${ownSheetHtml()}`;
+  if (pn.innerHTML !== html) pn.innerHTML = html;
 }
 // pay Chispas for an energy boost (energy otherwise only refills slowly while sleeping)
 const RECHARGE = { amount: 40, price: 12 };
