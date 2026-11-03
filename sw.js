@@ -1,5 +1,5 @@
 // Offline support: keep the game files cached, refresh them in the background.
-const CACHE = "evolvlings-v3";
+const CACHE = "evolvlings-v4";
 const CORE = ["./", "./index.html", "./rpg.js", "./manifest.webmanifest", "./icons/icon.svg", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/apple-touch-icon.png"];
 
 self.addEventListener("install", (e) => {

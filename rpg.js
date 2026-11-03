@@ -42,12 +42,12 @@ function isDayNow(d) { const h = (d || new Date()).getHours(); return h >= 7 && 
 /* Grades                                                                 */
 /* ====================================================================== */
 const GRADES = [
-  { id: "c",  mult: 1.00, dur: 0, cd: 0, trade: 1.0,  w: 55,  es: "Común",      en: "Common",     col: "#8a9580" },
-  { id: "r",  mult: 1.20, dur: 0, cd: 0, trade: 0.9,  w: 25,  es: "Rara",       en: "Rare",       col: "#3f8fc9" },
-  { id: "vr", mult: 1.40, dur: 1, cd: 1, trade: 0.8,  w: 12,  es: "Muy rara",   en: "Very rare",  col: "#4c9a3c" },
-  { id: "sr", mult: 1.65, dur: 1, cd: 1, trade: 0.65, w: 5,   es: "Súper rara", en: "Super rare", col: "#8a55d6" },
-  { id: "ep", mult: 1.95, dur: 2, cd: 2, trade: 0.5,  w: 2.5, es: "Épica",      en: "Epic",       col: "#d0612c" },
-  { id: "lg", mult: 2.30, dur: 2, cd: 2, trade: 0.4,  w: 0.5, es: "Legendaria", en: "Legendary",  col: "#d4a017" },
+  { id: "c",  mult: 1.00, dur: 0, cd: 0, trade: 1.0,  w: 80,  es: "Común",      en: "Common",     col: "#8a9580" },
+  { id: "r",  mult: 1.20, dur: 0, cd: 0, trade: 0.9,  w: 15,  es: "Rara",       en: "Rare",       col: "#3f8fc9" },
+  { id: "vr", mult: 1.40, dur: 1, cd: 1, trade: 0.8,  w: 4,   es: "Súper rara", en: "Super rare", col: "#4c9a3c" },
+  { id: "sr", mult: 1.65, dur: 1, cd: 1, trade: 0.65, w: 0.8, es: "Épica",      en: "Epic",       col: "#8a55d6" },
+  { id: "ep", mult: 1.95, dur: 2, cd: 2, trade: 0.5,  w: 0.18,es: "Mítica",     en: "Mythic",     col: "#d0612c" },
+  { id: "lg", mult: 2.30, dur: 2, cd: 2, trade: 0.4,  w: 0.02,es: "Legendaria", en: "Legendary",  col: "#d4a017" },
 ];
 function rollGrade(minIdx, rnd) {
   rnd = rnd || Math.random;
@@ -77,6 +77,11 @@ const STATUS = {
   regen:   { neg: false, icon: "🌱", v: 8,  es: "Siembra",   en: "Sprout" },
   haste:   { neg: false, icon: "💨", v: 20, es: "Prisa",     en: "Haste" },
   cushion: { neg: false, icon: "☁️", v: 50, es: "Mullido",   en: "Cushioned" },
+  hidden:  { neg: false, icon: "🌫️", v: 0,  es: "Escondido", en: "Hidden" },
+  charge:  { neg: false, icon: "⚡", v: 80, es: "Carga",     en: "Charged" },
+  taunt:   { neg: false, icon: "🛡️", v: 0,  es: "Desafío",   en: "Taunting" },
+  evade:   { neg: false, icon: "💨", v: 10, es: "Esquivo",   en: "Evasive" },
+  exposed: { neg: true,  icon: "🎯", v: 0,  es: "Expuesto",  en: "Exposed" },
 };
 
 /* ====================================================================== */
@@ -133,12 +138,52 @@ const CARDS = {
   vine:     { type: "plant", by: "seto", boss: true, p: { thorns: 10 }, a: { cd: 4, tgt: "fastestFoe", pow: 80, st: ["trap", 1, 1] }, s: { on: "allyBigHit", fx: { tgt: "attacker", st: ["trap", 1, 1] } } },
   thorn:    { type: "plant", by: "seto", boss: true, p: { thorns: 15 }, a: { cd: 3, tgt: "foes", pow: 60, st: ["slow", 1, 1] }, s: { on: "start", fx: { tgt: "foes", st: ["slow", 2, 1, 15] } } },
   root:     { type: "plant", by: "seto", boss: true, p: { lifesteal: 10 }, a: { cd: 4, tgt: "self", heal: 15 }, s: { on: "start", fx: { tgt: "self", st: ["regen", 99, 1, 3] } } },
+  // Nim
+  night:    { type: "shadow", by: "nim", p: { nightAll: 10 }, a: { cd: 4, tgt: "self", st: ["hidden", 1, 1], selfSt: ["charge", 3, 1, 80] }, s: { on: "start", fx: { tgt: "allies", nightOnly: 1, st: ["evade", 2, 1, 10] } } },
+  nohide:   { type: "shadow", by: "nim", p: { shade: 15 }, a: { cd: 3, tgt: "foe", pow: 140, selfSt: ["exposed", 1, 1] }, s: { on: "allyLow", pct: 30, fx: { tgt: "self", st: ["taunt", 1, 1] } } },
+  truename: { type: "shadow", by: "nim", p: { immune: "blind" }, a: { cd: 4, tgt: "foe", st: ["blind", 2, 1], st2: ["slow", 1, 1] }, s: { on: "allyStatus", status: "blind", fx: { tgt: "theAlly", cleanse: "blind" } } },
+  // Centinela de Bruma
+  lance:    { type: "shadow", by: "centinela", p: { vsBlind: 10 }, a: { cd: 4, tgt: "foe", pow: 160, pierce: 1 }, s: { on: "foeShield" } },
+  oath:     { type: "shadow", by: "centinela", pact: true, p: { oath: 25 }, a: { cd: 5, tgt: "self", st: ["taunt", 2, 1], selfSt: ["guard", 2, 1, 30] }, s: { on: "allyKO", fx: { tgt: "self", st: ["fury", 99, 1, 30] } } },
+  veil:     { type: "shadow", by: "centinela", p: { def: 15 }, a: { cd: 4, tgt: "lowOther", st: ["hidden", 1, 1] }, s: { on: "allyBigHit", fx: { tgt: "self", st: ["taunt", 2, 1] } } },
+  // Vidriela
+  lostwave: { type: "water", by: "vidriela", p: { perFallen: 10 }, a: { cd: 4, tgt: "foe", pow: 120, splash: 40 }, s: { on: "allyKO", fx: { tgt: "allies", heal: 20 } } },
+  truewater:{ type: "water", by: "vidriela", p: { immune: "blind", sight: 10 }, a: { cd: 4, tgt: "strongFoe", copyBuff: 1 }, s: { on: "allyStatus", status: "blind", fx: { tgt: "theAlly", cleanse: "blind" } } },
+  reading:  { type: "water", by: "vidriela", p: { dodge: 8 }, a: { cd: 4, tgt: "self", foresight: 1 }, s: { on: "start", fx: { tgt: "allies", st: ["guard", 1, 1, 15] } } },
+  // Ecolito
+  echo:     { type: "stone", by: "ecolito", p: { echo: 15 }, a: { cd: 4, tgt: "self", echoLast: 60 }, s: { on: "start", fx: { tgt: "self", cdDown: 1 } } },
+  miner:    { type: "stone", by: "ecolito", p: { desperate: 20 }, a: { cd: 5, tgt: "foes", pow: 90, st: ["slow", 1, 1] }, s: { on: "win", revive: 10 } },
+  rockname: { type: "stone", by: "ecolito", p: { stoneDef: 10 }, a: { cd: 5, tgt: "foe", st: ["stun", 1, 1], selfSt: ["slow", 2, 1] }, s: { on: "allyKO", fx: { tgt: "fallenAlly", ifAbove: 50, revive: 15 } } },
+  // El Trono Vacío (guardian only)
+  court:    { type: "shadow", by: "trono", boss: true, p: { dodge: 12 }, a: { cd: 4, tgt: "foes", pow: 85, st: ["blind", 1, 0.6] }, s: { on: "every", n: 3, fx: { tgt: "self", st: ["hidden", 1, 1] } } },
+  crown:    { type: "shadow", by: "trono", boss: true, p: { nightAll: 15 }, a: { cd: 3, tgt: "foe", pow: 130, pierce: 1 }, s: { on: "allyLow", pct: 50, fx: { tgt: "self", st: ["charge", 3, 1, 60] } } },
+  // La Que Mira desde Abajo (guardian only)
+  mirror:   { type: "water", by: "mira", boss: true, p: { resistAdv: 20 }, a: { cd: 4, tgt: "foes", pow: 90, st: ["soak", 2, 1] }, s: { on: "allyLow", pct: 50, fx: { tgt: "self", heal: 20 } } },
+  gaze:     { type: "water", by: "mira", boss: true, p: { sight: 15 }, a: { cd: 3, tgt: "strongFoe", pow: 110, st: ["dull", 2, 1, 10] }, s: { on: "start", fx: { tgt: "foes", st: ["dull", 2, 1, 10] } } },
+  // Grava (guardian only)
+  cavein:   { type: "stone", by: "grava", boss: true, p: { def: 15, thorns: 5 }, a: { cd: 4, tgt: "foes", pow: 90, st: ["slow", 1, 1] }, s: { on: "every", n: 3, fx: { tgt: "self", shield: [15, 2] } } },
+  song:     { type: "stone", by: "grava", boss: true, p: { echo: 20 }, a: { cd: 3, tgt: "foe", pow: 120, st: ["stun", 1, 0.3] }, s: { on: "allyLow", pct: 40, fx: { tgt: "self", heal: 15 } } },
   // El Gran Farol (guardian only, never drops)
   beam:     { type: "light", by: "farol", boss: true, p: { dmg: 10 }, a: { cd: 4, tgt: "foes", pow: 100, st: ["blind", 1, 1] }, s: { on: "start", fx: { tgt: "foes", st: ["slow", 2, 1, 10] } } },
   pride:    { type: "light", by: "farol", boss: true, p: { dmg: 15 }, a: { cd: 3, tgt: "foe", pow: 130 }, s: { on: "allyLow", pct: 50, fx: { tgt: "self", shield: [20, 2] } } },
   law:      { type: "light", by: "farol", boss: true, p: { spd: 10 }, a: { cd: 4, tgt: "foes", st: ["slow", 2, 1, 10] }, s: { on: "start", fx: { tgt: "foes", st: ["slow", 2, 1, 10] } } },
 };
 const DROP_POOL = Object.keys(CARDS).filter((k) => !CARDS[k].boss);
+// Which card types each home creature can use: its own type, two from its circle or close to it,
+// and one for coverage. Adults also learn their evolution's type, and a creature can always use its own signature cards.
+const COMPAT = {
+  lumo: ["light", "fire", "plant", "dream"],
+  fizz: ["air", "dream", "plant", "fire"],
+  pebb: ["stone", "water", "shadow", "fire"],
+};
+function canUse(species, form, id) {
+  const c = CARDS[id], list = COMPAT[species];
+  if (!c || !list) return true;
+  if (c.by === species || list.includes(c.type)) return true;
+  const adult = MONS[species] && MONS[species].adult && form && MONS[species].adult[form];
+  return adult === c.type;
+}
+const UPGRADE_N = 5; // 5 cards of one grade make 1 of the next
 
 // scale a numeric spec value by grade (positive → value mult, negative → tradeoff)
 function sv(v, g) { return v >= 0 ? Math.round(v * g.mult) : Math.round(v * g.trade); }
@@ -167,9 +212,13 @@ function scaled(id, gi) {
   if (a.st) a.st = scaleStatus(a.st, g);
   if (a.selfSt) a.selfSt = scaleStatus(a.selfSt, g);
   if (a.selfCost) a.selfCost = sv(a.selfCost, g);
+  if (a.st2) a.st2 = scaleStatus(a.st2, g);
+  if (a.splash) a.splash = sv(a.splash, g);
+  if (a.echoLast) a.echoLast = sv(a.echoLast, g);
   if (a.selfMaxDown) a.selfMaxDown = sv(a.selfMaxDown, g);
   const s = Object.assign({}, c.s);
   if (s.heal) s.heal = sv(s.heal, g);
+  if (s.revive) s.revive = sv(s.revive, g);
   if (s.v) s.v = sv(s.v, g);
   if (s.n && s.on === "allyHitAdv") s.n = s.n + g.dur;
   if (s.n && s.on === "every") s.n = Math.max(2, s.n - g.cd);
@@ -179,6 +228,7 @@ function scaled(id, gi) {
     if (s.fx.shield) s.fx.shield = [sv(s.fx.shield[0], g), s.fx.shield[1] + g.dur];
     if (s.fx.heal) s.fx.heal = sv(s.fx.heal, g);
     if (s.fx.give) s.fx.give = sv(s.fx.give, g);
+    if (s.fx.revive) s.fx.revive = sv(s.fx.revive, g);
   }
   return { id, type: c.type, grade: gi || 0, p, a, s };
 }
@@ -198,6 +248,13 @@ const MONS = {
   mecha:    { types: ["light"], rar: 1, st: { hp: 40, str: 38, def: 35, spd: 52, cr: 50 }, cards: ["street", "oil", "ration"] },
   yunqueron:{ types: ["fire"],  rar: 2, st: { hp: 58, str: 52, def: 62, spd: 22, cr: 36 }, cards: ["temper", "anvil", "furnace"] },
   espinardo:{ types: ["plant"], rar: 3, st: { hp: 52, str: 56, def: 62, spd: 35, cr: 40 }, cards: ["inward", "outward", "hedge"] },
+  nim:      { types: ["shadow"], rar: 1, st: { hp: 36, str: 42, def: 32, spd: 58, cr: 47 }, cards: ["night", "nohide", "truename"] },
+  centinela:{ types: ["shadow"], rar: 4, st: { hp: 60, str: 62, def: 58, spd: 40, cr: 40 }, cards: ["lance", "oath", "veil"] },
+  vidriela: { types: ["water"],  rar: 2, st: { hp: 48, str: 40, def: 40, spd: 48, cr: 54 }, cards: ["lostwave", "truewater", "reading"] },
+  ecolito:  { types: ["stone"],  rar: 2, st: { hp: 46, str: 44, def: 56, spd: 38, cr: 46 }, cards: ["echo", "miner", "rockname"] },
+  trono:    { types: ["shadow"], rar: 3, st: { hp: 150, str: 46, def: 40, spd: 42, cr: 32 }, cards: ["court", "crown", "law"], boss: true },
+  mira:     { types: ["water"],  rar: 3, st: { hp: 130, str: 38, def: 36, spd: 36, cr: 30 }, cards: ["mirror", "gaze", "core"], boss: true },
+  grava:    { types: ["stone"],  rar: 3, st: { hp: 155, str: 38, def: 50, spd: 20, cr: 28 }, cards: ["cavein", "song", "core"], boss: true },
   farol:    { types: ["light"], rar: 3, st: { hp: 150, str: 42, def: 40, spd: 34, cr: 30 }, cards: ["beam", "pride", "law"], boss: true },
   forja:    { types: ["fire"],  rar: 3, st: { hp: 155, str: 44, def: 48, spd: 26, cr: 30 }, cards: ["breath", "blow", "core"], boss: true },
   seto:     { types: ["plant"], rar: 3, st: { hp: 170, str: 40, def: 44, spd: 30, cr: 30 }, cards: ["vine", "thorn", "root"], boss: true },
@@ -250,6 +307,7 @@ function Battle(allies, foes, opt) {
   this.zone = opt.zone || null;
   this.events = [];          // presentation queue: {k:'act'|'dmg'|'heal'|'miss'|'st'|'log'|'ko'|'shield'|'cleanse', ...}
   this.side = { ally: { lastType: null, spark: 0, breakNext: false, cloud: 0, vessel: 0, vesselV: 0 }, foe: { lastType: null, spark: 0, breakNext: false, cloud: 0, vessel: 0, vesselV: 0 } };
+  for (const u of this.units) if (u.mods.sight) this.side[u.side].sight = Math.max(this.side[u.side].sight || 0, u.mods.sight);
   for (const u of this.units) {
     const s = u.cards.s;
     if (!s) continue;
@@ -266,9 +324,24 @@ B.stVal = function (u, name) { const s = u.st[name]; return s ? s.v : 0; };
 B.eff = function (u, k) {
   let pct = (u.mods[k] || 0);
   if (k === "spd") pct += this.stVal(u, "haste") - this.stVal(u, "slow") + this.stVal(u, "might");
-  if (k === "def") { pct += this.stVal(u, "guard") + this.stVal(u, "might"); if (u.mods.defRound) pct += Math.min(15 * (u.mods.defRound / 3), u.mods.defRound * this.round); }
+  if (k === "def") {
+    pct += this.stVal(u, "guard") + this.stVal(u, "might");
+    if (u.mods.defRound) pct += Math.min(15 * (u.mods.defRound / 3), u.mods.defRound * this.round);
+    if (u.mods.oath && this.oathOn(u)) pct += u.mods.oath;
+    if (u.mods.nightAll) pct += this.day ? -Math.round(u.mods.nightAll / 2) : u.mods.nightAll;
+    if (u.mods.stoneDef) pct += u.mods.stoneDef * this.alive(u.side).filter((x) => x.types.includes("stone")).length;
+  }
   if (k === "str") pct += this.stVal(u, "might");
   return Math.max(1, u.base[k] * (1 + pct / 100));
+};
+// Juramento Susurrado: active while the first ally of the list is standing
+B.oathOn = function (u) { const first = this.units.find((x) => x.side === u.side); return !!(first && first.hp > 0); };
+B.dodgeOf = function (u, attacker) {
+  if (u.st.exposed) return 0;
+  let d = u.dodge + this.stVal(u, "evade");
+  if (u.mods.shade && u.hp / u.maxHp > 0.5) d += u.mods.shade;
+  if (attacker) d -= this.side[attacker.side].sight || 0;
+  return Math.max(0, Math.min(40, d));
 };
 B.typeOf = function (u, card) {
   let ty = card ? card.type : u.types[0];
@@ -332,7 +405,9 @@ B.hit = function (src, tgt, pow, card, extra) {
   const ty = this.typeOf(src, card);
   // blinded: 50% to miss; dodge
   if (src.st.blind && this.rnd() < src.st.blind.v / 100) { this.emit({ k: "miss", u: tgt.uid, by: src.uid, blind: true }); return 0; }
-  if (!extra.trueHit && this.rnd() * 100 < Math.min(35, tgt.dodge)) { this.emit({ k: "miss", u: tgt.uid, by: src.uid }); return 0; }
+  const tsd = this.side[tgt.side];
+  if (tsd.foresight > 0) { tsd.foresight--; this.emit({ k: "miss", u: tgt.uid, by: src.uid }); return 0; }
+  if (!extra.trueHit && this.rnd() * 100 < this.dodgeOf(tgt, src)) { this.emit({ k: "miss", u: tgt.uid, by: src.uid }); return 0; }
   let d = this.eff(src, "str") * pow / 100;
   let tm = 1; for (const dt of tgt.types) tm *= typeMult(ty, dt);
   d *= tm;
@@ -344,6 +419,13 @@ B.hit = function (src, tgt, pow, card, extra) {
   if (tgt.shield > 0 && src.mods.vsShield) pct += src.mods.vsShield;
   if (src.mods.vsHigher && tgt.hp > src.hp) pct += src.mods.vsHigher;
   if (src.mods.rage && src.rage) pct += src.mods.rage * src.rage;
+  if (src.st.charge) { pct += src.st.charge.v; delete src.st.charge; }
+  if (src.mods.vsBlind && tgt.st.blind) pct += src.mods.vsBlind;
+  if (src.mods.oath && this.oathOn(src)) pct += src.mods.oath;
+  if (src.mods.nightAll) pct += this.day ? -Math.round(src.mods.nightAll / 2) : src.mods.nightAll;
+  if (src.mods.shade && src.hp / src.maxHp <= 0.5) pct += src.mods.shade;
+  if (src.mods.desperate && this.alive(src.side).some((x) => x.hp / x.maxHp < 0.3)) pct += src.mods.desperate;
+  if (src.mods.perFallen) pct += src.mods.perFallen * this.units.filter((x) => x.side === src.side && x.hp <= 0).length;
   const side = this.side[src.side];
   if (side.spark) { pct += side.spark; side.spark = 0; }
   d *= 1 + pct / 100;
@@ -368,7 +450,7 @@ B.hit = function (src, tgt, pow, card, extra) {
   if ((extra.breakShield || side.breakNext) && tgt.shield > 0) { tgt.shield = 0; tgt.shieldT = 0; side.breakNext = false; this.emit({ k: "break", u: tgt.uid }); }
   // shield absorbs
   let absorbed = 0;
-  if (tgt.shield > 0) { absorbed = Math.min(tgt.shield, d); tgt.shield -= absorbed; if (tgt.shield <= 0) tgt.shieldT = 0; }
+  if (tgt.shield > 0 && !extra.pierce) { absorbed = Math.min(tgt.shield, d); tgt.shield -= absorbed; if (tgt.shield <= 0) tgt.shieldT = 0; }
   let left = d - absorbed;
   const ts = this.side[tgt.side];
   if (left >= tgt.hp && ts.cloud > 0) { ts.cloud--; left = Math.round(left / 2); this.emit({ k: "save", u: tgt.uid }); }
@@ -380,6 +462,7 @@ B.hit = function (src, tgt, pow, card, extra) {
   if (src.mods.onHit) this.addStatus(src, tgt, src.mods.onHit, card ? card.type : null);
   if (tgt.mods.onHitBy && tgt.hp > 0) this.addStatus(tgt, src, tgt.mods.onHitBy, null);
   if (tgt.mods.rage) tgt.rage = Math.min(5, (tgt.rage || 0) + 1);
+  if (src.mods.echo && !extra.echoed && tgt.hp > 0 && this.rnd() * 100 < src.mods.echo) { this.emit({ k: "echo", u: src.uid }); this.hit(src, tgt, pow * 0.5, card, { echoed: true }); }
   if (src.mods.lifesteal && src.hp > 0 && left > 0) { const g = Math.round(left * src.mods.lifesteal / 100); const bf = src.hp; src.hp = Math.min(src.maxHp, src.hp + g); if (src.hp > bf) this.emit({ k: "heal", u: src.uid, n: src.hp - bf }); }
   if (tgt.mods.thorns && src.hp > 0 && left > 0 && !extra.thorns) {
     const r = Math.max(1, Math.round(left * tgt.mods.thorns / 100));
@@ -395,7 +478,10 @@ B.hit = function (src, tgt, pow, card, extra) {
 
 // choose targets
 B.targets = function (spec, src, ctx) {
-  const foes = this.alive(this.other(src.side)), allies = this.alive(src.side);
+  let foes = this.alive(this.other(src.side)).filter((u) => !u.st.hidden);
+  const allies = this.alive(src.side);
+  const taunt = foes.filter((u) => u.st.taunt);
+  if (taunt.length && ["foe", "rand", "randFoe", "fastestFoe", "fireFoe"].includes(spec)) foes = taunt;
   const byHpPct = (a, b) => a.hp / a.maxHp - b.hp / b.maxHp;
   switch (spec) {
     case "foe": {
@@ -419,6 +505,8 @@ B.targets = function (spec, src, ctx) {
     case "wildAllies": return allies.filter((u) => u.wild);
     case "debuffedAlly": { const d = allies.filter((u) => Object.keys(u.st).some((k) => STATUS[k].neg)); return d.length ? [d[0]] : []; }
     case "theAlly": return ctx && ctx.ally && ctx.ally.hp > 0 ? [ctx.ally] : [];
+    case "fallenAlly": return ctx && ctx.ally && ctx.ally.hp <= 0 ? [ctx.ally] : [];
+    case "strongFoe": return foes.length ? [foes.slice().sort((a, b) => this.eff(b, "str") - this.eff(a, "str"))[0]] : [];
     case "attacker": return ctx && ctx.attacker && ctx.attacker.hp > 0 ? [ctx.attacker] : [];
     case "lowOther": { const o = allies.filter((u) => u !== src).sort(byHpPct); return o.length ? [o[0]] : []; }
     case "lowDefAlly": return allies.length ? [allies.slice().sort((a, b) => this.eff(a, "def") - this.eff(b, "def"))[0]] : [];
@@ -428,8 +516,21 @@ B.targets = function (spec, src, ctx) {
 
 // apply an effect spec (from an active or a support)
 B.apply = function (src, fx, card, ctx) {
+  if (fx.nightOnly && this.day) return false;
+  if (fx.ifAbove && src.hp / src.maxHp * 100 <= fx.ifAbove) return false;
+  if (fx.echoLast) {
+    const last = this.side[src.side].lastActive;
+    if (!last) return false;
+    const copy = Object.assign({}, last.a, { cd: 0 });
+    for (const k of ["pow", "heal"]) if (copy[k]) copy[k] = Math.round(copy[k] * fx.echoLast / 100);
+    if (copy.shield) copy.shield = [Math.round(copy.shield[0] * fx.echoLast / 100), copy.shield[1]];
+    this.emit({ k: "echo", u: src.uid, card: last.id });
+    return this.apply(src, copy, last, ctx);
+  }
   const list = this.targets(fx.tgt, src, Object.assign({ card }, ctx));
-  if (!list.length) return false;
+  if (fx.foresight) { this.side[src.side].foresight = (this.side[src.side].foresight || 0) + fx.foresight; this.emit({ k: "st", u: src.uid, st: "evade" }); }
+  if (fx.cdDown) for (const u of this.alive(src.side)) u.cd = Math.max(0, u.cd - fx.cdDown);
+  if (!list.length) return !!(fx.foresight || fx.cdDown);
   const ty = card ? card.type : null;
   if (fx.pow) {
     const hits = fx.hits || 1;
@@ -438,13 +539,17 @@ B.apply = function (src, fx, card, ctx) {
       const tl = tg ? [tg] : list;
       for (const t of tl) {
         if (!t || t.hp <= 0) continue;
-        const d = this.hit(src, t, fx.pow, card, { breakShield: fx.breakShield, drain: fx.drain, trueHit: fx.trueHit });
+        const d = this.hit(src, t, fx.pow, card, { breakShield: fx.breakShield, drain: fx.drain, trueHit: fx.trueHit, pierce: fx.pierce });
         if (d > 0 && fx.st) this.addStatus(src, t, fx.st, ty);
+        if (d > 0 && fx.st2) this.addStatus(src, t, fx.st2, ty);
+        if (fx.splash) for (const o of this.alive(this.other(src.side))) if (o !== t && !o.st.hidden) this.hit(src, o, fx.splash, card, {});
       }
       if (!tg) break;
       if (!this.alive(this.other(src.side)).length) break;
     }
-  } else if (fx.st) for (const t of list) this.addStatus(src, t, fx.st, ty);
+  } else if (fx.st) for (const t of list) { this.addStatus(src, t, fx.st, ty); if (fx.st2) this.addStatus(src, t, fx.st2, ty); }
+  if (fx.copyBuff) for (const t of list) for (const k of Object.keys(t.st)) if (!STATUS[k].neg && k !== "hidden" && k !== "taunt") { src.st[k] = Object.assign({}, t.st[k]); this.emit({ k: "st", u: src.uid, st: k }); }
+  if (fx.revive) for (const t of list) if (t.hp <= 0) { t.hp = Math.max(1, Math.round(t.maxHp * fx.revive / 100)); this.emit({ k: "revive", u: t.uid, n: t.hp }); }
   if (fx.selfCost) { const c = Math.round(src.maxHp * Math.abs(fx.selfCost) / 100); if (src.hp > c) { src.hp -= c; this.emit({ k: "dmg", u: src.uid, n: c, dot: "cost" }); } }
   if (fx.give) for (const t of list) { const g = Math.min(src.hp - 1, Math.round(src.hp * fx.give / 100)); if (g > 0 && t !== src) { src.hp -= g; const bf = t.hp; t.hp = Math.min(t.maxHp, t.hp + g); this.emit({ k: "heal", u: t.uid, n: t.hp - bf }); } }
   if (fx.heal) for (const t of list) this.heal(src, t, fx.heal);
@@ -527,10 +632,12 @@ B.act = function (u, useCard) {
     this.emit({ k: "act", u: u.uid, card: c.id });
     this.apply(u, c.a, c, {});
     u.cd = c.a.cd;
+    if (!c.a.echoLast) this.side[u.side].lastActive = c;
   } else {
     const t = this.targets("foe", u)[0];
     this.emit({ k: "act", u: u.uid, card: null });
     if (t) this.hit(u, t, 80, null, {});
+    else this.emit({ k: "lost", u: u.uid });
   }
   this.turnEnd(u);
 };
@@ -575,10 +682,29 @@ const ZONES = {
     boss: "seto", sky: ["#d6ecc4", "#86b67e"], skyN: ["#12251e", "#26443a"], ground: "#5f8f4a", groundN: "#2f4a33",
     events: ["liquen", "vines", "loggers", "well"],
   },
+  // the Underside (Envés): the night half of the valley, past the Ford
+  hollow: {
+    type: "shadow", bonus: { shadow: 10, light: -10 }, sections: 4, min: 4, unlock: ["crater", "forest"], decor: "mist",
+    foes: ["nim", "nim", "centinela", "ecolito"], allies: ["lumo", "fuellito", "remolin", "pebb", "bostezo", "mecha", "nim", "ecolito"],
+    boss: "trono", sky: ["#b9b4c6", "#7d7891"], skyN: ["#17151f", "#2c2838"], ground: "#6d6a78", groundN: "#2a2833",
+    events: ["court", "dig", "whisper"],
+  },
+  lake: {
+    type: "water", bonus: { water: 10, fire: -10 }, sections: 4, min: 5, unlock: ["crater", "forest"], decor: "lake",
+    foes: ["remolin", "vidriela", "remolin", "nim"], allies: ["brotin", "fizz", "pebb", "bostezo", "remolin", "vidriela", "nim", "espinardo"],
+    boss: "mira", sky: ["#cfe6f2", "#8cb9d6"], skyN: ["#0f1b2e", "#25385a"], ground: "#5d8fa8", groundN: "#1f3448",
+    events: ["orilla", "reflection", "boats"],
+  },
+  caves: {
+    type: "stone", bonus: { stone: 10, air: -10 }, sections: 4, min: 5, unlock: ["crater", "forest"], decor: "caves",
+    foes: ["pebb", "ecolito", "pebb", "remolin"], allies: ["remolin", "brotin", "fizz", "bostezo", "yunqueron", "ecolito", "vidriela", "espinardo"],
+    boss: "grava", sky: ["#8a7a6a", "#5a4c40"], skyN: ["#1c1714", "#2f2620"], ground: "#7a6a58", groundN: "#2e2620",
+    events: ["gravasong", "tunnels", "miners"],
+  },
 };
-const EVENTS = ["farol", "patrol", "tila", "well", "dam", "apprentice", "ola", "liquen", "vines", "loggers"];
+const EVENTS = ["farol", "patrol", "tila", "well", "dam", "apprentice", "ola", "liquen", "vines", "loggers", "court", "dig", "whisper", "orilla", "reflection", "boats", "gravasong", "tunnels", "miners"];
 
-const api = { TYPES, BEATS, OPPOSITE, typeMult, GRADES, rollGrade, STATUS, CARDS, DROP_POOL, scaled, MONS, makeUnit, Battle, lvlScale, xpNeed, SLOT_LVL, ZONES, EVENTS, isDayNow };
+const api = { COMPAT, canUse, UPGRADE_N, TYPES, BEATS, OPPOSITE, typeMult, GRADES, rollGrade, STATUS, CARDS, DROP_POOL, scaled, MONS, makeUnit, Battle, lvlScale, xpNeed, SLOT_LVL, ZONES, EVENTS, isDayNow };
 if (typeof module !== "undefined" && module.exports) module.exports = api;
 if (!root || !root.EV) return;
 
@@ -626,7 +752,8 @@ const TX = {
     "end.lvlPick": "Por subir de nivel, elige una carta", "quit": "Retirarse",
     "slot.a": "Activa", "slot.p": "Pasiva", "slot.s": "Soporte", "slot.lock": "Nivel {n}",
     "cards.title": "Cartas", "cards.lvl": "Nivel {n}", "cards.xp": "{x} / {y} XP", "cards.equip": "Equipar en", "cards.empty": "Hueco vacío",
-    "cards.owned": "Tu colección ({n})", "cards.fuse": "Fusionar 3 → {g}", "cards.fused": "¡Fusión! {card} ahora es {g}.",
+    "cards.owned": "Tu colección ({n})", "cards.fuse": "Mejorar {n} {a} → 1 {g}", "cards.fused": "¡Mejora! Ahora tienes {card} {g}.",
+    "cards.cant": "{name} no puede usar cartas de {type}", "cards.canTypes": "{name} puede usar cartas de: {types}, y las suyas propias.", "cards.copies": "Copias",
     "cards.desc": "Cada carta trae tres efectos; solo funciona el del hueco donde la pongas. Si el tipo de la carta coincide con el de tu criatura, resuena (+15 %).",
     "cards.noCreature": "Ten una criatura joven para usar cartas.", "cards.stats": "Vida {hp} · Fuerza {str} · Defensa {def} · Velocidad {spd} · Crítico {cr} %",
     "cards.unequip": "Quitar", "cards.inUse": "En uso", "cards.mode": "Modo de combate",
@@ -637,8 +764,11 @@ const TX = {
     "end.verse": "Recibes un fragmento del Canto del Claro: «{v}».",
     "ach.guard3": ["Ladera en paz", "Calma a los tres guardianes de la Ladera del Día."],
     "ach.exp1": ["Primer paso", "Gana tu primer combate de expedición."], "ach.guard1": ["Luz limpia", "Calma al Gran Farol del Prado Aurora."],
-    "ach.cards10": ["Coleccionista", "Reúne 10 cartas."], "ach.fuse1": ["Tres en una", "Fusiona una carta."],
-    "foe.hollow": "{name} apagado", "boss.farol": "El Gran Farol", "boss.forja": "La Forja Despierta", "boss.seto": "El Seto Hambriento",
+    "ach.cards10": ["Coleccionista", "Reúne 10 cartas."], "ach.fuse1": ["Cinco en una", "Mejora una carta juntando cinco iguales."],
+    "foe.hollow": "{name} apagado", "boss.farol": "El Gran Farol", "boss.forja": "La Forja Despierta", "boss.seto": "El Seto Hambriento", "boss.trono": "El Trono Vacío", "boss.mira": "La Que Mira desde Abajo", "boss.grava": "Grava",
+    "zones.lockEnv": "Calma a un guardián del Cráter o del Bosque para cruzar el Vado hacia el Envés.",
+    "log.lost": "{name} no encuentra a nadie en la niebla.", "log.echo": "¡El golpe de {name} resuena otra vez!", "log.revive": "¡{name} se levanta con {n} de vida!",
+    "ach.guard6": ["El Envés en calma", "Calma a los tres guardianes del Envés."],
   },
   en: {
     "nav.cards": "Cards", "act.exp": "🗺️ Expedition",
@@ -674,7 +804,8 @@ const TX = {
     "end.lvlPick": "For levelling up, pick a card", "quit": "Turn back",
     "slot.a": "Active", "slot.p": "Passive", "slot.s": "Support", "slot.lock": "Level {n}",
     "cards.title": "Cards", "cards.lvl": "Level {n}", "cards.xp": "{x} / {y} XP", "cards.equip": "Equip as", "cards.empty": "Empty slot",
-    "cards.owned": "Your collection ({n})", "cards.fuse": "Fuse 3 → {g}", "cards.fused": "Fusion! {card} is now {g}.",
+    "cards.owned": "Your collection ({n})", "cards.fuse": "Upgrade {n} {a} → 1 {g}", "cards.fused": "Upgraded! You now have {card} {g}.",
+    "cards.cant": "{name} can't use {type} cards", "cards.canTypes": "{name} can use cards of: {types}, plus its own.", "cards.copies": "Copies",
     "cards.desc": "Each card carries three effects; only the one for the slot you put it in works. If the card's type matches your creature's, it resonates (+15%).",
     "cards.noCreature": "Raise a creature to kid stage to use cards.", "cards.stats": "Health {hp} · Strength {str} · Defence {def} · Speed {spd} · Crit {cr}%",
     "cards.unequip": "Remove", "cards.inUse": "In use", "cards.mode": "Battle mode",
@@ -685,8 +816,11 @@ const TX = {
     "end.verse": "You receive a fragment of the Song of the Glade: “{v}”.",
     "ach.guard3": ["Slope at peace", "Calm all three guardians of the Dayside slope."],
     "ach.exp1": ["First step", "Win your first expedition battle."], "ach.guard1": ["Clean light", "Calm the Great Lantern of the Aurora Meadow."],
-    "ach.cards10": ["Collector", "Gather 10 cards."], "ach.fuse1": ["Three in one", "Fuse a card."],
-    "foe.hollow": "Dimmed {name}", "boss.farol": "The Great Lantern", "boss.forja": "The Wakeful Forge", "boss.seto": "The Hungry Hedge",
+    "ach.cards10": ["Collector", "Gather 10 cards."], "ach.fuse1": ["Five in one", "Upgrade a card by combining five of the same."],
+    "foe.hollow": "Dimmed {name}", "boss.farol": "The Great Lantern", "boss.forja": "The Wakeful Forge", "boss.seto": "The Hungry Hedge", "boss.trono": "The Empty Throne", "boss.mira": "She Who Watches from Below", "boss.grava": "Grava",
+    "zones.lockEnv": "Calm a guardian of the Crater or the Wood to cross the Ford to the Underside.",
+    "log.lost": "{name} can't find anyone in the fog.", "log.echo": "{name}'s blow rings out again!", "log.revive": "{name} gets back up with {n} health!",
+    "ach.guard6": ["Underside at peace", "Calm all three guardians of the Underside."],
   },
 };
 const ZT = {
@@ -703,6 +837,18 @@ const ZT = {
       desc: "Un bosque antiguo rodeado por el Seto, un muro vivo que lo protege. Por dentro, algo empieza a pudrirse. Aquí la Planta pega un 10 % más fuerte y la Luz un 10 % menos.",
       bossD: "El Seto Hambriento cierra el corazón del bosque.", win: "¡El Seto Hambriento afloja sus raíces!",
       winText: "Las espinas se abren y entra luz entre los troncos. {name} vuelve a casa con hojas por todas partes.", verse: "El verso de la raíz que comparte" },
+    hollow: { name: "Hondonada Umbría", sub: "El Envés · zona de Sombra", to: "a la Hondonada Umbría", from: "de la Hondonada Umbría",
+      desc: "Una hondonada siempre en niebla, donde solo se ve el paso siguiente. Aquí vive el pueblo de la Sombra, que tuvo que dejar sus casas. Aquí la Sombra pega un 10 % más fuerte y la Luz un 10 % menos.",
+      bossD: "El Trono Vacío preside una corte sin rey.", win: "¡El Trono Vacío se queda en silencio!",
+      winText: "La niebla se abre un poco y, por primera vez, se ve el camino entero. {name} vuelve a casa con niebla en las orejas.", verse: "El verso de la sombra que acompaña" },
+    lake: { name: "Lago Espejo", sub: "El Envés · zona de Agua", to: "al Lago Espejo", from: "del Lago Espejo",
+      desc: "Un lago tan quieto que refleja cosas que no están. Desde que represaron el arroyo, el agua baja y las barcas se quedan en el barro. Aquí el Agua pega un 10 % más fuerte y el Fuego un 10 % menos.",
+      bossD: "La Que Mira desde Abajo vigila desde el fondo.", win: "¡La Que Mira desde Abajo cierra los ojos!",
+      winText: "El lago vuelve a reflejar solo lo que hay. {name} vuelve a casa oliendo a lago.", verse: "El verso del agua que recuerda" },
+    caves: { name: "Cuevas del Eco", sub: "El Envés · zona de Piedra", to: "a las Cuevas del Eco", from: "de las Cuevas del Eco",
+      desc: "Cuevas donde cada palabra vuelve. Los túneles nuevos las están rompiendo, y el eco llega cada vez más débil. Aquí la Piedra pega un 10 % más fuerte y el Aire un 10 % menos.",
+      bossD: "Grava, la guardiana de las cuevas, canta con voz de derrumbe.", win: "¡Grava se sienta a descansar!",
+      winText: "Grava se derrumba despacio, como una montaña que se sienta. Entre sus piedras hay semillas guardadas con mucho cuidado: guardaba la cura, y tú acabas de vencerla. {name} vuelve a casa en silencio.", verse: "El verso del que repite a todos los demás" },
   },
   en: {
     aurora: { name: "Aurora Meadow", sub: "Dayside slope · Light zone", to: "to the Aurora Meadow", from: "from the Aurora Meadow",
@@ -717,6 +863,18 @@ const ZT = {
       desc: "An ancient wood ringed by the Hedge, a living wall that protects it. Inside, something is starting to rot. Here Plant hits 10% harder and Light 10% softer.",
       bossD: "The Hungry Hedge closes off the heart of the wood.", win: "The Hungry Hedge loosens its roots!",
       winText: "The thorns part and light falls between the trunks. {name} heads home covered in leaves.", verse: "The verse of the root that shares" },
+    hollow: { name: "Gloom Hollow", sub: "The Underside · Shadow zone", to: "to the Gloom Hollow", from: "from the Gloom Hollow",
+      desc: "A hollow always in fog, where you can only see the next step. The Shadow folk live here, after they had to leave their homes. Here Shadow hits 10% harder and Light 10% softer.",
+      bossD: "The Empty Throne presides over a court with no king.", win: "The Empty Throne falls silent!",
+      winText: "The fog parts a little and, for the first time, the whole path can be seen. {name} heads home with fog in its ears.", verse: "The verse of the shadow that keeps you company" },
+    lake: { name: "Mirror Lake", sub: "The Underside · Water zone", to: "to Mirror Lake", from: "from Mirror Lake",
+      desc: "A lake so still it reflects things that aren't there. Since the stream was dammed the water keeps dropping and boats are left in the mud. Here Water hits 10% harder and Fire 10% softer.",
+      bossD: "She Who Watches from Below keeps watch from the bottom.", win: "She Who Watches from Below closes her eyes!",
+      winText: "The lake reflects only what's really there again. {name} heads home smelling of lake.", verse: "The verse of the water that remembers" },
+    caves: { name: "Echo Caves", sub: "The Underside · Stone zone", to: "to the Echo Caves", from: "from the Echo Caves",
+      desc: "Caves where every word comes back. The new tunnels are breaking them, and the echo grows weaker every day. Here Stone hits 10% harder and Air 10% softer.",
+      bossD: "Grava, guardian of the caves, sings with a rockfall voice.", win: "Grava sits down to rest!",
+      winText: "Grava slowly crumbles, like a mountain sitting down. Among her stones there are seeds, kept with great care: she was keeping the cure, and you just beat her. {name} heads home in silence.", verse: "The verse of the one who repeats all the others" },
   },
 };
 const zt = (k, v, zone) => { let s = ZT[L()][zone || (X && X.zone) || "aurora"][k]; if (v) s = s.replace(/\{(\w+)\}/g, (m, n) => (v[n] != null ? v[n] : m)); return s; };
@@ -724,11 +882,11 @@ const tx = (k, v) => { let s = TX[L()][k]; if (s == null) s = TX.en[k]; if (s ==
 
 const MON_NAMES = {
   lumo: "Lumo", fizz: "Fizz", pebb: "Pebb", fuellito: "Fuellito", brotin: "Brotín", remolin: "Remolín", bostezo: "Bostezo",
-  mecha: "Mecha", yunqueron: "Yunquerón", espinardo: "Espinardo",
+  mecha: "Mecha", yunqueron: "Yunquerón", espinardo: "Espinardo", nim: "Nim", centinela: "Centinela", vidriela: "Vidriela", ecolito: "Ecolito",
 };
 const MON_DESC = {
-  es: { lumo: "Chispa juguetona de las Casas del Farol", fizz: "Nube dormilona de los Altos", pebb: "Comilón tozudo de la Hondura", fuellito: "Aprendiz del Gremio de la Brasa", brotin: "Bellota paciente del Bosque Hondo", remolin: "Nutria viajera de las Mareas", bostezo: "Ovejita-polilla del Fondo Blanco", mecha: "Vela con patas del Barrio Apagado", yunqueron: "Tortuga-yunque de la Forja Madre", espinardo: "Erizo de zarza nacido en el Seto" },
-  en: { lumo: "Playful spark from the Lantern Houses", fizz: "Sleepy cloud from the Heights", pebb: "Stubborn glutton from the Deep", fuellito: "Apprentice of the Ember Guild", brotin: "Patient acorn from the Deep Wood", remolin: "Wandering otter of the Tides", bostezo: "Woolly moth-lamb from the White Hollow", mecha: "Candle on legs from the Dim Quarter", yunqueron: "Anvil turtle of the Mother Forge", espinardo: "Bramble hedgehog born in the Hedge" },
+  es: { lumo: "Chispa juguetona de las Casas del Farol", fizz: "Nube dormilona de los Altos", pebb: "Comilón tozudo de la Hondura", fuellito: "Aprendiz del Gremio de la Brasa", brotin: "Bellota paciente del Bosque Hondo", remolin: "Nutria viajera de las Mareas", bostezo: "Ovejita-polilla del Fondo Blanco", mecha: "Vela con patas del Barrio Apagado", yunqueron: "Tortuga-yunque de la Forja Madre", espinardo: "Erizo de zarza nacido en el Seto", nim: "Murcielaguito del pueblo de la Sombra", centinela: "Guardia del Rey Lóbrego", vidriela: "Pez de cristal del Lago Espejo", ecolito: "Piedra que canta, de las Cuevas del Eco" },
+  en: { lumo: "Playful spark from the Lantern Houses", fizz: "Sleepy cloud from the Heights", pebb: "Stubborn glutton from the Deep", fuellito: "Apprentice of the Ember Guild", brotin: "Patient acorn from the Deep Wood", remolin: "Wandering otter of the Tides", bostezo: "Woolly moth-lamb from the White Hollow", mecha: "Candle on legs from the Dim Quarter", yunqueron: "Anvil turtle of the Mother Forge", espinardo: "Bramble hedgehog born in the Hedge", nim: "Little bat of the Shadow folk", centinela: "Guard of King Lóbrego", vidriela: "Glass fish of Mirror Lake", ecolito: "Singing stone of the Echo Caves" },
 };
 
 /* ---------- Card names, lore and effect text ---------- */
@@ -776,6 +934,24 @@ const CT = {
   vine:     { es: ["Enredadera Negra", "Sus raíces bajaron tanto que tocaron algo."], en: ["Black Vine", "Its roots went down so far they touched something."] },
   thorn:    { es: ["Muro de Espinos", "Protege el bosque. También lo encierra."], en: ["Thorn Wall", "It protects the wood. It also locks it in."] },
   root:     { es: ["Raíz que Bebe", "Bebe de abajo. Lo que sube no es agua."], en: ["Drinking Root", "It drinks from below. What rises isn't water."] },
+  night:    { es: ["Turno de Noche", "«Mamá dijo que volvería cuando dejara de oler a tierra.»"], en: ["Night Shift", "\"Mum said she'd come back when she stopped smelling of earth.\""] },
+  nohide:   { es: ["No Esconderse", "Nim se esconde de todo, menos de los que se esconden."], en: ["No Hiding", "Nim hides from everything except those who hide."] },
+  truename: { es: ["Nombre Verdadero", "Si dices su nombre verdadero, una sombra deja de ser un hueco."], en: ["True Name", "Say its true name and a shadow stops being a hole."] },
+  lance:    { es: ["Lanza de Niebla", "No atraviesa armaduras. Atraviesa excusas."], en: ["Fog Lance", "It doesn't pierce armour. It pierces excuses."] },
+  oath:     { es: ["Juramento Susurrado", "Juró proteger al primero de la fila. Nunca dijo qué pasaría después."], en: ["Whispered Oath", "It swore to protect the first in line. It never said what would happen after."] },
+  veil:     { es: ["Velo del Rey", "El Rey lo prestaba a quien quería salvar. Ahora lo presta su guardia."], en: ["King's Veil", "The King lent it to those he wanted to save. Now his guard lends it."] },
+  lostwave: { es: ["Ola Perdida", "«Mi hermana dijo que escribiría cuando bajara el calor.»"], en: ["Lost Wave", "\"My sister said she'd write when the heat went down.\""] },
+  truewater:{ es: ["Agua que No Miente", "En el Lago todo se refleja al revés. Esta agua no."], en: ["Water That Doesn't Lie", "In the Lake everything is reflected backwards. Not this water."] },
+  reading:  { es: ["Lectura del Lago", "Vidriela mira el agua y sabe dónde caerá el golpe."], en: ["Lake Reading", "Vidriela looks into the water and knows where the blow will land."] },
+  echo:     { es: ["Eco Repetido", "Lo que dices en la cueva vuelve. A veces, más fuerte."], en: ["Repeated Echo", "What you say in the cave comes back. Sometimes louder."] },
+  miner:    { es: ["Ningún Minero Atrás", "En la Hondura se sale de dos en dos, o no se sale."], en: ["No Miner Left Behind", "In the Deep you come out in pairs, or not at all."] },
+  rockname: { es: ["Nombre en la Roca", "Cada minero graba su nombre. Mientras se lea, nadie lo da por perdido."], en: ["Name in the Rock", "Every miner carves their name. While it can be read, nobody gives them up for lost."] },
+  court:    { es: ["Corte de Niebla", "Sillas vacías alrededor de un trono vacío. Aun así, nadie se sienta."], en: ["Fog Court", "Empty chairs around an empty throne. Even so, nobody sits."] },
+  crown:    { es: ["Corona sin Rey", "Pesa lo mismo sin una cabeza debajo."], en: ["Kingless Crown", "It weighs the same with no head beneath it."] },
+  mirror:   { es: ["Espejo Hondo", "Te enseña lo que fuiste. No lo que eres."], en: ["Deep Mirror", "It shows you what you were. Not what you are."] },
+  gaze:     { es: ["Mirada desde Abajo", "Desde el fondo, todo parece pequeño."], en: ["Gaze from Below", "From the bottom, everything looks small."] },
+  cavein:   { es: ["Derrumbe", "Grava no empuja las rocas. Las deja caer."], en: ["Cave-in", "Grava doesn't push the rocks. She lets them fall."] },
+  song:     { es: ["Canción de Piedra", "La canta a trozos, para que nadie la aprenda entera."], en: ["Stone Song", "She sings it in pieces, so nobody learns it whole."] },
   law:      { es: ["Ley del Umbral", "Después del ocaso, nadie cruza. Ni siquiera la luz."], en: ["Threshold Law", "After dusk, nobody crosses. Not even light."] },
 };
 const cardName = (id) => CT[id][L()][0];
@@ -784,26 +960,33 @@ const cardLore = (id) => CT[id][L()][1];
 function stTextEs(st, who) {
   const [n, tt, ch, v] = st;
   const chance = ch < 1 ? Math.round(ch * 100) + " % de " : "";
-  const base = { burn: "Quemar", soak: "Empapar", trap: "Atrapar", stun: "Aturdir", blind: "Cegar", slow: "dejar Lento", dull: "Adormilar" }[n];
+  const base = { burn: "Quemar", soak: "Empapar", trap: "Atrapar", stun: "Aturdir", blind: "Cegar", slow: "dejar Lento", dull: "Adormilar", exposed: "quedar Expuesto (no esquiva)" }[n];
   if (STATUS[n].neg) return `${chance}${base}${who ? " " + who : ""} ${turnsEs(tt)}`;
-  const pos = { cheer: "Ánimo", guard: `+${v} % de defensa`, fury: `+${v} % de daño`, might: `+${v} % a sus estadísticas`, regen: `recupera ${v} % por turno`, haste: `+${v} % de velocidad`, cushion: `el próximo golpe le hace ${v} % menos` }[n];
+  const pos = { cheer: "Ánimo", guard: `+${v} % de defensa`, fury: `+${v} % de daño`, might: `+${v} % a sus estadísticas`, regen: `recupera ${v} % por turno`, haste: `+${v} % de velocidad`, cushion: `el próximo golpe le hace ${v} % menos`, hidden: "Escondido (no se le puede apuntar)", charge: `Carga (+${v} % al próximo golpe)`, taunt: "Desafío (atrae los golpes)", evade: `+${v} % de esquiva` }[n];
   return `${pos} ${turnsEs(tt)}`;
 }
 function stTextEn(st, who) {
   const [n, tt, ch, v] = st;
   const chance = ch < 1 ? Math.round(ch * 100) + "% chance to " : "";
-  const base = { burn: "Burn", soak: "Soak", trap: "Trap", stun: "Stun", blind: "Blind", slow: "Slow", dull: "make Drowsy" }[n];
+  const base = { burn: "Burn", soak: "Soak", trap: "Trap", stun: "Stun", blind: "Blind", slow: "Slow", dull: "make Drowsy", exposed: "become Exposed (no dodging)" }[n];
   if (STATUS[n].neg) return `${chance}${ch < 1 ? base.toLowerCase() : base}${who ? " " + who : ""} for ${turnsEn(tt)}`;
-  const pos = { cheer: "Cheer", guard: `+${v}% defence`, fury: `+${v}% damage`, might: `+${v}% to all stats`, regen: `recovers ${v}% per turn`, haste: `+${v}% speed`, cushion: `the next hit deals ${v}% less` }[n];
+  const pos = { cheer: "Cheer", guard: `+${v}% defence`, fury: `+${v}% damage`, might: `+${v}% to all stats`, regen: `recovers ${v}% per turn`, haste: `+${v}% speed`, cushion: `the next hit deals ${v}% less`, hidden: "Hidden (can't be targeted)", charge: `Charged (+${v}% on the next hit)`, taunt: "Taunting (draws hits)", evade: `+${v}% dodge` }[n];
   return `${pos} for ${turnsEn(tt)}`;
 }
 const TGT = {
-  es: { foe: "al enemigo", foes: "a todos los enemigos", rand: "a enemigos al azar", randFoe: "a un enemigo al azar", fastestFoe: "al enemigo más rápido", fireFoe: "al enemigo de Fuego más fuerte", self: "a sí mismo", ally: "al aliado más herido", allyOther: "a un aliado", lowAlly: "al aliado más herido", allies: "a todo el equipo", selfAlly: "a sí mismo y a un aliado", slowAlly: "al aliado más lento", fireAlly: "al aliado de Fuego más fuerte", wildAllies: "a los aliados salvajes", debuffedAlly: "a un aliado", theAlly: "a ese aliado", lowOther: "a otro aliado herido", lowDefAlly: "al aliado con menos defensa", attacker: "al atacante" },
-  en: { foe: "the enemy", foes: "all enemies", rand: "random enemies", randFoe: "a random enemy", fastestFoe: "the fastest enemy", fireFoe: "the strongest Fire enemy", self: "itself", ally: "the most hurt ally", allyOther: "an ally", lowAlly: "the most hurt ally", allies: "the whole team", selfAlly: "itself and an ally", slowAlly: "the slowest ally", fireAlly: "the strongest Fire ally", wildAllies: "wild allies", debuffedAlly: "an ally", theAlly: "that ally", lowOther: "another hurt ally", lowDefAlly: "the ally with the least defence", attacker: "the attacker" },
+  es: { foe: "al enemigo", foes: "a todos los enemigos", rand: "a enemigos al azar", randFoe: "a un enemigo al azar", fastestFoe: "al enemigo más rápido", fireFoe: "al enemigo de Fuego más fuerte", self: "a sí mismo", ally: "al aliado más herido", allyOther: "a un aliado", lowAlly: "al aliado más herido", allies: "a todo el equipo", selfAlly: "a sí mismo y a un aliado", slowAlly: "al aliado más lento", fireAlly: "al aliado de Fuego más fuerte", wildAllies: "a los aliados salvajes", debuffedAlly: "a un aliado", theAlly: "a ese aliado", lowOther: "a otro aliado herido", lowDefAlly: "al aliado con menos defensa", attacker: "al atacante", fallenAlly: "al aliado caído", strongFoe: "del enemigo más fuerte" },
+  en: { foe: "the enemy", foes: "all enemies", rand: "random enemies", randFoe: "a random enemy", fastestFoe: "the fastest enemy", fireFoe: "the strongest Fire enemy", self: "itself", ally: "the most hurt ally", allyOther: "an ally", lowAlly: "the most hurt ally", allies: "the whole team", selfAlly: "itself and an ally", slowAlly: "the slowest ally", fireAlly: "the strongest Fire ally", wildAllies: "wild allies", debuffedAlly: "an ally", theAlly: "that ally", lowOther: "another hurt ally", lowDefAlly: "the ally with the least defence", attacker: "the attacker", fallenAlly: "the fallen ally", strongFoe: "the strongest enemy" },
 };
 function fxText(fx) {
   const es = L() === "es", T = TGT[L()], out = [];
   const tg = T[fx.tgt] || "";
+  if (fx.nightOnly) { const r = fxText(Object.assign({}, fx, { nightOnly: 0 })); return (es ? "De noche: " : "At night: ") + r.charAt(0).toLowerCase() + r.slice(1); }
+  if (fx.ifAbove) { const r = fxText(Object.assign({}, fx, { ifAbove: 0 })); return (es ? `Si tiene más del ${pc(fx.ifAbove)} de vida: ` : `If above ${pcE(fx.ifAbove)} health: `) + r.charAt(0).toLowerCase() + r.slice(1); }
+  if (fx.echoLast) out.push(es ? `repite la última carta Activa del equipo al ${pc(fx.echoLast)}` : `replays the team's last Active card at ${pcE(fx.echoLast)}`);
+  if (fx.foresight) out.push(es ? "el próximo golpe contra el equipo falla" : "the next hit against the team misses");
+  if (fx.cdDown) out.push(es ? `las cartas del equipo se recargan ${fx.cdDown} turno antes` : `the team's cards recharge ${fx.cdDown} turn sooner`);
+  if (fx.copyBuff) out.push(es ? `copia en sí misma los estados buenos ${tg}` : `copies the good statuses of ${tg} onto itself`);
+  if (fx.revive) out.push(es ? `levanta ${tg} con ${pc(fx.revive)} de vida` : `revives ${tg} with ${pcE(fx.revive)} health`);
   if (fx.noClockFoes) return es ? "Si es de noche, anula el +10 % del Reloj del claro a los enemigos" : "At night, cancels the enemies' +10% Glade Clock bonus";
   if (fx.selfCost) out.push(es ? `gasta ${pc(Math.abs(fx.selfCost))} de su vida` : `spends ${pcE(Math.abs(fx.selfCost))} of its health`);
   if (fx.give) out.push(es ? `le da el ${pc(fx.give)} de su propia vida ${tg}` : `gives ${pcE(fx.give)} of its own health to ${tg}`);
@@ -813,8 +996,11 @@ function fxText(fx) {
     if (fx.st) out.push(es ? stTextEs(fx.st) : stTextEn(fx.st).replace(/^./, (m) => m.toLowerCase()));
     if (fx.breakShield) out.push(es ? "rompe su Escudo" : "breaks its Shield");
     if (fx.trueHit) out.push(es ? "no se puede esquivar" : "can't be dodged");
+    if (fx.pierce) out.push(es ? "atraviesa el Escudo" : "goes through Shields");
+    if (fx.splash) out.push(es ? `salpica ${pc(fx.splash)} al resto de enemigos` : `splashes ${pcE(fx.splash)} onto the other enemies`);
     if (fx.drain) out.push(es ? `se cura el ${pc(fx.drain)} del daño` : `heals ${pcE(fx.drain)} of the damage`);
   } else if (fx.st) out.push(es ? `${stTextEs(fx.st)} ${STATUS[fx.st[0]].neg ? tg : tg}` : `${stTextEn(fx.st)} (${tg})`);
+  if (fx.st2) out.push(es ? `y ${stTextEs(fx.st2).replace(/^./, (m) => m.toLowerCase())}` : `and ${stTextEn(fx.st2).replace(/^./, (m) => m.toLowerCase())}`);
   if (fx.heal) out.push(es ? `cura ${pc(fx.heal)} ${tg}` : `heals ${pcE(fx.heal)} to ${tg}`);
   if (fx.shield) out.push(es ? `Escudo del ${pc(fx.shield[0])} ${tg} ${turnsEs(fx.shield[1])}` : `${pcE(fx.shield[0])} Shield to ${tg} for ${turnsEn(fx.shield[1])}`);
   if (fx.cleanse) {
@@ -853,6 +1039,15 @@ function passiveText(p) {
   if (p.immune) out.push(es ? `inmune a ${stN(p.immune)}` : `immune to ${stN(p.immune)}`);
   if (p.weakWater) out.push(es ? `pero recibe ${Math.abs(p.weakWater)} % más de daño de Agua` : `but takes ${Math.abs(p.weakWater)}% more damage from Water`);
   if (p.bleed) out.push(es ? `pero pierde ${Math.abs(p.bleed)} % de vida por turno` : `but loses ${Math.abs(p.bleed)}% health per turn`);
+  if (p.nightAll) out.push(es ? `+${p.nightAll} % de daño y defensa de noche (de día, la mitad en contra)` : `+${p.nightAll}% damage and defence at night (by day, half of it against)`);
+  if (p.shade) out.push(es ? `con más de la mitad de vida, +${p.shade} % de esquiva; con menos, +${p.shade} % de daño` : `above half health, +${p.shade}% dodge; below, +${p.shade}% damage`);
+  if (p.vsBlind) out.push(es ? `+${p.vsBlind} % de daño contra enemigos Cegados` : `+${p.vsBlind}% damage against Blinded enemies`);
+  if (p.oath) out.push(es ? `+${p.oath} % de daño y defensa mientras el primer aliado siga en pie` : `+${p.oath}% damage and defence while the first ally is standing`);
+  if (p.perFallen) out.push(es ? `+${p.perFallen} % de daño por cada aliado caído` : `+${p.perFallen}% damage for each fallen ally`);
+  if (p.sight) out.push(es ? `los enemigos esquivan ${p.sight} % menos al equipo` : `enemies dodge the team ${p.sight}% less`);
+  if (p.echo) out.push(es ? `${p.echo} % de que su golpe resuene otra vez a la mitad` : `${p.echo}% chance for its hit to ring out again at half power`);
+  if (p.desperate) out.push(es ? `+${p.desperate} % de daño si un aliado baja del 30 % de vida` : `+${p.desperate}% damage if an ally drops below 30% health`);
+  if (p.stoneDef) out.push(es ? `+${p.stoneDef} % de defensa por cada aliado de Piedra en pie` : `+${p.stoneDef}% defence for each Stone ally standing`);
   if (p.critImmune) out.push(es ? "los críticos contra él hacen daño normal" : "critical hits against it deal normal damage");
   const s = out.join(es ? ", " : ", ");
   return s.charAt(0).toUpperCase() + s.slice(1);
@@ -873,6 +1068,7 @@ function supportText(s) {
   if (s.on === "allyLethal") return es ? "Si un aliado va a caer de un golpe, ese golpe hace la mitad (1 vez)" : "If an ally would fall from one hit, that hit deals half (once)";
   if (s.on === "foeShield") return es ? "Cuando un enemigo se pone Escudo, el siguiente golpe del equipo lo rompe (1 vez)" : "When an enemy gains a Shield, the team's next hit breaks it (once)";
   if (s.on === "allyHitAdv") return es ? `Cuando un aliado recibe un golpe con ventaja de tipo, hace ${s.v} % menos (${s.n} veces)` : `When an ally takes a hit with type advantage, it deals ${s.v}% less (${s.n} times)`;
+  if (s.on === "win" && s.revive) return es ? `Tras cada combate ganado en expedición, los aliados caídos se levantan con ${s.revive} % más de vida` : `After each expedition battle won, fallen allies get back up with ${s.revive}% more health`;
   if (s.on === "win") return es ? `Tras cada combate ganado en expedición, el equipo recupera ${s.heal} % de vida` : `After each expedition battle won, the team recovers ${s.heal}% health`;
   return `${when}: ${fxText(s.fx).replace(/^./, (m) => m.toLowerCase())}`;
 }
@@ -912,9 +1108,22 @@ function rpgState() {
   }
   // drop equipped uids that no longer exist
   for (const k of ["a", "p", "s"]) if (S.rpg.eq[k] && !P.cards.some((c) => c.uid === S.rpg.eq[k])) S.rpg.eq[k] = null;
+  for (const k of ["a", "p", "s"]) { const c = S.rpg.eq[k] && cardByUid(S.rpg.eq[k]); if (c && !canUse(S.species, S.form, c.id)) S.rpg.eq[k] = null; }
   return S.rpg;
 }
+const usable = (id) => { const S = EV.S; return !S || canUse(S.species, S.form, id); };
 function giveCard(id, gi) { const P = EV.P; const c = { uid: "c" + P.cardSeq++, id, g: gi }; P.cards.push(c); return c; }
+function canTypesText() {
+  const S = EV.S; if (!S || !COMPAT[S.species]) return "";
+  const ts = COMPAT[S.species].slice();
+  const ad = MONS[S.species].adult && S.form && MONS[S.species].adult[S.form];
+  if (ad && !ts.includes(ad)) ts.push(ad);
+  return tx("cards.canTypes", { name: S.name, types: ts.map((t) => TYPES[t].icon + " " + TYPES[t][L()]).join(", ") });
+}
+function cantNote(id) {
+  const S = EV.S; if (!S || usable(id)) return "";
+  return `<p class="rc-cant">🚫 ${esc(tx("cards.cant", { name: S.name, type: TYPES[CARDS[id].type][L()] }))}</p>`;
+}
 function cardByUid(uid) { return EV.P.cards.find((c) => c.uid === uid); }
 function ownUnitOpts(hpPct) {
   const S = EV.S, R = rpgState();
@@ -967,6 +1176,8 @@ const css = `
 .trail i { flex: 1; height: 6px; border-radius: 3px; background: var(--line); }
 .trail i.done { background: var(--moss); }
 .trail i.now { background: var(--accent); }
+.rc-copies { margin: 6px 0 0; font-size: 12px; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.rc-cant { margin: 6px 0 0; font-size: 12px; font-weight: 700; color: var(--bad, #c0392b); }
 .bstage { width: 100%; max-width: 620px; margin: 0 auto; position: relative; border-radius: 16px; overflow: hidden; border: 1px solid var(--line); background: #000; }
 .bstage canvas { display: block; width: 100%; height: auto; }
 .bbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
@@ -1018,9 +1229,9 @@ Object.assign(EV.SFX, {
 });
 
 /* ---------- Achievements ---------- */
-EV.ACH.push(["exp1", 15, (p) => (p.c.expWins || 0) >= 1], ["guard1", 40, (p) => ((p.cleared || {}).aurora || 0) >= 1], ["guard3", 60, (p) => ["aurora", "crater", "forest"].every((z) => ((p.cleared || {})[z] || 0) >= 1)], ["cards10", 20, (p) => (p.cards || []).length >= 10], ["fuse1", 15, (p) => (p.c.fused || 0) >= 1]);
+EV.ACH.push(["exp1", 15, (p) => (p.c.expWins || 0) >= 1], ["guard1", 40, (p) => ((p.cleared || {}).aurora || 0) >= 1], ["guard3", 60, (p) => ["aurora", "crater", "forest"].every((z) => ((p.cleared || {})[z] || 0) >= 1)], ["guard6", 80, (p) => ["hollow", "lake", "caves"].every((z) => ((p.cleared || {})[z] || 0) >= 1)], ["cards10", 20, (p) => (p.cards || []).length >= 10], ["fuse1", 15, (p) => (p.c.fused || 0) >= 1]);
 for (const lg of ["es", "en"]) {
-  for (const id of ["exp1", "guard1", "guard3", "cards10", "fuse1"]) EV.STR[lg].ach[id] = TX[lg]["ach." + id];
+  for (const id of ["exp1", "guard1", "guard3", "guard6", "cards10", "fuse1"]) EV.STR[lg].ach[id] = TX[lg]["ach." + id];
   EV.STR[lg]["nav.cards"] = TX[lg]["nav.cards"];
 }
 EV.applyStatic();
@@ -1037,6 +1248,13 @@ const MONCOL = {
   espinardo:{ body: "#8a6a4a", belly: "#e0c9a0", line: "#3d2a18", cheek: "#f0a58a" },
   forja:    { body: "#4a3a36", belly: "#ff9a3a", line: "#1e1614", cheek: "#ff7a5a" },
   seto:     { body: "#3f6e36", belly: "#8fbf6a", line: "#1e3a1a", cheek: "#d4a0c0" },
+  nim:      { body: "#5b5175", belly: "#a89cc8", line: "#251f33", cheek: "#e0a0c8" },
+  centinela:{ body: "#4a4e60", belly: "#9aa0b8", line: "#1e2030", cheek: "#c8a0c0" },
+  vidriela: { body: "#8fd0e8", belly: "#e6f8ff", line: "#3a7896", cheek: "#f4b0c8" },
+  ecolito:  { body: "#9a8a76", belly: "#d8ccb8", line: "#4a4034", cheek: "#e8a88a" },
+  trono:    { body: "#2e2a3a", belly: "#6a6090", line: "#110f18", cheek: "#a080c0" },
+  mira:     { body: "#2f5f80", belly: "#a8e0f0", line: "#142c3e", cheek: "#f0a0b8" },
+  grava:    { body: "#7a6c5c", belly: "#c8b89a", line: "#352c22", cheek: "#e0a080" },
 };
 function drawMon(c, kind, o) {
   const ell = EV.ell;
@@ -1065,6 +1283,30 @@ function drawMon(c, kind, o) {
       c.fillStyle = col.belly; for (const [px, py] of [[-20, -26], [14, -36], [30, -4], [-34, 8], [6, 22]]) { EV.ell(c, px, py, 6, 4); c.fill(); }
       c.strokeStyle = "#24122e"; c.lineWidth = 2; for (let k = 0; k < 9; k++) { const a = k * 0.7, r = 44; c.beginPath(); c.moveTo(Math.cos(a) * (r - 8), Math.sin(a) * (r - 8) - 4); c.lineTo(Math.cos(a) * r, Math.sin(a) * r - 4); c.stroke(); }
       c.fillStyle = "#ffe27a"; for (const x of [-12, 12]) { EV.ell(c, x, -6, 5, o.ko ? 1 : 6); c.fill(); } c.fillStyle = "#24122e"; for (const x of [-12, 12]) { EV.ell(c, x, -5, 2, o.ko ? 0.5 : 3); c.fill(); }
+    } else if (kind === "trono") {
+      // an empty throne in the fog, with two eyes where the king should sit
+      c.fillStyle = col.body; c.fillRect(-30, -74, 60, 84); c.strokeRect(-30, -74, 60, 84);
+      for (const x of [-30, 22]) { c.fillRect(x, -88, 8, 16); }
+      c.fillRect(-42, 0, 84, 16); c.strokeRect(-42, 0, 84, 16);
+      for (const x of [-38, 30]) { c.fillRect(x, 16, 8, 22); }
+      c.fillStyle = col.belly; c.fillRect(-20, -62, 40, 58);
+      c.save(); c.globalAlpha = 0.35 + Math.sin(o.t * 2) * 0.1; c.fillStyle = "#d8d4e8"; for (let k = 0; k < 3; k++) { EV.ell(c, Math.sin(o.t + k * 2) * 20, -30 + k * 20, 34, 6); c.fill(); } c.restore();
+      c.fillStyle = "#e8e0ff"; for (const x of [-9, 9]) { EV.ell(c, x, -38, 4, o.ko ? 1 : 5); c.fill(); }
+      c.fillStyle = "#c0a040"; c.beginPath(); c.moveTo(-14, -74); c.lineTo(-8, -84); c.lineTo(0, -76); c.lineTo(8, -84); c.lineTo(14, -74); c.closePath(); c.fill();
+    } else if (kind === "mira") {
+      // a huge eye under a water surface
+      c.fillStyle = col.body; c.beginPath(); c.moveTo(-50, 36); c.quadraticCurveTo(-56, -20, 0, -40); c.quadraticCurveTo(56, -20, 50, 36); c.closePath(); c.fill(); c.stroke();
+      c.save(); c.globalAlpha = 0.5; c.strokeStyle = "#e0f6ff"; c.lineWidth = 2; for (let k = 0; k < 3; k++) { const y = -30 + k * 6 + Math.sin(o.t * 2 + k) * 2; c.beginPath(); c.moveTo(-40 + k * 6, y); c.quadraticCurveTo(0, y - 6, 40 - k * 6, y); c.stroke(); } c.restore();
+      c.fillStyle = "#f4fbff"; EV.ell(c, 0, 2, 26, o.ko ? 2 : 17); c.fill(); c.stroke();
+      if (!o.ko) { const lx = Math.sin(o.t * 0.9) * 8; c.fillStyle = "#3a8ab0"; EV.ell(c, lx, 2, 11, 11); c.fill(); c.fillStyle = "#0e1a24"; EV.ell(c, lx, 2, 5, 7); c.fill(); c.fillStyle = "#fff"; EV.ell(c, lx - 3, -2, 2, 2); c.fill(); }
+      c.fillStyle = col.belly; for (const [px, py] of [[-36, 24], [34, 20], [-20, 30], [22, 32]]) { EV.ell(c, px, py, 4, 3); c.fill(); }
+    } else if (kind === "grava") {
+      // a mountain of stones that sings; a crack glows where her mouth is
+      c.fillStyle = col.body; c.beginPath(); c.moveTo(-50, 38); c.lineTo(-38, -10); c.lineTo(-18, -44); c.lineTo(6, -52); c.lineTo(30, -30); c.lineTo(48, 4); c.lineTo(52, 38); c.closePath(); c.fill(); c.stroke();
+      c.fillStyle = col.belly; for (const [px, py, r] of [[-26, 10, 10], [18, -14, 9], [30, 20, 8], [-8, -30, 7]]) { EV.ell(c, px, py, r, r * 0.7); c.fill(); }
+      c.fillStyle = "#7ad0c8"; c.beginPath(); c.moveTo(-4, -52); c.lineTo(4, -70); c.lineTo(12, -50); c.closePath(); c.fill();
+      c.fillStyle = "#2a2018"; for (const x of [-12, 10]) { EV.ell(c, x, -14, 4, o.ko ? 1 : 5); c.fill(); }
+      const op = 0.5 + Math.sin(o.t * 3) * 0.3; c.save(); c.globalAlpha = o.ko ? 0.1 : op; c.fillStyle = "#ffe0a0"; c.fillRect(-12, 4, 24, 4); c.restore();
     } else if (kind === "farol") {
       // a great lantern on legs
       c.fillStyle = col.body; c.fillRect(-6, -78, 12, 14);
@@ -1101,6 +1343,35 @@ function drawMon(c, kind, o) {
         c.strokeStyle = "#3e6e2c"; c.lineWidth = 3; for (let k = 0; k < 11; k++) { const a = Math.PI * (1.05 + k * 0.09); c.beginPath(); c.moveTo(Math.cos(a) * 30, Math.sin(a) * 30); c.lineTo(Math.cos(a) * 50, Math.sin(a) * 50); c.stroke(); }
         c.fillStyle = "#c0392b"; for (const k of [2, 6, 9]) { const a = Math.PI * (1.05 + k * 0.09); EV.ell(c, Math.cos(a) * 50, Math.sin(a) * 50, 3, 3); c.fill(); }
         c.strokeStyle = col.line; c.lineWidth = 3; c.fillStyle = g; ell(c, 0, 4, 38, 34); c.fill(); c.stroke(); c.fillStyle = col.belly; ell(c, 0, 16, 22, 16); c.fill();
+      } else if (kind === "nim") {
+        // a little bat: pointed ears and folded wings
+        c.fillStyle = col.body; for (const sx of [-1, 1]) { c.beginPath(); c.moveTo(sx * 10, -24); c.lineTo(sx * 22, -50); c.lineTo(sx * 28, -20); c.closePath(); c.fill(); c.stroke(); }
+        const fl = Math.sin(o.t * 6) * 6;
+        for (const sx of [-1, 1]) { c.beginPath(); c.moveTo(sx * 26, -6); c.quadraticCurveTo(sx * 56, -22 + fl, sx * 58, 10); c.quadraticCurveTo(sx * 46, 2, sx * 40, 14); c.quadraticCurveTo(sx * 34, 4, sx * 26, 12); c.closePath(); c.fill(); c.stroke(); }
+        c.fillStyle = g; ell(c, 0, 4, 32, 32); c.fill(); c.stroke(); c.fillStyle = col.belly; ell(c, 0, 16, 18, 14); c.fill();
+      } else if (kind === "centinela") {
+        // an armoured guard with a fog lance and a crested helmet
+        c.strokeStyle = "#6a6478"; c.lineWidth = 3; c.beginPath(); c.moveTo(44, 38); c.lineTo(44, -60); c.stroke();
+        c.fillStyle = "#cfd4e8"; c.beginPath(); c.moveTo(38, -58); c.lineTo(44, -76); c.lineTo(50, -58); c.closePath(); c.fill();
+        c.save(); c.globalAlpha = 0.4; c.fillStyle = "#e8e4f0"; EV.ell(c, 44 + Math.sin(o.t * 2) * 3, -66, 10, 4); c.fill(); c.restore();
+        c.strokeStyle = col.line; c.fillStyle = g; ell(c, 0, 4, 36, 40); c.fill(); c.stroke();
+        c.fillStyle = "#6a6e86"; c.beginPath(); c.moveTo(-34, -12); c.quadraticCurveTo(0, -60, 34, -12); c.lineTo(28, -16); c.quadraticCurveTo(0, -40, -28, -16); c.closePath(); c.fill(); c.stroke();
+        c.fillStyle = "#4a3a6a"; c.beginPath(); c.moveTo(-4, -46); c.quadraticCurveTo(10, -66, 26, -60); c.quadraticCurveTo(12, -54, 4, -40); c.closePath(); c.fill();
+        c.fillStyle = col.belly; ell(c, 0, 18, 20, 16); c.fill();
+      } else if (kind === "vidriela") {
+        // a glass fish: see-through body, wavy fins and a tail
+        c.save(); c.globalAlpha = 0.85;
+        const w = Math.sin(o.t * 4) * 5;
+        c.fillStyle = "#bfe8f6"; c.beginPath(); c.moveTo(-30, 0); c.lineTo(-56, -18 + w); c.lineTo(-52, 0); c.lineTo(-56, 18 - w); c.closePath(); c.fill(); c.stroke();
+        c.beginPath(); c.moveTo(-6, -30); c.quadraticCurveTo(10, -52 + w, 22, -28); c.closePath(); c.fill(); c.stroke();
+        c.fillStyle = g; ell(c, 0, 0, 38, 30); c.fill(); c.stroke(); c.restore();
+        c.save(); c.globalAlpha = 0.6; c.fillStyle = "#ffffff"; ell(c, -12, -14, 10, 4); c.fill(); c.restore();
+      } else if (kind === "ecolito") {
+        // a singing pebble with sound rings
+        c.fillStyle = g; c.beginPath(); c.moveTo(-36, 30); c.lineTo(-40, -4); c.lineTo(-22, -32); c.lineTo(12, -38); c.lineTo(36, -14); c.lineTo(38, 30); c.closePath(); c.fill(); c.stroke();
+        c.fillStyle = col.belly; ell(c, 0, 16, 20, 12); c.fill();
+        c.strokeStyle = "#d8c8a8"; c.lineWidth = 2; for (let k = 0; k < 2; k++) { const ph = (o.t * 0.8 + k / 2) % 1; c.globalAlpha = 1 - ph; c.beginPath(); c.arc(0, 0, 44 + ph * 18, -0.5, 0.5); c.stroke(); c.beginPath(); c.arc(0, 0, 44 + ph * 18, Math.PI - 0.5, Math.PI + 0.5); c.stroke(); } c.globalAlpha = 1;
+        c.strokeStyle = col.line; c.lineWidth = 3;
       } else if (kind === "bostezo") { c.beginPath(); for (const [px, py, r] of [[-26, 8, 18], [-14, -18, 20], [10, -22, 20], [28, -2, 18], [24, 22, 16], [0, 24, 22], [-24, 26, 14]]) { c.moveTo(px + r, py); c.arc(px, py, r, 0, 7); } c.stroke(); c.fill(); }
       else if (kind === "brotin" || kind === "fuellito" || kind === "remolin") { ell(c, 0, 0, 38, kind === "brotin" ? 40 : 36); c.fill(); c.stroke(); c.fillStyle = col.belly; ell(c, 0, 14, 22, 18); c.fill(); }
       if (kind !== "bostezo" && kind !== "yunqueron") { c.fillStyle = col.body; c.lineWidth = 2.5; for (const fx of [-16, 16]) { ell(c, fx, 36, 10, 6); c.fill(); c.stroke(); } }
@@ -1162,7 +1433,7 @@ function startExpedition() {
   X = { zone: null, offer: [], chosen: [], party: [], section: 0, nodes: [], loot: { xp: 0, coins: 0, cards: [] }, nextFoeBuff: 0, wins: 0 };
   show("zones");
 }
-const zoneOpen = (id) => { const u = ZONES[id].unlock; return !u || ((EV.P.cleared || {})[u] || 0) > 0; };
+const zoneOpen = (id) => { const u = ZONES[id].unlock; if (!u) return true; return [].concat(u).some((z) => ((EV.P.cleared || {})[z] || 0) > 0); };
 function pickZone(id) {
   if (!ZONES[id] || !zoneOpen(id)) { EV.sfx("deny"); return; }
   const S = EV.S, z = ZONES[id];
@@ -1178,7 +1449,7 @@ function zonesHtml() {
     const done = cl[id] || 0;
     return `<button type="button" class="node zone" data-zone="${id}" ${open ? "" : "disabled"}><span class="ic" aria-hidden="true">${TYPES[z.type].icon}</span>
       <strong>${esc(zt("name", null, id))}</strong><small>${esc(zt("sub", null, id))}</small>
-      <small>${open ? esc(tx("zones.lvl", { n: z.min })) : "🔒 " + esc(tx("zones.lock"))}</small>
+      <small>${open ? esc(tx("zones.lvl", { n: z.min })) : "🔒 " + esc(tx(Array.isArray(z.unlock) ? "zones.lockEnv" : "zones.lock"))}</small>
       ${done ? `<small class="ok">✓ ${esc(tx("zones.done", { n: done }))}<br>${esc(tx("zones.verse", { v: zt("verse", null, id) }))}</small>` : ""}</button>`;
   }).join("")}</div>`;
 }
@@ -1290,7 +1561,7 @@ function loadoutHtml() {
   for (const k of ["a", "p", "s"]) { const c = R.eq[k] && cardByUid(R.eq[k]); if (c) eqIds[k] = c.id; }
   // one option per distinct card (best grade first)
   const best = {};
-  for (const c of P.cards) if (!best[c.id] || c.g > best[c.id].g) best[c.id] = c;
+  for (const c of P.cards) if (usable(c.id) && (!best[c.id] || c.g > best[c.id].g)) best[c.id] = c;
   const opts = Object.values(best).sort((a, b) => b.g - a.g || cardName(a.id).localeCompare(cardName(b.id)));
   const slots = ["a", "p", "s"].map((k) => {
     const locked = R.lvl < SLOT_LVL[k];
@@ -1303,11 +1574,12 @@ function loadoutHtml() {
     const fx = cur && !locked ? `<p class="muted">${esc(slotText(scaled(cur.id, cur.g), k))}</p>` : locked ? `<p class="muted">🔒 ${esc(tx("load.lock", { n: SLOT_LVL[k] }))}</p>` : "";
     return `<div class="slotbox"><p class="sub">${esc(tx("slot." + k))}</p>${sel}${fx}</div>`;
   }).join("");
-  return `<div class="panel"><h3>${esc(tx("load.title"))}</h3><p class="muted" style="margin:0">${esc(tx("load.sub"))}</p><div class="slots">${slots}</div></div>`;
+  return `<div class="panel"><h3>${esc(tx("load.title"))}</h3><p class="muted" style="margin:0">${esc(tx("load.sub"))} ${esc(canTypesText())}</p><div class="slots">${slots}</div></div>`;
 }
 function setLoad(slot, uid) {
   const R = rpgState(); if (!R) return;
   const c = uid && cardByUid(uid);
+  if (c && !usable(c.id)) { EV.sfx("deny"); return; }
   if (c) for (const k of ["a", "p", "s"]) { const o = R.eq[k] && cardByUid(R.eq[k]); if (k !== slot && o && o.id === c.id) R.eq[k] = null; }
   R.eq[slot] = c ? c.uid : null;
   EV.sfx("card"); EV.save(); render();
@@ -1368,6 +1640,9 @@ function flushEvents() {
       case "ko": blog(tx("log.ko", { name: uName(e.u) })); EV.sfx("ko"); EV.buzz(40); break;
       case "skip": blog(tx("log.skip." + e.why, { name: uName(e.u) })); break;
       case "round": renderBLog(); break;
+      case "lost": blog(tx("log.lost", { name: uName(e.u) })); break;
+      case "echo": blog(tx("log.echo", { name: uName(e.u) })); if (a) battle.floats.push({ x: a.x, y: a.y - 50, text: "≋", col: "#d8c8a8", life: 1 }); break;
+      case "revive": blog(tx("log.revive", { name: uName(e.u), n: e.n })); if (a) battle.floats.push({ x: a.x, y: a.y - 40, text: "↑ " + e.n, col: "#8fe08a", life: 1.3 }); EV.sfx("heal"); break;
     }
   }
   if (hitSfx) { EV.sfx(hitSfx); if (hitSfx === "crit") EV.buzz(25); }
@@ -1427,14 +1702,15 @@ function endBattle(res) {
   for (const m of X.party) if (m.own && m.hp <= 0) X.ownFalls = (X.ownFalls || 0) + 1;
   if (res !== "win") { finish("lose"); return; }
   // revive the fallen with a little health, apply after-battle supports
-  const winHeal = allies.filter((u) => u.hp > 0 && u.cards.s && u.cards.s.s.on === "win").reduce((a, u) => a + u.cards.s.s.heal, 0) / 100;
-  for (const m of X.party) m.hp = m.hp <= 0 ? 0.3 : Math.min(1, m.hp + 0.25 + winHeal);
+  const winSup = allies.filter((u) => u.hp > 0 && u.cards.s && u.cards.s.s.on === "win").map((u) => u.cards.s.s);
+  const winHeal = winSup.reduce((a, s) => a + (s.heal || 0), 0) / 100, winRevive = winSup.reduce((a, s) => a + (s.revive || 0), 0) / 100;
+  for (const m of X.party) m.hp = m.hp <= 0 ? Math.min(1, 0.3 + winRevive) : Math.min(1, m.hp + 0.25 + winHeal);
   X.wins++; EV.P.c.expWins = (EV.P.c.expWins || 0) + 1;
   const foes = b.units.filter((u) => u.side === "foe");
   const xp = foes.reduce((a, u) => a + 8 + 4 * u.lvl, 0) * (boss ? 2 : 1);
   const coins = boss ? 30 : 3 + Math.floor(rnd() * 4) + foes.length;
   X.loot.xp += xp; X.loot.coins += coins;
-  const offer = boss ? offerCards(3, 3) : rnd() < 0.3 ? offerCards(3, 0) : null;
+  const offer = boss ? offerCards(3, 1) : rnd() < 0.12 ? offerCards(3, 0) : null;
   X.reward = { xp, coins, offer, after: boss ? "win" : "next" };
   EV.checkAch();
   show("reward");
@@ -1442,7 +1718,7 @@ function endBattle(res) {
 function offerCards(n, minGrade) {
   const z = ZONES[X.zone];
   const weighted = [];
-  for (const id of DROP_POOL) { const w = CARDS[id].type === z.type ? 3 : 1; for (let i = 0; i < w; i++) weighted.push(id); }
+  for (const id of DROP_POOL) { const w = (CARDS[id].type === z.type ? 3 : 1) * (usable(id) ? 2 : 1); for (let i = 0; i < w; i++) weighted.push(id); }
   const ids = [];
   while (ids.length < n) { const id = weighted[Math.floor(rnd() * weighted.length)]; if (!ids.includes(id)) ids.push(id); }
   return ids.map((id) => ({ id, g: rollGrade(minGrade) }));
@@ -1454,7 +1730,7 @@ function rewardHtml() {
   if (r.coins) parts.push(`<span>✦ ${esc(tx("r.coins", { n: r.coins }))}</span>`);
   let html = `<div class="panel"><h3>${esc(r.title || tx("r.title"))}</h3>${r.text ? `<p class="evt-out">${esc(r.text)}</p>` : ""}${parts.length ? `<div class="loot">${parts.join("")}</div>` : ""}`;
   if (r.offer) {
-    html += `<h3>${esc(tx("r.pick"))}</h3><div class="rcards">${r.offer.map((o, i) => cardHtml(o.id, o.g, { foot: `<div class="rc-btns"><button class="btn" type="button" data-take="${i}">${esc(tx("r.pick"))}</button></div>` })).join("")}</div>
+    html += `<h3>${esc(tx("r.pick"))}</h3><div class="rcards">${r.offer.map((o, i) => cardHtml(o.id, o.g, { foot: `${cantNote(o.id)}<div class="rc-btns"><button class="btn" type="button" data-take="${i}">${esc(tx("r.pick"))}</button></div>` })).join("")}</div>
       <div class="bctl"><button class="btn ghost" type="button" data-take="-1">${esc(tx("r.skip"))}</button></div>`;
   } else html += `<div class="bctl"><button class="btn" type="button" data-x="continue">${esc(tx("r.continue"))}</button></div>`;
   return html + `</div><div class="panel"><h3>${esc(tx("exp.party"))}</h3>${partyHtml()}${lootHtml()}</div>`;
@@ -1467,6 +1743,31 @@ function afterReward() {
 
 /* ---------- Battle drawing ---------- */
 function drawDecor(c, decor, t, day) {
+  if (decor === "mist") {
+    // crooked posts and drifting fog banks
+    for (let i = 0; i < 5; i++) { const x = 24 + i * 82; c.fillStyle = day ? "#5c5868" : "#1d1b25"; c.fillRect(x - 3, 30 + (i % 2) * 8, 6, 44); c.fillRect(x - 10, 34 + (i % 2) * 8, 20, 4); }
+    for (let k = 0; k < 4; k++) { c.save(); c.globalAlpha = day ? 0.28 : 0.2; c.fillStyle = "#e8e4f0"; const y = 40 + k * 12, off = ((t * (8 + k * 3)) % 120); for (let i = -1; i < 5; i++) { EV.ell(c, i * 120 + off, y, 70, 9); c.fill(); } c.restore(); }
+    return;
+  }
+  if (decor === "lake") {
+    // still water on the horizon with a reflection that doesn't match
+    c.fillStyle = day ? "#7fb0cc" : "#1b3350"; c.fillRect(0, 46, BW, 26);
+    c.save(); c.globalAlpha = 0.45; c.strokeStyle = "#ffffff"; c.lineWidth = 1.5;
+    for (let i = 0; i < 9; i++) { const x = (i * 53 + t * 6) % BW, y = 52 + (i % 3) * 6; c.beginPath(); c.moveTo(x, y); c.lineTo(x + 18, y); c.stroke(); }
+    c.restore();
+    for (let i = 0; i < 3; i++) { const x = 60 + i * 140; c.fillStyle = day ? "#5a4a3a" : "#20180f"; c.beginPath(); c.moveTo(x - 18, 44); c.lineTo(x + 18, 44); c.lineTo(x + 12, 50); c.lineTo(x - 12, 50); c.closePath(); c.fill(); }
+    c.save(); c.globalAlpha = 0.35 + 0.15 * Math.sin(t * 1.3); c.fillStyle = "#e8f6ff"; EV.ell(c, BW * 0.72, 60, 10, 4); c.fill(); c.restore();
+    return;
+  }
+  if (decor === "caves") {
+    // a cave ceiling with stalactites and faint echo rings
+    c.fillStyle = day ? "#4a3e34" : "#15110e"; c.fillRect(0, 0, BW, 14);
+    for (let i = 0; i < 14; i++) { const x = 8 + i * 30, h = 14 + ((i * 37) % 26); c.beginPath(); c.moveTo(x - 9, 12); c.lineTo(x + 9, 12); c.lineTo(x, 12 + h); c.closePath(); c.fill(); }
+    c.save(); c.strokeStyle = "#e8d8b8"; c.lineWidth = 1.5;
+    for (let k = 0; k < 3; k++) { const ph = (t * 0.4 + k / 3) % 1; c.globalAlpha = (1 - ph) * 0.4; c.beginPath(); c.arc(BW / 2, 58, 10 + ph * 90, Math.PI * 1.1, Math.PI * 1.9); c.stroke(); }
+    c.restore();
+    return;
+  }
   if (decor === "forge") {
     // chimneys with rising embers
     for (let i = 0; i < 4; i++) {
@@ -1570,6 +1871,27 @@ const EVT = {
       o: ["", "", "Das un rodeo largo, pero tranquilo."] },
     loggers: { t: "Unos leñadores cargan troncos hacia el Cráter. Uno se ha torcido el tobillo.", c: ["Ayudarle a cargar", "Preguntar para qué tanta leña", "Seguir"],
       o: ["Le ayudáis hasta el claro. Os da unas Chispas y un trozo de pan.", "«Para las forjas. Mil faroles, dicen. Y el bosque, cada año más callado.» Ganas experiencia.", "Los leñadores siguen su camino."] },
+    court: { t: "En la niebla aparece una corte vacía: sillas de piedra en círculo alrededor de un trono sin nadie. Junto a cada silla hay una copa de agua fresca.", c: ["Sentarte en una silla", "Beber de una copa", "Pasar sin tocar nada"],
+      o: ["Al sentarte, las sombras de las sillas se levantan. «Nadie se sienta en la corte sin ser invitado.»", "El agua sabe a cueva y a lluvia vieja. El equipo recupera vida.", "Al salir del círculo oyes un susurro: «El Rey no está. Pero sigue mandando.» Ganas experiencia."] },
+    dig: { t: "En la niebla suenan palas. Una familia del pueblo de la Sombra cava un pozo hondo, a escondidas. Sobre la boca del pozo hay una marca con forma de farol.", c: ["Preguntarles para quién cavan", "Ayudarles un rato", "Seguir sin que te vean"],
+      o: ["«Para la Luz de Arriba. Nos pagan con permiso para quedarnos. El Rey lo firmó.» Lo dicen sin mirarte. Ganas experiencia.", "Cavas con ellos hasta que te duelen las patas. Te dan unas Chispas manchadas de tierra negra.", "Te alejas en silencio. Junto al sendero alguien olvidó algo."] },
+    whisper: { t: "Dos Susurradores del Rey Lóbrego te cierran el paso. Llevan velos de niebla y no se les ven los ojos. «¿Traes recado de la Luz?»", c: ["Decir la verdad: vas al Trono", "Darles 10 Chispas por su silencio", "Cruzar la niebla corriendo"],
+      o: ["«Entonces verás que está vacío. Siempre lo estuvo.» Se apartan sin hacer ruido. Ganas experiencia.", "Se guardan las Chispas. Uno te da un consejo: «Los de delante no ven bien en la niebla.» Las próximas criaturas apagadas pegarán más flojo.", ""] },
+    orilla: { t: "Junto al agua, una mujer de las Mareas remienda redes. Se llama Orilla y lleva mucho tiempo buscando a su hermana.", c: ["Ayudarle con las redes", "Preguntarle por el Lago", "Seguir tu camino"],
+      o: ["Remendáis redes hasta que cae la luz. «Mi hermana Ola se fue a buscar trabajo al Cráter. Si la ves…» El equipo descansa y te da unas Chispas.", "«El Lago recuerda todo lo que se le cae. Desde que bajó el agua, recuerda cosas que no han pasado.» Baja la voz: «Lo vi en el fondo: la luz bebe de la raíz.» Ganas experiencia.", "Orilla sigue con sus redes, mirando el agua."],
+      cL: ["Darle la carta de Ola", "Preguntarle por el Lago", "Seguir tu camino"],
+      oL: ["Orilla lee la carta tres veces. «Está viva. Trabaja en las forjas, ¿verdad? Lo sé por el carbón en el papel.» Llora y ríe a la vez, y te da lo mejor que tiene: Chispas, comida para el equipo y algo con forma de carta."] },
+    reflection: { t: "En el agua quieta ves a tu equipo reflejado. Pero en el reflejo sois cuatro.", c: ["Tocar el reflejo", "Saludar al cuarto", "Apartar la vista"],
+      o: ["El reflejo se rompe en mil gotas, y de ellas salen criaturas apagadas…", "El cuarto te devuelve el saludo un instante tarde. Luego ya no está. Ganas experiencia.", "Respiras hondo y sigues. El equipo descansa un poco."] },
+    boats: { t: "Barcas varadas en el barro. El agua del Lago ha bajado desde que represaron el arroyo.", c: ["Empujar una barca al agua", "Registrar las barcas", "Dejarlas"],
+      o: ["Empujáis hasta que la barca flota. Cuesta, pero ganas experiencia.", "Entre las redes viejas encuentras algo que brilla.", "Las barcas se quedan en el barro."],
+      dam: "Gracias a la compuerta que abriste en el Cráter, aquí llega un poco más de agua. La barca flota sola y os lleva un trecho: el equipo descansa y ganas experiencia." },
+    gravasong: { t: "Por las cuevas llega una canción a trozos, como si alguien la cantara muy lejos y la roca solo dejara pasar algunas palabras.", c: ["Cantar con ella", "Seguir el sonido", "Taparte los oídos"],
+      o: ["Tu voz vuelve multiplicada y, durante un momento, la canción suena entera. Ganas experiencia.", "El sonido te lleva hasta una grieta. Dentro, algo brilla.", "El silencio también descansa. El equipo recupera algo de vida."] },
+    tunnels: { t: "Un túnel nuevo, recto y liso, corta las cuevas viejas. En las paredes hay marcas con forma de farol, y aquí el eco ya no vuelve.", c: ["Seguir el túnel nuevo", "Taparlo con piedras", "Volver al camino viejo"],
+      o: ["Al fondo hay herramientas de las Casas de Luz y un saco de Chispas. Algo en la oscuridad se enfada.", "Cuesta, pero el eco vuelve un poco. Ganas experiencia.", "Vuelves al camino viejo. El eco te acompaña."] },
+    miners: { t: "Un grupo de mineros de la Hondura ha quedado atrapado detrás de un derrumbe. Se les oye golpear la roca.", c: ["Apartar las rocas", "Pasarles agua por una grieta", "Seguir"],
+      o: ["Tardáis, pero salen todos. «Ningún minero atrás», dicen, y te dan lo que llevan encima.", "Te dan las gracias por la grieta. «Grava ya no deja entrar a nadie», cuentan. Ganas experiencia.", "Los golpes se quedan sonando a tu espalda."] },
   },
   en: {
     farol: { t: "A wayside lantern lies in the grass. A thick black sap drips from its base, and the flame shivers as if it were cold.", c: ["Stand it up and wipe off the sap", "Take the oil it has left", "Leave it and move on"],
@@ -1592,20 +1914,44 @@ const EVT = {
       o: ["", "", "You take a long but quiet detour."] },
     loggers: { t: "Some loggers are hauling trunks toward the Crater. One of them has twisted an ankle.", c: ["Help carry", "Ask what all the wood is for", "Move on"],
       o: ["You help them to the clearing. They give you some Chispas and a piece of bread.", "\"For the forges. A thousand lanterns, they say. And the wood gets quieter every year.\" You gain experience.", "The loggers go on their way."] },
+    court: { t: "A court appears in the fog: stone chairs in a circle around a throne with nobody on it. Beside each chair there's a cup of fresh water.", c: ["Sit on a chair", "Drink from a cup", "Pass without touching anything"],
+      o: ["As you sit, the chairs' shadows stand up. \"Nobody sits at court uninvited.\"", "The water tastes of caves and old rain. The team recovers health.", "As you leave the circle you hear a whisper: \"The King is gone. But he still rules.\" You gain experience."] },
+    dig: { t: "Shovels sound in the fog. A family of the Shadow folk is digging a deep well in secret. Above its mouth there's a lantern-shaped mark.", c: ["Ask who they're digging for", "Help them for a while", "Slip past unseen"],
+      o: ["\"For the Light Above. They pay us with permission to stay. The King signed it.\" They say it without looking at you. You gain experience.", "You dig with them until your paws ache. They give you a few Chispas stained with black earth.", "You walk away quietly. By the path, someone left something behind."] },
+    whisper: { t: "Two of King Lóbrego's Whisperers block the path. They wear veils of fog and you can't see their eyes. \"Do you bring word from the Light?\"", c: ["Tell the truth: you're going to the Throne", "Give them 10 Chispas for their silence", "Run through the fog"],
+      o: ["\"Then you'll see it's empty. It always was.\" They step aside without a sound. You gain experience.", "They pocket the Chispas. One gives you a tip: \"The ones ahead can't see well in the fog.\" The next dimmed creatures will hit softer.", ""] },
+    orilla: { t: "By the water, a woman of the Tides is mending nets. Her name is Orilla, and she has been looking for her sister for a long time.", c: ["Help with the nets", "Ask her about the Lake", "Keep walking"],
+      o: ["You mend nets until the light fades. \"My sister Ola went to find work at the Crater. If you see her…\" The team rests and she gives you a few Chispas.", "\"The Lake remembers everything dropped into it. Since the water went down, it remembers things that never happened.\" She lowers her voice: \"I saw it at the bottom: the light drinks from the root.\" You gain experience.", "Orilla keeps mending, watching the water."],
+      cL: ["Give her Ola's letter", "Ask her about the Lake", "Keep walking"],
+      oL: ["Orilla reads the letter three times. \"She's alive. She works at the forges, doesn't she? I can tell from the coal on the paper.\" She laughs and cries at once, and gives you the best she has: Chispas, food for the team and something card-shaped."] },
+    reflection: { t: "In the still water you see your team reflected. But in the reflection there are four of you.", c: ["Touch the reflection", "Wave at the fourth one", "Look away"],
+      o: ["The reflection shatters into a thousand drops, and dimmed creatures climb out of them…", "The fourth one waves back a moment too late. Then it's gone. You gain experience.", "You take a deep breath and move on. The team rests a little."] },
+    boats: { t: "Boats stranded in the mud. The Lake's water has dropped since the stream was dammed.", c: ["Push a boat into the water", "Search the boats", "Leave them"],
+      o: ["You push until the boat floats. It's hard work, but you gain experience.", "Among the old nets you find something shiny.", "The boats stay in the mud."],
+      dam: "Thanks to the sluice gate you opened at the Crater, a little more water reaches here. The boat floats by itself and carries you a stretch: the team rests and you gain experience." },
+    gravasong: { t: "A song drifts through the caves in pieces, as if someone far away were singing it and the rock only let a few words through.", c: ["Sing along", "Follow the sound", "Cover your ears"],
+      o: ["Your voice comes back many times over and, for a moment, the song sounds whole. You gain experience.", "The sound leads you to a crack. Inside, something glitters.", "Silence is restful too. The team recovers some health."] },
+    tunnels: { t: "A new tunnel, straight and smooth, cuts through the old caves. There are lantern-shaped marks on the walls, and here the echo doesn't come back.", c: ["Follow the new tunnel", "Block it with stones", "Go back to the old path"],
+      o: ["At the end there are Light House tools and a bag of Chispas. Something in the dark gets angry.", "It's hard work, but the echo comes back a little. You gain experience.", "You go back to the old path. The echo keeps you company."] },
+    miners: { t: "A group of miners from the Deep is trapped behind a rockfall. You can hear them knocking on the rock.", c: ["Clear the rocks", "Pass them water through a crack", "Move on"],
+      o: ["It takes a while, but they all get out. \"No miner left behind,\" they say, and give you what they have on them.", "They thank you for the crack. \"Grava won't let anyone in any more,\" they tell you. You gain experience.", "The knocking keeps sounding behind you."] },
   },
 };
 const vineTx = { es: ["Las enredaderas se revuelven y despiertan a las criaturas del bosque…", "Pasáis sin que os toquen. Ganas experiencia.", "Las enredaderas os arañan al pasar. El equipo pierde algo de vida."], en: ["The vines thrash and wake the wood's creatures…", "You get through untouched. You gain experience.", "The vines scratch you as you pass. The team loses some health."] };
+const fogTx = { es: ["Corres a ciegas y sales al otro lado. En el suelo hay algo que se les cayó.", "La niebla se cierra a tu alrededor y salen criaturas apagadas…"], en: ["You run blind and come out the other side. On the ground there's something they dropped.", "The fog closes in around you and dimmed creatures appear…"] };
 const sneakTx = { es: ["Te cuelas sin que te vean. Al otro lado encuentras algo que se les cayó.", "Te pillan. «¡Alto ahí!» Los guardas llaman a unas criaturas apagadas…"], en: ["You slip past unseen. On the other side you find something they dropped.", "They spot you. \"Halt!\" The wardens call in some dimmed creatures…"] };
 function eventHtml() {
   const E = EVT[L()][X.event];
   if (X.eventOut == null) {
-    return `<div class="panel"><div class="sub">${esc(tx("node.event"))}</div><p class="evt-text">${esc(E.t)}</p><div class="choices">${E.c.map((c, i) => {
-      const poor = (X.event === "patrol" && i === 2 && EV.P.coins < 8) || ((X.event === "tila" || X.event === "liquen") && i === 0 && EV.P.coins < 10);
+    const ch = X.event === "orilla" && hasLetter() ? E.cL : E.c;
+    return `<div class="panel"><div class="sub">${esc(tx("node.event"))}</div><p class="evt-text">${esc(E.t)}</p><div class="choices">${ch.map((c, i) => {
+      const poor = (X.event === "patrol" && i === 2 && EV.P.coins < 8) || ((X.event === "tila" || X.event === "liquen") && i === 0 && EV.P.coins < 10) || (X.event === "whisper" && i === 1 && EV.P.coins < 10);
       return `<button class="btn ghost" type="button" data-ev="${i}" ${poor ? "disabled" : ""}>${esc(c)}</button>`;
     }).join("")}</div></div><div class="panel"><h3>${esc(tx("exp.party"))}</h3>${partyHtml()}</div>`;
   }
   return `<div class="panel"><div class="sub">${esc(tx("node.event"))}</div><p class="evt-text">${esc(X.eventOut)}</p><div class="bctl"><button class="btn" type="button" data-x="${X.eventFight ? "evfight" : "evnext"}">${esc(tx("r.continue"))}</button></div></div><div class="panel"><h3>${esc(tx("exp.party"))}</h3>${partyHtml()}${lootHtml()}</div>`;
 }
+const hasLetter = () => !!(EV.P.flags && EV.P.flags.olaLetter && !EV.P.flags.olaDelivered);
 const hurtParty = (f) => { for (const m of X.party) if (m.hp > 0) m.hp = Math.max(0.05, m.hp - f); };
 const healParty = (f) => { for (const m of X.party) if (m.hp > 0) m.hp = Math.min(1, m.hp + f); };
 function chooseEvent(i) {
@@ -1627,7 +1973,7 @@ function chooseEvent(i) {
       if (i === 1) X.loot.xp += 12;
       break;
     case "dam":
-      if (i === 0) { hurtParty(0.08); X.loot.xp += 16; }
+      if (i === 0) { hurtParty(0.08); X.loot.xp += 16; EV.P.flags = Object.assign(EV.P.flags || {}, { damOpen: 1 }); }
       if (i === 1) X.eventCard = true;
       break;
     case "apprentice":
@@ -1649,6 +1995,48 @@ function chooseEvent(i) {
     case "loggers":
       if (i === 0) { X.loot.coins += 8; healParty(0.1); }
       if (i === 1) X.loot.xp += 12;
+      break;
+    case "court":
+      if (i === 0) { X.eventFight = true; X.loot.xp += 8; }
+      if (i === 1) healParty(0.3);
+      if (i === 2) X.loot.xp += 12;
+      break;
+    case "dig":
+      if (i === 0) X.loot.xp += 14;
+      if (i === 1) { hurtParty(0.1); X.loot.coins += 10; }
+      if (i === 2) X.eventCard = true;
+      break;
+    case "whisper":
+      if (i === 0) X.loot.xp += 12;
+      if (i === 1) { EV.spendCoins(10); X.nextFoeBuff = -15; }
+      if (i === 2) { if (rnd() < 0.5) { out = fogTx[L()][0]; X.eventCard = true; } else { out = fogTx[L()][1]; X.eventFight = true; } }
+      break;
+    case "orilla":
+      if (i === 0 && hasLetter()) { out = E.oL[0]; EV.P.flags.olaDelivered = 1; X.loot.coins += 25; X.loot.xp += 20; healParty(0.4); X.eventCard = true; }
+      else if (i === 0) { healParty(0.15); X.loot.coins += 6; }
+      if (i === 1) X.loot.xp += 14;
+      break;
+    case "reflection":
+      if (i === 0) { X.eventFight = true; X.loot.xp += 6; }
+      if (i === 1) X.loot.xp += 14;
+      if (i === 2) healParty(0.2);
+      break;
+    case "boats":
+      if (i === 0) { if (EV.P.flags && EV.P.flags.damOpen) { out = E.dam; healParty(0.3); } else hurtParty(0.1); X.loot.xp += 14; }
+      if (i === 1) X.eventCard = true;
+      break;
+    case "gravasong":
+      if (i === 0) X.loot.xp += 16;
+      if (i === 1) X.eventCard = true;
+      if (i === 2) healParty(0.15);
+      break;
+    case "tunnels":
+      if (i === 0) { X.loot.coins += 12; X.nextFoeBuff = 15; }
+      if (i === 1) { hurtParty(0.1); X.loot.xp += 16; }
+      break;
+    case "miners":
+      if (i === 0) { hurtParty(0.15); X.loot.coins += 10; X.loot.xp += 10; }
+      if (i === 1) X.loot.xp += 8;
       break;
     case "well":
       if (i === 0) healParty(0.5);
@@ -1784,19 +2172,28 @@ function renderCards() {
       return `<div class="slotbox"><p class="sub">${esc(tx("slot." + k))}${locked ? " · 🔒 " + esc(tx("slot.lock", { n: SLOT_LVL[k] })) : ""}</p>${c ? cardHtml(c.id, c.g, { slot: k, foot: `<div class="rc-btns"><button class="btn ghost" type="button" data-unequip="${k}">${esc(tx("cards.unequip"))}</button></div>` }) : `<p class="muted">${esc(tx("cards.empty"))}</p>`}</div>`;
     }).join("")}</div>`;
   } else html += `<p class="muted">${esc(tx("cards.noCreature"))}</p>`;
-  // collection grouped by id+grade
+  if (R) html += `<p class="muted">${esc(canTypesText())}</p>`;
+  // collection: one entry per card (shown at its best grade), with the copies of each grade underneath
   const groups = {};
-  for (const c of P.cards) { const k = c.id + ":" + c.g; (groups[k] = groups[k] || []).push(c); }
-  const keys = Object.keys(groups).sort((a, b) => { const [ia, ga] = a.split(":"), [ib, gb] = b.split(":"); return gb - ga || cardName(ia).localeCompare(cardName(ib)); });
+  for (const c of P.cards) (groups[c.id] = groups[c.id] || []).push(c);
+  const bestG = (id) => Math.max(...groups[id].map((c) => c.g));
+  const ids = Object.keys(groups).sort((a, b) => (usable(b) - usable(a)) || bestG(b) - bestG(a) || cardName(a).localeCompare(cardName(b)));
   const eqSet = R ? new Set(Object.values(R.eq).filter(Boolean)) : new Set();
-  html += `<div class="rcards">${keys.map((k) => {
-    const list = groups[k], c0 = list[0];
-    const free = list.filter((c) => !eqSet.has(c.uid));
+  html = html.replace(esc(tx("cards.owned", { n: P.cards.length })), esc(tx("cards.owned", { n: ids.length })));
+  html += `<div class="rcards">${ids.map((id) => {
+    const list = groups[id], g = bestG(id);
+    const best = list.filter((c) => c.g === g);
+    const ok = usable(id);
+    const inUse = best.find((c) => eqSet.has(c.uid));
     const btns = [];
-    if (R && free.length) for (const s of ["a", "p", "s"]) btns.push(`<button class="btn ghost" type="button" data-equip="${free[0].uid}" data-slot="${s}" ${R.lvl < SLOT_LVL[s] ? "disabled" : ""}>${esc(tx("slot." + s))}</button>`);
-    if (free.length < list.length && !free.length) btns.push(`<span class="progress">${esc(tx("cards.inUse"))}</span>`);
-    if (free.length >= 3 && c0.g < GRADES.length - 1) btns.push(`<button class="btn" type="button" data-fuse="${k}">${esc(tx("cards.fuse", { g: GRADES[c0.g + 1][L()] }))}</button>`);
-    return cardHtml(c0.id, c0.g, { count: list.length, foot: btns.length ? `<div class="rc-btns">${btns.join("")}</div>` : "" });
+    if (R && ok) for (const sl of ["a", "p", "s"]) btns.push(`<button class="btn ghost" type="button" data-equip="${(inUse || best[0]).uid}" data-slot="${sl}" ${R.lvl < SLOT_LVL[sl] ? "disabled" : ""}>${esc(tx("slot." + sl))}</button>`);
+    if (inUse) btns.push(`<span class="progress">${esc(tx("cards.inUse"))}</span>`);
+    const counts = {};
+    for (const c of list) counts[c.g] = (counts[c.g] || 0) + 1;
+    const gs = Object.keys(counts).map(Number).sort((a, b) => b - a);
+    const copies = `<p class="rc-copies">${esc(tx("cards.copies"))}: ${gs.map((gi) => `<span class="gr" style="--g:${GRADES[gi].col}">${esc(GRADES[gi][L()])} ×${counts[gi]}</span>`).join(" ")}</p>`;
+    for (const gi of gs.slice().reverse()) if (counts[gi] >= UPGRADE_N && gi < GRADES.length - 1) btns.push(`<button class="btn" type="button" data-fuse="${id}:${gi}">${esc(tx("cards.fuse", { n: UPGRADE_N, a: GRADES[gi][L()], g: GRADES[gi + 1][L()] }))}</button>`);
+    return cardHtml(id, g, { count: list.length, foot: `${copies}${cantNote(id)}${btns.length ? `<div class="rc-btns">${btns.join("")}</div>` : ""}` });
   }).join("")}</div>`;
   el.innerHTML = html;
 }
@@ -1806,6 +2203,7 @@ function onCardsClick(e) {
   if (t.dataset.equip && R) {
     const uid = t.dataset.equip, slot = t.dataset.slot;
     const c = cardByUid(uid);
+    if (!c || !usable(c.id)) { EV.sfx("deny"); return; }
     // no duplicate card on one creature: remove the same card id from other slots
     for (const k of ["a", "p", "s"]) { const o = R.eq[k] && cardByUid(R.eq[k]); if (o && (o.uid === uid || o.id === c.id)) R.eq[k] = null; }
     R.eq[slot] = uid; EV.sfx("card"); EV.save(); renderCards(); return;
@@ -1814,10 +2212,13 @@ function onCardsClick(e) {
   if (t.dataset.fuse) {
     const [id, g] = t.dataset.fuse.split(":"); const gi = +g;
     const eqSet = R ? new Set(Object.values(R.eq).filter(Boolean)) : new Set();
-    const free = P.cards.filter((c) => c.id === id && c.g === gi && !eqSet.has(c.uid)).slice(0, 3);
-    if (free.length < 3) return;
-    P.cards = P.cards.filter((c) => !free.includes(c));
-    giveCard(id, gi + 1); P.c.fused = (P.c.fused || 0) + 1;
+    // use free copies first; if an equipped copy goes in, the new card takes its slot
+    const same = P.cards.filter((c) => c.id === id && c.g === gi).sort((a, b) => eqSet.has(a.uid) - eqSet.has(b.uid));
+    const used = same.slice(0, UPGRADE_N);
+    if (used.length < UPGRADE_N || gi >= GRADES.length - 1) return;
+    P.cards = P.cards.filter((c) => !used.includes(c));
+    const nc = giveCard(id, gi + 1); P.c.fused = (P.c.fused || 0) + 1;
+    if (R) for (const k of ["a", "p", "s"]) if (used.some((c) => c.uid === R.eq[k])) R.eq[k] = nc.uid;
     EV.toast(tx("cards.fused", { card: cardName(id), g: GRADES[gi + 1][L()] })); EV.sfx("grow"); EV.save(); EV.checkAch(); renderCards();
   }
 }
