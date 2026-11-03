@@ -820,6 +820,8 @@ const TX = {
     "zones.title": "¿Adónde vas?", "zones.sub": "Expedición", "zones.lock": "Calma al Gran Farol del Prado Aurora para abrir este camino.",
     "zones.lvl": "Nivel recomendado {n}", "zones.done": "Guardián calmado ×{n}", "zones.verse": "Fragmento: «{v}»",
     "end.verse": "Recibes un fragmento del Canto del Claro: «{v}».",
+    "end.stars": "Estrellas: {s}", "end.starsWhy": "2 estrellas si el equipo termina con la mitad de la vida o más; 3 si termina con el 75 % y sin nadie derrotado en el combate final.",
+    "end.starsNew": "¡Nueva mejor marca en esta zona!", "end.star3": "¡Zona con 3 estrellas! +3 Notas del Canto.", "zones.stars": "Mejor marca: {s}",
     "ach.guard3": ["Ladera en paz", "Calma a los tres guardianes de la Ladera del Día."],
     "ach.exp1": ["Primer paso", "Gana tu primer combate de expedición."], "ach.guard1": ["Luz limpia", "Calma al Gran Farol del Prado Aurora."],
     "ach.cards10": ["Coleccionista", "Reúne 10 cartas."], "ach.fuse1": ["Cinco en una", "Mejora una carta juntando cinco iguales."],
@@ -875,6 +877,8 @@ const TX = {
     "zones.title": "Where to?", "zones.sub": "Expedition", "zones.lock": "Calm the Great Lantern of the Aurora Meadow to open this path.",
     "zones.lvl": "Recommended level {n}", "zones.done": "Guardian calmed ×{n}", "zones.verse": "Fragment: “{v}”",
     "end.verse": "You receive a fragment of the Song of the Glade: “{v}”.",
+    "end.stars": "Stars: {s}", "end.starsWhy": "2 stars if the team ends with half its health or more; 3 if it ends with 75% and nobody defeated in the final battle.",
+    "end.starsNew": "New best in this zone!", "end.star3": "Zone at 3 stars! +3 Song Notes.", "zones.stars": "Best: {s}",
     "ach.guard3": ["Slope at peace", "Calm all three guardians of the Dayside slope."],
     "ach.exp1": ["First step", "Win your first expedition battle."], "ach.guard1": ["Clean light", "Calm the Great Lantern of the Aurora Meadow."],
     "ach.cards10": ["Collector", "Gather 10 cards."], "ach.fuse1": ["Five in one", "Upgrade a card by combining five of the same."],
@@ -1624,7 +1628,7 @@ function zonesHtml() {
     return `<button type="button" class="node zone" data-zone="${id}" ${open ? "" : "disabled"}><span class="ic" aria-hidden="true">${TYPES[z.type].icon}</span>
       <strong>${esc(zt("name", null, id))}</strong><small>${esc(zt("sub", null, id))}</small>
       <small>${open ? esc(tx("zones.lvl", { n: z.min })) : "🔒 " + esc(tx(Array.isArray(z.unlock) ? (z.unlock.includes("hollow") ? "zones.lockHigh" : "zones.lockEnv") : "zones.lock"))}</small>
-      ${done ? `<small class="ok">✓ ${esc(tx("zones.done", { n: done }))}<br>${esc(tx("zones.verse", { v: zt("verse", null, id) }))}</small>` : ""}</button>`;
+      ${done ? `<small class="ok">✓ ${esc(tx("zones.done", { n: done }))} · ${starStr((EV.P.stars || {})[id] || 0)}<br>${esc(tx("zones.verse", { v: zt("verse", null, id) }))}</small>` : ""}</button>`;
   }).join("")}</div>`;
 }
 function setOut() {
@@ -1756,6 +1760,7 @@ function setLoad(slot, uid) {
   if (c && !usable(c.id)) { EV.sfx("deny"); return; }
   if (c) for (const k of ["a", "p", "s"]) { const o = R.eq[k] && cardByUid(R.eq[k]); if (k !== slot && o && o.id === c.id) R.eq[k] = null; }
   R.eq[slot] = c ? c.uid : null;
+  if (c) EV.P.c.equips = (EV.P.c.equips || 0) + 1;
   EV.sfx("card"); EV.save(); render();
 }
 function lootHtml() {
@@ -1797,8 +1802,9 @@ function flushEvents() {
     const a = e.u && battle.anim[e.u];
     switch (e.k) {
       case "act": { const u = b.units.find((x) => x.uid === e.u); if (a) a.lunge = 1; if (e.card) { blog(tx("log.act", { name: u.name, card: cardName(e.card) })); EV.sfx("card"); } else blog(tx("log.basic", { name: u.name })); break; }
-      case "support": blog(tx("log.support", { name: uName(e.u), card: cardName(e.card) })); if (a) battle.floats.push({ x: a.x, y: a.y - 44, text: "★ " + cardName(e.card), col: "#ffe27a", life: 1.4, small: true }); break;
+      case "support": if (b.units.some((x) => x.uid === e.u && x.side === "ally")) EV.P.c.supportUsed = (EV.P.c.supportUsed || 0) + 1; blog(tx("log.support", { name: uName(e.u), card: cardName(e.card) })); if (a) battle.floats.push({ x: a.x, y: a.y - 44, text: "★ " + cardName(e.card), col: "#ffe27a", life: 1.4, small: true }); break;
       case "dmg":
+        if (e.eff === "up" && e.by && b.units.some((x) => x.uid === e.by && x.side === "ally")) EV.P.c.advHits = (EV.P.c.advHits || 0) + 1;
         if (a) { a.flash = 1; battle.floats.push({ x: a.x + (Math.random() * 16 - 8), y: a.y - 34, text: (e.crit ? "¡" : "") + e.n + (e.crit ? "!" : ""), col: e.dot ? "#ff9a4a" : e.crit ? "#ffd35a" : e.eff === "up" ? "#ff7a6a" : "#ffffff", life: 1.1, big: e.crit }); }
         if (e.dot) blog(tx("log." + e.dot, { name: uName(e.u), n: e.n }));
         else blog(tx("log.dmg", { name: uName(e.u), n: e.n, crit: e.crit ? tx("log.crit") : "", eff: e.eff ? tx("log." + e.eff) : "" }));
@@ -1877,6 +1883,11 @@ function endBattle(res) {
   battle = null;
   for (const m of X.party) if (m.own && m.hp <= 0) X.ownFalls = (X.ownFalls || 0) + 1;
   if (res !== "win") { finish("lose"); return; }
+  if (boss) {
+    const avg = X.party.reduce((a, m) => a + Math.max(0, m.hp), 0) / X.party.length;
+    const noKO = X.party.every((m) => m.hp > 0);
+    X.stars = avg >= 0.75 && noKO ? 3 : avg >= 0.5 ? 2 : 1;
+  }
   // revive the fallen with a little health, apply after-battle supports
   const winSup = allies.filter((u) => u.hp > 0 && u.cards.s && u.cards.s.s.on === "win").map((u) => u.cards.s.s);
   const winHeal = winSup.reduce((a, s) => a + (s.heal || 0), 0) / 100, winRevive = winSup.reduce((a, s) => a + (s.revive || 0), 0) / 100;
@@ -2307,6 +2318,18 @@ function finish(res) {
   }
   if (coins > 0) EV.addCoins(coins, true);
   if (res === "win") { P.c.guard = (P.c.guard || 0) + 1; P.cleared = P.cleared || {}; P.cleared[X.zone] = (P.cleared[X.zone] || 0) + 1; }
+  if (res === "win" || res === "lose") P.c.expDone = (P.c.expDone || 0) + 1;
+  // zone stars: keep the best, 3 Song Notes the first time a zone reaches 3
+  X.starInfo = null;
+  if (res === "win" && X.stars) {
+    P.stars = P.stars || {}; P.star3 = P.star3 || {};
+    const before = P.stars[X.zone] || 0;
+    const gained = Math.max(0, X.stars - before);
+    if (gained) { P.stars[X.zone] = X.stars; P.c.starsGot = (P.c.starsGot || 0) + gained; }
+    let bonus = false;
+    if (X.stars === 3 && !P.star3[X.zone]) { P.star3[X.zone] = 1; P.notes = (P.notes || 0) + 3; bonus = true; }
+    X.starInfo = { n: X.stars, best: gained > 0, bonus };
+  }
   if (S && S.phase === "alive") {
     S.stats.fun = Math.min(100, S.stats.fun + 10); S.stats.full = Math.max(0, S.stats.full - 15); S.stats.clean = Math.max(0, S.stats.clean - 20);
     // wounds: the more health the creature lost on the trip, the more energy and health it loses at home
@@ -2324,6 +2347,7 @@ function finish(res) {
   EV.save(); EV.checkAch();
   show("end");
 }
+const starStr = (n) => "★".repeat(n) + "☆".repeat(3 - n);
 function woundsOf() {
   const own = X && X.party && X.party.find((m) => m.own);
   return own ? Math.max(0, Math.min(1, 1 - own.hp)) : 0;
@@ -2338,6 +2362,7 @@ function endHtml() {
   if (X.hurt && (X.hurt.energy || X.hurt.health)) html += `<p class="evt-out">${esc(tx("end.hurt", { name: nm, e: X.hurt.energy, h: X.hurt.health }))}</p>`;
   else html += `<p class="evt-out">${esc(tx("end.unhurt", { name: nm }))}</p>`;
   if (e.res === "win") html += `<p class="evt-out">✦ ${esc(tx("end.verse", { v: zt("verse") }))}</p>`;
+  if (X.starInfo) html += `<p class="evt-out end-stars"><b>${esc(tx("end.stars", { s: starStr(X.starInfo.n) }))}</b>${X.starInfo.best ? " · " + esc(tx("end.starsNew")) : ""}${X.starInfo.bonus ? "<br>♪ " + esc(tx("end.star3")) : ""}<br><small>${esc(tx("end.starsWhy"))}</small></p>`;
   if (e.after > e.before) html += `<p class="evt-out">${esc(tx("end.lvl", { name: nm, n: e.after }))}</p>`;
   for (const k of e.unlocked) html += `<p class="evt-out">${esc(tx("end.slot", { slot: tx("slot." + k) }))}</p>`;
   if (e.cards.length) html += `<div class="rcards">${e.cards.map((c) => cardHtml(c.id, c.g)).join("")}</div>`;
@@ -2373,7 +2398,7 @@ function onExpClick(e) {
     else if (n === "event") { X.event = rollEvent(); X.eventOut = null; show("event"); }
     return;
   }
-  if (d.ev != null) { chooseEvent(+d.ev); return; }
+  if (d.ev != null) { EV.P.c.evChoices = (EV.P.c.evChoices || 0) + 1; chooseEvent(+d.ev); return; }
   if (d.take != null) {
     const i = +d.take, r = X.reward;
     if (i >= 0 && r && r.offer) { const o = r.offer[i]; giveCard(o.id, o.g); X.loot.cards.push(o); EV.toast(tx("r.card", { card: cardName(o.id) }), GRADES[o.g][L()]); EV.sfx("card"); EV.save(); EV.checkAch(); }
@@ -2449,7 +2474,7 @@ function onCardsClick(e) {
     if (!c || !usable(c.id)) { EV.sfx("deny"); return; }
     // no duplicate card on one creature: remove the same card id from other slots
     for (const k of ["a", "p", "s"]) { const o = R.eq[k] && cardByUid(R.eq[k]); if (o && (o.uid === uid || o.id === c.id)) R.eq[k] = null; }
-    R.eq[slot] = uid; EV.sfx("card"); EV.save(); renderCards(); return;
+    R.eq[slot] = uid; P.c.equips = (P.c.equips || 0) + 1; EV.sfx("card"); EV.save(); renderCards(); return;
   }
   if (t.dataset.unequip && R) { R.eq[t.dataset.unequip] = null; EV.sfx("tap"); EV.save(); renderCards(); return; }
   if (t.dataset.fuse) {
@@ -2515,5 +2540,13 @@ $("scrExp").addEventListener("change", (e) => { const s = e.target.closest("sele
 $("cardsPanel").addEventListener("click", onCardsClick);
 setInterval(refreshHome, 1000);
 rpgState(); EV.showScreen();
-EV.RPG = Object.defineProperties(Object.assign(api, { renderCards, startExpedition }), { X: { get: () => X }, battle: { get: () => battle } });
+// a random card your creature can use, at least minGrade (for chests and rewards outside expeditions)
+function pickUsable(n, minGrade) {
+  const pool = DROP_POOL.filter((id) => usable(id));
+  const ids = [];
+  while (ids.length < Math.min(n, pool.length)) { const id = pool[Math.floor(Math.random() * pool.length)]; if (!ids.includes(id)) ids.push(id); }
+  return ids.map((id) => ({ id, g: Math.max(minGrade, rollGrade(minGrade)) }));
+}
+function takeCard(id, g) { rpgState(); const c = giveCard(id, g); EV.save(); return c; }
+EV.RPG = Object.defineProperties(Object.assign(api, { renderCards, startExpedition, cardHtml, cardName, pickUsable, takeCard, starStr }), { X: { get: () => X }, battle: { get: () => battle } });
 })(typeof window !== "undefined" ? window : null);
