@@ -1380,7 +1380,13 @@ const MONCOL = {
 };
 function drawMon(c, kind, o) {
   const ell = EV.ell;
-  if (kind === "lumo" || kind === "fizz" || kind === "pebb") {
+  if ((kind === "lumo" || kind === "fizz" || kind === "pebb") && typeof PX !== "undefined") {
+    const st = o.stage == null ? 1 : o.stage, n = [12, 16, 20][st];
+    const sp = PX.sprite(kind, n, st, Math.floor(o.t * 2) % 2, o.ko ? "sleep" : o.hp < 0.35 ? "sad" : "normal", o.hollow || o.form === "scruffy");
+    const w = sp.width * 5, h = sp.height * 5, hover = kind === "fizz" ? 30 : 0;
+    c.save(); c.imageSmoothingEnabled = false; c.globalAlpha *= 0.25; c.fillStyle = "#1d1626"; c.fillRect(-w / 2 + 15, 40, w - 30, 5); c.restore();
+    c.save(); c.imageSmoothingEnabled = false; c.drawImage(sp, -w / 2, 46 - h - hover, w, h); c.restore();
+  } else if (kind === "lumo" || kind === "fizz" || kind === "pebb") {
     EV.drawCreature(c, 0, 0, { kind, stage: o.stage, form: o.hollow ? "scruffy" : o.form, t: o.t, mood: o.hp < 0.35 ? 20 : 60, sleeping: o.ko, sick: false, blink: o.ko, eat: false, jump: 0 });
   } else if (MONCOL[kind]) {
     const col = MONCOL[kind];
@@ -1729,7 +1735,13 @@ function render() {
     body = endHtml();
   }
   el.innerHTML = head + body;
-  if (view === "pick") el.querySelectorAll("canvas[data-mon]").forEach((cv) => { const c = EV.setupCanvas(cv, 96, 80); c.translate(48, 44); c.scale(0.62, 0.62); drawMon(c, cv.dataset.mon, { t: 0.5, stage: 1, form: "bright", hp: 1 }); });
+  if (view === "pick") el.querySelectorAll("canvas[data-mon]").forEach((cv) => {
+    const out = EV.setupCanvas(cv, 96, 80);
+    if (typeof PX === "undefined") { out.translate(48, 44); out.scale(0.62, 0.62); drawMon(out, cv.dataset.mon, { t: 0.5, stage: 1, form: "bright", hp: 1 }); return; }
+    const L = PX.layer(32, 27), c = L.g; c.scale(1 / 3, 1 / 3); c.translate(48, 44); c.scale(0.62, 0.62);
+    drawMon(c, cv.dataset.mon, { t: 0.5, stage: 1, form: "bright", hp: 1 });
+    c.setTransform(1, 0, 0, 1, 0, 0); PX.quantize(c, 32, 27, false); PX.blit(out, L, 96, 81);
+  });
   if (view === "battle") battleMount();
 }
 // pre-trip loadout: up to 3 cards, one per slot, chosen before setting out
@@ -1996,9 +2008,13 @@ function drawDecor(c, decor, t, day) {
     for (let i = 0; i < 6; i++) { const x = 20 + i * 64, y = 44 + (i % 2) * 8; c.save(); c.globalAlpha = 0.5 + 0.3 * Math.sin(t * 2 + i); c.shadowColor = "#ffd35a"; c.shadowBlur = 10; c.fillStyle = "#ffe27a"; c.fillRect(x - 3, y - 6, 6, 9); c.restore(); c.fillStyle = "#00000033"; c.fillRect(x - 1, y + 3, 2, 26); }
   }
 }
+// Battles are drawn at half resolution, snapped to the Glimmer-32 palette and blown up x2; names and numbers stay sharp on top.
+const BLOW = typeof PX !== "undefined" ? PX.layer(BW / 2, BH / 2) : null;
 function drawBattle(now) {
   if (!battle || !battle.c) return;
-  const c = battle.c, b = battle.b, t = now / 1000, z = ZONES[X.zone];
+  const out = battle.c, b = battle.b, t = now / 1000, z = ZONES[X.zone];
+  const c = BLOW ? BLOW.g : out;
+  if (BLOW) { c.setTransform(1, 0, 0, 1, 0, 0); c.imageSmoothingEnabled = false; c.scale(0.5, 0.5); }
   const day = b.day;
   const sky = c.createLinearGradient(0, 0, 0, BH);
   const sk = day ? z.sky : z.skyN;
@@ -2007,16 +2023,20 @@ function drawBattle(now) {
   drawDecor(c, z.decor, t, day);
   c.fillStyle = day ? z.ground : z.groundN; c.beginPath(); c.moveTo(0, 70); c.quadraticCurveTo(BW / 2, 52, BW, 70); c.lineTo(BW, BH); c.lineTo(0, BH); c.fill();
   c.fillStyle = "#00000014"; for (let i = 0; i < 40; i++) { const x = (i * 97) % BW, y = 80 + ((i * 53) % 140); c.fillRect(x, y, 2, 5); }
+  if (BLOW) { c.setTransform(1, 0, 0, 1, 0, 0); PX.quantize(c, BW / 2, BH / 2, true); c.scale(0.5, 0.5); }
   // units
   const order = b.units.slice().sort((p, q) => battle.anim[p.uid].y - battle.anim[q.uid].y);
+  const place = [];
   for (const u of order) {
     const a = battle.anim[u.uid];
     a.lunge = Math.max(0, a.lunge - 0.06); a.flash = Math.max(0, a.flash - 0.07);
     a.shownHp += (u.hp - a.shownHp) * 0.15;
     const dir = u.side === "ally" ? 1 : -1;
-    const lx = Math.sin(a.lunge * Math.PI) * 18 * dir;
+    const lx = Math.round(Math.sin(a.lunge * Math.PI) * 9 * dir) * 2;
     const ko = u.hp <= 0;
-    c.save(); c.translate(a.x + lx, a.y + (ko ? 8 : 0));
+    const x = Math.round((a.x + lx) / 2) * 2, y = a.y + (ko ? 8 : 0);
+    place.push({ u, a, x, y, ko });
+    c.save(); c.translate(x, y);
     const sc = u.boss ? 0.62 : 0.4;
     c.save(); if (u.side === "foe" && !u.boss) c.scale(-1, 1); c.scale(sc, sc);
     if (ko) c.globalAlpha = 0.35;
@@ -2024,28 +2044,34 @@ function drawBattle(now) {
     c.restore();
     if (a.flash > 0) { c.save(); c.globalAlpha = a.flash * 0.6; c.fillStyle = "#ffffff"; EV.ell(c, 0, -4, 22 * (u.boss ? 1.5 : 1), 22 * (u.boss ? 1.8 : 1)); c.fill(); c.restore(); }
     // shield ring
-    if (u.shield > 0) { c.save(); c.strokeStyle = "#8fd3ff"; c.lineWidth = 2; c.globalAlpha = 0.8; c.beginPath(); c.arc(0, -4, u.boss ? 40 : 24, 0, Math.PI * 2); c.stroke(); c.restore(); }
-    // hp bar + name
-    const bw = u.boss ? 80 : 54, by = u.boss ? 30 : 22;
-    c.fillStyle = "#00000088"; c.fillRect(-bw / 2 - 1, by - 1, bw + 2, 7);
-    const pct = Math.max(0, a.shownHp / u.maxHp);
-    c.fillStyle = pct > 0.5 ? "#6fd06a" : pct > 0.25 ? "#f2b632" : "#ef6a5a"; c.fillRect(-bw / 2, by, bw * pct, 5);
-    if (u.shield > 0) { c.fillStyle = "#8fd3ff"; c.fillRect(-bw / 2, by, Math.min(bw, bw * u.shield / u.maxHp), 2); }
-    c.font = "700 9px Nunito, system-ui, sans-serif"; c.textAlign = "center"; c.fillStyle = "#ffffff"; c.strokeStyle = "#00000099"; c.lineWidth = 3;
-    const label = u.name.length > 14 ? u.name.slice(0, 13) + "…" : u.name;
-    c.strokeText(label + " · " + u.lvl, 0, by + 15); c.fillText(label + " · " + u.lvl, 0, by + 15);
-    const icons = Object.keys(u.st).map((k) => STATUS[k].icon).join("") + TYPES[u.types[0]].icon;
-    c.font = "10px system-ui"; c.fillText(icons, 0, -(u.boss ? 56 : 30));
-    // card ready marker
-    if (u.cards.a && u.cd <= 0 && !ko) { c.fillStyle = "#ffe27a"; c.beginPath(); c.arc(bw / 2 + 5, by + 2, 3, 0, 7); c.fill(); }
+    if (u.shield > 0) { c.save(); c.strokeStyle = "#7cc8e3"; c.lineWidth = 2; c.beginPath(); c.arc(0, -4, u.boss ? 40 : 24, 0, Math.PI * 2); c.stroke(); c.restore(); }
+    // segmented hp bar
+    const bw = u.boss ? 80 : 56, by = u.boss ? 30 : 22;
+    c.fillStyle = "#1d1626"; c.fillRect(-bw / 2 - 2, by - 2, bw + 4, 8);
+    const pct = Math.max(0, a.shownHp / u.maxHp), col = pct > 0.5 ? "#86b85a" : pct > 0.25 ? "#ffd57a" : "#e0603f";
+    c.fillStyle = col; const segs = Math.ceil((bw / 4) * pct); for (let k = 0; k < segs; k++) c.fillRect(-bw / 2 + k * 4, by, 2, 4);
+    if (u.shield > 0) { c.fillStyle = "#c8eef5"; c.fillRect(-bw / 2, by, Math.min(bw, bw * u.shield / u.maxHp), 2); }
+    if (u.cards.a && u.cd <= 0 && !ko) { c.fillStyle = "#ffd57a"; c.fillRect(bw / 2 + 4, by - 2, 4, 4); c.fillStyle = "#1d1626"; c.fillRect(bw / 2 + 4, by + 2, 4, 2); }
     c.restore();
   }
-  // floating texts
+  if (BLOW) { c.setTransform(1, 0, 0, 1, 0, 0); PX.quantize(c, BW / 2, BH / 2, false); out.clearRect(0, 0, BW, BH); PX.blit(out, BLOW, BW, BH); }
+  // names, status icons and floating numbers stay sharp
+  const font = (w, px) => `${w} ${px}px "Pixelify Sans", system-ui, sans-serif`;
+  for (const { u, x, y } of place) {
+    const bw = u.boss ? 80 : 56, by = u.boss ? 30 : 22;
+    out.save(); out.translate(x, y);
+    out.font = font(600, 10); out.textAlign = "center"; out.textBaseline = "alphabetic"; out.fillStyle = "#fbf6ef"; out.strokeStyle = "#1d1626"; out.lineWidth = 3; out.lineJoin = "round";
+    const label = u.name.length > 14 ? u.name.slice(0, 13) + "…" : u.name;
+    out.strokeText(label + " · " + u.lvl, 0, by + 16); out.fillText(label + " · " + u.lvl, 0, by + 16);
+    const icons = Object.keys(u.st).map((k) => STATUS[k].icon).join("") + TYPES[u.types[0]].icon;
+    out.font = "10px system-ui"; out.fillText(icons, 0, -(u.boss ? 56 : 30));
+    out.restore();
+  }
   for (const f of battle.floats) {
     f.life -= 0.016; f.y -= 0.45;
-    c.save(); c.globalAlpha = Math.max(0, Math.min(1, f.life)); c.textAlign = "center";
-    c.font = f.big ? "800 16px Grandstander, system-ui" : f.small ? "700 9px Nunito, system-ui" : "800 13px Grandstander, system-ui";
-    c.lineWidth = 3; c.strokeStyle = "#000000aa"; c.strokeText(f.text, f.x, f.y); c.fillStyle = f.col; c.fillText(f.text, f.x, f.y); c.restore();
+    out.save(); out.globalAlpha = Math.max(0, Math.min(1, f.life)); out.textAlign = "center";
+    out.font = f.big ? font(700, 17) : f.small ? font(600, 10) : font(700, 14);
+    out.lineWidth = 3; out.lineJoin = "round"; out.strokeStyle = "#1d1626"; out.strokeText(f.text, f.x, Math.round(f.y)); out.fillStyle = f.col; out.fillText(f.text, f.x, Math.round(f.y)); out.restore();
   }
   battle.floats = battle.floats.filter((f) => f.life > 0);
   battle.raf = requestAnimationFrame(drawBattle);
