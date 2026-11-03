@@ -534,6 +534,7 @@ const TX = {
     "exp.title": "Prado Aurora", "exp.zoneSub": "Ladera del Día · zona de Luz",
     "exp.zoneDesc": "Hierba dorada y faroles que no se apagan nunca. Últimamente algunos parpadean, y por las raíces sube una savia oscura. Aquí la Luz pega un 10 % más fuerte y la Sombra un 10 % menos.",
     "exp.pick": "Elige dos compañeros salvajes para el viaje", "exp.pickSub": "Te acompañan solo en esta expedición. Mira sus tipos: la Luz pierde contra el Fuego, y el Fuego contra el Agua.",
+    "load.title": "Tu mazo para el viaje", "load.sub": "Llevas como máximo 3 cartas, una por hueco. Elige cuál va en cada uno: el mismo efecto cambia según el hueco. Durante la expedición no se puede cambiar.", "load.lock": "Se desbloquea en el nivel {n}",
     "exp.go": "Partir", "exp.cancel": "Volver a casa", "exp.party": "Tu equipo",
     "exp.section": "Tramo {n} de {m}", "exp.choose": "¿Por dónde sigues?", "exp.bossNext": "Al final del camino brilla una luz enorme. El equipo toma aire antes de acercarse (+30 % de vida).",
     "node.fight": "Combate", "node.event": "Encuentro", "node.chest": "Cofre", "node.rest": "Descanso", "node.boss": "Guardián",
@@ -553,6 +554,8 @@ const TX = {
     "r.card": "Carta nueva: {card}", "r.continue": "Seguir",
     "end.win": "¡El Gran Farol vuelve a brillar limpio!", "end.winText": "La savia oscura se escurre de su cristal y el prado se ilumina. {name} vuelve a casa orgullosa.",
     "end.lose": "Vuelta a casa", "end.loseText": "El equipo no pudo seguir. {name} se trae la mitad de lo ganado y todas las cartas.",
+    "end.hurt": "{name} vuelve con heridas: −{e} de energía y −{h} de salud.", "end.unhurt": "{name} vuelve sin un rasguño.",
+    "recharge": "⚡ Recargar energía (+{n}) · {c} Chispas", "recharge.done": "¡Energía recargada!", "recharge.full": "Ya tiene la energía casi llena.",
     "end.quit": "Te retiras", "end.home": "Volver a casa", "end.lvl": "¡{name} sube a nivel {n}!", "end.slot": "Hueco desbloqueado: {slot}",
     "end.lvlPick": "Por subir de nivel, elige una carta", "quit": "Retirarse",
     "slot.a": "Activa", "slot.p": "Pasiva", "slot.s": "Soporte", "slot.lock": "Nivel {n}",
@@ -575,6 +578,7 @@ const TX = {
     "exp.title": "Aurora Meadow", "exp.zoneSub": "Dayside slope · Light zone",
     "exp.zoneDesc": "Golden grass and lanterns that never go out. Lately a few of them flicker, and a dark sap is creeping up through the roots. Here Light hits 10% harder and Shadow 10% softer.",
     "exp.pick": "Pick two wild companions for the trip", "exp.pickSub": "They only travel with you on this expedition. Check their types: Light loses to Fire, and Fire loses to Water.",
+    "load.title": "Your deck for the trip", "load.sub": "You carry up to 3 cards, one per slot. Choose which goes where: the same card does something different in each slot. It can't be changed during the expedition.", "load.lock": "Unlocks at level {n}",
     "exp.go": "Set out", "exp.cancel": "Back home", "exp.party": "Your team",
     "exp.section": "Leg {n} of {m}", "exp.choose": "Which way now?", "exp.bossNext": "A huge light shines at the end of the path. The team catches its breath before going closer (+30% health).",
     "node.fight": "Battle", "node.event": "Encounter", "node.chest": "Chest", "node.rest": "Rest", "node.boss": "Guardian",
@@ -594,6 +598,8 @@ const TX = {
     "r.card": "New card: {card}", "r.continue": "Continue",
     "end.win": "The Great Lantern shines clean again!", "end.winText": "The dark sap drains from its glass and the meadow lights up. {name} heads home proud.",
     "end.lose": "Back home", "end.loseText": "The team couldn't go on. {name} brings back half the loot and every card.",
+    "end.hurt": "{name} comes back hurt: −{e} energy and −{h} health.", "end.unhurt": "{name} comes back without a scratch.",
+    "recharge": "⚡ Recharge energy (+{n}) · {c} Chispas", "recharge.done": "Energy recharged!", "recharge.full": "Its energy is already almost full.",
     "end.quit": "You turn back", "end.home": "Back home", "end.lvl": "{name} reached level {n}!", "end.slot": "Slot unlocked: {slot}",
     "end.lvlPick": "For levelling up, pick a card", "quit": "Turn back",
     "slot.a": "Active", "slot.p": "Passive", "slot.s": "Support", "slot.lock": "Level {n}",
@@ -846,6 +852,7 @@ const css = `
 .slotbox { border: 1px dashed var(--line); border-radius: 14px; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
 .slotbox > .sub { margin: 0; }
 .slotbox .muted { font-size: 13px; margin: 0; }
+.slotbox select { font: 600 14px var(--font-body); padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); min-height: 40px; width: 100%; }
 .rstats { font: 500 12px var(--font-mono); color: var(--muted); margin: 0; }
 .xpbar { height: 8px; }
 .evt-text { margin: 0; font-size: 15px; line-height: 1.55; }
@@ -1048,6 +1055,7 @@ function render() {
     body = `<div class="panel"><p class="lead">${esc(tx("exp.zoneDesc"))}</p>
       <h3>${esc(tx("exp.pick"))}</h3><p class="muted" style="margin:0">${esc(tx("exp.pickSub"))}</p>
       <div class="mons">${X.offer.map((k) => `<button type="button" class="mon" data-pick="${k}" aria-pressed="${X.chosen.includes(k)}"><canvas width="96" height="80" data-mon="${k}"></canvas><strong>${esc(monName(k))}</strong>${typeChip(MONS[k].types[0])}<small>${esc(MON_DESC[L()][k])}</small></button>`).join("")}</div>
+      </div>${loadoutHtml()}<div class="panel">
       <div class="bctl"><button class="btn" type="button" data-x="go" ${X.chosen.length === 2 ? "" : "disabled"}>${esc(tx("exp.go"))} · ${esc(tx("exp.cost"))}</button><button class="btn ghost" type="button" data-x="cancel">${esc(tx("exp.cancel"))}</button></div></div>`;
   } else if (view === "map") {
     const icons = { fight: "⚔️", event: "❓", chest: "🎁", rest: "🔥", boss: "🏮" };
@@ -1072,6 +1080,35 @@ function render() {
   el.innerHTML = head + body;
   if (view === "pick") el.querySelectorAll("canvas[data-mon]").forEach((cv) => { const c = EV.setupCanvas(cv, 96, 80); c.translate(48, 44); c.scale(0.62, 0.62); drawMon(c, cv.dataset.mon, { t: 0.5, stage: 1, form: "bright", hp: 1 }); });
   if (view === "battle") battleMount();
+}
+// pre-trip loadout: up to 3 cards, one per slot, chosen before setting out
+function loadoutHtml() {
+  const R = rpgState(), P = EV.P; if (!R) return "";
+  const eqIds = {};
+  for (const k of ["a", "p", "s"]) { const c = R.eq[k] && cardByUid(R.eq[k]); if (c) eqIds[k] = c.id; }
+  // one option per distinct card (best grade first)
+  const best = {};
+  for (const c of P.cards) if (!best[c.id] || c.g > best[c.id].g) best[c.id] = c;
+  const opts = Object.values(best).sort((a, b) => b.g - a.g || cardName(a.id).localeCompare(cardName(b.id)));
+  const slots = ["a", "p", "s"].map((k) => {
+    const locked = R.lvl < SLOT_LVL[k];
+    const cur = R.eq[k] && cardByUid(R.eq[k]);
+    const sel = `<select data-load="${k}" ${locked ? "disabled" : ""} aria-label="${esc(tx("slot." + k))}"><option value="">${esc(tx("cards.empty"))}</option>${opts.map((c) => {
+      const other = Object.keys(eqIds).find((s) => s !== k && eqIds[s] === c.id);
+      const uid = cur && cur.id === c.id ? cur.uid : c.uid;
+      return `<option value="${uid}" ${cur && cur.id === c.id ? "selected" : ""}>${esc(cardName(c.id))} · ${esc(GRADES[c.g][L()])} · ${TYPES[CARDS[c.id].type].icon}${other ? " (" + esc(tx("slot." + other)) + ")" : ""}</option>`;
+    }).join("")}</select>`;
+    const fx = cur && !locked ? `<p class="muted">${esc(slotText(scaled(cur.id, cur.g), k))}</p>` : locked ? `<p class="muted">🔒 ${esc(tx("load.lock", { n: SLOT_LVL[k] }))}</p>` : "";
+    return `<div class="slotbox"><p class="sub">${esc(tx("slot." + k))}</p>${sel}${fx}</div>`;
+  }).join("");
+  return `<div class="panel"><h3>${esc(tx("load.title"))}</h3><p class="muted" style="margin:0">${esc(tx("load.sub"))}</p><div class="slots">${slots}</div></div>`;
+}
+function setLoad(slot, uid) {
+  const R = rpgState(); if (!R) return;
+  const c = uid && cardByUid(uid);
+  if (c) for (const k of ["a", "p", "s"]) { const o = R.eq[k] && cardByUid(R.eq[k]); if (k !== slot && o && o.id === c.id) R.eq[k] = null; }
+  R.eq[slot] = c ? c.uid : null;
+  EV.sfx("card"); EV.save(); render();
 }
 function lootHtml() {
   const l = X.loot;
@@ -1185,6 +1222,7 @@ function endBattle(res) {
     m.hp = u.hp / u.maxHp;
   }
   battle = null;
+  for (const m of X.party) if (m.own && m.hp <= 0) X.ownFalls = (X.ownFalls || 0) + 1;
   if (res !== "win") { finish("lose"); return; }
   // revive the fallen with a little health, apply after-battle supports
   const winHeal = allies.filter((u) => u.hp > 0 && u.cards.s && u.cards.s.s.on === "win").reduce((a, u) => a + u.cards.s.s.heal, 0) / 100;
@@ -1364,6 +1402,12 @@ function finish(res) {
   if (res === "win") P.c.guard = (P.c.guard || 0) + 1;
   if (S && S.phase === "alive") {
     S.stats.fun = Math.min(100, S.stats.fun + 10); S.stats.full = Math.max(0, S.stats.full - 15); S.stats.clean = Math.max(0, S.stats.clean - 20);
+    // wounds: the more health the creature lost on the trip, the more energy and health it loses at home
+    const w = woundsOf();
+    const dEnergy = Math.round(30 * w), dHealth = Math.round(35 * w) + 5 * (X.ownFalls || 0);
+    S.stats.energy = Math.max(0, S.stats.energy - dEnergy);
+    S.stats.health = Math.max(10, S.stats.health - dHealth); // never so low that it wanders off
+    X.hurt = { energy: dEnergy, health: dHealth };
     EV.addLog(tx(res === "win" ? "log.expWin" : "log.expLose", { name: S.name }));
   }
   // a card for every two levels gained
@@ -1373,6 +1417,10 @@ function finish(res) {
   EV.save(); EV.checkAch();
   show("end");
 }
+function woundsOf() {
+  const own = X && X.party && X.party.find((m) => m.own);
+  return own ? Math.max(0, Math.min(1, 1 - own.hp)) : 0;
+}
 function endHtml() {
   const e = X.end, S = EV.S;
   const nm = S && S.name ? S.name : "";
@@ -1380,6 +1428,8 @@ function endHtml() {
   const text = e.res === "win" ? tx("end.winText", { name: nm }) : tx("end.loseText", { name: nm });
   let html = `<div class="panel"><h3>${esc(title)}</h3><p class="evt-text">${esc(text)}</p>
     <div class="loot"><span>${esc(tx("r.xp", { n: e.xp }))}</span><span>✦ ${esc(tx("r.coins", { n: e.coins }))}</span><span>🃏 ${e.cards.length}</span></div>`;
+  if (X.hurt && (X.hurt.energy || X.hurt.health)) html += `<p class="evt-out">${esc(tx("end.hurt", { name: nm, e: X.hurt.energy, h: X.hurt.health }))}</p>`;
+  else html += `<p class="evt-out">${esc(tx("end.unhurt", { name: nm }))}</p>`;
   if (e.after > e.before) html += `<p class="evt-out">${esc(tx("end.lvl", { name: nm, n: e.after }))}</p>`;
   for (const k of e.unlocked) html += `<p class="evt-out">${esc(tx("end.slot", { slot: tx("slot." + k) }))}</p>`;
   if (e.cards.length) html += `<div class="rcards">${e.cards.map((c) => cardHtml(c.id, c.g)).join("")}</div>`;
@@ -1510,6 +1560,21 @@ function refreshHome() {
   let w = $("aExpWhy");
   if (!w) { w = document.createElement("p"); w.id = "aExpWhy"; w.className = "exp-why"; btn.after(w); }
   w.textContent = why ? tx("exp.need." + why) : "";
+  let r = $("aRecharge");
+  if (!r) { r = document.createElement("button"); r.id = "aRecharge"; r.type = "button"; r.className = "btn ghost exp-go"; w.after(r); r.addEventListener("click", recharge); }
+  r.textContent = tx("recharge", { n: RECHARGE.amount, c: RECHARGE.price });
+  r.hidden = S.stats.energy >= 70;
+  r.disabled = EV.P.coins < RECHARGE.price;
+}
+// pay Chispas for an energy boost (energy otherwise only refills slowly while sleeping)
+const RECHARGE = { amount: 40, price: 12 };
+function recharge() {
+  const S = EV.S; if (!S || S.phase !== "alive") return;
+  if (S.stats.energy >= 90) { EV.toast(tx("recharge.full")); return; }
+  if (!EV.spendCoins(RECHARGE.price)) { EV.toast(EV.t("toast.poor")); EV.sfx("deny"); return; }
+  S.stats.energy = Math.min(100, S.stats.energy + RECHARGE.amount);
+  EV.sfx("heal"); EV.buzz(20); EV.toast(tx("recharge.done"), "+" + RECHARGE.amount);
+  EV.save(); EV.renderStats(); refreshHome();
 }
 EV.HOOKS.showScreen = function () {
   const S = EV.S;
@@ -1524,8 +1589,9 @@ EV.HOOKS.renderCards = renderCards;
 $("aExp").addEventListener("click", () => { EV.sfx("tap"); startExpedition(); EV.showScreen(); });
 $("btnCards").addEventListener("click", () => { EV.sfx("tap"); EV.togglePanel("cards"); });
 $("scrExp").addEventListener("click", onExpClick);
+$("scrExp").addEventListener("change", (e) => { const s = e.target.closest("select[data-load]"); if (s && X && view === "pick") setLoad(s.dataset.load, s.value); });
 $("cardsPanel").addEventListener("click", onCardsClick);
 setInterval(refreshHome, 1000);
 rpgState(); EV.showScreen();
-EV.RPG = Object.assign(api, { get X() { return X; }, get battle() { return battle; }, renderCards, startExpedition });
+EV.RPG = Object.defineProperties(Object.assign(api, { renderCards, startExpedition }), { X: { get: () => X }, battle: { get: () => battle } });
 })(typeof window !== "undefined" ? window : null);
