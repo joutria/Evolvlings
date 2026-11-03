@@ -17,6 +17,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@400;500&display=swap">
 <style>
+/* Digits always use a plain, readable font; letters keep the pixel style */
+@font-face { font-family: "EvNum"; font-style: normal; font-weight: 100 549; font-display: swap; src: url(https://fonts.gstatic.com/s/atkinsonhyperlegible/v12/9Bt23C1KxNDXMspQ1lPyU89-1h6ONRlW45G04pIo.woff2) format("woff2"); unicode-range: U+0030-0039; }
+@font-face { font-family: "EvNum"; font-style: normal; font-weight: 550 900; font-display: swap; src: url(https://fonts.gstatic.com/s/atkinsonhyperlegible/v12/9Bt73C1KxNDXMspQ1lPyU89-1h6ONRlW45G8Wbc9dCWP.woff2) format("woff2"); unicode-range: U+0030-0039; }
 /* Pixel theme: Glimmer-32 colors, square corners, hard 1-step shadows, Pixelify Sans headings. Layout: one centered "field journal" column. Habitat window on top, care stats + actions beside it on wide screens, stacked on phones. */
 :root {
   --bg: #f1e8da;
@@ -32,7 +35,7 @@
   --accent-ink: #fbf6ef;
   --warn: #a8581a;
   --bad: #a3343b;
-  --font-display: "Pixelify Sans", "Courier New", monospace;
+  --font-display: "EvNum", "Pixelify Sans", "Courier New", monospace;
   --font-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "DM Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 }
@@ -1197,7 +1200,7 @@ function drawMess(c, x, t) {
 }
 
 function drawBubble(c, x, y, text) {
-  c.font = '600 14px "Pixelify Sans", monospace';
+  c.font = '600 14px "EvNum", "Pixelify Sans", monospace';
   const w = Math.round(Math.max(40, c.measureText(text).width + 22) / 2) * 2, h = 28;
   const bx = Math.round(clamp(x - w / 2, 6, W - w - 6) / 2) * 2, by = Math.round((y - h) / 2) * 2;
   c.fillStyle = "#fbf6ef"; c.strokeStyle = "#1d1626"; c.lineWidth = 2;
@@ -1296,8 +1299,9 @@ function drawSickSign(g, x, y) {
   PX.rect(g, x, y, 11, 11, X.ink); PX.rect(g, x + 1, y + 1, 9, 9, X.cream);
   PX.rect(g, x + 4, y + 2, 3, 7, X.ember2); PX.rect(g, x + 2, y + 4, 7, 3, X.ember2);
 }
+if (document.fonts) { document.fonts.load('600 14px "EvNum"', "0").catch(() => {}); document.fonts.load('700 14px "EvNum"', "0").catch(() => {}); }
 function pixelText(c, text, x, y, size, fill, align) {
-  c.font = `600 ${size}px "Pixelify Sans", ${"monospace"}`; c.textAlign = align || "center"; c.textBaseline = "middle";
+  c.font = `600 ${size}px "EvNum", "Pixelify Sans", monospace`; c.textAlign = align || "center"; c.textBaseline = "middle";
   c.lineWidth = 4; c.strokeStyle = PX.P.ink; c.lineJoin = "round"; c.strokeText(text, x, y); c.fillStyle = fill; c.fillText(text, x, y);
 }
 
@@ -1371,7 +1375,7 @@ function frame(now) {
       for (const st of mini.stars) { st.y += st.vy * dt; st.rot += dt * 3; }
       mini.stars = mini.stars.filter((st) => st.y < 236);
       c.fillStyle = "#1d1626"; c.fillRect(10, 10, 132, 30); c.fillStyle = "#2e2440"; c.fillRect(12, 12, 128, 26);
-      c.fillStyle = "#fbf6ef"; c.font = '600 15px "Pixelify Sans", monospace'; c.textAlign = "left"; c.textBaseline = "middle";
+      c.fillStyle = "#fbf6ef"; c.font = '600 15px "EvNum", "Pixelify Sans", monospace'; c.textAlign = "left"; c.textBaseline = "middle";
       c.fillText(`★ ${mini.caught}   ${Math.max(0, left).toFixed(1)}s`, 22, 26);
       if (left <= 0) endPlay();
     }
