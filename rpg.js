@@ -825,6 +825,17 @@ const TX = {
     "ach.guard3": ["Ladera en paz", "Calma a los tres guardianes de la Ladera del Día."],
     "ach.exp1": ["Primer paso", "Gana tu primer combate de expedición."], "ach.guard1": ["Luz limpia", "Calma al Gran Farol del Prado Aurora."],
     "ach.cards10": ["Coleccionista", "Reúne 10 cartas."], "ach.fuse1": ["Cinco en una", "Mejora una carta juntando cinco iguales."],
+    "ach.grimSol": ["Círculo del Sol", "Descubre en el Grimorio todas las cartas de Fuego, Planta y Luz."], "ach.grimSky": ["Círculo del Cielo", "Descubre todas las cartas de Rayo, Aire y Música."],
+    "ach.grimLake": ["Círculo del Lago", "Descubre todas las cartas de Agua, Piedra y Sombra."], "ach.grimFrost": ["Círculo de la Escarcha", "Descubre todas las cartas de Hielo, Seta y Sueño."],
+    "ach.grimAll": ["El Grimorio completo", "Descubre todas las cartas del Claro."], "ach.dust1": ["Polvo de estrella", "Deshaz una copia sobrante en Polvo de estrella."],
+    "ctab.col": "Colección", "ctab.grim": "Grimorio", "ctab.shop": "Taller",
+    "grim.desc": "Todas las cartas del Claro. Las que aún no has visto aparecen en silueta. Completa un círculo entero para ganar un logro.",
+    "grim.count": "{n} de {m} descubiertas", "grim.unknown": "Carta sin descubrir", "grim.boss": "Solo la entrega un guardián.", "grim.by": "La lleva {mon}.",
+    "grim.craft": "Crear Común · {c} ✧", "grim.crafted": "¡Has creado {card}!", "grim.circle.sol": "Círculo del Sol", "grim.circle.sky": "Círculo del Cielo", "grim.circle.lake": "Círculo del Lago", "grim.circle.frost": "Círculo de la Escarcha", "grim.circle.star": "Estrella",
+    "dust.have": "Polvo de estrella: {n} ✧", "dust.btn": "Deshacer 1 → +{n} ✧", "dust.got": "+{n} Polvo de estrella", "dust.poor": "Te falta Polvo de estrella.",
+    "dust.desc": "Deshaz las copias que te sobran (nunca la última ni la que llevas puesta). Cada grado vale 5 veces más: Común 1 ✧, Rara 5 ✧, Súper rara 25 ✧… Con {c} ✧ creas en el Grimorio una carta Común que te falte.",
+    "pack.title": "Sobre de cartas", "pack.desc": "Tres cartas al azar, la mitad pensadas para tu criatura. Puedes abrir {m} al día; te quedan {n}.",
+    "pack.btn": "Abrir sobre · {c} ✦", "pack.none": "Ya abriste todos los sobres de hoy. Vuelve mañana.", "pack.got": "Del sobre:",
     "foe.hollow": "{name} apagado", "boss.farol": "El Gran Farol", "boss.forja": "La Forja Despierta", "boss.seto": "El Seto Hambriento", "boss.trono": "El Trono Vacío", "boss.mira": "La Que Mira desde Abajo", "boss.grava": "Grava", "boss.veleta": "La Veleta Mayor", "boss.micelio": "La Madre Micelio",
     "zones.lockEnv": "Calma a un guardián del Cráter o del Bosque para cruzar el Vado hacia el Envés.",
     "zones.lockHigh": "Calma a un guardián del Envés para abrir este camino.",
@@ -882,6 +893,17 @@ const TX = {
     "ach.guard3": ["Slope at peace", "Calm all three guardians of the Dayside slope."],
     "ach.exp1": ["First step", "Win your first expedition battle."], "ach.guard1": ["Clean light", "Calm the Great Lantern of the Aurora Meadow."],
     "ach.cards10": ["Collector", "Gather 10 cards."], "ach.fuse1": ["Five in one", "Upgrade a card by combining five of the same."],
+    "ach.grimSol": ["Circle of the Sun", "Discover every Fire, Plant and Light card in the Grimoire."], "ach.grimSky": ["Circle of the Sky", "Discover every Bolt, Air and Music card."],
+    "ach.grimLake": ["Circle of the Lake", "Discover every Water, Stone and Shadow card."], "ach.grimFrost": ["Circle of the Frost", "Discover every Ice, Mushroom and Dream card."],
+    "ach.grimAll": ["The full Grimoire", "Discover every card of the Glade."], "ach.dust1": ["Stardust", "Break a spare copy into Stardust."],
+    "ctab.col": "Collection", "ctab.grim": "Grimoire", "ctab.shop": "Workshop",
+    "grim.desc": "Every card of the Glade. The ones you haven't seen yet show as silhouettes. Complete a whole circle to earn an achievement.",
+    "grim.count": "{n} of {m} discovered", "grim.unknown": "Undiscovered card", "grim.boss": "Only a guardian gives it.", "grim.by": "Carried by {mon}.",
+    "grim.craft": "Make Common · {c} ✧", "grim.crafted": "You made {card}!", "grim.circle.sol": "Circle of the Sun", "grim.circle.sky": "Circle of the Sky", "grim.circle.lake": "Circle of the Lake", "grim.circle.frost": "Circle of the Frost", "grim.circle.star": "Star",
+    "dust.have": "Stardust: {n} ✧", "dust.btn": "Break 1 → +{n} ✧", "dust.got": "+{n} Stardust", "dust.poor": "Not enough Stardust.",
+    "dust.desc": "Break the copies you don't need (never the last one or the one in use). Each grade is worth 5 times more: Common 1 ✧, Rare 5 ✧, Super rare 25 ✧… With {c} ✧ you can make a Common card you're missing in the Grimoire.",
+    "pack.title": "Card pack", "pack.desc": "Three random cards, half of them suited to your creature. You can open {m} a day; {n} left.",
+    "pack.btn": "Open pack · {c} ✦", "pack.none": "You've opened all of today's packs. Come back tomorrow.", "pack.got": "From the pack:",
     "foe.hollow": "Dimmed {name}", "boss.farol": "The Great Lantern", "boss.forja": "The Wakeful Forge", "boss.seto": "The Hungry Hedge", "boss.trono": "The Empty Throne", "boss.mira": "She Who Watches from Below", "boss.grava": "Grava", "boss.veleta": "The Great Weathervane", "boss.micelio": "Mother Mycelium",
     "zones.lockEnv": "Calm a guardian of the Crater or the Wood to cross the Ford to the Underside.",
     "zones.lockHigh": "Calm a guardian of the Underside to open this path.",
@@ -1213,6 +1235,8 @@ function rpgState() {
   if (!P.c.guard) P.c.guard = 0;
   if (!P.c.fused) P.c.fused = 0;
   if (!P.cleared) P.cleared = P.c.guard ? { aurora: P.c.guard } : {};
+  if (!P.grim) { P.grim = {}; for (const c of P.cards) P.grim[c.id] = 1; }
+  if (P.dust == null) P.dust = 0;
   if (!S || S.phase !== "alive") return null;
   if (!S.rpg) S.rpg = { lvl: 1, xp: 0, eq: { a: null, p: null, s: null } };
   if (!P.sigGiven) P.sigGiven = {};
@@ -1227,7 +1251,13 @@ function rpgState() {
   return S.rpg;
 }
 const usable = (id) => { const S = EV.S; return !S || canUse(S.species, S.form, id); };
-function giveCard(id, gi) { const P = EV.P; const c = { uid: "c" + P.cardSeq++, id, g: gi }; P.cards.push(c); return c; }
+function giveCard(id, gi) { const P = EV.P; const c = { uid: "c" + P.cardSeq++, id, g: gi }; P.cards.push(c); (P.grim = P.grim || {})[id] = 1; return c; }
+// Stardust: each grade is worth 5 times the one below, like upgrades
+const DUST_OF = (gi) => Math.pow(UPGRADE_N, gi), CRAFT_COST = 10, PACK = { price: 60, perDay: 3 };
+const GRIM_ORDER = ["fire", "plant", "light", "bolt", "air", "music", "water", "stone", "shadow", "ice", "mush", "dream", "star"];
+const grimIds = (types) => Object.keys(CARDS).filter((id) => types.includes(CARDS[id].type));
+const grimDone = (p, types) => grimIds(types).every((id) => (p.grim || {})[id]);
+const dayKeyNow = () => (EV.DAILY && EV.DAILY.dayKey ? EV.DAILY.dayKey() : new Date().toDateString());
 function canTypesText() {
   const S = EV.S; if (!S || !COMPAT[S.species]) return "";
   const ts = COMPAT[S.species].slice();
@@ -1314,6 +1344,8 @@ const css = `
 .rc-fx li.on { color: var(--ink); background: color-mix(in srgb, var(--accent) 10%, transparent); border-radius: 6px; padding: 2px 4px; margin: 0 -4px; }
 .rc-lore { margin: 0; font-size: 12px; font-style: italic; color: var(--muted); }
 .rc-btns { display: flex; gap: 6px; flex-wrap: wrap; margin-top: auto; }
+.rcard.ghost { --g: var(--muted); border-style: dashed; opacity: .75; background: repeating-linear-gradient(45deg, transparent 0 6px, color-mix(in srgb, var(--line) 12%, transparent) 6px 8px); }
+.ctabs { margin-left: auto; }
 .rc-btns .btn { padding: 6px 10px; font-size: 12px; min-height: 34px; }
 .slots { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
 .slotbox { border: 1px dashed var(--line); border-radius: 14px; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
@@ -1344,9 +1376,12 @@ Object.assign(EV.SFX, {
 });
 
 /* ---------- Achievements ---------- */
-EV.ACH.push(["exp1", 15, (p) => (p.c.expWins || 0) >= 1], ["guard1", 40, (p) => ((p.cleared || {}).aurora || 0) >= 1], ["guard3", 60, (p) => ["aurora", "crater", "forest"].every((z) => ((p.cleared || {})[z] || 0) >= 1)], ["guard6", 80, (p) => ["hollow", "lake", "caves"].every((z) => ((p.cleared || {})[z] || 0) >= 1)], ["guard8", 120, (p) => Object.keys(ZONES).every((z) => ((p.cleared || {})[z] || 0) >= 1)], ["cards10", 20, (p) => (p.cards || []).length >= 10], ["fuse1", 15, (p) => (p.c.fused || 0) >= 1]);
+EV.ACH.push(["exp1", 15, (p) => (p.c.expWins || 0) >= 1], ["guard1", 40, (p) => ((p.cleared || {}).aurora || 0) >= 1], ["guard3", 60, (p) => ["aurora", "crater", "forest"].every((z) => ((p.cleared || {})[z] || 0) >= 1)], ["guard6", 80, (p) => ["hollow", "lake", "caves"].every((z) => ((p.cleared || {})[z] || 0) >= 1)], ["guard8", 120, (p) => Object.keys(ZONES).every((z) => ((p.cleared || {})[z] || 0) >= 1)], ["cards10", 20, (p) => (p.cards || []).length >= 10], ["fuse1", 15, (p) => (p.c.fused || 0) >= 1],
+  ["grimSol", 40, (p) => grimDone(p, ["fire", "plant", "light"])], ["grimSky", 40, (p) => grimDone(p, ["bolt", "air", "music"])],
+  ["grimLake", 40, (p) => grimDone(p, ["water", "stone", "shadow"])], ["grimFrost", 40, (p) => grimDone(p, ["ice", "mush", "dream"])],
+  ["grimAll", 150, (p) => grimDone(p, GRIM_ORDER)], ["dust1", 10, (p) => (p.c.dusted || 0) >= 1]);
 for (const lg of ["es", "en"]) {
-  for (const id of ["exp1", "guard1", "guard3", "guard6", "guard8", "cards10", "fuse1"]) EV.STR[lg].ach[id] = TX[lg]["ach." + id];
+  for (const id of ["exp1", "guard1", "guard3", "guard6", "guard8", "cards10", "fuse1", "grimSol", "grimSky", "grimLake", "grimFrost", "grimAll", "dust1"]) EV.STR[lg].ach[id] = TX[lg]["ach." + id];
   EV.STR[lg]["nav.cards"] = TX[lg]["nav.cards"];
 }
 EV.applyStatic();
@@ -2451,10 +2486,48 @@ function onExpClick(e) {
 /* ====================================================================== */
 /* Cards panel                                                            */
 /* ====================================================================== */
+let cTab = "col", lastPack = null;
+function cardTabs() {
+  return `<div class="seg ctabs" role="group">${["col", "grim", "shop"].map((k) => `<button type="button" data-ctab="${k}" aria-pressed="${cTab === k}">${esc(tx("ctab." + k))}</button>`).join("")}</div>`;
+}
+function grimHtml() {
+  const P = EV.P, all = Object.keys(CARDS), seen = all.filter((id) => (P.grim || {})[id]).length;
+  let h = `<p class="muted" style="margin:0">${esc(tx("grim.desc"))}</p><p class="progress">${esc(tx("grim.count", { n: seen, m: all.length }))} · ${esc(tx("dust.have", { n: P.dust || 0 }))}</p>`;
+  const circles = [["sol", ["fire", "plant", "light"]], ["sky", ["bolt", "air", "music"]], ["lake", ["water", "stone", "shadow"]], ["frost", ["ice", "mush", "dream"]], ["star", ["star"]]];
+  for (const [ck, types] of circles) {
+    const ids = grimIds(types); if (!ids.length) continue;
+    const got = ids.filter((id) => P.grim[id]).length;
+    h += `<h3 class="cat-title">${esc(tx("grim.circle." + ck))} · ${got} / ${ids.length}${got === ids.length ? " ✓" : ""}</h3>`;
+    for (const ty of types) {
+      const tids = grimIds([ty]); if (!tids.length) continue;
+      h += `<p class="rc-copies">${typeChip(ty)} <span class="progress">${tids.filter((id) => P.grim[id]).length} / ${tids.length}</span></p><div class="rcards">`;
+      for (const id of tids) {
+        const C = CARDS[id], boss = !!C.boss, owner = C.by && MONS[C.by] ? monName(C.by) : "";
+        const craft = boss ? `<p class="rc-cant">${esc(tx("grim.boss"))}</p>` : `<div class="rc-btns"><button class="btn ghost" type="button" data-craft="${id}" ${(P.dust || 0) < CRAFT_COST ? "disabled" : ""}>${esc(tx("grim.craft", { c: CRAFT_COST }))}</button></div>`;
+        if (P.grim[id]) h += cardHtml(id, 0, { foot: craft });
+        else h += `<div class="rcard ghost"><div class="rc-top"><strong>???</strong></div><div class="rc-tags">${typeChip(ty)}</div><p class="rc-lore">${esc(tx("grim.unknown"))}${owner && !boss ? " · " + esc(tx("grim.by", { mon: owner })) : ""}</p>${craft}</div>`;
+      }
+      h += `</div>`;
+    }
+  }
+  return h;
+}
+function workshopHtml() {
+  const P = EV.P, d = P.packDay === dayKeyNow() ? P.packN || 0 : 0, left = PACK.perDay - d;
+  let h = `<div class="slotbox" style="border-style:solid"><strong style="font-family:var(--font-display);font-size:18px">${esc(tx("dust.have", { n: P.dust || 0 }))}</strong><p class="muted">${esc(tx("dust.desc", { c: CRAFT_COST }))}</p></div>`;
+  h += `<div class="slotbox" style="border-style:solid"><strong style="font-family:var(--font-display);font-size:18px">${esc(tx("pack.title"))}</strong><p class="muted">${esc(left > 0 ? tx("pack.desc", { m: PACK.perDay, n: left }) : tx("pack.none"))}</p>
+    <div class="rc-btns"><button class="btn" type="button" data-pack="1" ${left <= 0 || P.coins < PACK.price ? "disabled" : ""}>${esc(tx("pack.btn", { c: PACK.price }))}</button></div></div>`;
+  if (lastPack) h += `<h3 class="cat-title">${esc(tx("pack.got"))}</h3><div class="rcards">${lastPack.map((c) => cardHtml(c.id, c.g, { foot: cantNote(c.id) })).join("")}</div>`;
+  return h;
+}
 function renderCards() {
   const el = $("cardsPanel"); if (!el) return;
   const R = rpgState(), P = EV.P, S = EV.S;
-  let html = `<div class="panel-head"><h2>${esc(tx("cards.title"))}</h2><span class="progress">${esc(tx("cards.owned", { n: P.cards.length }))}</span></div><p class="muted" style="margin:0">${esc(tx("cards.desc"))}</p>`;
+  if (cTab !== "col") {
+    el.innerHTML = `<div class="panel-head"><h2>${esc(tx(cTab === "grim" ? "ctab.grim" : "ctab.shop"))}</h2>${cardTabs()}</div>` + (cTab === "grim" ? grimHtml() : workshopHtml());
+    return;
+  }
+  let html = `<div class="panel-head"><h2>${esc(tx("cards.title"))}</h2>${cardTabs()}<span class="progress">${esc(tx("cards.owned", { n: P.cards.length }))}</span></div><p class="muted" style="margin:0">${esc(tx("cards.desc"))}</p>`;
   if (R) {
     const u = makeUnit(ownUnitOpts(1));
     const need = xpNeed(R.lvl);
@@ -2486,14 +2559,38 @@ function renderCards() {
     for (const c of list) counts[c.g] = (counts[c.g] || 0) + 1;
     const gs = Object.keys(counts).map(Number).sort((a, b) => b - a);
     const copies = `<p class="rc-copies">${esc(tx("cards.copies"))}: ${gs.map((gi) => `<span class="gr" style="--g:${GRADES[gi].col}">${esc(GRADES[gi][L()])} ×${counts[gi]}</span>`).join(" ")}</p>`;
+    const spare = list.filter((c) => !eqSet.has(c.uid)).sort((a, b) => a.g - b.g);
+    if (list.length > 1 && spare.length) btns.push(`<button class="btn ghost" type="button" data-dust="${spare[0].uid}">${esc(tx("dust.btn", { n: DUST_OF(spare[0].g) }))}</button>`);
     for (const gi of gs.slice().reverse()) if (counts[gi] >= UPGRADE_N && gi < GRADES.length - 1) btns.push(`<button class="btn" type="button" data-fuse="${id}:${gi}">${esc(tx("cards.fuse", { n: UPGRADE_N, a: GRADES[gi][L()], g: GRADES[gi + 1][L()] }))}</button>`);
     return cardHtml(id, g, { count: list.length, foot: `${copies}${cantNote(id)}${btns.length ? `<div class="rc-btns">${btns.join("")}</div>` : ""}` });
   }).join("")}</div>`;
   el.innerHTML = html;
 }
 function onCardsClick(e) {
-  const t = e.target.closest("button"); if (!t) return;
+  const t = e.target.closest("button"); if (!t || t.disabled) return;
   const R = rpgState(); const P = EV.P;
+  if (t.dataset.ctab) { cTab = t.dataset.ctab; EV.sfx("tap"); renderCards(); return; }
+  if (t.dataset.dust) {
+    const c = cardByUid(t.dataset.dust), eqSet = R ? new Set(Object.values(R.eq).filter(Boolean)) : new Set();
+    if (!c || eqSet.has(c.uid) || P.cards.filter((x) => x.id === c.id).length < 2) return;
+    P.cards = P.cards.filter((x) => x !== c); P.dust = (P.dust || 0) + DUST_OF(c.g); P.c.dusted = (P.c.dusted || 0) + 1;
+    EV.toast(tx("dust.got", { n: DUST_OF(c.g) }), "✧"); EV.sfx("coin"); EV.save(); EV.checkAch(); renderCards(); return;
+  }
+  if (t.dataset.craft) {
+    const id = t.dataset.craft; if (!CARDS[id] || CARDS[id].boss) return;
+    if ((P.dust || 0) < CRAFT_COST) { EV.toast(tx("dust.poor")); EV.sfx("deny"); return; }
+    P.dust -= CRAFT_COST; giveCard(id, 0);
+    EV.toast(tx("grim.crafted", { card: cardName(id) })); EV.sfx("grow"); EV.save(); EV.checkAch(); renderCards(); return;
+  }
+  if (t.dataset.pack) {
+    const day = dayKeyNow(); if (P.packDay !== day) { P.packDay = day; P.packN = 0; }
+    if (P.packN >= PACK.perDay) { EV.toast(tx("pack.none")); return; }
+    if (!EV.spendCoins(PACK.price)) { EV.toast(EV.t("toast.poor")); EV.sfx("deny"); return; }
+    P.packN++;
+    const mine = DROP_POOL.filter((id) => usable(id));
+    lastPack = [0, 1, 2].map((i) => { const pool = i < 2 && mine.length && Math.random() < 0.75 ? mine : DROP_POOL; const id = pool[Math.floor(Math.random() * pool.length)]; return giveCard(id, rollGrade(0)); });
+    EV.sfx("grow"); EV.buzz(20); EV.save(); EV.checkAch(); renderCards(); return;
+  }
   if (t.dataset.equip && R) {
     const uid = t.dataset.equip, slot = t.dataset.slot;
     const c = cardByUid(uid);
