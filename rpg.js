@@ -2091,7 +2091,7 @@ function drawBattle(now) {
   }
   if (BLOW) { c.setTransform(1, 0, 0, 1, 0, 0); PX.quantize(c, BW / 2, BH / 2, false); out.clearRect(0, 0, BW, BH); PX.blit(out, BLOW, BW, BH); }
   // names, status icons and floating numbers stay sharp
-  const font = (w, px) => `${w} ${px}px "Pixelify Sans", system-ui, sans-serif`;
+  const font = (w, px) => `${w} ${px}px "EvNum", "Pixelify Sans", system-ui, sans-serif`;
   for (const { u, x, y } of place) {
     const bw = u.boss ? 80 : 56, by = u.boss ? 30 : 22;
     out.save(); out.translate(x, y);
