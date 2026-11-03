@@ -195,8 +195,15 @@ const CARDS = {
   beam:     { type: "light", by: "farol", boss: true, p: { dmg: 10 }, a: { cd: 4, tgt: "foes", pow: 100, st: ["blind", 1, 1] }, s: { on: "start", fx: { tgt: "foes", st: ["slow", 2, 1, 10] } } },
   pride:    { type: "light", by: "farol", boss: true, p: { dmg: 15 }, a: { cd: 3, tgt: "foe", pow: 130 }, s: { on: "allyLow", pct: 50, fx: { tgt: "self", shield: [20, 2] } } },
   law:      { type: "light", by: "farol", boss: true, p: { spd: 10 }, a: { cd: 4, tgt: "foes", st: ["slow", 2, 1, 10] }, s: { on: "start", fx: { tgt: "foes", st: ["slow", 2, 1, 10] } } },
+  // the Aching Root (final guardian, Star) and Unísona (story creature, Star: never from pulls)
+  ache:     { type: "star", by: "raiz", boss: true, p: { dmg: 10 }, a: { cd: 4, tgt: "foes", pow: 90, st: ["dull", 2, 1, 10] }, s: { on: "start", fx: { tgt: "foes", st: ["slow", 1, 1, 10] } } },
+  eight:    { type: "star", by: "raiz", boss: true, p: { teamCrit: 6, dmg: 10 }, a: { cd: 3, tgt: "strongFoe", pow: 120, strip: 1 }, s: { on: "allyLow", pct: 50, fx: { tgt: "self", st: ["fury", 99, 1, 20] } } },
+  rootheart:{ type: "star", by: "raiz", boss: true, p: { def: 15 }, a: { cd: 5, tgt: "self", shield: [30, 2] }, s: { on: "allyLow", pct: 25, fx: { tgt: "theAlly", shield: [30, 2] } } },
+  duet:     { type: "star", by: "unisona", story: true, p: { spd: 10 }, a: { cd: 3, tgt: "foe", pow: 120, st: ["blind", 1, 1] }, s: { on: "start", fx: { tgt: "fastestFoe", st: ["blind", 1, 1] } } },
+  unison:   { type: "star", by: "unisona", story: true, p: { healGive: 15 }, a: { cd: 4, tgt: "allies", heal: 12 }, s: { on: "allyStatus", status: "blind", fx: { tgt: "theAlly", cleanse: "blind" } } },
+  firstnote:{ type: "star", by: "unisona", story: true, p: { teamCrit: 6 }, a: { cd: 4, tgt: "allies", shield: [20, 2] }, s: { on: "allyLow", pct: 40, fx: { tgt: "theAlly", st: ["guard", 2, 1, 20] } } },
 };
-const DROP_POOL = Object.keys(CARDS).filter((k) => !CARDS[k].boss);
+const DROP_POOL = Object.keys(CARDS).filter((k) => !CARDS[k].boss && !CARDS[k].story);
 // Which card types each home creature can use: its own type, two from its circle or close to it,
 // and one for coverage. Adults also learn their evolution's type, and a creature can always use its own signature cards.
 const COMPAT = {
@@ -207,6 +214,7 @@ const COMPAT = {
 function canUse(species, form, id) {
   const c = CARDS[id], list = COMPAT[species];
   if (!c || !list) return true;
+  if (c.type === "star") return true; // Star cards fit every creature
   if (c.by === species || list.includes(c.type)) return true;
   const adult = MONS[species] && MONS[species].adult && form && MONS[species].adult[form];
   return adult === c.type;
@@ -288,6 +296,8 @@ const MONS = {
   guardatumba:{ types: ["ice"], rar: 4, st: { hp: 66, str: 50, def: 66, spd: 30, cr: 48 }, cards: ["regent", "thousand", "sealed"] },
   veleta:   { types: ["air"],   rar: 3, st: { hp: 160, str: 42, def: 38, spd: 48, cr: 34 }, cards: ["gale", "voices", "spin"], boss: true },
   micelio:  { types: ["mush"],  rar: 3, st: { hp: 175, str: 38, def: 44, spd: 22, cr: 28 }, cards: ["spores", "threads", "sapbed"], boss: true },
+  raiz:     { types: ["star"],  rar: 4, st: { hp: 230, str: 48, def: 50, spd: 38, cr: 36 }, cards: ["ache", "eight", "rootheart"], boss: true },
+  unisona:  { types: ["star"],  rar: 4, st: { hp: 48, str: 48, def: 44, spd: 54, cr: 52 }, cards: ["duet", "unison", "firstnote"], story: true },
   trono:    { types: ["shadow"], rar: 3, st: { hp: 150, str: 46, def: 40, spd: 42, cr: 32 }, cards: ["court", "crown", "law"], boss: true },
   mira:     { types: ["water"],  rar: 3, st: { hp: 130, str: 38, def: 36, spd: 36, cr: 30 }, cards: ["mirror", "gaze", "core"], boss: true },
   grava:    { types: ["stone"],  rar: 3, st: { hp: 155, str: 38, def: 50, spd: 20, cr: 28 }, cards: ["cavein", "song", "core"], boss: true },
@@ -759,8 +769,15 @@ const ZONES = {
     boss: "micelio", sky: ["#eef6fa", "#c4dcea"], skyN: ["#121a22", "#26343f"], ground: "#dfe9ee", groundN: "#3a4650",
     events: ["esporina", "tomb", "dreams"],
   },
+  // the Heart of the Glade: the stump above the single Root, opens once all eight guardians are calm
+  heart: {
+    type: "star", bonus: {}, sections: 4, min: 8, unlock: ["aurora", "crater", "forest", "hollow", "lake", "caves", "heights", "deep"], unlockAll: true, decor: "heart",
+    foes: ["lumo", "fizz", "pebb", "nim", "vidriela", "relampin", "capuchon", "yunqueron", "trinilla", "carambano"], allies: ["lumo", "fizz", "pebb", "fuellito", "remolin", "nim", "trinilla", "vidriela", "capuchon", "relampin"],
+    boss: "raiz", sky: ["#f3e2ff", "#d9b8f0"], skyN: ["#140f24", "#2c2050"], ground: "#8a7a5a", groundN: "#2e2838",
+    events: ["duo", "albor", "cantora"],
+  },
 };
-const EVENTS = ["farol", "patrol", "tila", "well", "dam", "apprentice", "ola", "liquen", "vines", "loggers", "court", "dig", "whisper", "orilla", "reflection", "boats", "gravasong", "tunnels", "miners", "coplo", "news", "pass", "esporina", "tomb", "dreams"];
+const EVENTS = ["farol", "patrol", "tila", "well", "dam", "apprentice", "ola", "liquen", "vines", "loggers", "court", "dig", "whisper", "orilla", "reflection", "boats", "gravasong", "tunnels", "miners", "coplo", "news", "pass", "esporina", "tomb", "dreams", "duo", "albor", "cantora"];
 
 const api = { COMPAT, canUse, UPGRADE_N, TYPES, BEATS, OPPOSITE, typeMult, GRADES, rollGrade, STATUS, CARDS, DROP_POOL, scaled, MONS, makeUnit, Battle, lvlScale, xpNeed, SLOT_LVL, ZONES, EVENTS, isDayNow };
 if (typeof module !== "undefined" && module.exports) module.exports = api;
@@ -828,7 +845,7 @@ const TX = {
     "ach.cards10": ["Coleccionista", "Reúne 10 cartas."], "ach.fuse1": ["Cinco en una", "Mejora una carta juntando cinco iguales."],
     "ach.grimSol": ["Círculo del Sol", "Descubre en el Grimorio todas las cartas de Fuego, Planta y Luz."], "ach.grimSky": ["Círculo del Cielo", "Descubre todas las cartas de Rayo, Aire y Música."],
     "ach.grimLake": ["Círculo del Lago", "Descubre todas las cartas de Agua, Piedra y Sombra."], "ach.grimFrost": ["Círculo de la Escarcha", "Descubre todas las cartas de Hielo, Seta y Sueño."],
-    "ach.grimAll": ["El Grimorio completo", "Descubre todas las cartas del Claro."], "ach.dust1": ["Polvo de estrella", "Deshaz una copia sobrante en Polvo de estrella."],
+    "ach.grimAll": ["El Grimorio completo", "Descubre todas las cartas del Claro."], "ach.heart1": ["El Canto entero", "Calma a la Raíz Doliente en el Corazón del Claro."], "ach.dust1": ["Polvo de estrella", "Deshaz una copia sobrante en Polvo de estrella."],
     "ctab.col": "Colección", "ctab.grim": "Grimorio", "ctab.shop": "Taller",
     "grim.desc": "Todas las cartas del Claro. Las que aún no has visto aparecen en silueta. Completa un círculo entero para ganar un logro.",
     "grim.count": "{n} de {m} descubiertas", "grim.unknown": "Carta sin descubrir", "grim.boss": "Solo la entrega un guardián.", "grim.by": "La lleva {mon}.",
@@ -837,9 +854,10 @@ const TX = {
     "dust.desc": "Deshaz las copias que te sobran (nunca la última ni la que llevas puesta). Cada grado vale 5 veces más: Común 1 ✧, Rara 5 ✧, Súper rara 25 ✧… Con {c} ✧ creas en el Grimorio una carta Común que te falte.",
     "pack.title": "Sobre de cartas", "pack.desc": "Tres cartas al azar, la mitad pensadas para tu criatura. Puedes abrir {m} al día; te quedan {n}.",
     "pack.btn": "Abrir sobre · {c} ✦", "pack.none": "Ya abriste todos los sobres de hoy. Vuelve mañana.", "pack.got": "Del sobre:",
-    "foe.hollow": "{name} apagado", "boss.farol": "El Gran Farol", "boss.forja": "La Forja Despierta", "boss.seto": "El Seto Hambriento", "boss.trono": "El Trono Vacío", "boss.mira": "La Que Mira desde Abajo", "boss.grava": "Grava", "boss.veleta": "La Veleta Mayor", "boss.micelio": "La Madre Micelio",
+    "foe.hollow": "{name} apagado", "boss.farol": "El Gran Farol", "boss.forja": "La Forja Despierta", "boss.seto": "El Seto Hambriento", "boss.trono": "El Trono Vacío", "boss.mira": "La Que Mira desde Abajo", "boss.grava": "Grava", "boss.veleta": "La Veleta Mayor", "boss.micelio": "La Madre Micelio", "boss.raiz": "La Raíz Doliente",
     "zones.lockEnv": "Calma a un guardián del Cráter o del Bosque para cruzar el Vado hacia el Envés.",
-    "zones.lockHigh": "Calma a un guardián del Envés para abrir este camino.",
+    "zones.lockHigh": "Calma a un guardián del Envés para abrir este camino.", "zones.lockHeart": "Calma a los ocho guardianes para llegar al Corazón.",
+    "r.guard": "El guardián te deja una de sus cartas", "grim.story": "Solo la da Unísona.", "end.unisona": "Unísona se queda contigo. Desde ahora puede acompañarte en cualquier expedición, y sus cartas Estrella valen para todas las criaturas.", "end.unisonaUp": "Unísona canta contigo otra vez y te da otra copia de una de sus cartas. Fusiónalas para que suba de rareza.",
     "log.strip": "{name} pierde {st}.", "log.cdup": "La carta de {name} tardará {n} más en estar lista.",
     "ach.guard8": ["El Canto casi entero", "Calma a los ocho guardianes del valle."],
     "log.lost": "{name} no encuentra a nadie en la niebla.", "log.echo": "¡El golpe de {name} resuena otra vez!", "log.revive": "¡{name} se levanta con {n} de vida!",
@@ -897,7 +915,7 @@ const TX = {
     "ach.cards10": ["Collector", "Gather 10 cards."], "ach.fuse1": ["Five in one", "Upgrade a card by combining five of the same."],
     "ach.grimSol": ["Circle of the Sun", "Discover every Fire, Plant and Light card in the Grimoire."], "ach.grimSky": ["Circle of the Sky", "Discover every Bolt, Air and Music card."],
     "ach.grimLake": ["Circle of the Lake", "Discover every Water, Stone and Shadow card."], "ach.grimFrost": ["Circle of the Frost", "Discover every Ice, Mushroom and Dream card."],
-    "ach.grimAll": ["The full Grimoire", "Discover every card of the Glade."], "ach.dust1": ["Stardust", "Break a spare copy into Stardust."],
+    "ach.grimAll": ["The full Grimoire", "Discover every card of the Glade."], "ach.heart1": ["The whole Song", "Calm the Aching Root in the Heart of the Glade."], "ach.dust1": ["Stardust", "Break a spare copy into Stardust."],
     "ctab.col": "Collection", "ctab.grim": "Grimoire", "ctab.shop": "Workshop",
     "grim.desc": "Every card of the Glade. The ones you haven't seen yet show as silhouettes. Complete a whole circle to earn an achievement.",
     "grim.count": "{n} of {m} discovered", "grim.unknown": "Undiscovered card", "grim.boss": "Only a guardian gives it.", "grim.by": "Carried by {mon}.",
@@ -906,9 +924,10 @@ const TX = {
     "dust.desc": "Break the copies you don't need (never the last one or the one in use). Each grade is worth 5 times more: Common 1 ✧, Rare 5 ✧, Super rare 25 ✧… With {c} ✧ you can make a Common card you're missing in the Grimoire.",
     "pack.title": "Card pack", "pack.desc": "Three random cards, half of them suited to your creature. You can open {m} a day; {n} left.",
     "pack.btn": "Open pack · {c} ✦", "pack.none": "You've opened all of today's packs. Come back tomorrow.", "pack.got": "From the pack:",
-    "foe.hollow": "Dimmed {name}", "boss.farol": "The Great Lantern", "boss.forja": "The Wakeful Forge", "boss.seto": "The Hungry Hedge", "boss.trono": "The Empty Throne", "boss.mira": "She Who Watches from Below", "boss.grava": "Grava", "boss.veleta": "The Great Weathervane", "boss.micelio": "Mother Mycelium",
+    "foe.hollow": "Dimmed {name}", "boss.farol": "The Great Lantern", "boss.forja": "The Wakeful Forge", "boss.seto": "The Hungry Hedge", "boss.trono": "The Empty Throne", "boss.mira": "She Who Watches from Below", "boss.grava": "Grava", "boss.veleta": "The Great Weathervane", "boss.micelio": "Mother Mycelium", "boss.raiz": "The Aching Root",
     "zones.lockEnv": "Calm a guardian of the Crater or the Wood to cross the Ford to the Underside.",
-    "zones.lockHigh": "Calm a guardian of the Underside to open this path.",
+    "zones.lockHigh": "Calm a guardian of the Underside to open this path.", "zones.lockHeart": "Calm all eight guardians to reach the Heart.",
+    "r.guard": "The guardian leaves you one of its cards", "grim.story": "Only Unísona gives it.", "end.unisona": "Unísona stays with you. From now on it can join you on any expedition, and its Star cards work for every creature.", "end.unisonaUp": "Unísona sings with you again and gives you another copy of one of its cards. Fuse them to raise its grade.",
     "log.strip": "{name} loses {st}.", "log.cdup": "{name}'s card will take {n} longer to be ready.",
     "ach.guard8": ["The Song almost whole", "Calm all eight guardians of the valley."],
     "log.lost": "{name} can't find anyone in the fog.", "log.echo": "{name}'s blow rings out again!", "log.revive": "{name} gets back up with {n} health!",
@@ -945,6 +964,10 @@ const ZT = {
       desc: "Picos y nubes donde viven mensajeros, juglares y meteorólogos. Venden noticias al mejor postor y cierran los pasos cuando les conviene. Aquí el Aire pega un 10 % más fuerte y la Piedra un 10 % menos.",
       bossD: "La Veleta Mayor, un remolino de voces robadas.", win: "¡La Veleta Mayor deja de girar!",
       winText: "Las voces robadas se escapan del remolino y vuelven a sus dueños, cada una por su valle. {name} vuelve a casa con el pelo revuelto por el viento.", verse: "El verso de la voz que no se vende" },
+    heart: { name: "Corazón del Claro", sub: "El centro del valle · zona de Estrella", to: "al Corazón del Claro", from: "del Corazón del Claro",
+      desc: "El tocón enorme del centro del valle, justo encima de la Raíz. Es lugar de peregrinos y nadie entra. De aquí sube la savia negra. Aquí no hay ventajas de tipo: la Estrella no gana ni pierde contra nadie.",
+      bossD: "La Raíz Doliente, de todos los tipos y de ninguno.", win: "¡La Raíz Doliente deja de doler!",
+      winText: "Cantas los ocho versos y la Raíz responde con el noveno. La savia negra se aclara y baja despacio hacia todos los valles a la vez. {name} vuelve a casa con Unísona al lado, y el Claro entero suena distinto.", verse: "El verso que solo se canta con los otros ocho" },
     deep: { name: "El Fondo Blanco", sub: "Bajo el Envés · zona de Seta", to: "al Fondo Blanco", from: "del Fondo Blanco",
       desc: "Cavernas heladas bajo el Envés, casi aisladas del resto. La savia derritió el hielo y sus pueblos tuvieron que salir. Aquí la Seta pega un 10 % más fuerte y la Planta un 10 % menos.",
       bossD: "La Madre Micelio duerme sobre la savia.", win: "¡La Madre Micelio despierta tranquila!",
@@ -979,6 +1002,10 @@ const ZT = {
       desc: "Peaks and clouds where messengers, minstrels and weather-watchers live. They sell news to the highest bidder and close the passes when it suits them. Here Air hits 10% harder and Stone 10% softer.",
       bossD: "The Great Weathervane, a whirlwind of stolen voices.", win: "The Great Weathervane stops spinning!",
       winText: "The stolen voices slip out of the whirlwind and go back to their owners, each down its own valley. {name} heads home with wind-tousled fur.", verse: "The verse of the voice that isn't for sale" },
+    heart: { name: "Heart of the Glade", sub: "The centre of the valley · Star zone", to: "to the Heart of the Glade", from: "from the Heart of the Glade",
+      desc: "The huge stump at the centre of the valley, right above the Root. Pilgrims come here and nobody goes in. The black sap rises from here. There are no type advantages here: Star neither wins nor loses against anyone.",
+      bossD: "The Aching Root, of every type and of none.", win: "The Aching Root stops aching!",
+      winText: "You sing the eight verses and the Root answers with the ninth. The black sap clears and flows slowly down into every valley at once. {name} heads home with Unísona alongside, and the whole Glade sounds different.", verse: "The verse that is only sung with the other eight" },
     deep: { name: "The White Deep", sub: "Beneath the Underside · Mushroom zone", to: "to the White Deep", from: "from the White Deep",
       desc: "Frozen caverns beneath the Underside, almost cut off from everything. The sap melted the ice and its peoples had to leave. Here Mushroom hits 10% harder and Plant 10% softer.",
       bossD: "Mother Mycelium sleeps on the sap.", win: "Mother Mycelium wakes up calm!",
@@ -989,12 +1016,12 @@ const zt = (k, v, zone) => { let s = ZT[L()][zone || (X && X.zone) || "aurora"][
 const tx = (k, v) => { let s = TX[L()][k]; if (s == null) s = TX.en[k]; if (s == null) return k; if (v) s = s.replace(/\{(\w+)\}/g, (m, n) => (v[n] != null ? v[n] : m)); return s; };
 
 const MON_NAMES = {
-  lumo: "Lumo", fizz: "Fizz", pebb: "Pebb", fuellito: "Fuellito", brotin: "Brotín", remolin: "Remolín", bostezo: "Bostezo",
+  unisona: "Unísona", lumo: "Lumo", fizz: "Fizz", pebb: "Pebb", fuellito: "Fuellito", brotin: "Brotín", remolin: "Remolín", bostezo: "Bostezo",
   mecha: "Mecha", yunqueron: "Yunquerón", espinardo: "Espinardo", nim: "Nim", centinela: "Centinela", vidriela: "Vidriela", ecolito: "Ecolito", relampin: "Relampín", trinilla: "Trinilla", carambano: "Carámbano", capuchon: "Capuchón", guardatumba: "Guardatumba",
 };
 const MON_DESC = {
-  es: { lumo: "Chispa juguetona de las Casas del Farol", fizz: "Nube dormilona de los Altos", pebb: "Comilón tozudo de la Hondura", fuellito: "Aprendiz del Gremio de la Brasa", brotin: "Bellota paciente del Bosque Hondo", remolin: "Nutria viajera de las Mareas", bostezo: "Ovejita-polilla del Fondo Blanco", mecha: "Vela con patas del Barrio Apagado", yunqueron: "Tortuga-yunque de la Forja Madre", espinardo: "Erizo de zarza nacido en el Seto", nim: "Murcielaguito del pueblo de la Sombra", centinela: "Guardia del Rey Lóbrego", vidriela: "Pez de cristal del Lago Espejo", ecolito: "Piedra que canta, de las Cuevas del Eco", relampin: "Hurón mensajero de la Aguja del Trueno", trinilla: "Pájaro juglar de la casa del Verso", carambano: "Topo de hielo de la Tumba Helada", capuchon: "Cangrejo ermitaño con una seta por concha", guardatumba: "Gigante de hielo que guarda la Tumba" },
-  en: { lumo: "Playful spark from the Lantern Houses", fizz: "Sleepy cloud from the Heights", pebb: "Stubborn glutton from the Deep", fuellito: "Apprentice of the Ember Guild", brotin: "Patient acorn from the Deep Wood", remolin: "Wandering otter of the Tides", bostezo: "Woolly moth-lamb from the White Hollow", mecha: "Candle on legs from the Dim Quarter", yunqueron: "Anvil turtle of the Mother Forge", espinardo: "Bramble hedgehog born in the Hedge", nim: "Little bat of the Shadow folk", centinela: "Guard of King Lóbrego", vidriela: "Glass fish of Mirror Lake", ecolito: "Singing stone of the Echo Caves", relampin: "Messenger ferret of the Thunder Spire", trinilla: "Minstrel bird of the House of Verse", carambano: "Ice mole of the Frozen Tomb", capuchon: "Hermit crab with a mushroom for a shell", guardatumba: "Ice giant who guards the Tomb" },
+  es: { unisona: "Criatura Estrella nacida de dos nanas a la vez", raiz: "La Raíz que hay bajo el Claro", lumo: "Chispa juguetona de las Casas del Farol", fizz: "Nube dormilona de los Altos", pebb: "Comilón tozudo de la Hondura", fuellito: "Aprendiz del Gremio de la Brasa", brotin: "Bellota paciente del Bosque Hondo", remolin: "Nutria viajera de las Mareas", bostezo: "Ovejita-polilla del Fondo Blanco", mecha: "Vela con patas del Barrio Apagado", yunqueron: "Tortuga-yunque de la Forja Madre", espinardo: "Erizo de zarza nacido en el Seto", nim: "Murcielaguito del pueblo de la Sombra", centinela: "Guardia del Rey Lóbrego", vidriela: "Pez de cristal del Lago Espejo", ecolito: "Piedra que canta, de las Cuevas del Eco", relampin: "Hurón mensajero de la Aguja del Trueno", trinilla: "Pájaro juglar de la casa del Verso", carambano: "Topo de hielo de la Tumba Helada", capuchon: "Cangrejo ermitaño con una seta por concha", guardatumba: "Gigante de hielo que guarda la Tumba" },
+  en: { unisona: "Star creature born of two lullabies at once", raiz: "The Root beneath the Glade", lumo: "Playful spark from the Lantern Houses", fizz: "Sleepy cloud from the Heights", pebb: "Stubborn glutton from the Deep", fuellito: "Apprentice of the Ember Guild", brotin: "Patient acorn from the Deep Wood", remolin: "Wandering otter of the Tides", bostezo: "Woolly moth-lamb from the White Hollow", mecha: "Candle on legs from the Dim Quarter", yunqueron: "Anvil turtle of the Mother Forge", espinardo: "Bramble hedgehog born in the Hedge", nim: "Little bat of the Shadow folk", centinela: "Guard of King Lóbrego", vidriela: "Glass fish of Mirror Lake", ecolito: "Singing stone of the Echo Caves", relampin: "Messenger ferret of the Thunder Spire", trinilla: "Minstrel bird of the House of Verse", carambano: "Ice mole of the Frozen Tomb", capuchon: "Hermit crab with a mushroom for a shell", guardatumba: "Ice giant who guards the Tomb" },
 };
 
 /* ---------- Card names, lore and effect text ---------- */
@@ -1075,6 +1102,12 @@ const CT = {
   regent:   { es: ["Golpe del Regente", "Golpea en nombre de alguien a quien nunca ha visto."], en: ["Regent's Blow", "It strikes in the name of someone it has never seen."] },
   thousand: { es: ["Mil Años de Hielo", "«Nadie ha cruzado la puerta de la Tumba. Él tampoco. Nunca se le ocurrió mirar dentro.»"], en: ["A Thousand Years of Ice", "\"Nobody has crossed the Tomb's door. Neither has he. It never occurred to him to look inside.\""] },
   sealed:   { es: ["Puerta Sellada", "Lo que está sellado no se abre. Ni siquiera desde dentro."], en: ["Sealed Door", "What is sealed doesn't open. Not even from inside."] },
+  ache:     { es: ["Dolor Antiguo", "Lleva siglos doliendo en silencio. Hoy por fin lo dice."], en: ["Old Ache", "It has ached in silence for centuries. Today it finally says so."] },
+  eight:    { es: ["Ocho Voces", "Cada pueblo le cantó algo distinto. Se acuerda de todo."], en: ["Eight Voices", "Every people sang it something different. It remembers all of it."] },
+  rootheart:{ es: ["Corazón de Raíz", "Late una vez cada cien años. Hoy ha latido tres."], en: ["Root Heart", "It beats once every hundred years. Today it has beaten three times."] },
+  duet:     { es: ["Dueto", "Una nota de luz y otra de sombra. Juntas no se tapan."], en: ["Duet", "One note of light and one of shadow. Together they don't drown each other out."] },
+  unison:   { es: ["Al Unísono", "Cuando todos cantan lo mismo, nadie canta solo."], en: ["In Unison", "When everyone sings the same thing, nobody sings alone."] },
+  firstnote:{ es: ["La Primera Nota", "La que dio la Primera Cantora antes de partir el Canto."], en: ["The First Note", "The one the First Singer sang before she split the Song."] },
   gale:     { es: ["Vendaval", "Sopla todas las noticias a la vez. Nadie entiende ninguna."], en: ["Gale", "It blows every piece of news at once. Nobody understands any of them."] },
   voices:   { es: ["Voces Robadas", "Cada voz que gira en la Veleta era de alguien que la vendió barata."], en: ["Stolen Voices", "Every voice spinning in the Weathervane belonged to someone who sold it cheap."] },
   spin:     { es: ["Giro sin Fin", "Apunta a donde sopla el viento. Siempre."], en: ["Endless Spin", "It points wherever the wind blows. Always."] },
@@ -1443,6 +1476,7 @@ const css = `
 .slotbox select { font: 600 14px var(--font-body); padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); min-height: 40px; width: 100%; }
 .rstats { font: 500 12px var(--font-mono); color: var(--muted); margin: 0; }
 .mstats { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 10px; margin-top: 6px; width: 100%; font-size: 12px; text-align: left; }
+@media (max-width: 520px) { .mstats { grid-template-columns: 1fr; } }
 .mstats span { display: flex; justify-content: space-between; gap: 4px; } .mstats i { font-style: normal; color: var(--muted); } .mstats b { font-variant-numeric: tabular-nums; white-space: nowrap; }
 .sheet { display: flex; flex-direction: column; gap: 6px; }
 .fstat { display: grid; grid-template-columns: 76px minmax(0, 1fr) 44px 112px; gap: 8px; align-items: center; font-size: 14px; }
@@ -1474,12 +1508,12 @@ Object.assign(EV.SFX, {
 });
 
 /* ---------- Achievements ---------- */
-EV.ACH.push(["exp1", 15, (p) => (p.c.expWins || 0) >= 1], ["guard1", 40, (p) => ((p.cleared || {}).aurora || 0) >= 1], ["guard3", 60, (p) => ["aurora", "crater", "forest"].every((z) => ((p.cleared || {})[z] || 0) >= 1)], ["guard6", 80, (p) => ["hollow", "lake", "caves"].every((z) => ((p.cleared || {})[z] || 0) >= 1)], ["guard8", 120, (p) => Object.keys(ZONES).every((z) => ((p.cleared || {})[z] || 0) >= 1)], ["cards10", 20, (p) => (p.cards || []).length >= 10], ["fuse1", 15, (p) => (p.c.fused || 0) >= 1],
+EV.ACH.push(["exp1", 15, (p) => (p.c.expWins || 0) >= 1], ["guard1", 40, (p) => ((p.cleared || {}).aurora || 0) >= 1], ["guard3", 60, (p) => ["aurora", "crater", "forest"].every((z) => ((p.cleared || {})[z] || 0) >= 1)], ["guard6", 80, (p) => ["hollow", "lake", "caves"].every((z) => ((p.cleared || {})[z] || 0) >= 1)], ["guard8", 120, (p) => ZONES.heart.unlock.every((z) => ((p.cleared || {})[z] || 0) >= 1)], ["heart1", 200, (p) => ((p.cleared || {}).heart || 0) >= 1], ["cards10", 20, (p) => (p.cards || []).length >= 10], ["fuse1", 15, (p) => (p.c.fused || 0) >= 1],
   ["grimSol", 40, (p) => grimDone(p, ["fire", "plant", "light"])], ["grimSky", 40, (p) => grimDone(p, ["bolt", "air", "music"])],
   ["grimLake", 40, (p) => grimDone(p, ["water", "stone", "shadow"])], ["grimFrost", 40, (p) => grimDone(p, ["ice", "mush", "dream"])],
   ["grimAll", 150, (p) => grimDone(p, GRIM_ORDER)], ["dust1", 10, (p) => (p.c.dusted || 0) >= 1]);
 for (const lg of ["es", "en"]) {
-  for (const id of ["exp1", "guard1", "guard3", "guard6", "guard8", "cards10", "fuse1", "grimSol", "grimSky", "grimLake", "grimFrost", "grimAll", "dust1"]) EV.STR[lg].ach[id] = TX[lg]["ach." + id];
+  for (const id of ["exp1", "guard1", "guard3", "guard6", "guard8", "cards10", "fuse1", "grimSol", "grimSky", "grimLake", "grimFrost", "grimAll", "dust1", "heart1"]) EV.STR[lg].ach[id] = TX[lg]["ach." + id];
   EV.STR[lg]["nav.cards"] = TX[lg]["nav.cards"];
 }
 EV.applyStatic();
@@ -1510,6 +1544,8 @@ const MONCOL = {
   trono:    { body: "#2e2a3a", belly: "#6a6090", line: "#110f18", cheek: "#a080c0" },
   mira:     { body: "#2f5f80", belly: "#a8e0f0", line: "#142c3e", cheek: "#f0a0b8" },
   grava:    { body: "#7a6c5c", belly: "#c8b89a", line: "#352c22", cheek: "#e0a080" },
+  raiz:     { body: "#6a4a3a", belly: "#c8a070", line: "#2a1a18", cheek: "#e0a080" },
+  unisona:  { body: "#f2c94c", belly: "#4a3f8a", line: "#2a2140", cheek: "#f0a0b8" },
 };
 function drawMon(c, kind, o) {
   const ell = EV.ell;
@@ -1556,6 +1592,27 @@ function drawMon(c, kind, o) {
       c.fillStyle = "#c0a040"; EV.ell(c, 0, -62, 6, 6); c.fill();
       c.fillStyle = col.belly; for (const x of [-10, 10]) { EV.ell(c, x, -20, 5, o.ko ? 1 : 6); c.fill(); }
       c.fillStyle = "#3a3440"; c.font = "700 14px system-ui"; c.textAlign = "center"; c.globalAlpha = 0.6; for (let k = 0; k < 3; k++) c.fillText("♪", Math.cos(o.t * 2 + k * 2.1) * 34, -10 + Math.sin(o.t * 2 + k * 2.1) * 10); c.globalAlpha = 1;
+    } else if (kind === "raiz") {
+      // the Root under the Glade: a stump of rings, eight eyes in the eight colours, dripping sap
+      const ec = ["#d9542c", "#4f9a3c", "#e2ae2e", "#6fb8d0", "#3f7fc9", "#a08a6a", "#8a78d4", "#b0603c"];
+      c.fillStyle = "#24122e"; EV.ell(c, 0, 36, 62, 10); c.fill();
+      c.fillStyle = col.body;
+      for (const sx of [-1, 1]) { c.beginPath(); c.moveTo(sx * 22, 28); c.quadraticCurveTo(sx * 52, 28, sx * 64, 40); c.lineTo(sx * 46, 40); c.quadraticCurveTo(sx * 34, 36, sx * 18, 36); c.closePath(); c.fill(); c.stroke(); }
+      c.beginPath(); c.moveTo(-38, 36); c.lineTo(-44, -40); c.quadraticCurveTo(0, -54, 44, -40); c.lineTo(38, 36); c.closePath(); c.fill(); c.stroke();
+      c.fillStyle = col.belly; EV.ell(c, 0, -42, 42, 10); c.fill(); c.stroke();
+      c.lineWidth = 1.5; for (const r of [30, 19, 8]) { EV.ell(c, 0, -42, r, r * 0.24); c.stroke(); }
+      for (let k = 0; k < 8; k++) { const x = -27 + (k % 4) * 18, y = -18 + Math.floor(k / 4) * 22; c.save(); c.globalAlpha = o.ko ? 0.3 : 0.65 + 0.35 * Math.sin(o.t * 2 + k); c.fillStyle = ec[k]; EV.ell(c, x, y, 5, o.ko ? 1 : 4); c.fill(); c.restore(); }
+      c.fillStyle = "#24122e"; for (let k = 0; k < 4; k++) { const ph = (o.t * 0.5 + k / 4) % 1; c.fillRect(-31 + k * 20, -30 + ph * 60, 3, 6); }
+    } else if (kind === "unisona") {
+      // half dawn, half night: a round body split down the middle, a star crest and small wings
+      const fl = Math.sin(o.t * 5) * 5;
+      c.fillStyle = "#f6e6a8"; for (const sx of [-1, 1]) { c.beginPath(); c.moveTo(sx * 24, -4); c.quadraticCurveTo(sx * 52, -26 + fl, sx * 46, 8); c.closePath(); c.fill(); c.stroke(); }
+      c.save(); ell(c, 0, 6, 32, 32); c.clip(); c.fillStyle = col.body; c.fillRect(-40, -30, 40, 80); c.fillStyle = col.belly; c.fillRect(0, -30, 40, 80); c.restore();
+      ell(c, 0, 6, 32, 32); c.stroke();
+      c.fillStyle = "#fff4c0"; c.beginPath(); for (let k = 0; k < 10; k++) { const r = k % 2 ? 6 : 14, a = -Math.PI / 2 + k * Math.PI / 5; c.lineTo(Math.cos(a) * r, -30 + Math.sin(a) * r); } c.closePath(); c.fill(); c.stroke();
+      c.fillStyle = "#1d1626"; ell(c, -11, 2, 4, o.ko ? 1 : 5); c.fill(); c.fillStyle = "#fff4c0"; ell(c, 11, 2, 4, o.ko ? 1 : 5); c.fill();
+      c.fillStyle = col.cheek; ell(c, -19, 13, 4, 3); c.fill(); ell(c, 19, 13, 4, 3); c.fill();
+      c.save(); c.globalAlpha = 0.6; c.fillStyle = "#fff4c0"; c.font = "700 12px system-ui"; c.textAlign = "center"; c.fillText("♪", Math.cos(o.t * 2) * 42, -20 + Math.sin(o.t * 2) * 8); c.restore();
     } else if (kind === "micelio") {
       // a great pale mushroom mother sleeping on dark sap
       c.fillStyle = "#24122e"; EV.ell(c, 0, 34, 54, 10); c.fill();
@@ -1750,12 +1807,14 @@ function startExpedition() {
   X = { zone: null, offer: [], chosen: [], party: [], section: 0, nodes: [], loot: { xp: 0, coins: 0, cards: [] }, nextFoeBuff: 0, wins: 0 };
   show("zones");
 }
-const zoneOpen = (id) => { const u = ZONES[id].unlock; if (!u) return true; return [].concat(u).some((z) => ((EV.P.cleared || {})[z] || 0) > 0); };
+const zoneOpen = (id) => { const u = ZONES[id].unlock; if (!u) return true; const ok = (z) => ((EV.P.cleared || {})[z] || 0) > 0; return ZONES[id].unlockAll ? u.every(ok) : [].concat(u).some(ok); };
 function pickZone(id) {
   if (!ZONES[id] || !zoneOpen(id)) { EV.sfx("deny"); return; }
   const S = EV.S, z = ZONES[id];
   X.zone = id;
   X.offer = pickN(z.allies.filter((k) => k !== S.species), 3);
+  // Unísona: brought by Tila and Nim to the Heart; after the Heart is calm it can join any trip
+  if (id === "heart" || (EV.P.flags || {}).unisona) X.offer.unshift("unisona");
   X.chosen = [];
   show("pick");
 }
@@ -1766,7 +1825,7 @@ function zonesHtml() {
     const done = cl[id] || 0;
     return `<button type="button" class="node zone" data-zone="${id}" ${open ? "" : "disabled"}><span class="ic" aria-hidden="true">${TYPES[z.type].icon}</span>
       <strong>${esc(zt("name", null, id))}</strong><small>${esc(zt("sub", null, id))}</small>
-      <small>${open ? esc(tx("zones.lvl", { n: z.min })) : "🔒 " + esc(tx(Array.isArray(z.unlock) ? (z.unlock.includes("hollow") ? "zones.lockHigh" : "zones.lockEnv") : "zones.lock"))}</small>
+      <small>${open ? esc(tx("zones.lvl", { n: z.min })) : "🔒 " + esc(tx(z.unlockAll ? "zones.lockHeart" : Array.isArray(z.unlock) ? (z.unlock.includes("hollow") ? "zones.lockHigh" : "zones.lockEnv") : "zones.lock"))}</small>
       ${done ? `<small class="ok">✓ ${esc(tx("zones.done", { n: done }))} · ${starStr((EV.P.stars || {})[id] || 0)}<br>${esc(tx("zones.verse", { v: zt("verse", null, id) }))}</small>` : ""}</button>`;
   }).join("")}</div>`;
 }
@@ -1794,8 +1853,11 @@ function nextSection() {
 function partyUnits() {
   return X.party.map((m) => {
     if (m.own) return makeUnit(ownUnitOpts(m.hp));
-    const cards = { a: scaled(MONS[m.kind].cards[0], 0), p: scaled(MONS[m.kind].cards[1], 0) };
-    if (m.lvl >= SLOT_LVL.s) cards.s = scaled(MONS[m.kind].cards[2], 0);
+    // Unísona uses your best copy of each of its cards, so it grows as you fuse them
+    const gr = (id) => (m.kind === "unisona" ? Math.max(0, ...EV.P.cards.filter((c) => c.id === id).map((c) => c.g)) : 0);
+    const mc = MONS[m.kind].cards;
+    const cards = { a: scaled(mc[0], gr(mc[0])), p: scaled(mc[1], gr(mc[1])) };
+    if (m.lvl >= SLOT_LVL.s || m.kind === "unisona") cards.s = scaled(mc[2], gr(mc[2]));
     return makeUnit({ kind: m.kind, lvl: m.lvl, side: "ally", name: monName(m.kind), wild: true, cards, hpPct: m.hp, stage: 1, form: "bright" });
   });
 }
@@ -2048,7 +2110,14 @@ function endBattle(res) {
   const coins = boss ? 30 : 3 + Math.floor(rnd() * 4) + foes.length;
   X.loot.xp += xp; X.loot.coins += coins;
   const offer = boss ? offerCards(3, 1) : rnd() < 0.12 ? offerCards(3, 0) : null;
-  X.reward = { xp, coins, offer, after: boss ? "win" : "next" };
+  // the guardian leaves one of its own cards (one you haven't found yet, if any)
+  let guard = null;
+  if (boss) {
+    const gc = MONS[ZONES[X.zone].boss].cards, fresh = gc.filter((id) => !(EV.P.grim || {})[id]), pool = fresh.length ? fresh : gc;
+    const id = pool[Math.floor(rnd() * pool.length)];
+    giveCard(id, 0); guard = { id, g: 0 }; X.loot.cards.push(guard); EV.save();
+  }
+  X.reward = { xp, coins, offer, guard, after: boss ? "win" : "next" };
   EV.checkAch();
   show("reward");
 }
@@ -2066,6 +2135,7 @@ function rewardHtml() {
   if (r.xp) parts.push(`<span>${esc(tx("r.xp", { n: r.xp }))}</span>`);
   if (r.coins) parts.push(`<span>✦ ${esc(tx("r.coins", { n: r.coins }))}</span>`);
   let html = `<div class="panel"><h3>${esc(r.title || tx("r.title"))}</h3>${r.text ? `<p class="evt-out">${esc(r.text)}</p>` : ""}${parts.length ? `<div class="loot">${parts.join("")}</div>` : ""}`;
+  if (r.guard) html += `<h3>${esc(tx("r.guard"))}</h3><div class="rcards">${cardHtml(r.guard.id, r.guard.g)}</div>`;
   if (r.offer) {
     html += `<h3>${esc(tx("r.pick"))}</h3><div class="rcards">${r.offer.map((o, i) => cardHtml(o.id, o.g, { foot: `${cantNote(o.id)}<div class="rc-btns"><button class="btn" type="button" data-take="${i}">${esc(tx("r.pick"))}</button></div>` })).join("")}</div>
       <div class="bctl"><button class="btn ghost" type="button" data-take="-1">${esc(tx("r.skip"))}</button></div>`;
@@ -2080,6 +2150,17 @@ function afterReward() {
 
 /* ---------- Battle drawing ---------- */
 function drawDecor(c, decor, t, day) {
+  if (decor === "heart") {
+    // the great stump at the centre of the valley, root veins with black sap, floating star motes
+    const m = BW / 2;
+    c.fillStyle = day ? "#7a5a48" : "#3a2a30";
+    c.beginPath(); c.moveTo(m - 70, 70); c.lineTo(m - 56, 16); c.quadraticCurveTo(m, 6, m + 56, 16); c.lineTo(m + 70, 70); c.closePath(); c.fill();
+    c.fillStyle = day ? "#c8a070" : "#6a5040"; EV.ell(c, m, 16, 56, 9); c.fill();
+    c.strokeStyle = day ? "#8a6a50" : "#4a3838"; c.lineWidth = 1; for (const r of [40, 26, 12]) { EV.ell(c, m, 16, r, r * 0.16); c.stroke(); }
+    c.strokeStyle = "#24122e"; c.lineWidth = 3; for (const [x1, x2] of [[m - 60, 0], [m + 60, BW], [m - 30, 60], [m + 30, BW - 60]]) { c.beginPath(); c.moveTo(x1, 66); c.quadraticCurveTo((x1 + x2) / 2, 58, x2, 70); c.stroke(); }
+    c.save(); for (let i = 0; i < 14; i++) { const x = (i * 53 + t * 8) % BW, y = 60 - ((i * 17 + t * 10) % 60); c.globalAlpha = (0.5 + 0.5 * Math.sin(t * 3 + i)) * (day ? 0.7 : 1); c.fillStyle = i % 2 ? "#ffe9a0" : "#c8b8ff"; c.fillRect(x, y, 2, 2); } c.restore();
+    return;
+  }
   if (decor === "peaks") {
     // snowy peaks, drifting clouds and a spinning vane far away
     c.fillStyle = day ? "#8ea6c0" : "#26304a";
@@ -2270,6 +2351,12 @@ const EVT = {
       o: ["Sabe a tierra mojada y a algo dulce. El equipo recupera mucha vida. Esporina sonríe: «¿Ves? Nadie se muere por probarlo.»", "«La Casa Albor. Dicen que es para protegernos.» Baja la voz: «Si la savia se puede curar, alguien preguntará de dónde sale.» Ganas experiencia.", "Esporina asiente. Está acostumbrada."] },
     tomb: { t: "La puerta de la Tumba Helada gotea. Junto a ella, un gigante de hielo duerme de pie, con la maza apoyada en el suelo.", c: ["Asomarte por una grieta", "Tapar la gotera con nieve", "Pasar de puntillas"],
       o: ["Dentro solo ves oscuridad y un brillo pequeño, al alcance de la mano. Lo coges sin hacer ruido.", "Cuesta, pero la gotera para. El gigante suspira en sueños. Ganas experiencia.", "Pasáis de puntillas. El gigante no se mueve."] },
+    duo: { t: "Tila y Nim te esperan en la entrada del tocón. Unísona dormita entre los dos. «Las nanas de nuestros pueblos son el mismo verso», dice Tila. Nim asiente sin mirarla.", c: ["Pedirles que canten juntos", "Preguntar quién reclama a Unísona", "Dejar que Unísona elija el camino"],
+      o: ["Las dos nanas se trenzan y la savia negra retrocede un palmo. El equipo recupera mucha vida.", "«Albor dice que es suya porque nació de la luz. Lóbrego, que de la sombra. Albina, que la soñó primero.» Nim escupe al suelo. «Es de quien la cuide.» Ganas experiencia.", "Unísona revolotea hacia un brillo entre las raíces y vuelve con algo con forma de carta."] },
+    albor: { t: "Bajo el tocón hay tubos de cristal clavados en la Raíz, con el sello de la Casa Albor. Por ellos sube luz de raíz hacia los Pozos de Albor, y por las grietas rezuma savia negra.", c: ["Arrancar un tubo", "Seguir los tubos hasta su origen", "Guardar un tubo como prueba"],
+      o: ["La Raíz suspira y la savia se calma un poco, pero el cristal os corta. El equipo pierde vida y gana mucha experiencia.", "Los tubos llegan a las Casas del Farol: cada farol del prado bebe de aquí. Ahora sabes de dónde viene la savia negra. Ganas Chispas.", "Te guardas el tubo. Alguien en la Casa Albor tendrá que dar explicaciones. Las próximas criaturas apagadas pegarán más flojo."] },
+    cantora: { t: "En medio del Claro hay una estatua cubierta de musgo: la Primera Cantora, la que partió el Canto en nueve. Todos los pueblos le rezan, cada uno con otra cara. Esta tiene la boca abierta, como a mitad de una nota.", c: ["Cantar los versos que llevas", "Quitarle el musgo", "Descansar a su sombra"],
+      o: ["Tus versos resuenan en la piedra y, muy lejos, se oyen los otros. Ganas experiencia por cada verso que llevas.", "Bajo el musgo la estatua no tiene una cara: tiene nueve, una por pueblo, mirando hacia fuera. Entre ellas encuentras algo con forma de carta.", "El equipo duerme un rato sin pesadillas y recupera vida."] },
     dreams: { t: "Una familia de la casa del Sueño se acaba de despertar y, como cada mañana, se cuenta lo que ha soñado antes de que se le olvide.", c: ["Contar tu sueño", "Escuchar los suyos", "Seguir tu camino"],
       o: ["Cuentas un sueño sobre un farol y una sombra que cantaban juntos. La abuela se queda muy callada. Ganas experiencia.", "Sueñan con agua que sube, con hielo que llora y con una raíz que tiene sed. El equipo descansa escuchando.", "La familia sigue contando sueños a tu espalda."] },
   },
@@ -2325,6 +2412,12 @@ const EVT = {
       o: ["It tastes of wet earth and something sweet. The team recovers a lot of health. Esporina smiles: \"See? Nobody dies from trying it.\"", "\"House Albor. They say it's to protect us.\" She lowers her voice: \"If the sap can be cured, someone will ask where it comes from.\" You gain experience.", "Esporina nods. She's used to it."] },
     tomb: { t: "The door of the Frozen Tomb is dripping. Beside it an ice giant sleeps standing up, its club resting on the ground.", c: ["Peek through a crack", "Plug the leak with snow", "Tiptoe past"],
       o: ["Inside you see only darkness and a small glint, within arm's reach. You take it without a sound.", "It's hard work, but the leak stops. The giant sighs in its sleep. You gain experience.", "You tiptoe past. The giant doesn't move."] },
+    duo: { t: "Tila and Nim wait for you at the mouth of the stump. Unísona dozes between them. \"Our peoples' lullabies are the same verse,\" says Tila. Nim nods without looking at her.", c: ["Ask them to sing together", "Ask who claims Unísona", "Let Unísona pick the path"],
+      o: ["The two lullabies braid together and the black sap pulls back a hand's width. The team recovers a lot of health.", "\"Albor says it's theirs because it was born of light. Lóbrego says of shadow. Albina says she dreamed it first.\" Nim spits on the ground. \"It belongs to whoever looks after it.\" You gain experience.", "Unísona flutters toward a glint among the roots and comes back with something card-shaped."] },
+    albor: { t: "Under the stump, glass tubes are driven into the Root, stamped with the seal of House Albor. Root-light rises through them toward the Wells of Albor, and black sap seeps from the cracks they leave.", c: ["Pull out a tube", "Follow the tubes to their source", "Keep a tube as proof"],
+      o: ["The Root sighs and the sap calms a little, but the glass cuts you. The team loses health and gains a lot of experience.", "The tubes run to the Lantern Houses: every lantern in the meadow drinks from here. Now you know where the black sap comes from. You gain Chispas.", "You keep the tube. Someone in House Albor will have to explain. The next dimmed creatures will hit softer."] },
+    cantora: { t: "In the middle of the Glade stands a moss-covered statue: the First Singer, who split the Song into nine. Every people prays to her, each with a different face. This one has its mouth open, as if halfway through a note.", c: ["Sing the verses you carry", "Clear away the moss", "Rest in her shade"],
+      o: ["Your verses ring in the stone and, far away, the others can be heard. You gain experience for every verse you carry.", "Under the moss the statue doesn't have one face: it has nine, one per people, looking outward. Among them you find something card-shaped.", "The team sleeps a while without nightmares and recovers health."] },
     dreams: { t: "A family of the House of Dreams has just woken up and, like every morning, they tell each other what they dreamed before they forget.", c: ["Tell your dream", "Listen to theirs", "Keep walking"],
       o: ["You tell a dream about a lantern and a shadow singing together. The grandmother goes very quiet. You gain experience.", "They dream of rising water, of ice that weeps and of a thirsty root. The team rests while listening.", "The family keeps telling dreams behind you."] },
   },
@@ -2444,6 +2537,21 @@ function chooseEvent(i) {
       if (i === 1) { hurtParty(0.15); X.loot.xp += 18; }
       if (i === 2) { healParty(0.3); X.nextFoeBuff = 15; }
       break;
+    case "duo":
+      if (i === 0) healParty(0.45);
+      if (i === 1) X.loot.xp += 20;
+      if (i === 2) X.eventCard = true;
+      break;
+    case "albor":
+      if (i === 0) { hurtParty(0.15); X.loot.xp += 28; }
+      if (i === 1) { X.loot.coins += 18; EV.P.flags = Object.assign(EV.P.flags || {}, { alborTruth: 1 }); }
+      if (i === 2) { X.nextFoeBuff = -15; EV.P.flags = Object.assign(EV.P.flags || {}, { alborProof: 1 }); }
+      break;
+    case "cantora":
+      if (i === 0) X.loot.xp += 4 * Object.keys(EV.P.cleared || {}).filter((z) => EV.P.cleared[z] > 0).length;
+      if (i === 1) X.eventCard = true;
+      if (i === 2) healParty(0.35);
+      break;
     case "esporina":
       if (i === 0) { healParty(0.5); EV.P.flags = Object.assign(EV.P.flags || {}, { sporeRemedy: 1 }); }
       if (i === 1) X.loot.xp += 16;
@@ -2482,6 +2590,12 @@ function finish(res) {
   }
   if (coins > 0) EV.addCoins(coins, true);
   if (res === "win") { P.c.guard = (P.c.guard || 0) + 1; P.cleared = P.cleared || {}; P.cleared[X.zone] = (P.cleared[X.zone] || 0) + 1; }
+  X.unisona = null;
+  if (res === "win" && X.zone === "heart") {
+    const F = P.flags = P.flags || {};
+    if (!F.unisona) { F.unisona = 1; for (const id of MONS.unisona.cards) { giveCard(id, 0); l.cards.push({ id, g: 0 }); } X.unisona = "first"; }
+    else { const id = MONS.unisona.cards[Math.floor(rnd() * 3)]; giveCard(id, 0); l.cards.push({ id, g: 0 }); X.unisona = "again"; }
+  }
   if (res === "win" || res === "lose") P.c.expDone = (P.c.expDone || 0) + 1;
   // zone stars: keep the best, 3 Song Notes the first time a zone reaches 3
   X.starInfo = null;
@@ -2526,6 +2640,7 @@ function endHtml() {
   if (X.hurt && (X.hurt.energy || X.hurt.health)) html += `<p class="evt-out">${esc(tx("end.hurt", { name: nm, e: X.hurt.energy, h: X.hurt.health }))}</p>`;
   else html += `<p class="evt-out">${esc(tx("end.unhurt", { name: nm }))}</p>`;
   if (e.res === "win") html += `<p class="evt-out">✦ ${esc(tx("end.verse", { v: zt("verse") }))}</p>`;
+  if (X.unisona) html += `<p class="evt-out">✦ ${esc(tx(X.unisona === "first" ? "end.unisona" : "end.unisonaUp"))}</p>`;
   if (X.starInfo) html += `<p class="evt-out end-stars"><b>${esc(tx("end.stars", { s: starStr(X.starInfo.n) }))}</b>${X.starInfo.best ? " · " + esc(tx("end.starsNew")) : ""}${X.starInfo.bonus ? "<br>♪ " + esc(tx("end.star3")) : ""}<br><small>${esc(tx("end.starsWhy"))}</small></p>`;
   if (e.after > e.before) html += `<p class="evt-out">${esc(tx("end.lvl", { name: nm, n: e.after }))}</p>`;
   for (const k of e.unlocked) html += `<p class="evt-out">${esc(tx("end.slot", { slot: tx("slot." + k) }))}</p>`;
@@ -2605,8 +2720,8 @@ function grimHtml() {
       const tids = grimIds([ty]); if (!tids.length) continue;
       h += `<p class="rc-copies">${typeChip(ty)} <span class="progress">${tids.filter((id) => P.grim[id]).length} / ${tids.length}</span></p><div class="rcards">`;
       for (const id of tids) {
-        const C = CARDS[id], boss = !!C.boss, owner = C.by && MONS[C.by] ? monName(C.by) : "";
-        const craft = boss ? `<p class="rc-cant">${esc(tx("grim.boss"))}</p>` : `<div class="rc-btns"><button class="btn ghost" type="button" data-craft="${id}" ${(P.dust || 0) < CRAFT_COST ? "disabled" : ""}>${esc(tx("grim.craft", { c: CRAFT_COST }))}</button></div>`;
+        const C = CARDS[id], boss = !!C.boss || !!C.story, owner = C.by && MONS[C.by] ? monName(C.by) : "";
+        const craft = boss ? `<p class="rc-cant">${esc(tx(C.story ? "grim.story" : "grim.boss"))}</p>` : `<div class="rc-btns"><button class="btn ghost" type="button" data-craft="${id}" ${(P.dust || 0) < CRAFT_COST ? "disabled" : ""}>${esc(tx("grim.craft", { c: CRAFT_COST }))}</button></div>`;
         if (P.grim[id]) h += cardHtml(id, 0, { foot: craft });
         else h += ghostCardHtml(id, tx("grim.unknown") + (owner && !boss ? " · " + tx("grim.by", { mon: owner }) : ""), craft);
       }
@@ -2680,7 +2795,7 @@ function onCardsClick(e) {
     EV.toast(tx("dust.got", { n: DUST_OF(c.g) }), "✧"); EV.sfx("coin"); EV.save(); EV.checkAch(); renderCards(); return;
   }
   if (t.dataset.craft) {
-    const id = t.dataset.craft; if (!CARDS[id] || CARDS[id].boss) return;
+    const id = t.dataset.craft; if (!CARDS[id] || CARDS[id].boss || CARDS[id].story) return;
     if ((P.dust || 0) < CRAFT_COST) { EV.toast(tx("dust.poor")); EV.sfx("deny"); return; }
     P.dust -= CRAFT_COST; giveCard(id, 0);
     EV.toast(tx("grim.crafted", { card: cardName(id) })); EV.sfx("grow"); EV.save(); EV.checkAch(); renderCards(); return;
