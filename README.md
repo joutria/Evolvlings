@@ -50,6 +50,7 @@ To host it on **GitHub Pages**: open the repo's *Settings → Pages*, choose *De
 - **Savia Mode**: once a zone has 3 stars it can be played again with thicker Sap (+2 levels, +15 % stats) for 3 more stars, up to 54 in total with the normal ones.
 - **Guardian's Echo** (Keeper Level 6): each week a calmed guardian returns stronger with one rule (Sap shield, fury, tired team or extra speed). 3 tries a week; a win gives Stardust and Chispas and counts for a new weekly task.
 - **Lore** (`lore.js`, written in the lore thread): six one-time encounters with dialogue that unlock as you calm guardians, 15 Writings to collect and read in the Grimoire (from encounters, chests, guardians and the event stall), and rumours of the world on the zone screen.
+- **Pixel sprites** (`sprites.js`, made in the creature-cards thread, `window.EVS`): the 20 launch creatures as Glimmer-32 sprites in battle, on the pick screen and in the Refuge (hollowed foes use the faded palette), each card's own 16×16 art next to the creature that carries it, 9×9 pixel type icons instead of emoji, and a short animation for every card used in battle (13 styles, type particles, hits). Guardians still use the vector drawings.
 - **44 achievements**, each with a Chispas reward.
 - **Spanish and English**: picked from the browser language, switchable in Settings.
 - **Sound effects** generated with Web Audio (no audio files), plus optional vibration on phones. Mute from the header.
