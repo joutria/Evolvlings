@@ -147,9 +147,9 @@ footer { font-size: 12px; color: var(--muted); }
 .chip-btn.coin { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-weight: 500; color: var(--warn); border-color: color-mix(in srgb, var(--warn) 45%, var(--line)); }
 .chip-btn.coin svg { width: 16px; height: 16px; }
 .chip-btn.coin.pop { animation: pop .45s ease; }
-#btnDaily { position: relative; }
+#btnDaily, #btnRefuge { position: relative; }
 #btnDaily .notes { font-family: var(--font-mono); font-weight: 500; color: var(--accent, #5b45c8); }
-#btnDaily .dot { position: absolute; top: -2px; right: -2px; width: 9px; height: 9px; border-radius: 50%; background: #e2553f; border: 2px solid var(--surface); }
+#btnDaily .dot, #btnRefuge .dot { position: absolute; top: -2px; right: -2px; width: 9px; height: 9px; border-radius: 50%; background: #e2553f; border: 2px solid var(--surface); }
 .chip-btn.icon { padding: 6px 9px; display: inline-flex; align-items: center; }
 .chip-btn.icon svg { width: 18px; height: 18px; }
 @keyframes pop { 0% { transform: scale(1); } 40% { transform: scale(1.18); } 100% { transform: scale(1); } }
@@ -221,7 +221,7 @@ h1, h2, h3, .brand, .idline .nm, .btn, .act, .chip-btn, .seg button, .submenu bu
 .bar i { -webkit-mask: repeating-linear-gradient(90deg, #000 0 6px, transparent 6px 8px); mask: repeating-linear-gradient(90deg, #000 0 6px, transparent 6px 8px); transition: width .4s steps(8), background-color .4s; }
 .badge { border: 2px solid currentColor; padding: 0 8px; font-family: var(--font-display); }
 .toast { border: 2px solid var(--line); box-shadow: 4px 4px 0 var(--shade); font-family: var(--font-display); font-weight: 500; }
-#btnDaily .dot { border-width: 2px; }
+#btnDaily .dot, #btnRefuge .dot { border-width: 2px; }
 .egg-card:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--shade); }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .stage { border-color: #4a3d5e; } }
 </style>
@@ -234,6 +234,7 @@ h1, h2, h3, .brand, .idline .nm, .btn, .act, .chip-btn, .seg button, .submenu bu
     <div class="top-tools">
       <button class="chip-btn coin" id="btnCoins" type="button" data-i18n-aria="nav.coins"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.2 7.8L22 12l-7.8 2.2L12 22l-2.2-7.8L2 12l7.8-2.2z" fill="currentColor"/></svg><span id="coinVal">0</span></button>
       <button class="chip-btn" id="btnDaily" type="button" hidden><span id="dailyLbl">Tasks</span> <span class="notes" id="noteVal">♪ 0</span><i class="dot" id="dailyDot" hidden></i></button>
+      <button class="chip-btn" id="btnRefuge" type="button" hidden><span id="refugeLbl">Refuge</span><i class="dot" id="refugeDot" hidden></i></button>
       <button class="chip-btn" id="btnCards" type="button" data-i18n="nav.cards" hidden>Cards</button>
       <button class="chip-btn" id="btnAch" type="button" data-i18n="nav.ach">Achievements</button>
       <button class="chip-btn" id="btnJournal" type="button" data-i18n="nav.journal">Journal</button>
@@ -300,6 +301,7 @@ h1, h2, h3, .brand, .idline .nm, .btn, .act, .chip-btn, .seg button, .submenu bu
 
   <section id="cardsPanel" class="panel" hidden></section>
   <section id="dailyPanel" class="panel" hidden></section>
+  <section id="refugePanel" class="panel" hidden></section>
 
   <!-- choose an egg -->
   <section id="scrChoose" class="choose" hidden>
@@ -1517,7 +1519,7 @@ function renderSettings() {
 }
 
 /* ---------- Panels (one open at a time) ---------- */
-const PANELS = { settings: "settingsPanel", journal: "journalPanel", shop: "shopPanel", ach: "achPanel", cards: "cardsPanel", daily: "dailyPanel" };
+const PANELS = { settings: "settingsPanel", journal: "journalPanel", shop: "shopPanel", ach: "achPanel", cards: "cardsPanel", daily: "dailyPanel", refuge: "refugePanel" };
 function togglePanel(name, forceOpen) {
   const id = PANELS[name], el = $(id);
   const open = forceOpen || el.hidden;
@@ -1528,6 +1530,7 @@ function togglePanel(name, forceOpen) {
   if (name === "ach") renderAch();
   if (name === "cards" && HOOKS.renderCards) HOOKS.renderCards();
   if (name === "daily" && HOOKS.renderDaily) HOOKS.renderDaily();
+  if (name === "refuge" && HOOKS.renderRefuge) HOOKS.renderRefuge();
   el.hidden = false;
   el.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
@@ -1622,5 +1625,6 @@ requestAnimationFrame(frame);
 <script src="rpg.js"></script>
 <script src="daily.js"></script>
 <script src="well.js"></script>
+<script src="eggs.js"></script>
 </body>
 </html>
