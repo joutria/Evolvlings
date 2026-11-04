@@ -42,13 +42,25 @@ function isDayNow(d) { const h = (d || new Date()).getHours(); return h >= 7 && 
 /* Grades                                                                 */
 /* ====================================================================== */
 const GRADES = [
-  { id: "c",  mult: 1.00, dur: 0, cd: 0, trade: 1.0,  w: 80,  es: "Común",      en: "Common",     col: "#8a9580" },
-  { id: "r",  mult: 1.20, dur: 0, cd: 0, trade: 0.9,  w: 15,  es: "Rara",       en: "Rare",       col: "#3f8fc9" },
-  { id: "vr", mult: 1.40, dur: 1, cd: 1, trade: 0.8,  w: 4,   es: "Súper rara", en: "Super rare", col: "#4c9a3c" },
-  { id: "sr", mult: 1.65, dur: 1, cd: 1, trade: 0.65, w: 0.8, es: "Épica",      en: "Epic",       col: "#8a55d6" },
-  { id: "ep", mult: 1.95, dur: 2, cd: 2, trade: 0.5,  w: 0.18,es: "Mítica",     en: "Mythic",     col: "#d0612c" },
-  { id: "lg", mult: 2.30, dur: 2, cd: 2, trade: 0.4,  w: 0.02,es: "Legendaria", en: "Legendary",  col: "#d4a017" },
+  { id: "c",  mult: 1.00, dur: 0, cd: 0, trade: 1.0,  w: 80,  es: "Común",      en: "Common",     col: "#6b4a3a" },
+  { id: "r",  mult: 1.20, dur: 0, cd: 0, trade: 0.9,  w: 15,  es: "Rara",       en: "Rare",       col: "#a3343b" },
+  { id: "vr", mult: 1.40, dur: 1, cd: 1, trade: 0.8,  w: 4,   es: "Súper rara", en: "Super rare", col: "#6e6283" },
+  { id: "sr", mult: 1.65, dur: 1, cd: 1, trade: 0.65, w: 0.8, es: "Épica",      en: "Epic",       col: "#2f5d96" },
+  { id: "ep", mult: 1.95, dur: 2, cd: 2, trade: 0.5,  w: 0.18,es: "Mítica",     en: "Mythic",     col: "#c25e9a" },
+  { id: "lg", mult: 2.30, dur: 2, cd: 2, trade: 0.4,  w: 0.02,es: "Legendaria", en: "Legendary",  col: "#e0603f" },
 ];
+/* Rarity is read from the frame's material (Visual language of the Glade, section 7):
+   wood, copper, silver, lake glass, nacre, root-light. Colours are Glimmer-32. */
+const GRADE_VIS = [
+  { mat: ["#6b4a3a", "#a07a55"], anim: null },    // Común: madera del Bosque Hondo
+  { mat: ["#a3343b", "#f39a52"], anim: null },    // Rara: cobre del Gremio
+  { mat: ["#9d93ad", "#fbf6ef"], anim: null },    // Súper rara: plata de Los Altos
+  { mat: ["#3f93c4", "#c8eef5"], anim: "shine" }, // Épica: cristal del Lago Espejo
+  { mat: ["#f4a6c4", "#c7a6ff"], anim: "irid" },  // Mítica: nácar del Fondo Blanco
+  { mat: ["#ffd57a", "#fff0b8"], anim: "pulse" }, // Legendaria: luz de raíz
+];
+// The Black Sap keeps its own colours, outside Glimmer-32 on purpose; nothing else uses them
+const SAP = { c0: "#0e0814", c1: "#241030", c2: "#3b1d4a", sheen: "#7dffb0" };
 function rollGrade(minIdx, rnd) {
   rnd = rnd || Math.random;
   const pool = GRADES.slice(minIdx || 0);
@@ -508,7 +520,7 @@ B.hit = function (src, tgt, pow, card, extra) {
   if (left >= tgt.hp && ts.cloud > 0) { ts.cloud--; left = Math.round(left / 2); this.emit({ k: "save", u: tgt.uid }); }
   tgt.hp = Math.max(0, tgt.hp - left);
   src.hitOnce = true; tgt.hitsTaken++;
-  this.emit({ k: "dmg", u: tgt.uid, by: src.uid, n: d, crit, eff: tm > 1 ? "up" : tm < 1 ? "down" : "", ty });
+  this.emit({ k: "dmg", u: tgt.uid, by: src.uid, n: d, crit, eff: tm >= 1.5 ? "up" : tm > 1 ? "opp" : tm < 1 ? "down" : "", ty });
   if (crit && src.mods.critSpark) side.spark = src.mods.critSpark;
   if (crit) this.trigger("allyCrit", tgt, {});
   if (src.mods.onHit) this.addStatus(src, tgt, src.mods.onHit, card ? card.type : null);
@@ -722,58 +734,58 @@ const ZONES = {
   aurora: {
     type: "light", bonus: { light: 10, shadow: -10 }, sections: 4, min: 1, unlock: null, decor: "lanterns",
     foes: ["lumo", "fuellito", "brotin", "lumo"], allies: ["brotin", "remolin", "fuellito", "bostezo", "lumo", "fizz", "pebb", "mecha"],
-    boss: "farol", sky: ["#ffe9b8", "#f6c97a"], skyN: ["#2b2f5c", "#57508a"], ground: "#9cc46a", groundN: "#4f6b47",
+    boss: "farol", sky: ["#fff0b8", "#ffd57a"], skyN: ["#1f2f5c", "#2f5d96"], ground: "#86b85a", groundN: "#4f8a46",
     events: ["farol", "patrol", "tila", "well"],
   },
   crater: {
     type: "fire", bonus: { fire: 10, water: -10 }, sections: 4, min: 2, unlock: "aurora", decor: "forge",
     foes: ["fuellito", "fuellito", "yunqueron", "mecha"], allies: ["remolin", "brotin", "bostezo", "pebb", "fizz", "lumo", "mecha", "yunqueron"],
-    boss: "forja", sky: ["#ffd7a8", "#e9875a"], skyN: ["#2a1b2b", "#5d2e3a"], ground: "#9a7458", groundN: "#4a3838",
+    boss: "forja", sky: ["#fff0b8", "#f39a52"], skyN: ["#1d1626", "#5c1f2e"], ground: "#a07a55", groundN: "#3d2a2a",
     events: ["dam", "apprentice", "ola", "well"],
   },
   forest: {
     type: "plant", bonus: { plant: 10, light: -10 }, sections: 4, min: 3, unlock: "aurora", decor: "forest",
     foes: ["brotin", "brotin", "espinardo", "fuellito"], allies: ["fuellito", "remolin", "bostezo", "pebb", "fizz", "lumo", "yunqueron", "espinardo"],
-    boss: "seto", sky: ["#d6ecc4", "#86b67e"], skyN: ["#12251e", "#26443a"], ground: "#5f8f4a", groundN: "#2f4a33",
+    boss: "seto", sky: ["#c4df7f", "#86b85a"], skyN: ["#1d1626", "#1f3b35"], ground: "#4f8a46", groundN: "#1f3b35",
     events: ["liquen", "vines", "loggers", "well"],
   },
   // the Underside (Envés): the night half of the valley, past the Ford
   hollow: {
     type: "shadow", bonus: { shadow: 10, light: -10 }, sections: 4, min: 4, unlock: ["crater", "forest"], decor: "mist",
     foes: ["nim", "nim", "centinela", "ecolito"], allies: ["lumo", "fuellito", "remolin", "pebb", "bostezo", "mecha", "nim", "ecolito"],
-    boss: "trono", sky: ["#b9b4c6", "#7d7891"], skyN: ["#17151f", "#2c2838"], ground: "#6d6a78", groundN: "#2a2833",
+    boss: "trono", sky: ["#d2cbd9", "#6e6283"], skyN: ["#1d1626", "#2e2440"], ground: "#6e6283", groundN: "#2e2440",
     events: ["court", "dig", "whisper"],
   },
   lake: {
     type: "water", bonus: { water: 10, fire: -10 }, sections: 4, min: 5, unlock: ["crater", "forest"], decor: "lake",
     foes: ["remolin", "vidriela", "remolin", "nim"], allies: ["brotin", "fizz", "pebb", "bostezo", "remolin", "vidriela", "nim", "espinardo"],
-    boss: "mira", sky: ["#cfe6f2", "#8cb9d6"], skyN: ["#0f1b2e", "#25385a"], ground: "#5d8fa8", groundN: "#1f3448",
+    boss: "mira", sky: ["#c8eef5", "#7cc8e3"], skyN: ["#1d1626", "#1f2f5c"], ground: "#3f93c4", groundN: "#1f2f5c",
     events: ["orilla", "reflection", "boats"],
   },
   caves: {
     type: "stone", bonus: { stone: 10, air: -10 }, sections: 4, min: 5, unlock: ["crater", "forest"], decor: "caves",
     foes: ["pebb", "ecolito", "pebb", "remolin"], allies: ["remolin", "brotin", "fizz", "bostezo", "yunqueron", "ecolito", "vidriela", "espinardo"],
-    boss: "grava", sky: ["#8a7a6a", "#5a4c40"], skyN: ["#1c1714", "#2f2620"], ground: "#7a6a58", groundN: "#2e2620",
+    boss: "grava", sky: ["#a07a55", "#6b4a3a"], skyN: ["#1d1626", "#3d2a2a"], ground: "#6b4a3a", groundN: "#3d2a2a",
     events: ["gravasong", "tunnels", "miners"],
   },
   // Los Altos (above the Dayside) and the White Deep (under the Underside)
   heights: {
     type: "air", bonus: { air: 10, stone: -10 }, sections: 4, min: 6, unlock: ["hollow", "lake", "caves"], decor: "peaks",
     foes: ["relampin", "trinilla", "fizz", "relampin"], allies: ["lumo", "fizz", "pebb", "fuellito", "remolin", "relampin", "trinilla", "ecolito"],
-    boss: "veleta", sky: ["#dff0ff", "#9cc8ec"], skyN: ["#141c34", "#2e3e6a"], ground: "#a8b8a0", groundN: "#38424a",
+    boss: "veleta", sky: ["#c8eef5", "#7cc8e3"], skyN: ["#1d1626", "#1f2f5c"], ground: "#9d93ad", groundN: "#4a3d5e",
     events: ["coplo", "news", "pass"],
   },
   deep: {
     type: "mush", bonus: { mush: 10, plant: -10 }, sections: 4, min: 7, unlock: ["hollow", "lake", "caves"], decor: "ice",
     foes: ["carambano", "capuchon", "bostezo", "carambano"], allies: ["fuellito", "brotin", "bostezo", "pebb", "carambano", "capuchon", "guardatumba", "vidriela"],
-    boss: "micelio", sky: ["#eef6fa", "#c4dcea"], skyN: ["#121a22", "#26343f"], ground: "#dfe9ee", groundN: "#3a4650",
+    boss: "micelio", sky: ["#fbf6ef", "#c8eef5"], skyN: ["#1d1626", "#1f3b35"], ground: "#c8eef5", groundN: "#4a3d5e",
     events: ["esporina", "tomb", "dreams"],
   },
   // the Heart of the Glade: the stump above the single Root, opens once all eight guardians are calm
   heart: {
     type: "star", bonus: {}, sections: 4, min: 8, unlock: ["aurora", "crater", "forest", "hollow", "lake", "caves", "heights", "deep"], unlockAll: true, decor: "heart",
     foes: ["lumo", "fizz", "pebb", "nim", "vidriela", "relampin", "capuchon", "yunqueron", "trinilla", "carambano"], allies: ["lumo", "fizz", "pebb", "fuellito", "remolin", "nim", "trinilla", "vidriela", "capuchon", "relampin"],
-    boss: "raiz", sky: ["#f3e2ff", "#d9b8f0"], skyN: ["#140f24", "#2c2050"], ground: "#8a7a5a", groundN: "#2e2838",
+    boss: "raiz", sky: ["#fbf6ef", "#d2cbd9"], skyN: ["#1d1626", "#2e2440"], ground: "#a07a55", groundN: "#2e2440",
     events: ["duo", "albor", "cantora"],
   },
 };
@@ -812,7 +824,7 @@ const TX = {
     "b.noCard": "Sin carta activa",
     "b.win": "¡Victoria!", "b.lose": "El equipo se retira…",
     "log.act": "{name} juega {card}.", "log.basic": "{name} ataca.", "log.dmg": "{name} recibe {n}{crit}{eff}.", "log.crit": " (¡crítico!)",
-    "log.up": " · es muy eficaz", "log.down": " · no es muy eficaz", "log.miss": "{name} esquiva.", "log.blindMiss": "{name} falla: no ve nada.",
+    "log.up": " · es muy eficaz", "log.opp": " · tipo opuesto", "log.down": " · no es muy eficaz", "b.opp": "Opuesto", "log.miss": "{name} esquiva.", "log.blindMiss": "{name} falla: no ve nada.",
     "log.heal": "{name} recupera {n}.", "log.st": "{name}: {st}.", "log.ko": "{name} cae.", "log.skip.stun": "{name} está aturdido.",
     "log.skip.trap": "{name} está atrapado.", "log.skip.tired": "{name} se toma un respiro.", "log.support": "Soporte de {name}: {card}.",
     "log.shield": "{name} gana un escudo de {n}.", "log.break": "¡Escudo roto!", "log.cleanse": "{name} se libra de {st}.",
@@ -849,9 +861,9 @@ const TX = {
     "ctab.col": "Colección", "ctab.grim": "Grimorio", "ctab.shop": "Taller",
     "grim.desc": "Todas las cartas del Claro. Las que aún no has visto aparecen en silueta. Completa un círculo entero para ganar un logro.",
     "grim.count": "{n} de {m} descubiertas", "grim.unknown": "Carta sin descubrir", "grim.boss": "Solo la entrega un guardián.", "grim.by": "La lleva {mon}.",
-    "grim.craft": "Crear Común · {c} ✧", "grim.crafted": "¡Has creado {card}!", "grim.circle.sol": "Círculo del Sol", "grim.circle.sky": "Círculo del Cielo", "grim.circle.lake": "Círculo del Lago", "grim.circle.frost": "Círculo de la Escarcha", "grim.circle.star": "Estrella",
-    "dust.have": "Polvo de estrella: {n} ✧", "dust.btn": "Deshacer 1 → +{n} ✧", "dust.got": "+{n} Polvo de estrella", "dust.poor": "Te falta Polvo de estrella.",
-    "dust.desc": "Deshaz las copias que te sobran (nunca la última ni la que llevas puesta). Cada grado vale 5 veces más: Común 1 ✧, Rara 5 ✧, Súper rara 25 ✧… Con {c} ✧ creas en el Grimorio una carta Común que te falte.",
+    "grim.craft": "Crear Común · {c} ∴", "grim.crafted": "¡Has creado {card}!", "grim.circle.sol": "Círculo del Sol", "grim.circle.sky": "Círculo del Cielo", "grim.circle.lake": "Círculo del Lago", "grim.circle.frost": "Círculo de la Escarcha", "grim.circle.star": "Estrella",
+    "dust.have": "Polvo de estrella: {n} ∴", "dust.btn": "Deshacer 1 → +{n} ∴", "dust.got": "+{n} Polvo de estrella", "dust.poor": "Te falta Polvo de estrella.",
+    "dust.desc": "Deshaz las copias que te sobran (nunca la última ni la que llevas puesta). Cada grado vale 5 veces más: Común 1 ∴, Rara 5 ∴, Súper rara 25 ∴… Con {c} ∴ creas en el Grimorio una carta Común que te falte.",
     "pack.title": "Sobre de cartas", "pack.desc": "Tres cartas al azar, la mitad pensadas para tu criatura. Puedes abrir {m} al día; te quedan {n}.",
     "pack.btn": "Abrir sobre · {c} ✦", "pack.none": "Ya abriste todos los sobres de hoy. Vuelve mañana.", "pack.got": "Del sobre:",
     "foe.hollow": "{name} apagado", "boss.farol": "El Gran Farol", "boss.forja": "La Forja Despierta", "boss.seto": "El Seto Hambriento", "boss.trono": "El Trono Vacío", "boss.mira": "La Que Mira desde Abajo", "boss.grava": "Grava", "boss.veleta": "La Veleta Mayor", "boss.micelio": "La Madre Micelio", "boss.raiz": "La Raíz Doliente",
@@ -882,7 +894,7 @@ const TX = {
     "b.noCard": "No active card",
     "b.win": "Victory!", "b.lose": "The team pulls back…",
     "log.act": "{name} plays {card}.", "log.basic": "{name} attacks.", "log.dmg": "{name} takes {n}{crit}{eff}.", "log.crit": " (critical!)",
-    "log.up": " · super effective", "log.down": " · not very effective", "log.miss": "{name} dodges.", "log.blindMiss": "{name} misses: it can't see.",
+    "log.up": " · super effective", "log.opp": " · opposite type", "log.down": " · not very effective", "b.opp": "Opposite", "log.miss": "{name} dodges.", "log.blindMiss": "{name} misses: it can't see.",
     "log.heal": "{name} recovers {n}.", "log.st": "{name}: {st}.", "log.ko": "{name} is down.", "log.skip.stun": "{name} is stunned.",
     "log.skip.trap": "{name} is trapped.", "log.skip.tired": "{name} takes a breather.", "log.support": "{name}'s support: {card}.",
     "log.shield": "{name} gains a {n} shield.", "log.break": "Shield broken!", "log.cleanse": "{name} shakes off {st}.",
@@ -919,9 +931,9 @@ const TX = {
     "ctab.col": "Collection", "ctab.grim": "Grimoire", "ctab.shop": "Workshop",
     "grim.desc": "Every card of the Glade. The ones you haven't seen yet show as silhouettes. Complete a whole circle to earn an achievement.",
     "grim.count": "{n} of {m} discovered", "grim.unknown": "Undiscovered card", "grim.boss": "Only a guardian gives it.", "grim.by": "Carried by {mon}.",
-    "grim.craft": "Make Common · {c} ✧", "grim.crafted": "You made {card}!", "grim.circle.sol": "Circle of the Sun", "grim.circle.sky": "Circle of the Sky", "grim.circle.lake": "Circle of the Lake", "grim.circle.frost": "Circle of the Frost", "grim.circle.star": "Star",
-    "dust.have": "Stardust: {n} ✧", "dust.btn": "Break 1 → +{n} ✧", "dust.got": "+{n} Stardust", "dust.poor": "Not enough Stardust.",
-    "dust.desc": "Break the copies you don't need (never the last one or the one in use). Each grade is worth 5 times more: Common 1 ✧, Rare 5 ✧, Super rare 25 ✧… With {c} ✧ you can make a Common card you're missing in the Grimoire.",
+    "grim.craft": "Make Common · {c} ∴", "grim.crafted": "You made {card}!", "grim.circle.sol": "Circle of the Sun", "grim.circle.sky": "Circle of the Sky", "grim.circle.lake": "Circle of the Lake", "grim.circle.frost": "Circle of the Frost", "grim.circle.star": "Star",
+    "dust.have": "Stardust: {n} ∴", "dust.btn": "Break 1 → +{n} ∴", "dust.got": "+{n} Stardust", "dust.poor": "Not enough Stardust.",
+    "dust.desc": "Break the copies you don't need (never the last one or the one in use). Each grade is worth 5 times more: Common 1 ∴, Rare 5 ∴, Super rare 25 ∴… With {c} ∴ you can make a Common card you're missing in the Grimoire.",
     "pack.title": "Card pack", "pack.desc": "Three random cards, half of them suited to your creature. You can open {m} a day; {n} left.",
     "pack.btn": "Open pack · {c} ✦", "pack.none": "You've opened all of today's packs. Come back tomorrow.", "pack.got": "From the pack:",
     "foe.hollow": "Dimmed {name}", "boss.farol": "The Great Lantern", "boss.forja": "The Wakeful Forge", "boss.seto": "The Hungry Hedge", "boss.trono": "The Empty Throne", "boss.mira": "She Who Watches from Below", "boss.grava": "Grava", "boss.veleta": "The Great Weathervane", "boss.micelio": "Mother Mycelium", "boss.raiz": "The Aching Root",
@@ -1259,7 +1271,8 @@ function tcgArt(by, ty, sil) {
   return `<div class="tcg-art"><canvas class="rc-art" width="120" height="72" data-by="${by || ""}" data-ty="${ty}"${sil ? " data-sil=\"1\"" : ""}></canvas></div>`;
 }
 function tcgFrame(ty, gi, inner, ghost) {
-  return `<div class="tcg${ghost ? " ghost" : ""}${gi >= 3 ? " foil" : ""}" style="--tc:${TCOL[ty]};--g:${gi == null ? "#8a8a8a" : GRADES[gi].col}">${inner}</div>`;
+  const v = gi == null ? { mat: ["#9d93ad", "#d2cbd9"], anim: null } : GRADE_VIS[gi];
+  return `<div class="tcg${ghost ? " ghost" : ""}${v.anim ? " m-" + v.anim : ""}" style="--tc:${TCOL[ty]};--m0:${v.mat[0]};--m1:${v.mat[1]};--g:${gi == null ? "#9d93ad" : GRADES[gi].col}">${inner}</div>`;
 }
 function cardHtml(id, gi, opts) {
   opts = opts || {};
@@ -1269,7 +1282,7 @@ function cardHtml(id, gi, opts) {
   const no = String(CARD_NO.indexOf(id) + 1).padStart(3, "0") + "/" + CARD_NO.length;
   const inner = `<div class="tcg-name"><span class="tcg-gem" title="${esc(TYPES[ty][L()])}">${TYPES[ty].icon}</span><strong>${esc(cardName(id))}</strong>${opts.count > 1 ? `<span class="cnt">×${opts.count}</span>` : ""}<span class="tcg-cd" title="${esc(tx("slot.a"))}">⟳${sc.a.cd}</span></div>
   ${tcgArt(C.by, ty)}
-  <div class="tcg-line"><span>${esc(TYPES[ty][L()])}${by ? " · " + esc(by) : ""}${C.boss ? " · 👑" : ""}</span><span class="tcg-pips" title="${esc(GRADES[gi][L()])}">${"◆".repeat(gi + 1)}</span></div>
+  <div class="tcg-line"><span>${esc(TYPES[ty][L()])}${by ? " · " + esc(by) : ""}${C.boss ? " · 👑" : ""}</span><span class="tcg-pips" title="${esc(GRADES[gi][L()])}">${"◆".repeat(gi + 1)}<i>${"◇".repeat(5 - gi)}</i></span></div>
   <div class="tcg-box"><ul class="rc-fx">${rows}</ul><p class="rc-lore">${esc(cardLore(id))}</p></div>
   <div class="tcg-foot"><span>${esc(GRADES[gi][L()])}</span><span>EV · ${no}</span></div>`;
   return `<div class="rcard">${tcgFrame(ty, gi, inner)}${opts.foot || ""}</div>`;
@@ -1419,6 +1432,9 @@ const css = `
 .node { border: 2px solid var(--line); border-radius: 16px; background: var(--bg); padding: 12px; text-align: left; cursor: pointer; font: inherit; color: inherit; display: flex; flex-direction: column; gap: 4px; min-height: 96px; }
 .node:hover { border-color: var(--accent); }
 .node .ic { font-size: 26px; line-height: 1; }
+.evd { display: block; width: 16px; height: 16px; margin: 5px; background: #fbf6ef; border: 2px solid #1d1626; transform: rotate(45deg); animation: evd 1.6s steps(2) infinite; }
+@keyframes evd { 50% { background: #fff0b8; } }
+@media (prefers-reduced-motion: reduce) { .evd { animation: none; } }
 .node strong { font-family: var(--font-display); font-size: 17px; }
 .node small { color: var(--muted); font-size: 13px; line-height: 1.35; }
 .node:disabled { opacity: .55; cursor: not-allowed; }
@@ -1441,8 +1457,13 @@ const css = `
 .bturn { font-weight: 700; margin: 0; }
 .rcards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
 .rcard { display: flex; flex-direction: column; gap: 6px; }
-.tcg { position: relative; background: var(--tc); border: 3px solid #1d1626; padding: 6px; display: flex; flex-direction: column; gap: 5px; box-shadow: 4px 4px 0 #1d1626; color: #1d1626; }
-.tcg::before { content: ""; position: absolute; inset: 2px; border: 2px solid color-mix(in srgb, #fff 45%, var(--tc)); pointer-events: none; }
+.tcg { position: relative; background: var(--tc); border: 3px solid #1d1626; padding: 9px; display: flex; flex-direction: column; gap: 5px; box-shadow: 4px 4px 0 #1d1626; color: #1d1626; }
+.tcg::before { content: ""; position: absolute; inset: 0; border: 4px solid var(--m0); box-shadow: inset 0 0 0 2px var(--m1), inset 0 0 0 3px #1d1626; pointer-events: none; }
+.tcg.m-irid::before { animation: irid 6s ease-in-out infinite; }
+@keyframes irid { 0%, 100% { border-color: #f4a6c4; } 33% { border-color: #c7a6ff; } 66% { border-color: #c8eef5; } }
+.tcg.m-pulse::before { animation: pulse 2.4s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { box-shadow: inset 0 0 0 2px var(--m1), inset 0 0 0 3px #1d1626; } 50% { box-shadow: inset 0 0 0 2px var(--m1), inset 0 0 0 3px #1d1626, 0 0 10px 2px #ffd57a; } }
+@media (prefers-reduced-motion: reduce) { .tcg.m-irid::before, .tcg.m-pulse::before { animation: none; } }
 .tcg-name { position: relative; display: flex; align-items: center; gap: 6px; background: #fbf6ef; border: 2px solid #1d1626; padding: 3px 6px; min-height: 32px; }
 .tcg-name strong { font-family: var(--font-display); font-size: 15px; line-height: 1.1; flex: 1; min-width: 0; }
 .tcg-name .cnt { font: 700 12px var(--font-mono); color: #5b5266; }
@@ -1450,16 +1471,16 @@ const css = `
 .tcg-cd { font: 700 12px var(--font-mono); background: #1d1626; color: #fbf6ef; padding: 2px 6px; flex: none; }
 .tcg-art { position: relative; border: 2px solid #1d1626; background: #fbf3e4; overflow: hidden; line-height: 0; }
 .tcg-art canvas { width: 100%; height: auto; aspect-ratio: 120 / 72; image-rendering: pixelated; display: block; }
-.tcg.foil .tcg-art::after { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.55) 45%, rgba(255,240,180,.35) 52%, transparent 66%); background-size: 250% 100%; animation: foil 4s linear infinite; mix-blend-mode: screen; pointer-events: none; }
+.tcg.m-shine .tcg-art::after, .tcg.m-pulse .tcg-art::after { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.55) 45%, rgba(255,240,180,.35) 52%, transparent 66%); background-size: 250% 100%; animation: foil 4s linear infinite; mix-blend-mode: screen; pointer-events: none; }
 @keyframes foil { from { background-position: 120% 0; } to { background-position: -120% 0; } }
-@media (prefers-reduced-motion: reduce) { .tcg.foil .tcg-art::after { animation: none; background-position: 50% 0; } }
+@media (prefers-reduced-motion: reduce) { .tcg.m-shine .tcg-art::after, .tcg.m-pulse .tcg-art::after { animation: none; background-position: 50% 0; } }
 .tcg-line { position: relative; display: flex; justify-content: space-between; align-items: center; gap: 6px; background: #1d1626; color: #fbf6ef; padding: 2px 6px; font-size: 12px; font-weight: 700; }
-.tcg-pips { color: var(--g); letter-spacing: 1px; font-size: 11px; text-shadow: 0 0 0 #000; }
+.tcg-pips { color: var(--m1); letter-spacing: 1px; font-size: 11px; } .tcg-pips i { font-style: normal; color: #6e6283; }
 .tcg-box { position: relative; background: #fbf6ef; border: 2px solid #1d1626; padding: 6px 7px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
 .tcg-box .rc-fx li { color: #4a4255; } .tcg-box .rc-fx li b { color: #1d1626; } .tcg-box .rc-fx li.on { color: #1d1626; background: color-mix(in srgb, var(--tc) 22%, transparent); }
 .tcg-box .rc-lore { color: #5b5266; border-top: 1px dashed #b9ad9c; padding-top: 5px; }
 .tcg-foot { position: relative; display: flex; justify-content: space-between; font: 700 10px var(--font-mono); color: #1d1626; padding: 0 2px; text-transform: uppercase; letter-spacing: .04em; }
-.tcg-foot span:first-child { color: color-mix(in srgb, var(--g) 70%, #1d1626); background: #fbf6ef; padding: 0 4px; }
+.tcg-foot span:first-child { color: #1d1626; background: var(--m1); border: 1px solid var(--m0); padding: 0 4px; }
 .rc-fx { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; font-size: 13px; line-height: 1.35; }
 .rc-fx li b { font: 700 11px var(--font-mono); text-transform: uppercase; letter-spacing: .06em; margin-right: 4px; }
 .rc-fx li.on { border-radius: 0; padding: 2px 4px; margin: 0 -4px; }
@@ -1595,14 +1616,14 @@ function drawMon(c, kind, o) {
     } else if (kind === "raiz") {
       // the Root under the Glade: a stump of rings, eight eyes in the eight colours, dripping sap
       const ec = ["#d9542c", "#4f9a3c", "#e2ae2e", "#6fb8d0", "#3f7fc9", "#a08a6a", "#8a78d4", "#b0603c"];
-      c.fillStyle = "#24122e"; EV.ell(c, 0, 36, 62, 10); c.fill();
+      c.fillStyle = SAP.c1; EV.ell(c, 0, 36, 62, 10); c.fill();
       c.fillStyle = col.body;
       for (const sx of [-1, 1]) { c.beginPath(); c.moveTo(sx * 22, 28); c.quadraticCurveTo(sx * 52, 28, sx * 64, 40); c.lineTo(sx * 46, 40); c.quadraticCurveTo(sx * 34, 36, sx * 18, 36); c.closePath(); c.fill(); c.stroke(); }
       c.beginPath(); c.moveTo(-38, 36); c.lineTo(-44, -40); c.quadraticCurveTo(0, -54, 44, -40); c.lineTo(38, 36); c.closePath(); c.fill(); c.stroke();
       c.fillStyle = col.belly; EV.ell(c, 0, -42, 42, 10); c.fill(); c.stroke();
       c.lineWidth = 1.5; for (const r of [30, 19, 8]) { EV.ell(c, 0, -42, r, r * 0.24); c.stroke(); }
       for (let k = 0; k < 8; k++) { const x = -27 + (k % 4) * 18, y = -18 + Math.floor(k / 4) * 22; c.save(); c.globalAlpha = o.ko ? 0.3 : 0.65 + 0.35 * Math.sin(o.t * 2 + k); c.fillStyle = ec[k]; EV.ell(c, x, y, 5, o.ko ? 1 : 4); c.fill(); c.restore(); }
-      c.fillStyle = "#24122e"; for (let k = 0; k < 4; k++) { const ph = (o.t * 0.5 + k / 4) % 1; c.fillRect(-31 + k * 20, -30 + ph * 60, 3, 6); }
+      for (let k = 0; k < 4; k++) { const ph = (Math.floor(o.t * 6) / 12 + k / 4) % 1; c.fillStyle = SAP.c0; c.fillRect(-31 + k * 20, 30 - ph * 60, 3, 6); c.fillStyle = SAP.sheen; c.fillRect(-31 + k * 20, 30 - ph * 60, 1, 1); }
     } else if (kind === "unisona") {
       // half dawn, half night: a round body split down the middle, a star crest and small wings
       const fl = Math.sin(o.t * 5) * 5;
@@ -1615,7 +1636,7 @@ function drawMon(c, kind, o) {
       c.save(); c.globalAlpha = 0.6; c.fillStyle = "#fff4c0"; c.font = "700 12px system-ui"; c.textAlign = "center"; c.fillText("♪", Math.cos(o.t * 2) * 42, -20 + Math.sin(o.t * 2) * 8); c.restore();
     } else if (kind === "micelio") {
       // a great pale mushroom mother sleeping on dark sap
-      c.fillStyle = "#24122e"; EV.ell(c, 0, 34, 54, 10); c.fill();
+      c.fillStyle = SAP.c1; EV.ell(c, 0, 34, 54, 10); c.fill();
       c.strokeStyle = "#f4efe6"; c.lineWidth = 2; for (let k = 0; k < 7; k++) { const a = Math.PI * (0.1 + k * 0.13); c.beginPath(); c.moveTo(0, 30); c.quadraticCurveTo(Math.cos(a) * 30, 40, Math.cos(a) * 56, 36 + Math.sin(o.t + k) * 2); c.stroke(); }
       c.strokeStyle = col.line; c.lineWidth = 3; c.fillStyle = col.belly; c.fillRect(-14, -14, 28, 46); c.strokeRect(-14, -14, 28, 46);
       c.fillStyle = col.body; c.beginPath(); c.moveTo(-56, -10); c.quadraticCurveTo(-50, -70, 0, -72); c.quadraticCurveTo(50, -70, 56, -10); c.quadraticCurveTo(0, -24, -56, -10); c.fill(); c.stroke();
@@ -1779,9 +1800,10 @@ function drawMon(c, kind, o) {
   }
   if (o.hollow) {
     // the Black Sap: dark drips and a dim violet haze
-    c.save(); c.globalAlpha = 0.28; c.fillStyle = "#3b1d4a"; ell(c, 0, 0, 42, 42); c.fill(); c.restore();
-    c.fillStyle = "#24122e";
-    for (let i = 0; i < 3; i++) { const dy = (o.t * 18 + i * 17) % 30; c.globalAlpha = 1 - dy / 30; EV.ell(c, -18 + i * 18, 26 + dy, 3, 5); c.fill(); }
+    // drops fall upward, in steps (choppy on purpose), with one oily glint each
+    c.save(); c.globalAlpha = 0.28; c.fillStyle = SAP.c2; ell(c, 0, 0, 42, 42); c.fill(); c.restore();
+    const tq = Math.floor(o.t * 6) / 6;
+    for (let i = 0; i < 3; i++) { const dy = (tq * 18 + i * 17) % 30; c.globalAlpha = 1 - dy / 30; c.fillStyle = SAP.c1; EV.ell(c, -18 + i * 18, 30 - dy, 3, 5); c.fill(); c.fillStyle = SAP.sheen; c.fillRect(-19 + i * 18, 27 - dy, 2, 2); }
     c.globalAlpha = 1;
   }
 }
@@ -1918,7 +1940,7 @@ function render() {
     const icons = { fight: "⚔️", event: "❓", chest: "🎁", rest: "🔥", boss: "🏮" };
     body = `<div class="panel"><div class="sub">${esc(X.nodes[0] === "boss" ? tx("node.boss") : tx("exp.section", { n: X.section, m: z.sections }))}</div>
       <h3>${esc(X.nodes[0] === "boss" ? tx("exp.bossNext") : tx("exp.choose"))}</h3>
-      <div class="nodes">${X.nodes.map((n) => `<button type="button" class="node${n === "boss" ? " boss" : ""}" data-node="${n}"><span class="ic" aria-hidden="true">${icons[n]}</span><strong>${esc(tx("node." + n))}</strong><small>${esc((n === "boss" ? zt("bossD") : tx("node." + n + ".d")))}</small></button>`).join("")}</div></div>
+      <div class="nodes">${X.nodes.map((n) => `<button type="button" class="node${n === "boss" ? " boss" : ""}" data-node="${n}"><span class="ic" aria-hidden="true">${n === "event" ? '<i class="evd"></i>' : icons[n]}</span><strong>${esc(tx("node." + n))}</strong><small>${esc((n === "boss" ? zt("bossD") : tx("node." + n + ".d")))}</small></button>`).join("")}</div></div>
       <div class="panel"><h3>${esc(tx("exp.party"))}</h3>${partyHtml()}${lootHtml()}</div>`;
   } else if (view === "battle") {
     body = `<div class="panel"><div class="bbar"><span class="sub grow" id="bRound"></span>
@@ -2016,14 +2038,20 @@ function flushEvents() {
       case "act": { const u = b.units.find((x) => x.uid === e.u); if (a) a.lunge = 1; if (e.card) { blog(tx("log.act", { name: u.name, card: cardName(e.card) })); EV.sfx("card"); } else blog(tx("log.basic", { name: u.name })); break; }
       case "support": if (b.units.some((x) => x.uid === e.u && x.side === "ally")) EV.P.c.supportUsed = (EV.P.c.supportUsed || 0) + 1; blog(tx("log.support", { name: uName(e.u), card: cardName(e.card) })); if (a) battle.floats.push({ x: a.x, y: a.y - 44, text: "★ " + cardName(e.card), col: "#ffe27a", life: 1.4, small: true }); break;
       case "dmg":
-        if (e.eff === "up" && e.by && b.units.some((x) => x.uid === e.by && x.side === "ally")) EV.P.c.advHits = (EV.P.c.advHits || 0) + 1;
-        if (a) { a.flash = 1; battle.floats.push({ x: a.x + (Math.random() * 16 - 8), y: a.y - 34, text: (e.crit ? "¡" : "") + e.n + (e.crit ? "!" : ""), col: e.dot ? "#ff9a4a" : e.crit ? "#ffd35a" : e.eff === "up" ? "#ff7a6a" : "#ffffff", life: 1.1, big: e.crit }); }
+        if ((e.eff === "up" || e.eff === "opp") && e.by && b.units.some((x) => x.uid === e.by && x.side === "ally")) EV.P.c.advHits = (EV.P.c.advHits || 0) + 1;
+        if (a) {
+          a.flash = 1;
+          // normal cream; ×1.5 gold and bigger; ×1.25 pink with an "Opposite" tag; ×0.75 grey and smaller; damage over time falls in its cause's colour
+          const col = e.dot ? (e.dot === "burn" ? TCOL.fire : "#d2cbd9") : e.eff === "up" ? "#ffd57a" : e.eff === "opp" ? "#f4a6c4" : e.eff === "down" ? "#9d93ad" : "#fbf6ef";
+          battle.floats.push({ x: a.x + (Math.random() * 16 - 8), y: a.y - (e.dot ? 20 : 34), vy: e.dot ? -0.3 : 0.45, text: (e.crit ? "¡" : "") + e.n + (e.crit ? "!" : ""), col, life: 1.1, big: e.crit || e.eff === "up", small: e.eff === "down" });
+          if (e.eff === "opp") battle.floats.push({ x: a.x, y: a.y - 20, text: tx("b.opp"), col: "#fbf6ef", stroke: "#4a3d5e", life: 1.1, small: true });
+        }
         if (e.dot) blog(tx("log." + e.dot, { name: uName(e.u), n: e.n }));
         else blog(tx("log.dmg", { name: uName(e.u), n: e.n, crit: e.crit ? tx("log.crit") : "", eff: e.eff ? tx("log." + e.eff) : "" }));
         hitSfx = e.crit ? "crit" : hitSfx || "hit"; break;
       case "miss": if (a) battle.floats.push({ x: a.x, y: a.y - 34, text: e.blind ? "✴" : "~", col: "#cfe8ff", life: 1 }); blog(e.blind ? tx("log.blindMiss", { name: uName(e.by) }) : tx("log.miss", { name: uName(e.u) })); hitSfx = hitSfx || "miss"; break;
-      case "heal": if (a) battle.floats.push({ x: a.x, y: a.y - 34, text: "+" + e.n, col: "#8fe08a", life: 1.1 }); blog(tx("log.heal", { name: uName(e.u), n: e.n })); break;
-      case "st": if (a) battle.floats.push({ x: a.x, y: a.y - 48, text: STATUS[e.st].icon + " " + STATUS[e.st][L()], col: STATUS[e.st].neg ? "#ffb0c8" : "#bfe8ff", life: 1.3, small: true }); blog(tx("log.st", { name: uName(e.u), st: STATUS[e.st][L()] })); break;
+      case "heal": if (a) battle.floats.push({ x: a.x, y: a.y - 34, vy: 0.3, text: "+" + e.n, col: "#86b85a", life: 1.1 }); blog(tx("log.heal", { name: uName(e.u), n: e.n })); break;
+      case "st": if (a) battle.floats.push(STATUS[e.st].neg ? { x: a.x, y: a.y + (a.boss ? 66 : 58), vy: -0.25, text: STATUS[e.st].icon + " " + STATUS[e.st][L()], col: "#9d93ad", life: 1.3, small: true } : { x: a.x, y: a.y - 48, text: STATUS[e.st].icon + " " + STATUS[e.st][L()], col: "#1d1626", stroke: "#fbf6ef", life: 1.3, small: true }); blog(tx("log.st", { name: uName(e.u), st: STATUS[e.st][L()] })); break;
       case "shield": blog(tx("log.shield", { name: uName(e.u), n: e.n })); break;
       case "break": blog(tx("log.break")); break;
       case "cleanse": blog(tx("log.cleanse", { name: uName(e.u), st: e.st.map((s) => STATUS[s][L()]).join(", ") })); break;
@@ -2157,7 +2185,7 @@ function drawDecor(c, decor, t, day) {
     c.beginPath(); c.moveTo(m - 70, 70); c.lineTo(m - 56, 16); c.quadraticCurveTo(m, 6, m + 56, 16); c.lineTo(m + 70, 70); c.closePath(); c.fill();
     c.fillStyle = day ? "#c8a070" : "#6a5040"; EV.ell(c, m, 16, 56, 9); c.fill();
     c.strokeStyle = day ? "#8a6a50" : "#4a3838"; c.lineWidth = 1; for (const r of [40, 26, 12]) { EV.ell(c, m, 16, r, r * 0.16); c.stroke(); }
-    c.strokeStyle = "#24122e"; c.lineWidth = 3; for (const [x1, x2] of [[m - 60, 0], [m + 60, BW], [m - 30, 60], [m + 30, BW - 60]]) { c.beginPath(); c.moveTo(x1, 66); c.quadraticCurveTo((x1 + x2) / 2, 58, x2, 70); c.stroke(); }
+    c.strokeStyle = SAP.c0; c.lineWidth = 3; for (const [x1, x2] of [[m - 60, 0], [m + 60, BW], [m - 30, 60], [m + 30, BW - 60]]) { c.beginPath(); c.moveTo(x1, 66); c.quadraticCurveTo((x1 + x2) / 2, 58, x2, 70); c.stroke(); }
     c.save(); for (let i = 0; i < 14; i++) { const x = (i * 53 + t * 8) % BW, y = 60 - ((i * 17 + t * 10) % 60); c.globalAlpha = (0.5 + 0.5 * Math.sin(t * 3 + i)) * (day ? 0.7 : 1); c.fillStyle = i % 2 ? "#ffe9a0" : "#c8b8ff"; c.fillRect(x, y, 2, 2); } c.restore();
     return;
   }
@@ -2282,15 +2310,16 @@ function drawBattle(now) {
     out.font = font(600, 10); out.textAlign = "center"; out.textBaseline = "alphabetic"; out.fillStyle = "#fbf6ef"; out.strokeStyle = "#1d1626"; out.lineWidth = 3; out.lineJoin = "round";
     const label = u.name.length > 14 ? u.name.slice(0, 13) + "…" : u.name;
     out.strokeText(label + " · " + u.lvl, 0, by + 16); out.fillText(label + " · " + u.lvl, 0, by + 16);
-    const icons = Object.keys(u.st).map((k) => STATUS[k].icon).join("") + TYPES[u.types[0]].icon;
-    out.font = "10px system-ui"; out.fillText(icons, 0, -(u.boss ? 56 : 30));
+    const ks = Object.keys(u.st), good = ks.filter((k) => !STATUS[k].neg).map((k) => STATUS[k].icon).join(""), bad = ks.filter((k) => STATUS[k].neg).map((k) => STATUS[k].icon).join("");
+    out.font = "10px system-ui"; out.fillText(good + TYPES[u.types[0]].icon, 0, -(u.boss ? 56 : 30));
+    if (bad) out.fillText(bad, 0, by + 28);
     out.restore();
   }
   for (const f of battle.floats) {
-    f.life -= 0.016; f.y -= 0.45;
+    f.life -= 0.016; f.y -= f.vy == null ? 0.45 : f.vy;
     out.save(); out.globalAlpha = Math.max(0, Math.min(1, f.life)); out.textAlign = "center";
     out.font = f.big ? font(700, 17) : f.small ? font(600, 10) : font(700, 14);
-    out.lineWidth = 3; out.lineJoin = "round"; out.strokeStyle = "#1d1626"; out.strokeText(f.text, f.x, Math.round(f.y)); out.fillStyle = f.col; out.fillText(f.text, f.x, Math.round(f.y)); out.restore();
+    out.lineWidth = 3; out.lineJoin = "round"; out.strokeStyle = f.stroke || "#1d1626"; out.strokeText(f.text, f.x, Math.round(f.y)); out.fillStyle = f.col; out.fillText(f.text, f.x, Math.round(f.y)); out.restore();
   }
   battle.floats = battle.floats.filter((f) => f.life > 0);
   battle.raf = requestAnimationFrame(drawBattle);
@@ -2792,7 +2821,7 @@ function onCardsClick(e) {
     const c = cardByUid(t.dataset.dust), eqSet = R ? new Set(Object.values(R.eq).filter(Boolean)) : new Set();
     if (!c || eqSet.has(c.uid) || P.cards.filter((x) => x.id === c.id).length < 2) return;
     P.cards = P.cards.filter((x) => x !== c); P.dust = (P.dust || 0) + DUST_OF(c.g); P.c.dusted = (P.c.dusted || 0) + 1;
-    EV.toast(tx("dust.got", { n: DUST_OF(c.g) }), "✧"); EV.sfx("coin"); EV.save(); EV.checkAch(); renderCards(); return;
+    EV.toast(tx("dust.got", { n: DUST_OF(c.g) }), "∴"); EV.sfx("coin"); EV.save(); EV.checkAch(); renderCards(); return;
   }
   if (t.dataset.craft) {
     const id = t.dataset.craft; if (!CARDS[id] || CARDS[id].boss || CARDS[id].story) return;
