@@ -36,6 +36,13 @@ const TX = {
     trailName: "Sendero", trailAsk: "El sendero sale del Vado hacia las zonas del valle. Cuesta 3 pasos y la energía de siempre.", go: "Salir ({n} pasos)", stay: "Ahora no",
     bedName: "Antes de dormir", "bed.sum": "Así ha ido el día de {name}:", "bed.none": "Ha sido un día tranquilo, sin mucho que contar.", "bed.board": "En el tablón hay algo nuevo esperando.",
     "bed.steps": "Le quedan {n} pasos y mañana se recargan 10.", "bed.sleep": "Dormir", "bed.later": "Todavía no",
+    "p.bottle": "Botella", "p.bottle.d": "Algo flota en la charca", "p.patch": "Rincón de búsqueda", "p.patch.d": "Buscar a su manera",
+    "pd.sol": "Cosechar", "pd.sky": "Atrapar brisas", "pd.lake": "Excavar", "pd.frost": "Recoger hojas de escarcha", "pd.star": "Cantar al Claro",
+    bottleName: "Mensaje en una botella", "bottle.0": "Dentro hay un papel enrollado:", "bottle.wet": "El papel está tan mojado que no se lee nada.", "bottle.gift": "Atado al cuello de la botella había un regalo: {g}.",
+    "g.coins": "{n} Chispas", "g.dust": "∴ {n} de Polvo", "g.item": "1 × {item}",
+    "f.sol": "{name} rebusca entre las matas y vuelve con {g}.", "f.sky": "{name} salta tras las brisas hasta atrapar una y se ríe un buen rato. +{n} Chispas y más diversión.",
+    "f.lake": "{name} escarba junto a la piedra y encuentra ∴ {n} de Polvo entre la tierra.", "f.frost": "{name} recoge hojas escarchadas a la sombra. Sirven para un té: +1 Té.",
+    "f.star": "{name} canta bajito y el Claro le contesta. +{n} Chispas y ∴ {d} de Polvo.", "f.done": "{name} ya buscó hoy en este rincón. Mañana habrá más.",
     "s.fed": "Comidas", "s.cuddles": "Mimos", "s.plays": "Partidas", "s.messes": "Manchas limpias", "s.expDone": "Expediciones", "s.dailyDone": "Tareas",
   },
   en: {
@@ -60,6 +67,13 @@ const TX = {
     trailName: "Trail", trailAsk: "The trail leaves El Vado for the valley's zones. It costs 3 steps and the usual energy.", go: "Set out ({n} steps)", stay: "Not now",
     bedName: "Before bed", "bed.sum": "Here's how {name}'s day went:", "bed.none": "It was a quiet day, not much to tell.", "bed.board": "Something new is waiting on the notice board.",
     "bed.steps": "It has {n} steps left, and 10 come back tomorrow.", "bed.sleep": "Sleep", "bed.later": "Not yet",
+    "p.bottle": "Bottle", "p.bottle.d": "Something is floating in the pond", "p.patch": "Foraging nook", "p.patch.d": "Search in its own way",
+    "pd.sol": "Harvest", "pd.sky": "Catch breezes", "pd.lake": "Dig", "pd.frost": "Gather frost leaves", "pd.star": "Sing to the Glade",
+    bottleName: "Message in a bottle", "bottle.0": "Inside there's a rolled-up note:", "bottle.wet": "The note is so wet that nothing can be read.", "bottle.gift": "Tied to the bottle's neck was a gift: {g}.",
+    "g.coins": "{n} Chispas", "g.dust": "∴ {n} Stardust", "g.item": "1 × {item}",
+    "f.sol": "{name} rummages through the bushes and comes back with {g}.", "f.sky": "{name} leaps after the breezes until it catches one, and laughs for a long while. +{n} Chispas and more fun.",
+    "f.lake": "{name} digs by the stone and finds ∴ {n} Stardust in the soil.", "f.frost": "{name} gathers frosted leaves in the shade. They make a good tea: +1 Tea.",
+    "f.star": "{name} sings softly and the Glade sings back. +{n} Chispas and ∴ {d} Stardust.", "f.done": "{name} already searched this nook today. There'll be more tomorrow.",
     "s.fed": "Meals", "s.cuddles": "Cuddles", "s.plays": "Games", "s.messes": "Messes cleaned", "s.expDone": "Expeditions", "s.dailyDone": "Tasks",
   },
 };
@@ -114,6 +128,8 @@ const MAPS = {
       { id: "lawn", x: 8, y: 7, stand: [8, 7], obj: null },
       { id: "board", x: 11, y: 5, solid: [[11, 5]], stand: [11, 6], obj: "board" },
       { id: "toVado", x: 7, y: 10, stand: [7, 10], obj: "sign", go: "vado" },
+      { id: "patch", x: 10, y: 3, solid: [[10, 3]], stand: [10, 4], obj: "patch", cost: 2 },
+      { id: "bottle", x: 8, y: 2, stand: [8, 3], obj: "bottle", when: () => bottleHere() },
     ],
     start: [7, 8], deco: [["tree", 1, 1], ["tree", 13, 1], ["tree", 1, 8], ["tree", 13, 8], ["flower", 12, 3], ["flower", 2, 5], ["flower", 10, 9]],
   },
@@ -255,6 +271,18 @@ function drawObj(c, kind, bx, by, t) {
     if (kind === "lectern") { sh(6); rect(c, bx - 1, by - 9, 2, 9, C.wood); rect(c, bx - 6, by - 14, 12, 5, C.wood2); rect(c, bx - 5, by - 14, 10, 3, C.cream); rect(c, bx, by - 14, 1, 3, C.wood); }
     else { sh(5); rect(c, bx - 5, by - 3, 10, 3, C.cream); rect(c, bx - 5, by - 3, 1, 3, "#c9b48a"); rect(c, bx + 4, by - 3, 1, 3, "#c9b48a"); rect(c, bx - 1, by - 3, 2, 3, C.red);
       if (kind === "scrolls2") { rect(c, bx - 3, by - 6, 8, 3, "#efe3c6"); rect(c, bx - 3, by - 6, 1, 3, "#c9b48a"); rect(c, bx + 4, by - 6, 1, 3, "#c9b48a"); } }
+  } else if (kind === "patch") {
+    // the foraging nook looks like what your creature's circle does there
+    const k = circle();
+    if (k === "sol") { sh(7); c.fillStyle = C.leaf; c.beginPath(); c.arc(bx, by - 6, 7, 0, Math.PI * 2); c.fill(); for (const [x, y] of [[-3, -8], [2, -5], [3, -10], [-2, -3]]) rect(c, bx + x, by + y, 2, 2, C.red); }
+    else if (k === "sky") { const o = Math.round(Math.sin(t / 300) * 2); c.strokeStyle = C.cream; c.lineWidth = 1; c.beginPath(); c.arc(bx + o, by - 8, 5, 0.3, 5.2); c.stroke(); c.beginPath(); c.arc(bx + o, by - 8, 2, 0.3, 5.2); c.stroke(); rect(c, bx - 6, by - 2, 12, 1, C.grass2); }
+    else if (k === "lake") { sh(7); c.fillStyle = C.path2; c.beginPath(); c.ellipse(bx, by - 2, 7, 3, 0, Math.PI, 0); c.fill(); rect(c, bx + 2, by - 7, 5, 4, C.stone); rect(c, bx + 2, by - 7, 5, 1, C.stone2); }
+    else if (k === "frost") { sh(6); for (const [x, h] of [[-4, 6], [0, 9], [4, 7]]) { rect(c, bx + x, by - h, 1, h, "#5f8fb0"); rect(c, bx + x - 1, by - h - 2, 3, 3, "#bfe3f2"); } }
+    else { sh(6); const a = 0.5 + 0.4 * Math.sin(t / 400); c.fillStyle = `rgba(226,174,46,${a.toFixed(2)})`; rect(c, bx - 1, by - 10, 2, 6, c.fillStyle); rect(c, bx - 3, by - 8, 6, 2, c.fillStyle); rect(c, bx - 6, by - 2, 12, 1, C.grass2); }
+  } else if (kind === "bottle") {
+    const o = Math.round(Math.sin(t / 500) * 1.5);
+    rect(c, bx - 4, by - 7 + o, 8, 4, "#8fc9a8"); rect(c, bx + 4, by - 6 + o, 3, 2, "#8fc9a8"); rect(c, bx + 7, by - 6 + o, 1, 2, C.wood);
+    rect(c, bx - 3, by - 6 + o, 3, 1, C.cream); rect(c, bx - 4, by - 3 + o, 8, 1, C.water2);
   } else if (kind === "tila") {
     sh(5); rect(c, bx - 4, by - 10, 8, 10, "#5b4b8e"); rect(c, bx - 3, by - 16, 6, 6, "#f0c8a0"); rect(c, bx - 4, by - 17, 8, 3, "#3b2a4a");
     rect(c, bx + 4, by - 12, 1, 6, C.ink); rect(c, bx + 3, by - 7, 4, 4, C.gold); rect(c, bx - 2, by - 14, 1, 1, C.ink); rect(c, bx + 1, by - 14, 1, 1, C.ink);
@@ -274,7 +302,7 @@ function ws() {
 }
 const curMap = () => MAPS[ws().map];
 const quiet = () => (EV.quietOn ? EV.quietOn() : false);
-const placesNow = () => curMap().places.filter((p) => !(p.hideQuiet && quiet()));
+const placesNow = () => curMap().places.filter((p) => !(p.hideQuiet && quiet()) && (!p.when || p.when()));
 const panelOpen = () => { const el = $("mapPanel"); return !!(el && !el.hidden); };
 // the home is drawn from above unless the player picked the side view; the star catch game always uses the side view
 function topOn() {
@@ -478,7 +506,7 @@ function summary() {
   let text = parts.length ? tx("bed.sum", { name: S.name }) + " " + parts.join(" · ") + "." : tx("bed.none");
   if (boardNew()) text += " " + tx("bed.board");
   if (s) text += " " + tx("bed.steps", { n: s.n });
-  dialog = { who: "bed", text, opts: ["bed.sleep"], close: "bed.later" };
+  dialog = { who: "bed", pet: "sleep", text, opts: ["bed.sleep"], close: "bed.later" };
 }
 function bedtime() {
   if (!topOn()) return false;
@@ -488,8 +516,43 @@ function bedtime() {
   go(); return true;
 }
 
+/* ---------- The foraging nook and the bottle in the pond ---------- */
+const CIRC = { fire: "sol", plant: "sol", light: "sol", bolt: "sky", air: "sky", music: "sky", water: "lake", stone: "lake", shadow: "lake", ice: "frost", mush: "frost", dream: "frost", star: "star" };
+function circle() { const S = EV.S, t = S && typeof EVS !== "undefined" && EVS.KIND_TYPE ? EVS.KIND_TYPE[S.species] : null; return CIRC[t] || "sol"; }
+// the same answer all day, different each day
+function dayRnd(salt) { let h = 2166136261; for (const ch of today() + salt) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return ((h >>> 0) % 10000) / 10000; }
+// a bottle drifts into the pond on about two days in three; it stays until opened
+function bottleHere() { const b = EV.P.bottle; return dayRnd("bottle") >= 0.34 && !(b && b.day === today()); }
+function openBottle() {
+  const P = EV.P; P.bottle = { day: today() };
+  const r = rumour(), k = Math.floor(dayRnd("gift") * 4);
+  let g;
+  if (k === 0) { EV.addCoins(10); g = tx("g.coins", { n: 10 }); }
+  else if (k === 1) { P.dust = (P.dust || 0) + 12; g = tx("g.dust", { n: 12 }); }
+  else { const it = k === 2 ? "cookie" : "fizzpop"; P.inv[it] = (P.inv[it] || 0) + 1; g = tx("g.item", { item: EV.itemName(it) }); }
+  P.c.bottles = (P.c.bottles || 0) + 1;
+  dialog = { who: "bottle", pet: "surprised", text: (r ? tx("bottle.0") + " " + quote(r) : tx("bottle.wet")) + " " + tx("bottle.gift", { g }), opts: [] };
+  EV.sfx("chirp"); EV.saveProfile();
+}
+// once a day per creature, for 2 steps: each circle searches its own way
+function forage() {
+  const S = EV.S, P = EV.P, key = creatureKey();
+  P.forage = P.forage || {};
+  if (P.forage[key] === today()) { dialog = { who: "pet", emo: "normal", text: tx("f.done", { name: S.name }), opts: [] }; return; }
+  if (!spendSteps(2)) { EV.toast(tx("noSteps", { name: S.name })); EV.sfx("deny"); return; }
+  P.forage[key] = today(); P.c.forage = (P.c.forage || 0) + 1;
+  const k = circle(); let text;
+  if (k === "sol") { P.inv.melon = (P.inv.melon || 0) + 1; text = tx("f.sol", { name: S.name, g: tx("g.item", { item: EV.itemName("melon") }) }); }
+  else if (k === "sky") { EV.addCoins(12); S.stats.fun = EV.clamp(S.stats.fun + 10); text = tx("f.sky", { name: S.name, n: 12 }); }
+  else if (k === "lake") { const n = 8 + Math.floor(Math.random() * 7); P.dust = (P.dust || 0) + n; text = tx("f.lake", { name: S.name, n }); }
+  else if (k === "frost") { P.inv.tea = (P.inv.tea || 0) + 1; text = tx("f.frost", { name: S.name }); }
+  else { EV.addCoins(8); P.dust = (P.dust || 0) + 5; text = tx("f.star", { name: S.name, n: 8, d: 5 }); }
+  dialog = { who: "pet", emo: "happy", text, opts: [] };
+  EV.sfx("chirp"); EV.save(); EV.saveProfile(); EV.renderStats();
+}
+
 /* ---------- Choosing a place ---------- */
-function costOf(p) { return p.go ? STEPS.move : p.id === "trail" ? STEPS.trail : 0; }
+function costOf(p) { return p.go ? STEPS.move : p.id === "trail" ? STEPS.trail : p.cost || 0; }
 function choose(id) {
   const S = EV.S;
   if (!S || S.phase !== "alive") { EV.toast(tx("needAlive")); return; }
@@ -535,7 +598,9 @@ function act(p) {
     case "pantry": EV.togglePanel("daily", true); break;
     case "shop": EV.togglePanel("shop", true); break;
     case "nest": EV.togglePanel("refuge", true); break;
-    case "tila": dialog = { who: "tila", text: tx("tila.hi", { name: S.name }), opts: ["tila.q1", "tila.q2", "tila.q3"] }; break;
+    case "tila": dialog = { who: "tila", emo: "happy", pet: "happy", text: tx("tila.hi", { name: S.name }), opts: ["tila.q1", "tila.q2", "tila.q3"] }; break;
+    case "patch": forage(); break;
+    case "bottle": openBottle(); break;
     case "trail": dialog = { who: "trail", text: tx("trailAsk"), opts: ["trail.go", "trail.stay"] }; break;
   }
 }
@@ -544,7 +609,7 @@ const quote = (r) => (L() === "es" ? "«" + r + "»" : "\u201c" + r + "\u201d");
 function rumour() { const Lr = LORE(); return Lr ? Lr.loadingLine(EV.P, L()) : ""; }
 function rootTalk() {
   const r = rumour();
-  dialog = { who: "root", text: r ? tx("root.0") + " " + quote(r) : tx("root.calm"), opts: r ? ["root.more"] : [] };
+  dialog = { who: "root", pet: r ? "surprised" : "normal", text: r ? tx("root.0") + " " + quote(r) : tx("root.calm"), opts: r ? ["root.more"] : [] };
 }
 function answer(k) {
   const S = EV.S;
@@ -552,9 +617,9 @@ function answer(k) {
   if (k === "close") { dialog = null; render(); return; }
   if (k === "root.more") { rootTalk(); render(); return; }
   if (k === "bed.sleep") { dialog = null; if (!S.sleeping) EV.toggleSleep(); render(); return; }
-  if (k === "tila.q1") { const r = rumour(); dialog = { who: "tila", text: r ? tx("tila.a1") + " " + quote(r) : tx("tila.a1none"), opts: ["tila.q2", "tila.q3"] }; }
-  else if (k === "tila.q2") { const lit = !!(EV.P.cosm && EV.P.cosm.mem && EV.P.cosm.mem.tila); dialog = { who: "tila", text: tx(lit ? "tila.a2lit" : "tila.a2dark"), opts: ["tila.q1", "tila.q3"] }; }
-  else if (k === "tila.q3") dialog = { who: "tila", text: tx("tila.a3"), opts: ["tila.q1", "tila.q2"] };
+  if (k === "tila.q1") { const r = rumour(); dialog = { who: "tila", emo: "normal", pet: r ? "surprised" : "normal", text: r ? tx("tila.a1") + " " + quote(r) : tx("tila.a1none"), opts: ["tila.q2", "tila.q3"] }; }
+  else if (k === "tila.q2") { const lit = !!(EV.P.cosm && EV.P.cosm.mem && EV.P.cosm.mem.tila); dialog = { who: "tila", emo: lit ? "happy" : "worried", pet: lit ? "happy" : "sad", text: tx(lit ? "tila.a2lit" : "tila.a2dark"), opts: ["tila.q1", "tila.q3"] }; }
+  else if (k === "tila.q3") dialog = { who: "tila", emo: "happy", pet: "normal", text: tx("tila.a3"), opts: ["tila.q1", "tila.q2"] };
   else if (k === "trail.stay") dialog = null;
   else if (k === "trail.go") {
     dialog = null;
@@ -571,22 +636,43 @@ function answer(k) {
 }
 
 /* ---------- Panel ---------- */
-function portrait(who) {
+// 40 x 40 portraits; Tila and your creature change face with the conversation
+function tilaBust(g, emo) {
+  rect(g, 6, 31, 28, 9, "#5b4b8e"); rect(g, 16, 26, 8, 6, "#f0c8a0");
+  rect(g, 11, 9, 18, 19, "#f0c8a0"); rect(g, 9, 5, 22, 7, "#3b2a4a"); rect(g, 9, 5, 3, 16, "#3b2a4a"); rect(g, 28, 5, 3, 16, "#3b2a4a");
+  rect(g, 13, 21, 3, 1, "#e89a8a"); rect(g, 24, 21, 3, 1, "#e89a8a");
+  const ink = C.ink;
+  if (emo === "happy") { for (const x of [14, 23]) { rect(g, x, 17, 1, 1, ink); rect(g, x + 1, 16, 1, 1, ink); rect(g, x + 2, 17, 1, 1, ink); } rect(g, 17, 24, 6, 1, ink); rect(g, 16, 23, 1, 1, ink); rect(g, 23, 23, 1, 1, ink); }
+  else if (emo === "worried") { rect(g, 15, 16, 2, 2, ink); rect(g, 23, 16, 2, 2, ink); rect(g, 14, 14, 3, 1, ink); rect(g, 23, 14, 3, 1, ink); rect(g, 17, 13, 1, 1, ink); rect(g, 22, 13, 1, 1, ink); rect(g, 18, 24, 4, 1, ink); rect(g, 17, 25, 1, 1, ink); rect(g, 22, 25, 1, 1, ink); }
+  else { rect(g, 15, 16, 2, 2, ink); rect(g, 23, 16, 2, 2, ink); rect(g, 18, 24, 4, 1, ink); }
+  rect(g, 33, 27, 1, 6, ink); rect(g, 31, 32, 5, 5, ink); rect(g, 32, 33, 3, 3, C.gold);
+}
+function petPortrait(g, emo) {
+  const S = EV.S;
+  if (S && typeof EVS !== "undefined" && EVS.KINDS && EVS.KINDS.includes(S.species)) {
+    try { const sp = EVS.sprite(S.species, 30, Math.max(0, Math.min(2, S.stage || 0)), 0, emo || "normal", S.form === "scruffy"); g.drawImage(sp, Math.round(20 - sp.width / 2), 39 - sp.height); return; } catch (e) {}
+  }
+  g.fillStyle = C.gold; g.beginPath(); g.arc(20, 24, 10, 0, Math.PI * 2); g.fill();
+}
+function portrait(who, emo) {
   const c = document.createElement("canvas"); c.width = 40; c.height = 40;
   const g = c.getContext("2d"); g.imageSmoothingEnabled = false;
   g.fillStyle = "#e9d8b4"; g.fillRect(0, 0, 40, 40);
   g.save();
   if (who === "root") drawObj(g, "root", 20, 34, performance.now());
-  else { g.scale(2, 2); drawObj(g, who === "tila" ? "tila" : who === "bed" ? "bed" : "sign", 10, who === "bed" ? 21 : 19, 0); }
+  else if (who === "tila") tilaBust(g, emo);
+  else if (who === "pet") petPortrait(g, emo);
+  else { g.scale(2, 2); drawObj(g, who === "bed" ? "bed" : who === "bottle" ? "bottle" : "sign", 10, who === "bed" ? 21 : 19, 0); }
   g.restore();
   return c.toDataURL();
 }
 function dlgHtml(alive) {
   if (dialog) {
-    const nm = dialog.who === "tila" ? "Tila" : dialog.who === "root" ? tx("root.name") : dialog.who === "bed" ? tx("bedName") : tx("trailName");
+    const nm = dialog.who === "tila" ? "Tila" : dialog.who === "root" ? tx("root.name") : dialog.who === "bed" ? tx("bedName") : dialog.who === "bottle" ? tx("bottleName") : dialog.who === "pet" ? EV.S.name : tx("trailName");
     const lbl = (k) => (k === "trail.go" ? tx("go", { n: STEPS.trail }) : k === "trail.stay" ? tx("stay") : k === "root.more" ? tx("d.more") : tx(k));
     const main = (k) => k === "trail.go" || k === "bed.sleep";
-    return `<div class="wdlg"><img class="wdlg-face" alt="" src="${portrait(dialog.who)}"><div class="wdlg-body"><b>${esc(nm)}</b><p>${esc(dialog.text)}</p><div class="wdlg-opts">${dialog.opts.map((k) => `<button class="btn${main(k) ? "" : " ghost"}" type="button" data-wans="${k}">${esc(lbl(k))}</button>`).join("")}<button class="btn ghost" type="button" data-wans="close">${esc(tx(dialog.close || "d.close"))}</button></div></div></div>`;
+    const react = dialog.pet && dialog.who !== "pet" ? `<img class="wdlg-pet" alt="" src="${portrait("pet", dialog.pet)}">` : "";
+    return `<div class="wdlg"><div class="wdlg-faces"><img class="wdlg-face" alt="" src="${portrait(dialog.who, dialog.emo)}">${react}</div><div class="wdlg-body"><b>${esc(nm)}</b><p>${esc(dialog.text)}</p><div class="wdlg-opts">${dialog.opts.map((k) => `<button class="btn${main(k) ? "" : " ghost"}" type="button" data-wans="${k}">${esc(lbl(k))}</button>`).join("")}<button class="btn ghost" type="button" data-wans="close">${esc(tx(dialog.close || "d.close"))}</button></div></div></div>`;
   }
   if (foodPick && alive) {
     const foods = Object.keys(EV.ITEMS).filter((k) => EV.ITEMS[k].cat === "food" && (EV.ITEMS[k].price === 0 || (EV.P.inv[k] || 0) > 0));
@@ -615,7 +701,7 @@ function render() {
   h += dlgHtml(alive);
   h += `<h3 class="cat-title">${esc(tx("where"))}</h3><div class="wplaces">${placesNow().map((p) => {
     const c = costOf(p), poor = c && s && s.n < c;
-    return `<button type="button" class="wplace" data-wgo="${p.id}" ${alive ? "" : "disabled"}><strong>${esc(tx("p." + p.id))}</strong><small>${esc(tx("p." + p.id + ".d"))}</small><small class="${poor ? "poor" : "ok"}">${esc(c ? (c === 1 ? tx("cost1") : tx("costN", { n: c })) : tx("free"))}</small></button>`;
+    return `<button type="button" class="wplace" data-wgo="${p.id}" ${alive ? "" : "disabled"}><strong>${esc(tx("p." + p.id))}</strong><small>${esc(p.id === "patch" ? tx("pd." + circle()) : tx("p." + p.id + ".d"))}</small><small class="${poor ? "poor" : "ok"}">${esc(c ? (c === 1 ? tx("cost1") : tx("costN", { n: c })) : tx("free"))}</small></button>`;
   }).join("")}</div>`;
   el.innerHTML = h;
   cv = $("wCanvas"); ctx = cv.getContext("2d");
@@ -656,12 +742,14 @@ const css = `
 .wplace small { color: var(--muted); } .wplace small.ok { color: var(--moss, #3c7a2c); } .wplace small.poor { color: #b8364b; }
 .wdlg { display: flex; gap: 10px; align-items: flex-start; border: 3px solid var(--line); background: color-mix(in srgb, #e9d8b4 30%, var(--surface)); padding: 10px; margin: 8px 0; }
 .wdlg-face { width: 80px; height: 80px; image-rendering: pixelated; border: 2px solid var(--line); flex: none; }
+.wdlg-faces { display: flex; flex-direction: column; align-items: flex-end; flex: none; }
+.wdlg-pet { width: 48px; height: 48px; margin-top: -12px; margin-right: -6px; image-rendering: pixelated; border: 2px solid var(--line); background: #e9d8b4; position: relative; }
 .wdlg-body { flex: 1; min-width: 0; } .wdlg-body p { margin: 4px 0 8px; font-family: Georgia, serif; line-height: 1.5; }
 .wdlg-opts { display: flex; flex-wrap: wrap; gap: 6px; }
 .steps { white-space: nowrap; }
 .wmap-walk { margin: 0; font-style: italic; }
 #topDlg .wdlg { margin: 8px 0 0; }
-@media (max-width: 480px) { .wdlg-face { width: 56px; height: 56px; } }
+@media (max-width: 480px) { .wdlg-face { width: 56px; height: 56px; } .wdlg-pet { width: 36px; height: 36px; } }
 `;
 const st = document.createElement("style"); st.textContent = css; document.head.appendChild(st);
 
@@ -675,5 +763,5 @@ requestAnimationFrame(homeFrame);
 $("btnMap").addEventListener("click", () => { EV.sfx("tap"); EV.togglePanel("map"); });
 setInterval(() => { refreshChip(); if (EV.S && EV.S.phase === "alive") dayBase(); }, 5000);
 refreshChip(); if (EV.S && EV.S.phase === "alive") dayBase();
-EV.WORLD = { MAPS, STEPS, steps, spendSteps, gainFromEnergy, path, choose, render, refreshChip, careWalk, bedtime, topOn, homeExtras, get state() { return ws(); }, get dialog() { return dialog; } };
+EV.WORLD = { MAPS, STEPS, steps, spendSteps, gainFromEnergy, path, choose, render, refreshChip, careWalk, bedtime, topOn, homeExtras, circle, bottleHere, get state() { return ws(); }, get dialog() { return dialog; } };
 })();
