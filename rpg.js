@@ -814,6 +814,7 @@ const TX = {
     "exp.title": "Prado Aurora", "exp.zoneSub": "Ladera del Día · zona de Luz",
     "exp.zoneDesc": "Hierba dorada y faroles que no se apagan nunca. Últimamente algunos parpadean, y por las raíces sube una savia oscura. Aquí la Luz pega un 10 % más fuerte y la Sombra un 10 % menos.",
     "exp.pick": "Elige dos compañeros para el viaje", "exp.pickSub": "Los salvajes te acompañan solo en esta expedición; los del Refugio suben de nivel y de Vínculo contigo. Mira sus tipos: la Luz pierde contra el Fuego, y el Fuego contra el Agua.",
+    "cload.title": "Cartas de {name}", "cload.sub": "{name} vive en tu Refugio, así que puedes cambiarle las cartas. Usa las de su círculo ({types}) y las suyas propias. Un hueco vacío lleva su carta de siempre.", "cload.def": "Su carta de siempre", "cload.wild": "Los acompañantes que aún no tienes llevan sus cartas de siempre. Abre su huevo en la incubadora para poder equiparlos.",
     "load.title": "Tu mazo para el viaje", "load.sub": "Llevas como máximo 3 cartas, una por hueco. Elige cuál va en cada uno: el mismo efecto cambia según el hueco. Durante la expedición no se puede cambiar.", "load.lock": "Se desbloquea en el nivel {n}",
     "exp.go": "Partir", "exp.cancel": "Volver a casa", "exp.party": "Tu equipo",
     "exp.section": "Tramo {n} de {m}", "exp.choose": "¿Por dónde sigues?", "exp.bossNext": "Al final del camino te espera el guardián. El equipo toma aire antes de acercarse (+30 % de vida).",
@@ -898,6 +899,7 @@ const TX = {
     "exp.title": "Aurora Meadow", "exp.zoneSub": "Dayside slope · Light zone",
     "exp.zoneDesc": "Golden grass and lanterns that never go out. Lately a few of them flicker, and a dark sap is creeping up through the roots. Here Light hits 10% harder and Shadow 10% softer.",
     "exp.pick": "Pick two companions for the trip", "exp.pickSub": "Wild ones only travel with you on this expedition; Refuge companions level up and grow their Bond with you. Check their types: Light loses to Fire, and Fire loses to Water.",
+    "cload.title": "{name}'s cards", "cload.sub": "{name} lives in your Refuge, so you can change its cards. It uses cards of its circle ({types}) and its own. An empty slot carries its usual card.", "cload.def": "Its usual card", "cload.wild": "Companions you don't own yet carry their usual cards. Hatch their egg in the incubator to equip them.",
     "load.title": "Your deck for the trip", "load.sub": "You carry up to 3 cards, one per slot. Choose which goes where: the same card does something different in each slot. It can't be changed during the expedition.", "load.lock": "Unlocks at level {n}",
     "exp.go": "Set out", "exp.cancel": "Back home", "exp.party": "Your team",
     "exp.section": "Leg {n} of {m}", "exp.choose": "Which way now?", "exp.bossNext": "The guardian waits at the end of the path. The team catches its breath before going closer (+30% health).",
@@ -2064,6 +2066,8 @@ function partyUnits() {
     const mc = MONS[m.kind].cards;
     const cards = { a: scaled(mc[0], gr(mc[0])), p: scaled(mc[1], gr(mc[1])) };
     if (m.lvl >= SLOT_LVL.s || m.kind === "unisona") cards.s = scaled(mc[2], gr(mc[2]));
+    // a Refuge companion carries the cards you gave it; empty slots keep its usual ones
+    if (m.roster) for (const k of ["a", "p", "s"]) { const c = compCard(m.kind, k); if (c) cards[k] = scaled(c.id, c.g); }
     return makeUnit({ kind: m.kind, lvl: m.lvl, side: "ally", name: monName(m.kind), wild: true, cards, hpPct: m.hp, stage: 1, form: "bright", bond: m.bond || 0 });
   });
 }
@@ -2130,7 +2134,7 @@ function render() {
     body = `<div class="panel"><p class="lead">${esc(zt("desc"))}</p>
       <h3>${esc(tx("exp.pick"))}</h3><p class="muted" style="margin:0">${esc(tx("exp.pickSub"))}</p>
       <div class="mons">${X.offer.map((k) => `<button type="button" class="mon" data-pick="${k}" aria-pressed="${X.chosen.includes(k)}"><canvas width="96" height="80" data-mon="${k}"></canvas><strong>${esc(monName(k))}</strong>${typeChip(MONS[k].types[0])}<small>${esc(MON_DESC[L()][k])}</small>${refOf(k) ? `<span class="mref">${esc(EV.EGGS.badge(k))}</span>` : ""}${pickStats(k)}</button>`).join("")}</div>
-      </div>${loadoutHtml()}<div class="panel">
+      </div>${loadoutHtml()}${X.chosen.filter((k) => refOf(k)).map(compLoadHtml).join("")}${X.chosen.some((k) => !refOf(k) && k !== "unisona") ? `<p class="muted cload-wild">${esc(tx("cload.wild"))}</p>` : ""}<div class="panel">
       <div class="bctl"><button class="btn" type="button" data-x="go" ${X.chosen.length === 2 ? "" : "disabled"}>${esc(tx("exp.go"))} · ${esc(tx("exp.cost"))}</button><button class="btn ghost" type="button" data-x="cancel">${esc(tx("exp.cancel"))}</button></div></div>`;
   } else if (view === "map") {
     const icons = { fight: "⚔️", event: "❓", chest: "🎁", rest: "🔥", boss: "🏮" };
@@ -2171,8 +2175,8 @@ function loadoutHtml() {
   const eqIds = {};
   for (const k of ["a", "p", "s"]) { const c = R.eq[k] && cardByUid(R.eq[k]); if (c) eqIds[k] = c.id; }
   // one option per distinct card (best grade first)
-  const best = {};
-  for (const c of P.cards) if (usable(c.id) && (!best[c.id] || c.g > best[c.id].g)) best[c.id] = c;
+  const best = {}, lent = compUids();
+  for (const c of P.cards) if (usable(c.id) && !lent.has(c.uid) && (!best[c.id] || c.g > best[c.id].g)) best[c.id] = c;
   const opts = Object.values(best).sort((a, b) => b.g - a.g || cardName(a.id).localeCompare(cardName(b.id)));
   const slots = ["a", "p", "s"].map((k) => {
     const locked = R.lvl < SLOT_LVL[k];
@@ -2190,9 +2194,61 @@ function loadoutHtml() {
 function setLoad(slot, uid) {
   const R = rpgState(); if (!R) return;
   const c = uid && cardByUid(uid);
-  if (c && !usable(c.id)) { EV.sfx("deny"); return; }
+  if (c && (!usable(c.id) || compUids().has(c.uid))) { EV.sfx("deny"); return; }
   if (c) for (const k of ["a", "p", "s"]) { const o = R.eq[k] && cardByUid(R.eq[k]); if (k !== slot && o && o.id === c.id) R.eq[k] = null; }
   R.eq[slot] = c ? c.uid : null;
+  if (c) EV.P.c.equips = (EV.P.c.equips || 0) + 1;
+  EV.sfx("card"); EV.save(); render();
+}
+/* Refuge companions can carry your cards: their circle's types, Star cards and their own.
+   Each copy of a card goes to one creature at a time. Companions you don't own keep their usual cards. */
+const rosterOf = (k) => (EV.P.eg && EV.P.eg.roster && EV.P.eg.roster[k]) || null;
+function compFits(kind, id) {
+  const c = CARDS[id], m = MONS[kind]; if (!c || !m) return false;
+  return c.by === kind || c.type === "star" || CIRCLE[c.type] === CIRCLE[m.types[0]];
+}
+// copies currently lent to Refuge companions
+function compUids() { const u = new Set(), ro = (EV.P.eg && EV.P.eg.roster) || {}; for (const k in ro) for (const s of ["a", "p", "s"]) if (ro[k].eq && ro[k].eq[s]) u.add(ro[k].eq[s]); return u; }
+function usedUids(skipKind, skipSlot) {
+  const used = new Set(), R = rpgState();
+  for (const k of ["a", "p", "s"]) if (R && R.eq[k]) used.add(R.eq[k]);
+  const ro = (EV.P.eg && EV.P.eg.roster) || {};
+  for (const kind in ro) for (const k of ["a", "p", "s"]) { const u = ro[kind].eq && ro[kind].eq[k]; if (u && !(kind === skipKind && k === skipSlot)) used.add(u); }
+  return used;
+}
+// the card a companion carries in a slot, or null for its usual one
+function compCard(kind, slot) {
+  const r = rosterOf(kind), u = r && r.eq && r.eq[slot]; if (!u) return null;
+  const c = cardByUid(u);
+  if (!c || !compFits(kind, c.id) || r.lvl < SLOT_LVL[slot]) return null;
+  return c;
+}
+function compLoadHtml(kind) {
+  const r = rosterOf(kind); if (!r) return "";
+  r.eq = r.eq || {};
+  const nm = monName(kind), circleTypes = Object.keys(CIRCLE).filter((t) => CIRCLE[t] === CIRCLE[MONS[kind].types[0]]).map((t) => TYPES[t][L()]).join(", ");
+  const slots = ["a", "p", "s"].map((k) => {
+    const locked = r.lvl < SLOT_LVL[k], cur = compCard(kind, k), used = usedUids(kind, k);
+    // one free copy per card id, best grade first
+    const best = {};
+    for (const c of EV.P.cards) if (compFits(kind, c.id) && (!used.has(c.uid) || (cur && cur.uid === c.uid)) && (!best[c.id] || c.g > best[c.id].g || (cur && cur.uid === c.uid))) best[c.id] = c;
+    if (cur) best[cur.id] = cur;
+    const opts = Object.values(best).sort((a, b) => b.g - a.g || cardName(a.id).localeCompare(cardName(b.id)));
+    const def = MONS[kind].cards[{ a: 0, p: 1, s: 2 }[k]];
+    const sel = `<select data-cload="${kind}:${k}" ${locked ? "disabled" : ""} aria-label="${esc(tx("slot." + k))}"><option value="">${esc(tx("cload.def"))} · ${esc(cardName(def))}</option>${opts.map((c) => `<option value="${c.uid}" ${cur && cur.uid === c.uid ? "selected" : ""}>${esc(cardName(c.id))} · ${esc(GRADES[c.g][L()])} · ${TYPES[CARDS[c.id].type].icon}</option>`).join("")}</select>`;
+    const fx = locked ? `<p class="muted">🔒 ${esc(tx("load.lock", { n: SLOT_LVL[k] }))}</p>` : cur ? `<p class="muted">${esc(slotText(scaled(cur.id, cur.g), k))}</p>` : "";
+    return `<div class="slotbox"><p class="sub">${esc(tx("slot." + k))}</p>${sel}${fx}</div>`;
+  }).join("");
+  return `<div class="panel"><h3>${esc(tx("cload.title", { name: nm }))}</h3><p class="muted" style="margin:0">${esc(tx("cload.sub", { name: nm, types: circleTypes }))}</p><div class="slots">${slots}</div></div>`;
+}
+function setCompLoad(kind, slot, uid) {
+  const r = rosterOf(kind); if (!r) return;
+  r.eq = r.eq || {};
+  const c = uid && cardByUid(uid);
+  if (c && (!compFits(kind, c.id) || usedUids(kind, slot).has(c.uid))) { EV.sfx("deny"); return; }
+  // one card id per creature: the same card can't sit in two of its slots
+  if (c) for (const k of ["a", "p", "s"]) { const o = compCard(kind, k); if (k !== slot && o && o.id === c.id) r.eq[k] = null; }
+  r.eq[slot] = c ? c.uid : null;
   if (c) EV.P.c.equips = (EV.P.c.equips || 0) + 1;
   EV.sfx("card"); EV.save(); render();
 }
@@ -3153,7 +3209,7 @@ function renderCards() {
   for (const c of P.cards) (groups[c.id] = groups[c.id] || []).push(c);
   const bestG = (id) => Math.max(...groups[id].map((c) => c.g));
   const ids = Object.keys(groups).sort((a, b) => (usable(b) - usable(a)) || bestG(b) - bestG(a) || cardName(a).localeCompare(cardName(b)));
-  const eqSet = R ? new Set(Object.values(R.eq).filter(Boolean)) : new Set();
+  const eqSet = new Set([...(R ? Object.values(R.eq).filter(Boolean) : []), ...compUids()]);
   html = html.replace(esc(tx("cards.owned", { n: P.cards.length })), esc(tx("cards.owned", { n: ids.length })));
   html += `<div class="rcards">${ids.map((id) => {
     const list = groups[id], g = bestG(id);
@@ -3180,7 +3236,7 @@ function onCardsClick(e) {
   if (t.dataset.ctab) { cTab = t.dataset.ctab; EV.sfx("tap"); renderCards(); return; }
   if (EV.WELL && EV.WELL.click(t)) return;
   if (t.dataset.dust) {
-    const c = cardByUid(t.dataset.dust), eqSet = R ? new Set(Object.values(R.eq).filter(Boolean)) : new Set();
+    const c = cardByUid(t.dataset.dust), eqSet = new Set([...(R ? Object.values(R.eq).filter(Boolean) : []), ...compUids()]);
     if (!c || eqSet.has(c.uid) || P.cards.filter((x) => x.id === c.id).length < 2) return;
     P.cards = P.cards.filter((x) => x !== c); P.dust = (P.dust || 0) + DUST_OF(c.g); P.c.dusted = (P.c.dusted || 0) + 1;
     EV.toast(tx("dust.got", { n: DUST_OF(c.g) }), "∴"); EV.sfx("coin"); EV.save(); EV.checkAch(); renderCards(); return;
@@ -3203,7 +3259,7 @@ function onCardsClick(e) {
   if (t.dataset.equip && R) {
     const uid = t.dataset.equip, slot = t.dataset.slot;
     const c = cardByUid(uid);
-    if (!c || !usable(c.id)) { EV.sfx("deny"); return; }
+    if (!c || !usable(c.id) || compUids().has(uid)) { EV.sfx("deny"); return; }
     // no duplicate card on one creature: remove the same card id from other slots
     for (const k of ["a", "p", "s"]) { const o = R.eq[k] && cardByUid(R.eq[k]); if (o && (o.uid === uid || o.id === c.id)) R.eq[k] = null; }
     R.eq[slot] = uid; P.c.equips = (P.c.equips || 0) + 1; EV.sfx("card"); EV.save(); renderCards(); return;
@@ -3211,7 +3267,7 @@ function onCardsClick(e) {
   if (t.dataset.unequip && R) { R.eq[t.dataset.unequip] = null; EV.sfx("tap"); EV.save(); renderCards(); return; }
   if (t.dataset.fuse) {
     const [id, g] = t.dataset.fuse.split(":"); const gi = +g;
-    const eqSet = R ? new Set(Object.values(R.eq).filter(Boolean)) : new Set();
+    const eqSet = new Set([...(R ? Object.values(R.eq).filter(Boolean) : []), ...compUids()]);
     // use free copies first; if an equipped copy goes in, the new card takes its slot
     const same = P.cards.filter((c) => c.id === id && c.g === gi).sort((a, b) => eqSet.has(a.uid) - eqSet.has(b.uid));
     const used = same.slice(0, UPGRADE_N);
@@ -3219,6 +3275,8 @@ function onCardsClick(e) {
     P.cards = P.cards.filter((c) => !used.includes(c));
     const nc = giveCard(id, gi + 1); P.c.fused = (P.c.fused || 0) + 1;
     if (R) for (const k of ["a", "p", "s"]) if (used.some((c) => c.uid === R.eq[k])) R.eq[k] = nc.uid;
+    const ro = (P.eg && P.eg.roster) || {};
+    for (const kind in ro) for (const k of ["a", "p", "s"]) if (ro[kind].eq && used.some((c) => c.uid === ro[kind].eq[k])) ro[kind].eq[k] = nc.uid;
     EV.toast(tx("cards.fused", { card: cardName(id), g: GRADES[gi + 1][L()] })); EV.sfx("grow"); EV.save(); EV.checkAch(); renderCards();
   }
 }
@@ -3282,7 +3340,10 @@ EV.HOOKS.renderCards = renderCards;
 $("aExp").addEventListener("click", () => { EV.sfx("tap"); startExpedition(); EV.showScreen(); });
 $("btnCards").addEventListener("click", () => { EV.sfx("tap"); EV.togglePanel("cards"); });
 $("scrExp").addEventListener("click", onExpClick);
-$("scrExp").addEventListener("change", (e) => { const s = e.target.closest("select[data-load]"); if (s && X && view === "pick") setLoad(s.dataset.load, s.value); });
+$("scrExp").addEventListener("change", (e) => {
+  const s = e.target.closest("select[data-load]"); if (s && X && view === "pick") setLoad(s.dataset.load, s.value);
+  const c = e.target.closest("select[data-cload]"); if (c && X && view === "pick") { const [kind, slot] = c.dataset.cload.split(":"); setCompLoad(kind, slot, c.value); }
+});
 $("cardsPanel").addEventListener("click", onCardsClick);
 setInterval(refreshHome, 1000);
 rpgState(); EV.showScreen();
