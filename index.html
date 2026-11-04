@@ -231,6 +231,85 @@ h1, h2, h3, .brand, .idline .nm, .btn, .act, .chip-btn, .seg button, .submenu bu
 #btnDaily .dot, #btnRefuge .dot, #btnSeason .dot { border-width: 2px; }
 .egg-card:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--shade); }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .stage { border-color: #4a3d5e; } }
+/* ---------- compact home: status icons, one care row, menus as sheets, item cards ---------- */
+.wrap { max-width: 1060px; }
+.game { grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); }
+@media (max-width: 760px) { .game { grid-template-columns: minmax(0, 1fr); } }
+.statrow { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.st { display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 0; padding: 4px 3px 5px; background: var(--surface); border: 2px solid var(--line); box-shadow: 2px 2px 0 var(--shade); color: var(--ink); font: 600 11px var(--font-body); cursor: pointer; }
+.st svg { width: 20px; height: 20px; }
+.st .bar { width: 100%; height: 9px; border-width: 1px; padding: 0; }
+.st .st-lbl, .st output { display: none; }
+.statrow.open .st .st-lbl, .statrow.open .st output { display: block; }
+.st .st-lbl { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; }
+.st output { font: 500 12px var(--font-mono); color: var(--muted); }
+.badges { min-height: 0; }
+.badges:empty { display: none; }
+.care-row { grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 5px; }
+.care-row .act { min-height: 54px; padding: 6px 0 5px; gap: 3px; font-size: 11px; box-shadow: 2px 2px 0 var(--shade); }
+.care-row .act svg { width: 22px; height: 22px; }
+.care-row .act span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-body); font-weight: 700; letter-spacing: -.2px; }
+@media (min-width: 761px) { .care-row .act { font-size: 11px; min-height: 62px; } .care-row .act svg { width: 26px; height: 26px; } }
+.habitat .exp-go { margin: 0; }
+.habitat .exp-why:empty { display: none; }
+details.fold > summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 28px; }
+details.fold > summary::-webkit-details-marker { display: none; }
+details.fold > summary::after { content: "+"; font: 700 16px var(--font-mono); color: var(--muted); }
+details.fold[open] > summary::after { content: "−"; }
+details.fold:not([open]) { gap: 0; }
+.sheet-back { position: fixed; inset: 0; z-index: 40; background: rgba(29, 22, 38, .45); }
+.sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 41; display: flex; flex-direction: column; max-height: 84vh; max-height: 84dvh; background: var(--surface); border-top: 2px solid var(--line); box-shadow: 0 -4px 0 var(--shade); animation: sheetUp .18s steps(3); }
+@keyframes sheetUp { from { transform: translateY(40px); opacity: 0; } }
+.sheet-body { overflow: auto; overscroll-behavior: contain; padding: 14px 14px calc(18px + env(safe-area-inset-bottom, 0px)); }
+.sheet-x { position: absolute; top: 8px; right: 10px; z-index: 2; width: 38px; height: 38px; display: grid; place-items: center; background: var(--surface); color: var(--ink); border: 2px solid var(--line); box-shadow: 2px 2px 0 var(--shade); font: 700 16px var(--font-body); cursor: pointer; }
+.sheet .panel { border: 0; box-shadow: none; background: transparent; padding: 0; border-radius: 0; }
+.sheet .panel > :first-child { padding-right: 48px; }
+.sheet .panel h2 { margin: 0; }
+body.sheet-on { overflow: hidden; }
+@media (min-width: 761px) {
+  .sheet { left: 50%; right: auto; bottom: auto; top: 5vh; width: min(760px, 94vw); max-height: 90vh; transform: translateX(-50%); border: 2px solid var(--line); box-shadow: 6px 6px 0 var(--shade); animation: none; }
+}
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 8px; margin: 6px 0 4px; }
+.tile { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 4px 4px; background: var(--bg); color: var(--ink); border: 2px solid var(--line); box-shadow: 2px 2px 0 var(--shade); cursor: pointer; }
+.tile img { width: 48px; height: 48px; image-rendering: pixelated; }
+.tile .tp { font: 500 12px var(--font-mono); color: var(--warn); }
+.tile .q { position: absolute; top: 2px; right: 4px; font: 600 11px var(--font-mono); color: var(--muted); }
+.tile.done { opacity: .6; }
+.tile.poor .tp { color: var(--muted); }
+.tile:hover { border-color: var(--accent); background: var(--surface-2); }
+.pick .empty { color: var(--muted); font-size: 14px; }
+.icard-back { position: fixed; inset: 0; z-index: 60; background: rgba(29, 22, 38, .35); }
+.icard { position: fixed; z-index: 61; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(340px, calc(100% - 32px)); display: flex; flex-direction: column; gap: 10px; padding: 14px; background: var(--surface); border: 2px solid var(--line); box-shadow: 6px 6px 0 var(--shade); }
+.ic-top { display: flex; gap: 12px; align-items: center; }
+.ic-top img { width: 96px; height: 96px; flex: none; image-rendering: pixelated; background: var(--surface-2); border: 2px solid var(--line); }
+.ic-top strong { display: block; font-family: var(--font-display); font-size: 18px; line-height: 1.2; }
+.ic-meta { font: 500 13px var(--font-mono); color: var(--warn); }
+.icard p { margin: 0; font-size: 14px; color: var(--muted); }
+.icard .ic-poor { color: var(--bad); }
+.effs { display: flex; flex-wrap: wrap; gap: 6px; }
+.effs:empty { display: none; }
+.eff { font: 600 12px var(--font-body); padding: 1px 8px; border: 2px solid currentColor; }
+.eff.up { color: var(--moss); }
+.eff.down { color: var(--bad); }
+.ic-act { display: flex; gap: 8px; }
+.ic-act .btn { flex: 1; }
+.toasts { z-index: 70; }
+.toasts { top: max(12px, env(safe-area-inset-top, 0px)); bottom: auto; }
+@media (max-width: 520px) {
+  .top-tools { gap: 6px; flex-wrap: nowrap; overflow-x: auto; margin-inline: -12px; padding: 2px 12px 6px; scrollbar-width: none; -webkit-mask: linear-gradient(90deg, #000 85%, transparent); mask: linear-gradient(90deg, #000 85%, transparent); }
+  .top-tools::-webkit-scrollbar { display: none; }
+  .top-tools > * { flex: none; }
+  .idline { flex-wrap: nowrap; align-items: center; }
+  .idline > div:first-child { min-width: 0; }
+  .idline .sp { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .idline .age { font-size: 11px; line-height: 1.3; flex: none; }
+  .chip-btn { font-size: 12px; padding: 4px 9px; min-height: 32px; }
+  .idline .nm { font-size: 20px; }
+  .habitat { gap: 8px; }
+  .care-row { gap: 4px; }
+  .care-row .act { font-size: 10px; }
+  .care-row .act span { letter-spacing: -.4px; text-overflow: clip; }
+}
 </style>
 </head>
 <body>
@@ -323,6 +402,8 @@ h1, h2, h3, .brand, .idline .nm, .btn, .act, .chip-btn, .seg button, .submenu bu
   <section id="refugePanel" class="panel" hidden></section>
   <section id="seasonPanel" class="panel" hidden></section>
   <section id="mapPanel" class="panel" hidden></section>
+  <section id="feedMenu" class="panel pick" hidden></section>
+  <section id="itemMenu" class="panel pick" hidden></section>
 
   <!-- choose an egg -->
   <section id="scrChoose" class="choose" hidden>
@@ -350,23 +431,12 @@ h1, h2, h3, .brand, .idline .nm, .btn, .act, .chip-btn, .seg button, .submenu bu
         <div><div class="nm" id="petName">—</div><div class="sp" id="petSpecies">—</div></div>
         <div class="age" id="petAge">—</div>
       </div>
+      <div class="statrow" id="statRow" role="group" data-i18n-aria="g.status"><button class="st" type="button" data-st="full"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="14" r="5" fill="#d9465b"/><circle cx="15.5" cy="13" r="4.5" fill="#b8364b"/><path d="M12 9c0-3 2-5 4-6" stroke="#3c7a2c" stroke-width="2" fill="none" stroke-linecap="round"/></svg><span class="st-lbl" data-i18n="stat.full">Belly</span><span class="bar"><i id="b_full"></i></span><output id="v_full">0</output></button><button class="st" type="button" data-st="fun"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.9 6.1 6.6.8-4.9 4.6 1.3 6.5L12 16.8 6.1 20l1.3-6.5L2.5 8.9l6.6-.8z" fill="#f2b632"/></svg><span class="st-lbl" data-i18n="stat.fun">Fun</span><span class="bar"><i id="b_fun"></i></span><output id="v_fun">0</output></button><button class="st" type="button" data-st="energy"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-2 8 9-13h-6z" fill="#e0a42a" stroke="#7a5216" stroke-width="1.2" stroke-linejoin="round"/></svg><span class="st-lbl" data-i18n="stat.energy">Energy</span><span class="bar"><i id="b_energy"></i></span><output id="v_energy">0</output></button><button class="st" type="button" data-st="clean"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="14" r="5" fill="none" stroke="#3aa0c8" stroke-width="2"/><circle cx="16" cy="9" r="3.5" fill="none" stroke="#3aa0c8" stroke-width="2"/><circle cx="17" cy="17" r="2" fill="#3aa0c8"/></svg><span class="st-lbl" data-i18n="stat.clean">Tidy</span><span class="bar"><i id="b_clean"></i></span><output id="v_clean">0</output></button><button class="st" type="button" data-st="health"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 6-8 11-8 11z" fill="#e65a4a"/><path d="M12 9v6M9 12h6" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg><span class="st-lbl" data-i18n="stat.health">Health</span><span class="bar"><i id="b_health"></i></span><output id="v_health">0</output></button></div>
+      <div class="badges" id="badges"></div>
       <div class="stage"><canvas id="scene" data-i18n-aria="g.sceneAria"></canvas><canvas id="topScene" width="720" height="560" data-i18n-aria="g.topAria" hidden></canvas></div>
       <div class="hint" id="hint" aria-live="polite"></div>
       <div id="topDlg"></div>
-    </div>
-    <div class="side">
-      <div class="panel">
-        <h3 data-i18n="g.status">How it's doing</h3>
-        <div class="stat"><label data-i18n="stat.full">Belly</label><div class="bar"><i id="b_full"></i></div><output id="v_full">0</output></div>
-        <div class="stat"><label data-i18n="stat.fun">Fun</label><div class="bar"><i id="b_fun"></i></div><output id="v_fun">0</output></div>
-        <div class="stat"><label data-i18n="stat.energy">Energy</label><div class="bar"><i id="b_energy"></i></div><output id="v_energy">0</output></div>
-        <div class="stat"><label data-i18n="stat.clean">Tidy</label><div class="bar"><i id="b_clean"></i></div><output id="v_clean">0</output></div>
-        <div class="stat"><label data-i18n="stat.health">Health</label><div class="bar"><i id="b_health"></i></div><output id="v_health">0</output></div>
-        <div class="badges" id="badges"></div>
-      </div>
-      <div class="panel">
-        <h3 data-i18n="g.care">Care</h3>
-        <div class="actions">
+      <div class="actions care-row" role="group" data-i18n-aria="g.care">
           <button class="act" id="aFeed" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="14" r="5" fill="#d9465b"/><circle cx="15.5" cy="13" r="4.5" fill="#b8364b"/><path d="M12 9c0-3 2-5 4-6" stroke="#3c7a2c" stroke-width="2" fill="none" stroke-linecap="round"/></svg><span data-i18n="act.feed">Feed</span></button>
           <button class="act" id="aPlay" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.9 6.1 6.6.8-4.9 4.6 1.3 6.5L12 16.8 6.1 20l1.3-6.5L2.5 8.9l6.6-.8z" fill="#f2b632"/></svg><span data-i18n="act.play">Play</span></button>
           <button class="act" id="aClean" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="14" r="5" fill="none" stroke="#3aa0c8" stroke-width="2"/><circle cx="16" cy="9" r="3.5" fill="none" stroke="#3aa0c8" stroke-width="2"/><circle cx="17" cy="17" r="2" fill="#3aa0c8"/></svg><span data-i18n="act.clean">Clean</span></button>
@@ -376,14 +446,13 @@ h1, h2, h3, .brand, .idline .nm, .btn, .act, .chip-btn, .seg button, .submenu bu
           <button class="act" id="aItems" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8h12l-1 12H7z" fill="#c98a3c"/><path d="M9 8V6a3 3 0 0 1 6 0v2" stroke="#7a5216" stroke-width="2" fill="none"/></svg><span data-i18n="act.items">Items</span></button>
           <button class="act" id="aShop" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.2 7.8L22 12l-7.8 2.2L12 22l-2.2-7.8L2 12l7.8-2.2z" fill="#e0a42a"/></svg><span data-i18n="act.shop">Shop</span></button>
         </div>
-        <button class="btn exp-go" id="aExp" type="button" hidden></button>
-        <div class="submenu" id="feedMenu" hidden></div>
-        <div class="submenu" id="itemMenu" hidden></div>
-      </div>
-      <div class="panel">
-        <h3 data-i18n="g.diary">Diary</h3>
+      <button class="btn exp-go" id="aExp" type="button" hidden></button>
+    </div>
+    <div class="side">
+      <details class="panel fold" id="diaryFold" open>
+        <summary><h3 data-i18n="g.diary">Diary</h3></summary>
         <ul class="log" id="log"></ul>
-      </div>
+      </details>
     </div>
   </section>
 
@@ -399,6 +468,13 @@ h1, h2, h3, .brand, .idline .nm, .btn, .act, .chip-btn, .seg button, .submenu bu
 
   <footer data-i18n="footer">Evolvlings is a working name. Progress saves in this browser only.</footer>
 </div>
+<div class="sheet-back" id="sheetBack" hidden></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" hidden>
+  <button class="sheet-x" id="sheetX" type="button" data-i18n-aria="menu.closeSub">✕</button>
+  <div class="sheet-body" id="sheetBody"></div>
+</div>
+<div class="icard-back" id="icardBack" hidden></div>
+<div class="icard" id="icard" role="dialog" aria-modal="true" hidden></div>
 <div class="toasts" id="toasts" aria-live="polite"></div>
 
 <script src="pixel.js"></script>
@@ -442,6 +518,7 @@ const STR = {
     "badge.asleep": "Asleep", "badge.sick": "Has a sniffle", "badge.messes": (v) => `${v.n} ${plural(v.n, "mess", "messes")}`,
     "badge.hungry": "Hungry", "badge.bored": "Bored", "badge.sleepy": "Sleepy", "badge.happy": "Happy",
     "act.feed": "Feed", "act.play": "Play", "act.clean": "Clean", "act.sleep": "Sleep", "act.wake": "Wake up", "act.heal": "Herbs", "act.pet": "Cuddle", "act.items": "Items", "act.shop": "Shop",
+    "feed.title": "What will you give?", "items.title": "Bag", "icard.feed": "Feed it", "icard.use": "Use", "icard.back": "Back", "icard.inBag": "In bag: {n}", "icard.free": "Always in the pantry", "icard.cure": "Cures colds", "icard.wash": "Cleans every mess", "icard.poor": "You have {n} Chispas.",
     "menu.close": "Never mind", "menu.closeSub": "Close", "menu.noItems": "Your bag is empty. Medicine and soap from the shop show up here.",
     "hint.sleeping": "{name} is sleeping. Energy refills while the lights are out.", "hint.sick": "{name} looks unwell. Give it herbs.",
     "hint.messy": "The glade is getting messy. Time to clean.", "hint.hungry": "{name}'s tummy is rumbling.", "hint.tired": "{name} keeps yawning. Maybe it's bedtime.",
@@ -540,6 +617,7 @@ const STR = {
     "badge.asleep": "Durmiendo", "badge.sick": "Con catarro", "badge.messes": (v) => `${v.n} ${plural(v.n, "caquita", "caquitas")}`,
     "badge.hungry": "Tiene hambre", "badge.bored": "Se aburre", "badge.sleepy": "Tiene sueño", "badge.happy": "Feliz",
     "act.feed": "Comer", "act.play": "Jugar", "act.clean": "Limpiar", "act.sleep": "Dormir", "act.wake": "Despertar", "act.heal": "Hierbas", "act.pet": "Mimar", "act.items": "Objetos", "act.shop": "Tienda",
+    "feed.title": "¿Qué le das?", "items.title": "Mochila", "icard.feed": "Dar de comer", "icard.use": "Usar", "icard.back": "Volver", "icard.inBag": "En la mochila: {n}", "icard.free": "Siempre hay en la despensa", "icard.cure": "Cura el catarro", "icard.wash": "Limpia todas las caquitas", "icard.poor": "Tienes {n} Chispas.",
     "menu.close": "Mejor no", "menu.closeSub": "Cerrar", "menu.noItems": "Tu mochila está vacía. Aquí aparecen las medicinas y el jabón de la tienda.",
     "hint.sleeping": "{name} está durmiendo. La energía se recupera con la luz apagada.", "hint.sick": "{name} no tiene buena cara. Dale hierbas.",
     "hint.messy": "El claro se está ensuciando. Toca limpiar.", "hint.hungry": "A {name} le ruge la barriga.", "hint.tired": "{name} no para de bostezar. Quizá sea hora de dormir.",
@@ -675,6 +753,31 @@ const ITEMS = {
   kite: { cat: "toy", price: 45, perm: true },
 };
 
+/* ---------- Item icons: 12x12 pixel art for the shop, bag and food grids ---------- */
+const ITEM_ART = {
+  berry: [["....g.......", "....gg.gg...", ".....ogg....", "..ooo.oooo..", ".orlro.orlo.", ".orrro.orro.", ".orrdo.ordo.", "..ooo..ooo..", "............", "............", "............", "............"], { o: "ink", r: "ember1", l: "rose2", d: "ember0", g: "moss2" }],
+  bun: [["............", "............", "...oooooo...", "..oyywyyyo..", ".oyyyyywyyo.", ".oyywyyyyyo.", ".obbbbbbbbo.", ".oddddddddo.", "..oooooooo..", "............", "............", "............"], { o: "ink", y: "ember3", w: "butter", b: "soil3", d: "soil2" }],
+  stew: [["....w..w....", ".....w..w...", "....w..w....", ".oooooooooo.", "oyyryyyyryyo", "obbbbbbbbbbo", "olbbbbbbbbdo", ".obbbbbbbdo.", "..odddddddo.", "...oooooo...", "............", "............"], { o: "ink", y: "ember4", r: "ember2", w: "fog", b: "soil1", l: "soil2", d: "soil0" }],
+  fizzpop: [["....oooo....", "....orro....", ".....oo.....", "....owso....", "...owssso...", "...osswso...", "...owssso...", "...ossswo...", "...osssso...", "....oooo....", "............", "............"], { o: "ink", r: "rose1", w: "cream", s: "sea3" }],
+  melon: [["............", "............", "oooooooooooo", "oppppppppppo", "opkppkppkppo", ".oppppppppo.", ".ollllllllo.", "..oggggggo..", "...oooooo...", "............", "............", "............"], { o: "ink", p: "glim1", k: "plum1", l: "moss4", g: "moss2" }],
+  cookie: [[".....oo.....", "....oyyo....", "....oyyo....", "oooooyyooooo", "oyyyyyyyyyyo", ".oyybyybyyo.", "..oyyyyyyo..", "..oyyoyyyo..", ".oyyo.oyyo..", ".oyo...oyo..", ".oo.....oo..", "............"], { o: "ink", y: "ember4", b: "soil1" }],
+  tea: [["....w.w.....", "...w.w......", "............", ".ooooooooo..", ".occccccco..", ".owttttwwoo.", ".owwwwwwwo.o", ".owwwwwwwoo.", "..owwwwwo...", "...ooooo....", ".ooooooooo..", "............"], { o: "ink", w: "cream", c: "soil2", t: "moss3" }],
+  tonic: [["....oooo....", "....osso....", ".....oo.....", "....oggo....", "...oglggo...", "..oggggggo..", "..owwwwwwo..", "..owrwrwwo..", "..owwwwwwo..", "..oggggggo..", "...oooooo...", "............"], { o: "ink", s: "soil2", g: "moss2", l: "moss4", w: "cream", r: "ember1" }],
+  salve: [["............", "..oooooooo..", "..orrrrrro..", "..oooooooo..", ".oyyyyyyyyo.", ".oywwyyyyyo.", ".oyyyypyyyo.", ".oyyypppyyo.", ".oyyyypyyyo.", ".oyyyyyyyyo.", "..oooooooo..", "............"], { o: "ink", r: "rose1", y: "butter", w: "cream", p: "rose2" }],
+  soap: [["........ss..", ".......s..s.", "...ss...ss..", "..s..s......", "...ss.......", ".oooooooooo.", "obbwbbbbbbbo", "obwbbbbbbbbo", "obbbbbbbbbdo", ".odddddddddo", "..oooooooooo", "............"], { o: "ink", s: "sea3", b: "sea4", w: "cream", d: "sea2" }],
+  ball: [[".....o......", "..o.ooo.o...", "...oyyyyo...", "..oyywyyyo..", "ooyywyyyyoo.", "..oyyyyydo..", "..oyyyyydo..", "...odddddo..", "..o.ooo.o...", ".....o......", "............", "............"], { o: "ink", y: "moss3", w: "moss4", d: "moss1" }],
+  kite: [[".....o......", "....oro.....", "...orrro....", "..orrwrro...", ".orrrorrro..", "..obbobbo...", "...obbbo....", "....obo.....", ".....o......", "......s.....", ".......s....", "......s....."], { o: "ink", r: "ember2", w: "ember4", b: "sea2", s: "plum3" }],
+};
+const ITEM_ICON = {};
+function itemIcon(id) {
+  if (ITEM_ICON[id]) return ITEM_ICON[id];
+  const a = ITEM_ART[id] || ITEM_ART.berry, keys = {};
+  for (const k in a[1]) keys[k] = PX.P[a[1][k]];
+  const src = PX.bake(a[0], keys), c = document.createElement("canvas");
+  c.width = c.height = 48; const g = c.getContext("2d"); g.imageSmoothingEnabled = false; g.drawImage(src, 0, 0, 48, 48);
+  return (ITEM_ICON[id] = c.toDataURL());
+}
+
 /* ---------- Achievements: [id, reward, test(P, S)] ---------- */
 const ACH = [
   ["hatch1", 10, (p) => p.c.hatched >= 1],
@@ -790,6 +893,7 @@ function toast(text, extra) {
   el.textContent = text;
   if (extra) { const b = document.createElement("b"); b.textContent = extra; el.appendChild(b); }
   $("toasts").appendChild(el);
+  while ($("toasts").children.length > 3) $("toasts").firstChild.remove(); // a burst of toasts would cover the screen
   setTimeout(() => el.remove(), 3200);
 }
 /* Achievement metadata, filled in by ach.js: { cat, tier: "b"|"s"|"g", notes, secret, hint } */
@@ -908,7 +1012,7 @@ function fmtDur(m) { m = Math.round(m); if (m < 60) return m + " min"; const h =
 let bubble = null, effects = [], foodAnim = null, bloom = null, mini = null, cleanAnim = null;
 function say(text) { bubble = { text, until: performance.now() + 2200 }; }
 function hint(text) { $("hint").textContent = text; $("hint").dataset.auto = "0"; }
-function closeMenus() { $("feedMenu").hidden = true; $("itemMenu").hidden = true; }
+function closeMenus() { $("feedMenu").hidden = true; $("itemMenu").hidden = true; closeCard(); }
 
 function applyEff(eff) { for (const k in eff) S.stats[k] = clamp(S.stats[k] + eff[k]); }
 function feed(id) {
@@ -1031,17 +1135,47 @@ function renderShop() {
   let html = "";
   for (const cat of ["food", "med", "toy"]) {
     const ids = Object.keys(ITEMS).filter((k) => ITEMS[k].cat === cat && ITEMS[k].price > 0);
-    html += `<p class="cat-title">${t("cat." + cat)}</p><div class="cards">`;
+    html += `<p class="cat-title">${t("cat." + cat)}</p><div class="tiles">`;
     for (const id of ids) {
       const it = ITEMS[id], owned = it.perm && P.owned[id];
-      const have = !it.perm && P.inv[id] ? `<span class="have">${t("shop.have", { n: P.inv[id] })}</span>` : `<span class="price">✦ ${it.price}</span>`;
-      html += `<div class="card${owned ? " done" : ""}"><strong>${itemName(id)}</strong><small>${itemDesc(id)}</small><div class="foot">${owned ? `<span class="have">${t("shop.owned")}</span>` : have}` +
-        (owned ? "" : `<button class="btn" type="button" data-buy="${id}"${P.coins < it.price ? " disabled" : ""}>${t("shop.buy")} · ${it.price}</button>`) + `</div></div>`;
+      html += `<button type="button" class="tile${owned ? " done" : ""}${!owned && P.coins < it.price ? " poor" : ""}" data-shop="${id}" aria-label="${escapeHtml(itemName(id))}"><img src="${itemIcon(id)}" alt="">` +
+        (!it.perm && P.inv[id] ? `<span class="q">×${P.inv[id]}</span>` : "") + `<span class="tp">${owned ? "✓" : "✦ " + it.price}</span></button>`;
     }
     html += `</div>`;
   }
   $("shopList").innerHTML = html;
+  if (CARD && CARD.mode === "shop") openCard("shop", CARD.id);
 }
+/* Item card: a small window over everything, with the picture, details and one confirm button */
+let CARD = null;
+function effChips(id) {
+  const it = ITEMS[id], out = [];
+  for (const k in it.eff || {}) { const v = it.eff[k]; if (k === "clean" && it.wash) continue; out.push(`<span class="eff ${v > 0 ? "up" : "down"}">${v > 0 ? "+" : "−"}${Math.abs(v)} ${t("stat." + k)}</span>`); }
+  if (it.cure) out.push(`<span class="eff up">${t("icard.cure")}</span>`);
+  if (it.wash) out.push(`<span class="eff up">${t("icard.wash")}</span>`);
+  return out.join("");
+}
+function openCard(mode, id) {
+  const it = ITEMS[id]; if (!it) return;
+  CARD = { mode, id };
+  const owned = it.perm && P.owned[id], have = P.inv[id] || 0;
+  let meta, act = "";
+  if (mode === "shop") {
+    meta = owned ? t("shop.owned") : `✦ ${it.price}${!it.perm ? ` · ${t("icard.inBag", { n: have })}` : ""}`;
+    if (!owned) act = `<button class="btn" type="button" data-cact="buy"${P.coins < it.price ? " disabled" : ""}>${t("shop.buy")} · ${it.price}</button>`;
+  } else {
+    meta = it.price ? t("icard.inBag", { n: have }) : t("icard.free");
+    const dis = it.price && !have;
+    act = `<button class="btn" type="button" data-cact="${mode}"${dis ? " disabled" : ""}>${t(mode === "feed" ? "icard.feed" : "icard.use")}</button>`;
+  }
+  $("icard").innerHTML = `<div class="ic-top"><img src="${itemIcon(id)}" alt=""><div><strong>${escapeHtml(itemName(id))}</strong><span class="ic-meta">${meta}</span></div></div>` +
+    `<p>${escapeHtml(itemDesc(id))}</p><div class="effs">${effChips(id)}</div>` +
+    (mode === "shop" && P.coins < it.price && !owned ? `<p class="ic-poor">${t("icard.poor", { n: P.coins })}</p>` : "") +
+    `<div class="ic-act">${act}<button class="btn ghost" type="button" data-cact="back">${t("icard.back")}</button></div>`;
+  $("icard").hidden = false; $("icardBack").hidden = false;
+  const b = $("icard").querySelector("button:not([disabled])"); if (b) b.focus({ preventScroll: true });
+}
+function closeCard() { CARD = null; if ($("icard")) { $("icard").hidden = true; $("icardBack").hidden = true; } }
 let achFilter = "all";
 const ACH_CATS = ["care", "exp", "stars", "cards", "types", "world", "secret"];
 function achCard(id, reward) {
@@ -1069,13 +1203,11 @@ function renderAch() {
 }
 function renderFeedMenu() {
   const ids = Object.keys(ITEMS).filter((k) => ITEMS[k].cat === "food" && (ITEMS[k].price === 0 || P.inv[k] > 0));
-  $("feedMenu").innerHTML = ids.map((id) => `<button type="button" data-food="${id}"><b>${itemName(id)}${ITEMS[id].price ? ` <span class="count">×${P.inv[id]}</span>` : ""}</b><small>${itemDesc(id)}</small></button>`).join("") +
-    `<button type="button" data-food="no"><b>${t("menu.close")}</b><small>${t("menu.closeSub")}</small></button>`;
+  $("feedMenu").innerHTML = `<h2>${t("feed.title")}</h2><div class="tiles">` + ids.map((id) => `<button type="button" class="tile" data-food="${id}" aria-label="${escapeHtml(itemName(id))}"><img src="${itemIcon(id)}" alt=""><span class="tp">${ITEMS[id].price ? "×" + P.inv[id] : "∞"}</span></button>`).join("") + `</div>`;
 }
 function renderItemMenu() {
   const ids = Object.keys(ITEMS).filter((k) => ITEMS[k].cat === "med" && P.inv[k] > 0);
-  $("itemMenu").innerHTML = (ids.length ? ids.map((id) => `<button type="button" data-item="${id}"><b>${itemName(id)} <span class="count">×${P.inv[id]}</span></b><small>${itemDesc(id)}</small></button>`).join("") : `<p class="empty">${t("menu.noItems")}</p>`) +
-    `<button type="button" data-item="no"><b>${t("menu.close")}</b><small>${t("menu.closeSub")}</small></button>`;
+  $("itemMenu").innerHTML = `<h2>${t("items.title")}</h2>` + (ids.length ? `<div class="tiles">` + ids.map((id) => `<button type="button" class="tile" data-item="${id}" aria-label="${escapeHtml(itemName(id))}"><img src="${itemIcon(id)}" alt=""><span class="tp">×${P.inv[id]}</span></button>`).join("") + `</div>` : `<p class="empty">${t("menu.noItems")}</p>`);
 }
 
 /* ---------- Drawing ---------- */
@@ -1572,6 +1704,7 @@ function togglePanel(name, forceOpen) {
   const id = PANELS[name], el = $(id);
   const open = forceOpen || el.hidden;
   for (const k in PANELS) $(PANELS[k]).hidden = true;
+  closeMenus();
   if (!open) return;
   if (name === "journal") renderJournal();
   if (name === "shop") renderShop();
@@ -1582,21 +1715,44 @@ function togglePanel(name, forceOpen) {
   if (name === "season" && HOOKS.renderSeason) HOOKS.renderSeason();
   if (name === "map" && HOOKS.renderMap) HOOKS.renderMap();
   el.hidden = false;
-  el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  $("sheetBody").scrollTop = 0;
 }
+/* Every menu opens as a sheet over the game instead of at the end of the page */
+const SHEETS = Object.values(PANELS).concat(["feedMenu", "itemMenu"]);
+function syncSheet() {
+  const on = SHEETS.some((id) => !$(id).hidden);
+  $("sheet").hidden = !on; $("sheetBack").hidden = !on;
+  document.body.classList.toggle("sheet-on", on);
+}
+function closeSheets() { for (const id of SHEETS) $(id).hidden = true; closeCard(); }
+for (const id of SHEETS) { $("sheetBody").appendChild($(id)); new MutationObserver(syncSheet).observe($(id), { attributes: true, attributeFilter: ["hidden"] }); }
+$("sheetX").addEventListener("click", () => { sfx("tap"); closeSheets(); });
+$("sheetBack").addEventListener("click", closeSheets);
+$("icardBack").addEventListener("click", closeCard);
+document.addEventListener("keydown", (e) => { if (e.key !== "Escape") return; if (CARD) closeCard(); else closeSheets(); });
+$("icard").addEventListener("click", (e) => {
+  const b = e.target.closest("button[data-cact]"); if (!b || !CARD) return;
+  const { mode, id } = CARD, a = b.dataset.cact;
+  if (a === "back") { sfx("tap"); closeCard(); return; }
+  if (a === "buy") { buy(id); return; }
+  if (a === "feed") { closeSheets(); viaPlace("bowl", () => S.stats.full <= 94 || (ITEMS[id].eff.full || 0) < 8, () => feed(id)); return; }
+  if (a === "item") { closeSheets(); useItem(id); }
+});
+// tapping the status icons shows or hides the numbers and names
+$("statRow").addEventListener("click", () => { sfx("tap"); $("statRow").classList.toggle("open"); });
 
 /* ---------- Events ---------- */
-$("aFeed").addEventListener("click", () => { sfx("tap"); $("itemMenu").hidden = true; renderFeedMenu(); $("feedMenu").hidden = !$("feedMenu").hidden; });
+$("aFeed").addEventListener("click", () => { sfx("tap"); const was = !$("feedMenu").hidden; closeSheets(); if (was) return; renderFeedMenu(); $("feedMenu").hidden = false; });
 // with the home seen from above (world.js), care walks the creature to its place first; refusals still happen on the spot
 function viaPlace(place, ok, fn) {
   if (EV.WORLD && EV.WORLD.careWalk && ok() && EV.WORLD.careWalk(place, fn)) { closeMenus(); return; }
   fn();
 }
-$("feedMenu").addEventListener("click", (e) => { const b = e.target.closest("button[data-food]"); if (!b) return; if (b.dataset.food === "no") { closeMenus(); return; } const id = b.dataset.food; viaPlace("bowl", () => S.stats.full <= 94 || (ITEMS[id].eff.full || 0) < 8, () => feed(id)); });
-$("aItems").addEventListener("click", () => { sfx("tap"); $("feedMenu").hidden = true; renderItemMenu(); $("itemMenu").hidden = !$("itemMenu").hidden; });
-$("itemMenu").addEventListener("click", (e) => { const b = e.target.closest("button[data-item]"); if (!b) return; if (b.dataset.item === "no") { closeMenus(); return; } useItem(b.dataset.item); });
+$("feedMenu").addEventListener("click", (e) => { const b = e.target.closest("button[data-food]"); if (b) { sfx("tap"); openCard("feed", b.dataset.food); } });
+$("aItems").addEventListener("click", () => { sfx("tap"); const was = !$("itemMenu").hidden; closeSheets(); if (was) return; renderItemMenu(); $("itemMenu").hidden = false; });
+$("itemMenu").addEventListener("click", (e) => { const b = e.target.closest("button[data-item]"); if (b) { sfx("tap"); openCard("item", b.dataset.item); } });
 $("aShop").addEventListener("click", () => { sfx("tap"); togglePanel("shop", true); });
-$("shopList").addEventListener("click", (e) => { const b = e.target.closest("button[data-buy]"); if (b) buy(b.dataset.buy); });
+$("shopList").addEventListener("click", (e) => { const b = e.target.closest("button[data-shop]"); if (b) { sfx("tap"); openCard("shop", b.dataset.shop); } });
 $("aPlay").addEventListener("click", () => viaPlace("lawn", () => S.stats.energy >= 15, startPlay));
 $("aClean").addEventListener("click", () => viaPlace("pond", () => true, cleanUp));
 // going to bed from above shows the day's summary first (world.js)
