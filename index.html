@@ -171,6 +171,13 @@ footer { font-size: 12px; color: var(--muted); }
 .card.locked strong::before { content: "🔒 "; font-size: 13px; }
 .card.done { border-color: color-mix(in srgb, var(--moss) 55%, var(--line)); }
 .card.done strong::before { content: "✓ "; color: var(--moss); }
+.medal { font: 700 11px var(--font-mono, monospace); padding: 1px 7px; border-radius: 999px; border: 1px solid; margin-right: auto; }
+.medal.m-b { color: #8a5a32; border-color: #b9845a; background: #f3e2cf; }
+.medal.m-s { color: #5d6470; border-color: #a7aebb; background: #eceef2; }
+.medal.m-g { color: #8a6a10; border-color: #e2ae2e; background: #fbf0c8; }
+.card.done.t-g { box-shadow: inset 0 0 0 1px #e2ae2e; }
+.ach-filter { margin: 4px 0 6px; }
+.ach-cat { display: flex; align-items: baseline; gap: 8px; margin: 14px 0 6px; }
 .cat-title { font: 700 12px var(--font-mono); text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin: 6px 0 0; }
 .progress { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
 .submenu .count { font-family: var(--font-mono); font-size: 11px; color: var(--warn); }
@@ -260,6 +267,11 @@ h1, h2, h3, .brand, .idline .nm, .btn, .act, .chip-btn, .seg button, .submenu bu
         <div class="seg" id="hapticSeg"><button type="button" data-v="1" data-i18n="on">On</button><button type="button" data-v="0" data-i18n="off">Off</button></div>
       </div>
       <div class="row">
+        <label data-i18n="set.quiet">Quiet mode</label>
+        <div class="seg" id="quietSeg"><button type="button" data-v="1" data-i18n="on">On</button><button type="button" data-v="0" data-i18n="off">Off</button></div>
+      </div>
+      <p class="muted" data-i18n="set.quietNote">Hides the Wells of Echoes for anyone who only wants to look after their creature. Song Notes you earn while it is on turn into Stardust by themselves (1 Note = 25 Stardust). The Notes you already have are kept.</p>
+      <div class="row">
         <label for="speedSel" data-i18n="set.speed">Time speed</label>
         <select id="speedSel">
           <option value="1" data-i18n="set.speed1">Normal (real time)</option>
@@ -297,7 +309,7 @@ h1, h2, h3, .brand, .idline .nm, .btn, .act, .chip-btn, .seg button, .submenu bu
 
   <section id="achPanel" class="panel" hidden>
     <div class="panel-head"><h2 data-i18n="ach.title">Achievements</h2><span class="progress" id="achProgress"></span></div>
-    <div class="cards" id="achList"></div>
+    <div id="achList"></div>
   </section>
 
   <section id="cardsPanel" class="panel" hidden></section>
@@ -402,7 +414,8 @@ const STR = {
     "nav.coins": "Chispas: open the shop", "nav.ach": "Achievements", "nav.journal": "Journal", "nav.settings": "Settings",
     "nav.mute": "Mute sound", "nav.unmute": "Turn sound on",
     on: "On", off: "Off",
-    "set.title": "Settings", "set.lang": "Language", "set.sound": "Sound", "set.haptics": "Vibration", "set.speed": "Time speed",
+    "set.title": "Settings", "set.lang": "Language", "set.sound": "Sound", "set.haptics": "Vibration", "set.quiet": "Quiet mode",
+    "set.quietNote": "Hides the Wells of Echoes for anyone who only wants to look after their creature. Song Notes you earn while it is on turn into Stardust by themselves (1 Note = 25 Stardust). The Notes you already have are kept.", "toast.quiet": "Quiet mode: {n} ♪ became Stardust", "set.speed": "Time speed",
     "set.speed1": "Normal (real time)", "set.speed10": "Fast (10×)", "set.speed60": "Turbo (60×)",
     "set.speedNote": "Normal time means a creature grows up over a few hours and gets hungry while you're away. Fast and Turbo are handy for trying the whole life cycle quickly.",
     "set.install": "Install app", "set.installIos": "On iPhone or iPad: tap Share, then Add to Home Screen to install the game.",
@@ -499,7 +512,8 @@ const STR = {
     "nav.coins": "Chispas: abrir la tienda", "nav.ach": "Logros", "nav.journal": "Recuerdos", "nav.settings": "Ajustes",
     "nav.mute": "Silenciar", "nav.unmute": "Activar sonido",
     on: "Sí", off: "No",
-    "set.title": "Ajustes", "set.lang": "Idioma", "set.sound": "Sonido", "set.haptics": "Vibración", "set.speed": "Velocidad",
+    "set.title": "Ajustes", "set.lang": "Idioma", "set.sound": "Sonido", "set.haptics": "Vibración", "set.quiet": "Modo tranquilo",
+    "set.quietNote": "Oculta los Pozos de los Ecos para quien solo quiere cuidar a su criatura. Las Notas del Canto que ganes mientras esté activo se convierten solas en Polvo de Estrella (1 Nota = 25 de Polvo). Las Notas que ya tienes se guardan.", "toast.quiet": "Modo tranquilo: {n} ♪ se convierten en Polvo", "set.speed": "Velocidad",
     "set.speed1": "Normal (tiempo real)", "set.speed10": "Rápida (10×)", "set.speed60": "Turbo (60×)",
     "set.speedNote": "En velocidad normal la criatura crece a lo largo de unas horas y le entra hambre mientras no estás. Rápida y Turbo sirven para ver el ciclo de vida completo en poco tiempo.",
     "set.install": "Instalar app", "set.installIos": "En iPhone o iPad: pulsa Compartir y luego «Añadir a pantalla de inicio» para instalar el juego.",
@@ -770,15 +784,18 @@ function toast(text, extra) {
   $("toasts").appendChild(el);
   setTimeout(() => el.remove(), 3200);
 }
+/* Achievement metadata, filled in by ach.js: { cat, tier: "b"|"s"|"g", notes, secret, hint } */
+const ACH_META = {};
 function checkAch() {
   for (const [id, reward, test] of ACH) {
     if (P.ach[id]) continue;
     let ok = false; try { ok = test(P, S); } catch (e) {}
     if (!ok) continue;
     P.ach[id] = Date.now();
-    const nm = STR[LANG].ach[id][0];
-    P.coins += reward; renderCoins();
-    toast(t("toast.ach", { name: nm }), "+" + reward + " ✦");
+    const nm = STR[LANG].ach[id][0], notes = (ACH_META[id] || {}).notes || 0;
+    if (reward) { P.coins += reward; renderCoins(); }
+    if (notes) P.notes = (P.notes || 0) + notes;
+    toast(t("toast.ach", { name: nm }), [reward ? "+" + reward + " ✦" : "", notes ? "+" + notes + " ♪" : ""].filter(Boolean).join(" "));
     sfx("ach"); buzz([30, 40, 30]);
     if (S && S.phase === "alive") addLog(t("log.ach", { name: nm }));
     if (!$("achPanel").hidden) renderAch();
@@ -1015,13 +1032,30 @@ function renderShop() {
   }
   $("shopList").innerHTML = html;
 }
+let achFilter = "all";
+const ACH_CATS = ["care", "exp", "stars", "cards", "types", "world", "secret"];
+function achCard(id, reward) {
+  const m = ACH_META[id] || {}, got = !!P.ach[id], hidden = m.secret && !got;
+  const [nm, d] = STR[LANG].ach[id];
+  const tier = m.tier ? `<span class="medal m-${m.tier}">${t("ach.tier." + m.tier)}</span>` : "";
+  const prize = [reward ? `+${reward} ✦` : "", m.notes ? `+${m.notes} ♪` : ""].filter(Boolean).join(" · ");
+  return `<div class="card ${got ? "done" : "locked"}${m.tier ? " t-" + m.tier : ""}"><strong>${escapeHtml(hidden ? t("ach.secret") : nm)}</strong><small>${escapeHtml(hidden ? m.hint || "" : d)}</small><div class="foot">${tier}<span class="price">${prize}</span></div></div>`;
+}
+$("achList").addEventListener("click", (e) => { const b = e.target.closest("button[data-achf]"); if (!b) return; achFilter = b.dataset.achf; sfx("tap"); renderAch(); });
 function renderAch() {
   const n = ACH.filter(([id]) => P.ach[id]).length;
   $("achProgress").textContent = t("ach.progress", { n, m: ACH.length });
-  $("achList").innerHTML = ACH.map(([id, reward]) => {
-    const [nm, d] = STR[LANG].ach[id];
-    return `<div class="card ${P.ach[id] ? "done" : "locked"}"><strong>${nm}</strong><small>${d}</small><div class="foot"><span class="price">+${reward} ✦</span></div></div>`;
-  }).join("");
+  const keep = ([id]) => achFilter === "all" || (achFilter === "got" ? !!P.ach[id] : !P.ach[id]);
+  let html = `<div class="seg ach-filter" role="group">${["all", "todo", "got"].map((k) => `<button type="button" data-achf="${k}" aria-pressed="${achFilter === k}">${t("ach.f." + k)}</button>`).join("")}</div>`;
+  for (const cat of ACH_CATS.concat([""])) {
+    const rows = ACH.filter(([id]) => ((ACH_META[id] || {}).cat || "") === cat);
+    if (!rows.length) continue;
+    const shown = rows.filter(keep);
+    if (!shown.length) continue;
+    const got = rows.filter(([id]) => P.ach[id]).length;
+    html += `<h3 class="cat-title ach-cat">${t("ach.c." + (cat || "other"))} <span class="progress">${got}/${rows.length}</span></h3><div class="cards">${shown.map(([id, r]) => achCard(id, r)).join("")}</div>`;
+  }
+  $("achList").innerHTML = html;
 }
 function renderFeedMenu() {
   const ids = Object.keys(ITEMS).filter((k) => ITEMS[k].cat === "food" && (ITEMS[k].price === 0 || P.inv[k] > 0));
@@ -1515,7 +1549,7 @@ function renderJournal() {
   $("journalList").innerHTML = j.length ? j.map((e) => `<li><span><b>${escapeHtml(e.name)}</b>, ${escapeHtml(e.kind)} (${e.end === "released" ? t("end.released") : t("end.gone")})</span><span>${fmtDur(e.age)}</span></li>`).join("") : `<li><span>${t("jr.empty")}</span><span></span></li>`;
 }
 function renderSettings() {
-  for (const [seg, on] of [["soundSeg", P.sound], ["hapticSeg", P.haptics]]) document.querySelectorAll(`#${seg} button`).forEach((b) => b.setAttribute("aria-pressed", String((b.dataset.v === "1") === !!on)));
+  for (const [seg, on] of [["soundSeg", P.sound], ["hapticSeg", P.haptics], ["quietSeg", quietOn()]]) document.querySelectorAll(`#${seg} button`).forEach((b) => b.setAttribute("aria-pressed", String((b.dataset.v === "1") === !!on)));
   $("muteWave").toggleAttribute("hidden", !P.sound); $("muteX").toggleAttribute("hidden", !!P.sound);
   $("btnMute").setAttribute("aria-pressed", String(!P.sound));
   $("btnMute").setAttribute("aria-label", P.sound ? t("nav.mute") : t("nav.unmute"));
@@ -1578,6 +1612,27 @@ $("btnCoins").addEventListener("click", () => { sfx("tap"); togglePanel("shop");
 $("btnMute").addEventListener("click", () => { P.sound = !P.sound; saveProfile(); renderSettings(); sfx("tap"); });
 $("langSeg").addEventListener("click", (e) => { const b = e.target.closest("button[data-lang]"); if (!b) return; LANG = P.lang = b.dataset.lang; saveProfile(); applyStatic(); renderSettings(); showScreen(); });
 $("soundSeg").addEventListener("click", (e) => { const b = e.target.closest("button[data-v]"); if (!b) return; P.sound = b.dataset.v === "1"; saveProfile(); renderSettings(); sfx("tap"); });
+/* Quiet mode: hides the Wells and turns newly earned Song Notes into Stardust */
+const QUIET_DUST = 25;
+function quietOn() { return !!(P.quiet && P.quiet.on); }
+function setQuiet(on) {
+  P.quiet = { on, base: P.notes || 0 };
+  saveProfile(); renderSettings();
+  if (HOOKS.renderCards) HOOKS.renderCards();
+  if (HOOKS.renderRefuge) HOOKS.renderRefuge();
+}
+function quietTick() {
+  if (!quietOn()) return;
+  const q = P.quiet, n = P.notes || 0;
+  if (n < q.base) { q.base = n; saveProfile(); return; }
+  if (n === q.base) return;
+  const extra = n - q.base;
+  P.notes = q.base; P.dust = (P.dust || 0) + extra * QUIET_DUST;
+  saveProfile();
+  toast(t("toast.quiet", { n: extra }), "+" + extra * QUIET_DUST + " ∴");
+}
+setInterval(quietTick, 1500);
+$("quietSeg").addEventListener("click", (e) => { const b = e.target.closest("button[data-v]"); if (!b) return; setQuiet(b.dataset.v === "1"); sfx("tap"); });
 $("hapticSeg").addEventListener("click", (e) => { const b = e.target.closest("button[data-v]"); if (!b) return; P.haptics = b.dataset.v === "1"; saveProfile(); renderSettings(); buzz(20); });
 $("speedSel").addEventListener("change", (e) => { catchUp(); S.speed = Number(e.target.value) || 1; save(); renderStats(); });
 $("btnRelease").addEventListener("click", () => { $("releaseAsk").innerHTML = t("set.releaseAsk", { name: escapeHtml(S.name || t("set.theEgg")) }); $("releaseConfirm").hidden = false; $("releaseRow").hidden = true; });
@@ -1604,7 +1659,7 @@ if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
 const HOOKS = {};
 window.EV = {
   get S() { return S; }, get P() { return P; }, get LANG() { return LANG; },
-  STR, ACH, SPECIES, SFX, HOOKS, $, clamp, rand, pick, t, tone, sfx, buzz, save, saveProfile, addCoins, spendCoins, toast, addLog,
+  quietOn, STR, ACH, ACH_META, SPECIES, SFX, HOOKS, $, clamp, rand, pick, t, tone, sfx, buzz, save, saveProfile, addCoins, spendCoins, toast, addLog,
   renderAll, renderStats, showScreen, applyStatic, escapeHtml, drawCreature, setupCanvas, ell, drawStar, checkAch, togglePanel, stageName, careNow, pixelText,
 };
 
@@ -1632,5 +1687,6 @@ requestAnimationFrame(frame);
 <script src="well.js"></script>
 <script src="eggs.js"></script>
 <script src="seasons.js"></script>
+<script src="ach.js"></script>
 </body>
 </html>
