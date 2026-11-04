@@ -76,3 +76,7 @@ An RPG expedition mode, a creature encyclopedia, more evolution branches and cre
 ## Compact home
 
 The home fits on one phone screen. Five status icons sit above the window (tap them to see names and numbers), the eight care buttons are one row under it, and the battle stats start folded. Every menu (shop, tasks, season, refuge, cards, map, achievements, settings, food and bag) opens as a sheet over the game instead of at the end of the page. The shop, the food menu and the bag are grids of pixel icons; tapping one opens a small card with the picture, price or amount, description, effects and one confirm button.
+
+## Cards and teams
+
+Card art is now a lore scene for every card (`scenes.js`, built from the card-scenes sources in the project files). Each loadout slot is a row with the card's thumbnail, name, type, grade and its effect in that slot, plus a Change button that lists every card that fits with its effect for that slot. The new Teams menu shows your creature and two Refuge companions with their cards, and keeps up to 5 named sets; sets load from the menu or with one tap before an expedition (missing creatures or copies are skipped and reported). The card collection and the achievements are grids; tapping one opens the whole card or the medal.
