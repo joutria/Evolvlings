@@ -197,7 +197,7 @@ function clXP() {
 }
 const clNeed = (lvl) => 10 * (lvl - 1) * lvl; // total experience to reach a level
 const clLvl = (xp) => { if (xp == null) xp = clXP(); return Math.max(1, Math.min(60, Math.floor((1 + Math.sqrt(1 + 0.4 * xp)) / 2))); };
-const slots = () => SLOT_LVL.filter((n) => clLvl() >= n).length;
+const slots = () => SLOT_LVL.filter((n) => clLvl() >= n).length + (EV.BUILD ? EV.BUILD.incExtra() : 0);
 const poolOpen = () => clLvl() >= POOL_LVL;
 function clPending() {
   const g = G(), lv = clLvl(); let c = 0, n = 0;
@@ -257,7 +257,9 @@ function giveEgg(min) {
 }
 
 /* ---------- Incubator ---------- */
-const left = (e) => Math.max(0, hatchMs(e.tier) - (Date.now() - e.at) - (e.cut || 0));
+// the Incubator build (build.js) makes every egg hatch sooner
+const incMs = (tier) => hatchMs(tier) * (1 - (EV.BUILD ? EV.BUILD.incCut() : 0));
+const left = (e) => Math.max(0, incMs(e.tier) - (Date.now() - e.at) - (e.cut || 0));
 function autoIncubate() {
   const g = G();
   while (g.inc.length < slots() && g.bag.length) { const e = g.bag.shift(); e.at = Date.now(); e.cut = 0; e.warm = 0; e.talk = null; g.inc.push(e); }
@@ -410,11 +412,11 @@ function refugeHtml() {
 function incHtml() {
   const g = G(), n = slots();
   let h = `<p class="muted" style="margin:0">${esc(tx("inc.sub"))}</p><div class="rf-slots">`;
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < Math.max(3, n); i++) {
     const e = g.inc[i];
     if (i >= n) { h += `<div class="rf-slot lock"><span>🔒</span><small>${esc(tx("slot.lock", { n: SLOT_LVL[i] }))}</small></div>`; continue; }
     if (!e) { h += `<div class="rf-slot"><span class="muted">${esc(tx("slot.free"))}</span></div>`; continue; }
-    const ms = left(e), total = hatchMs(e.tier), crack = 1 - ms / total;
+    const ms = left(e), total = incMs(e.tier), crack = 1 - ms / total;
     const warmWait = Date.now() - (e.warm || 0) < WARM_CD;
     h += `<div class="rf-slot${ms ? "" : " ready"}">${eggCv(e.tier, crack, 64)}<strong>${esc(eggName(e.tier))}</strong><small class="muted">${esc(tx("who"))}</small>
       <small class="progress">${esc(ms ? tx("left", { t: fmtLeft(ms) }) : tx("ready"))}</small><div class="bar"><i style="width:${Math.round(crack * 100)}%"></i></div>
@@ -524,7 +526,7 @@ css.textContent = `
 .rf-small { font-size: 13px; }
 .rf-born { display: flex; gap: 12px; align-items: center; border: 2px solid #c25e9a; padding: 10px; background: color-mix(in srgb, #c25e9a 10%, var(--bg)); animation: wcard .4s ease-out; }
 .rf-born h3 { margin: 0 0 4px; }
-.rf-slots { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.rf-slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
 .rf-slot { display: flex; flex-direction: column; gap: 4px; align-items: center; text-align: center; border: 2px solid var(--line); padding: 10px; min-height: 150px; justify-content: center; background: var(--bg); }
 .rf-slot.lock { border-style: dashed; opacity: .7; }
 .rf-slot.ready { border-color: var(--warn, #e2ae2e); }

@@ -25,6 +25,7 @@ const TX = {
     "p.lawn": "Claro abierto", "p.lawn.d": "Jugar a cazar estrellas", "p.root": "Raíz del Claro", "p.root.d": "Escuchar la Raíz", "p.board": "Tablón", "p.board.d": "Ver las tareas",
     "p.toVado": "Camino al Vado", "p.toVado.d": "Cruzar el arroyo", "p.toHome": "Camino a casa", "p.toHome.d": "Volver a tu rincón",
     "p.well": "Pozo de los Ecos", "p.well.d": "Tirar cartas", "p.pantry": "Despensa", "p.pantry.d": "Tirada del día", "p.shop": "Tienda", "p.shop.d": "Comprar comida y cosas",
+    "p.garden": "Huerto", "p.garden.d": "Cosechar comida y Madera", "garden.hi": "{name} husmea entre las matas del Huerto.", "build.open": "Ver obras",
     "p.nest": "Incubadora", "p.nest.d": "Ver el Refugio y los huevos", "p.tila": "Tila", "p.tila.d": "Hablar", "p.trail": "Sendero de las expediciones", "p.trail.d": "Salir de expedición",
     "food.pick": "¿Qué le pones en el comedero?", "food.none": "Cerrar",
     "d.close": "Adiós", "d.more": "Seguir escuchando",
@@ -56,6 +57,7 @@ const TX = {
     "p.lawn": "Open lawn", "p.lawn.d": "Play star catch", "p.root": "Glade Root", "p.root.d": "Listen to the Root", "p.board": "Notice board", "p.board.d": "See the tasks",
     "p.toVado": "Path to El Vado", "p.toVado.d": "Cross the stream", "p.toHome": "Path home", "p.toHome.d": "Back to your corner",
     "p.well": "Well of Echoes", "p.well.d": "Pull cards", "p.pantry": "Pantry", "p.pantry.d": "Pull of the day", "p.shop": "Shop", "p.shop.d": "Buy food and things",
+    "p.garden": "Garden", "p.garden.d": "Harvest food and Wood", "garden.hi": "{name} sniffs around the Garden beds.", "build.open": "See builds",
     "p.nest": "Incubator", "p.nest.d": "See the Refuge and eggs", "p.tila": "Tila", "p.tila.d": "Talk", "p.trail": "Expedition trail", "p.trail.d": "Set out on an expedition",
     "food.pick": "What goes in the bowl?", "food.none": "Close",
     "d.close": "Goodbye", "d.more": "Keep listening",
@@ -130,6 +132,7 @@ const MAPS = {
       { id: "toVado", x: 7, y: 10, stand: [7, 10], obj: "sign", go: "vado" },
       { id: "patch", x: 10, y: 3, solid: [[10, 3]], stand: [10, 4], obj: "patch", cost: 2 },
       { id: "bottle", x: 8, y: 2, stand: [8, 3], obj: "bottle", when: () => bottleHere() },
+      { id: "garden", x: 4, y: 9, w: 2, solid: [[4, 9], [5, 9]], stand: [4, 8], obj: "garden", when: () => !!EV.BUILD },
     ],
     start: [7, 8], deco: [["tree", 1, 1], ["tree", 13, 1], ["tree", 1, 8], ["tree", 13, 8], ["flower", 12, 3], ["flower", 2, 5], ["flower", 10, 9]],
   },
@@ -279,6 +282,15 @@ function drawObj(c, kind, bx, by, t) {
     else if (k === "lake") { sh(7); c.fillStyle = C.path2; c.beginPath(); c.ellipse(bx, by - 2, 7, 3, 0, Math.PI, 0); c.fill(); rect(c, bx + 2, by - 7, 5, 4, C.stone); rect(c, bx + 2, by - 7, 5, 1, C.stone2); }
     else if (k === "frost") { sh(6); for (const [x, h] of [[-4, 6], [0, 9], [4, 7]]) { rect(c, bx + x, by - h, 1, h, "#5f8fb0"); rect(c, bx + x - 1, by - h - 2, 3, 3, "#bfe3f2"); } }
     else { sh(6); const a = 0.5 + 0.4 * Math.sin(t / 400); c.fillStyle = `rgba(226,174,46,${a.toFixed(2)})`; rect(c, bx - 1, by - 10, 2, 6, c.fillStyle); rect(c, bx - 3, by - 8, 6, 2, c.fillStyle); rect(c, bx - 6, by - 2, 12, 1, C.grass2); }
+  } else if (kind === "garden") {
+    // tilled rows that fill up with each level; a fence from level 3, a little shed at level 5
+    const n = EV.BUILD ? EV.BUILD.lvl("garden") : 1, st = EV.BUILD ? EV.BUILD.gardenStock() : { f: 0 };
+    rect(c, bx - 8, by - 9, 32, 9, C.path2);
+    for (let r = 0; r < 2; r++) rect(c, bx - 7, by - 8 + r * 4, 30, 2, "#8a6a3e");
+    const plants = Math.min(10, 2 + n * 2);
+    for (let i = 0; i < plants; i++) { const px = bx - 6 + (i % 5) * 6, py = by - 9 + Math.floor(i / 5) * 4; rect(c, px, py - 2, 2, 3, C.leaf); rect(c, px + 1, py - 3, 2, 2, C.grass2); if (i < st.f) rect(c, px + 2, py - 1, 2, 2, i % 3 === 2 ? "#e2ae2e" : C.red); }
+    if (n >= 3) { for (let x = -9; x <= 24; x += 4) rect(c, bx + x, by - 11, 1, 4, C.wood); rect(c, bx - 9, by - 10, 34, 1, C.wood2); }
+    if (n >= 5) { rect(c, bx + 18, by - 16, 7, 7, C.wood2); rect(c, bx + 17, by - 18, 9, 2, C.red); rect(c, bx + 20, by - 13, 2, 4, C.ink); }
   } else if (kind === "bottle") {
     const o = Math.round(Math.sin(t / 500) * 1.5);
     rect(c, bx - 4, by - 7 + o, 8, 4, "#8fc9a8"); rect(c, bx + 4, by - 6 + o, 3, 2, "#8fc9a8"); rect(c, bx + 7, by - 6 + o, 1, 2, C.wood);
@@ -601,6 +613,7 @@ function act(p) {
     case "nest": EV.togglePanel("refuge", true); break;
     case "tila": dialog = { who: "tila", emo: "happy", pet: "happy", text: tx("tila.hi", { name: S.name }), opts: ["tila.q1", "tila.q2", "tila.q3"] }; break;
     case "patch": forage(); break;
+    case "garden": { const r = EV.BUILD.harvest(); dialog = { who: "pet", emo: r.n ? "happy" : "normal", text: tx("garden.hi", { name: S.name }) + " " + r.text, opts: ["build.open"] }; break; }
     case "bottle": openBottle(); break;
     case "trail": dialog = { who: "trail", text: tx("trailAsk"), opts: ["trail.go", "trail.stay"] }; break;
   }
@@ -617,6 +630,7 @@ function answer(k) {
   EV.sfx("tap");
   if (k === "close") { dialog = null; render(); return; }
   if (k === "root.more") { rootTalk(); render(); return; }
+  if (k === "build.open") { dialog = null; render(); EV.togglePanel("build", true); return; }
   if (k === "bed.sleep") { dialog = null; if (!S.sleeping) EV.toggleSleep(); render(); return; }
   if (k === "tila.q1") { const r = rumour(); dialog = { who: "tila", emo: "normal", pet: r ? "surprised" : "normal", text: r ? tx("tila.a1") + " " + quote(r) : tx("tila.a1none"), opts: ["tila.q2", "tila.q3"] }; }
   else if (k === "tila.q2") { const lit = !!(EV.P.cosm && EV.P.cosm.mem && EV.P.cosm.mem.tila); dialog = { who: "tila", emo: lit ? "happy" : "worried", pet: lit ? "happy" : "sad", text: tx(lit ? "tila.a2lit" : "tila.a2dark"), opts: ["tila.q1", "tila.q3"] }; }
@@ -677,8 +691,8 @@ function dlgHtml(alive) {
     return `<div class="wdlg"><div class="wdlg-faces"><img class="wdlg-face" alt="" src="${portrait(dialog.who, dialog.emo)}">${react}</div><div class="wdlg-body"><b>${esc(nm)}</b><p>${esc(dialog.text)}</p><div class="wdlg-opts">${dialog.opts.map((k) => `<button class="btn${main(k) ? "" : " ghost"}" type="button" data-wans="${k}">${esc(lbl(k))}</button>`).join("")}<button class="btn ghost" type="button" data-wans="close">${esc(tx(dialog.close || "d.close"))}</button></div></div></div>`;
   }
   if (foodPick && alive) {
-    const foods = Object.keys(EV.ITEMS).filter((k) => EV.ITEMS[k].cat === "food" && (EV.ITEMS[k].price === 0 || (EV.P.inv[k] || 0) > 0));
-    return `<div class="wdlg"><div class="wdlg-body"><b>${esc(tx("food.pick"))}</b><div class="wdlg-opts">${foods.map((k) => `<button class="btn ghost" type="button" data-wfood="${k}">${esc(EV.itemName(k))}${EV.ITEMS[k].price ? " ×" + EV.P.inv[k] : ""}</button>`).join("")}<button class="btn ghost" type="button" data-wfood="">${esc(tx("food.none"))}</button></div></div></div>`;
+    const foods = Object.keys(EV.ITEMS).filter((k) => EV.ITEMS[k].cat === "food" && (!EV.stocked(k) || (EV.P.inv[k] || 0) > 0));
+    return `<div class="wdlg"><div class="wdlg-body"><b>${esc(tx("food.pick"))}</b>${foods.length ? "" : `<p>${esc(EV.t("feed.empty"))}</p>`}<div class="wdlg-opts">${foods.map((k) => `<button class="btn ghost" type="button" data-wfood="${k}">${esc(EV.itemName(k))}${EV.stocked(k) ? " ×" + EV.P.inv[k] : ""}</button>`).join("")}<button class="btn ghost" type="button" data-wfood="">${esc(tx("food.none"))}</button></div></div></div>`;
   }
   return "";
 }
