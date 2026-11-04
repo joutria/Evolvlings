@@ -11,7 +11,7 @@ const $ = EV.$, esc = EV.escapeHtml, L = () => EV.LANG;
 const TX = {
   es: {
     "nav": "Tareas", "title": "Tareas y premios", "notes": "♪ {n} Notas del Canto",
-    "notes.what": "Las Notas del Canto se gastarán en el Pozo de los Ecos, que llega en la próxima entrega. Nunca caducan.",
+    "notes.what": "Las Notas del Canto se gastan en el Pozo de los Ecos (Cartas → Pozo). Nunca caducan.",
     "day.title": "Tareas de hoy", "day.reset": "Se renuevan a las 05:00.", "day.claim": "Cobrar", "day.done": "Cobrada",
     "day.reroll": "Cambiar", "day.rerollUsed": "Ya cambiaste una tarea hoy.", "day.pending": "Pendiente de {d}",
     "lamp": "Farolillo del día", "lamp.sub": "Cobra las 4 tareas para encenderlo: 1 Nota y 1 tirada gratis más en la Despensa.",
@@ -36,7 +36,7 @@ const TX = {
   },
   en: {
     "nav": "Tasks", "title": "Tasks and rewards", "notes": "♪ {n} Song Notes",
-    "notes.what": "Song Notes will be spent at the Well of Echoes, which arrives in the next delivery. They never expire.",
+    "notes.what": "Song Notes are spent at the Well of Echoes (Cards → Well). They never expire.",
     "day.title": "Today's tasks", "day.reset": "They refresh at 05:00.", "day.claim": "Claim", "day.done": "Claimed",
     "day.reroll": "Swap", "day.rerollUsed": "You already swapped a task today.", "day.pending": "Left over from {d}",
     "lamp": "Lantern of the day", "lamp.sub": "Claim all 4 tasks to light it: 1 Note and 1 extra free Pantry pull.",

@@ -791,7 +791,7 @@ const ZONES = {
 };
 const EVENTS = ["farol", "patrol", "tila", "well", "dam", "apprentice", "ola", "liquen", "vines", "loggers", "court", "dig", "whisper", "orilla", "reflection", "boats", "gravasong", "tunnels", "miners", "coplo", "news", "pass", "esporina", "tomb", "dreams", "duo", "albor", "cantora"];
 
-const api = { COMPAT, canUse, UPGRADE_N, TYPES, BEATS, OPPOSITE, typeMult, GRADES, rollGrade, STATUS, CARDS, DROP_POOL, scaled, MONS, makeUnit, Battle, lvlScale, xpNeed, SLOT_LVL, ZONES, EVENTS, isDayNow };
+const api = { GRADE_VIS, COMPAT, canUse, UPGRADE_N, TYPES, BEATS, OPPOSITE, typeMult, GRADES, rollGrade, STATUS, CARDS, DROP_POOL, scaled, MONS, makeUnit, Battle, lvlScale, xpNeed, SLOT_LVL, ZONES, EVENTS, isDayNow };
 if (typeof module !== "undefined" && module.exports) module.exports = api;
 if (!root || !root.EV) return;
 
@@ -2735,7 +2735,7 @@ function onExpClick(e) {
 /* ====================================================================== */
 let cTab = "col", lastPack = null;
 function cardTabs() {
-  return `<div class="seg ctabs" role="group">${["col", "grim", "shop"].map((k) => `<button type="button" data-ctab="${k}" aria-pressed="${cTab === k}">${esc(tx("ctab." + k))}</button>`).join("")}</div>`;
+  return `<div class="seg ctabs" role="group">${["col", "grim", "shop"].concat(EV.WELL ? ["well"] : []).map((k) => `<button type="button" data-ctab="${k}" aria-pressed="${cTab === k}">${esc(k === "well" ? EV.WELL.tab() : tx("ctab." + k))}</button>`).join("")}</div>`;
 }
 function grimHtml() {
   const P = EV.P, all = Object.keys(CARDS), seen = all.filter((id) => (P.grim || {})[id]).length;
@@ -2771,6 +2771,7 @@ function renderCards() {
   const el = $("cardsPanel"); if (!el) return;
   const R = rpgState(), P = EV.P, S = EV.S;
   if (cTab !== "col") {
+    if (cTab === "well" && EV.WELL) { el.innerHTML = `<div class="panel-head"><h2>${esc(EV.WELL.title())}</h2>${cardTabs()}</div>` + EV.WELL.html(); return; }
     el.innerHTML = `<div class="panel-head"><h2>${esc(tx(cTab === "grim" ? "ctab.grim" : "ctab.shop"))}</h2>${cardTabs()}</div>` + (cTab === "grim" ? grimHtml() : workshopHtml());
     return;
   }
@@ -2817,6 +2818,7 @@ function onCardsClick(e) {
   const t = e.target.closest("button"); if (!t || t.disabled) return;
   const R = rpgState(); const P = EV.P;
   if (t.dataset.ctab) { cTab = t.dataset.ctab; EV.sfx("tap"); renderCards(); return; }
+  if (EV.WELL && EV.WELL.click(t)) return;
   if (t.dataset.dust) {
     const c = cardByUid(t.dataset.dust), eqSet = R ? new Set(Object.values(R.eq).filter(Boolean)) : new Set();
     if (!c || eqSet.has(c.uid) || P.cards.filter((x) => x.id === c.id).length < 2) return;
