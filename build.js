@@ -25,6 +25,15 @@ const TX = {
     "e.garden": "{f} comidas al día · guarda hasta {cap} · 🪵 {w} al día{extra}",
     "e.garden.melon": " · a veces melón", "e.garden.stew": " · a veces guiso",
     "e.inc": "Huevos un {p} % más rápidos{slot}", "e.inc.slot": " · un hueco más",
+    "p.pantry": "Despensa", "p.pantry.d": "La tirada gratis del día tiene más probabilidad de premio especial.",
+    "p.well": "Pozo de los Ecos", "p.well.d": "Todas las tiradas del Pozo sacan algo mejores cartas. Además, una tirada gratis cada semana.",
+    "p.path": "Camino al Vado", "p.path.d": "Tu criatura recupera más pasos cada día.",
+    "p.nook": "Rincón de búsqueda", "p.nook.d": "Más búsquedas al día en el rincón del Claro.",
+    "p.nest": "Nidos del Refugio", "p.nest.d": "Los compañeros que se quedan en casa también aprenden de tus viajes.",
+    "p.craft": "Taller del Gremio", "p.craft.d": "Fabricar cartas en el Grimorio cuesta menos Polvo.",
+    "e.pantry": "+{n} puntos de premio especial en la tirada gratis", "e.well": "+{n} puntos de Rara o mejor en cada tirada",
+    "e.path": "+{n} pasos al día", "e.nook": "{n} búsquedas al día", "e.nest": "Los que se quedan ganan el {n} % de la experiencia del viaje{pet}", "e.nest.pet": " · acariciar da +2 de Vínculo",
+    "e.craft": "Fabricar cuesta {n} ∴", "e.none": "Sin mejora todavía",
     "store": "En el huerto: {f} comidas · 🪵 {w}", "harvest": "Cosechar", "harvestNone": "Todavía no hay nada que cosechar.",
     "harvested": "Cosechas: {what}.", "full": "El huerto está lleno: cosecha para que siga creciendo.",
     "tripWood": "🪵 +{n} Madera del viaje", "tripCut": "La obra avanza 1 h.",
@@ -44,6 +53,15 @@ const TX = {
     "e.garden": "{f} meals a day · holds up to {cap} · 🪵 {w} a day{extra}",
     "e.garden.melon": " · sometimes melon", "e.garden.stew": " · sometimes stew",
     "e.inc": "Eggs {p}% faster{slot}", "e.inc.slot": " · one more slot",
+    "p.pantry": "Pantry", "p.pantry.d": "The day's free pull is more likely to give a special prize.",
+    "p.well": "Well of Echoes", "p.well.d": "Every Well pull gives slightly better cards. Plus one free pull every week.",
+    "p.path": "Path to El Vado", "p.path.d": "Your creature gets more steps back each day.",
+    "p.nook": "Foraging nook", "p.nook.d": "More searches a day at the Glade's nook.",
+    "p.nest": "Refuge nests", "p.nest.d": "Companions who stay home also learn from your trips.",
+    "p.craft": "Guild workshop", "p.craft.d": "Crafting cards in the Grimoire costs less Stardust.",
+    "e.pantry": "+{n} points of special prize on the free pull", "e.well": "+{n} points of Rare or better on every pull",
+    "e.path": "+{n} steps a day", "e.nook": "{n} searches a day", "e.nest": "Those who stay get {n}% of the trip's experience{pet}", "e.nest.pet": " · petting gives +2 Bond",
+    "e.craft": "Crafting costs {n} ∴", "e.none": "No bonus yet",
     "store": "In the garden: {f} meals · 🪵 {w}", "harvest": "Harvest", "harvestNone": "Nothing to harvest yet.",
     "harvested": "You harvest: {what}.", "full": "The garden is full: harvest so it keeps growing.",
     "tripWood": "🪵 +{n} Wood from the trip", "tripCut": "The build moves 1 h closer.",
@@ -61,7 +79,13 @@ const MAX = 5;
 const FAST = true;
 const COST = { 2: { c: 60, w: 5, h: 2, fh: 0.25 }, 3: { c: 150, w: 12, h: 6, fh: 0.75 }, 4: { c: 300, w: 25, h: 12, fh: 2 }, 5: { c: 600, w: 45, h: 24, fh: 4 } };
 const hoursOf = (c) => (FAST ? c.fh : c.h);
-const PLACES = ["garden", "inc"];
+const PLACES = ["garden", "inc", "pantry", "well", "path", "nook", "nest", "craft"];
+// what each level gives (index = level); the odds never go up more than 10 points (Jose's cap)
+const EFF = {
+  pantry: [0, 0, 2, 4, 6, 10], well: [0, 0, 2, 4, 6, 10], path: [0, 0, 1, 2, 3, 5],
+  nook: [0, 1, 1, 2, 2, 3], nest: [0, 0, 10, 20, 35, 50], craft: [0, 10, 9, 9, 8, 7],
+};
+const eff = (id) => EFF[id][lvl(id)];
 // Garden by level: meals a day, how many it holds, wood a day, what grows
 const GARDEN = [null,
   { f: 3, cap: 4, w: 1, pool: ["berry", "berry", "bun"] },
@@ -153,7 +177,11 @@ function start(id) {
 /* ---------- What each level does ---------- */
 function effText(id, n) {
   if (id === "garden") { const G = GARDEN[n]; return tx("e.garden", { f: G.f, cap: G.cap, w: String(G.w).replace(".", L() === "es" ? "," : "."), extra: G.pool.includes("stew") ? tx("e.garden.stew") : G.pool.includes("melon") ? tx("e.garden.melon") : "" }); }
-  return tx("e.inc", { p: Math.round(INC_CUT[n] * 100), slot: n >= MAX ? tx("e.inc.slot") : "" });
+  if (id === "inc") return tx("e.inc", { p: Math.round(INC_CUT[n] * 100), slot: n >= MAX ? tx("e.inc.slot") : "" });
+  const v = EFF[id][n];
+  if (id === "nest") return v ? tx("e.nest", { n: v, pet: n >= MAX ? tx("e.nest.pet") : "" }) : tx("e.none");
+  if (!v && id !== "craft") return tx("e.none");
+  return tx("e." + id, { n: v });
 }
 
 /* ---------- Panel ---------- */
@@ -242,5 +270,7 @@ function hello() {
 hello(); tick(); refreshBtn();
 
 EV.BUILD = { B, lvl, harvest, gardenStock, grow, start, tick, jobLeft, render, COST, GARDEN, INC_CUT, MAX, PLACES,
-  incCut: () => INC_CUT[lvl("inc")] || 0, incExtra: () => (lvl("inc") >= MAX ? 1 : 0), tx };
+  incCut: () => INC_CUT[lvl("inc")] || 0, incExtra: () => (lvl("inc") >= MAX ? 1 : 0), tx, EFF, eff,
+  pantryBonus: () => eff("pantry"), wellBonus: () => eff("well"), pathBonus: () => eff("path"), nookN: () => eff("nook"),
+  nestShare: () => eff("nest") / 100, nestPet: () => (lvl("nest") >= MAX ? 2 : 1), craftCost: () => eff("craft") };
 })(window);

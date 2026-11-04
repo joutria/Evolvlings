@@ -31,9 +31,10 @@ const TX = {
     "trait.1": "Instinto (+5 % de crítico)", "trait.2": "Reflejos de camada (+6 % de esquiva)",
     "stars": "Estrellas", "frags": "Su historia ({n} de 2)", "fragLock": "Se abre con ★ {n}",
     "starWhy": "Cada vez que nace una criatura que ya tienes, gana una estrella (hasta 5): +4 % a sus estadísticas por estrella, un rasgo y un fragmento de su historia en ★2 y ★4, y borde dorado en ★5.",
-    "petted": "{n} se acurruca contra tu mano. +1 Vínculo",
+    "petted": "{n} se acurruca contra tu mano. +{b} Vínculo",
     // incubator
     "inc.sub": "Los huevos tardan de 12 a 44 horas en abrirse. Dales calor, háblales y sal de expedición para que vayan más rápido: cada expedición terminada los adelanta 3 h.",
+    "tripNest": "En los Nidos, los que se quedaron en casa aprenden de tu viaje ({p} % de la experiencia).",
     "tripEggs": "El viaje calienta el Refugio: los huevos de la incubadora se adelantan {n} h.",
     "slot.lock": "Hueco libre con Nivel de Cuidador {n}", "slot.free": "Hueco libre",
     "left": "Faltan {t}", "ready": "¡Se está moviendo!", "warm": "Dar calor (−2 h)", "warmWait": "Calentito ({m} min)", "talk": "Hablarle (−4 h)", "talkDone": "Ya le hablaste hoy", "open": "Abrir",
@@ -82,8 +83,9 @@ const TX = {
     "trait.1": "Instinct (+5% crit)", "trait.2": "Litter reflexes (+6% dodge)",
     "stars": "Stars", "frags": "Its story ({n} of 2)", "fragLock": "Opens at ★ {n}",
     "starWhy": "Every time a creature you already have hatches, it gains a star (up to 5): +4% to its stats per star, a trait and a piece of its story at ★2 and ★4, and a golden border at ★5.",
-    "petted": "{n} snuggles into your hand. +1 Bond",
+    "petted": "{n} snuggles into your hand. +{b} Bond",
     "inc.sub": "Eggs take 12 to 44 hours to open. Keep them warm, talk to them and go on expeditions to speed things up: each finished trip brings them 3 h closer.",
+    "tripNest": "In the Nests, those who stayed home learn from your trip ({p}% of the experience).",
     "tripEggs": "The trip warms the Refuge: the eggs in the incubator move {n} h closer.",
     "slot.lock": "Free slot at Keeper Level {n}", "slot.free": "Free slot",
     "left": "{t} to go", "ready": "It's wiggling!", "warm": "Warm it (−2 h)", "warmWait": "Cosy ({m} min)", "talk": "Talk to it (−4 h)", "talkDone": "Talked today", "open": "Open",
@@ -303,9 +305,9 @@ function hatch(id) {
 function pet(k) {
   const r = G().roster[k]; if (!r || r.pet === today()) return;
   const before = bondLvl(r.bxp);
-  r.pet = today(); r.bxp++;
+  r.pet = today(); r.bxp += EV.BUILD ? EV.BUILD.nestPet() : 1;
   EV.P.c.refugePets = (EV.P.c.refugePets || 0) + 1;
-  EV.toast(tx("petted", { n: monName(k) }), "♥"); EV.sfx(bondLvl(r.bxp) > before ? "grow" : "tap");
+  EV.toast(tx("petted", { n: monName(k), b: EV.BUILD ? EV.BUILD.nestPet() : 1 }), "♥"); EV.sfx(bondLvl(r.bxp) > before ? "grow" : "tap");
   save();
 }
 // for rpg.js: what this creature brings to an expedition
@@ -336,6 +338,20 @@ function afterTrip(res, xp, party, plvl) {
     out.push(tx("trip", { n, x: gain }));
     if (r.lvl > l0) out.push(tx("tripLvl", { n, l: r.lvl }));
     if (bondLvl(r.bxp) > b0) out.push(tx("tripBond", { n, b: bondLvl(r.bxp) }));
+  }
+  // the Nests build (build.js): companions who stayed home get a share of the trip's experience
+  const share = EV.BUILD ? EV.BUILD.nestShare() : 0;
+  if (share > 0 && xp > 0) {
+    const went = new Set((party || []).filter((m) => m.roster).map((m) => m.kind));
+    let n = 0;
+    for (const k of Object.keys(R)) {
+      if (went.has(k)) continue;
+      const r = R[k]; if (r.lvl >= plvl) continue;
+      r.xp += Math.round(xp * share); n++;
+      while (r.lvl < plvl && r.xp >= RPG.xpNeed(r.lvl)) { r.xp -= RPG.xpNeed(r.lvl); r.lvl++; }
+      if (r.lvl >= plvl) r.xp = Math.min(r.xp, RPG.xpNeed(r.lvl) - 1);
+    }
+    if (n) out.push(tx("tripNest", { n, p: Math.round(share * 100) }));
   }
   if (res === "win" || res === "lose") {
     const warm = G().inc.filter((e) => left(e) > 0);

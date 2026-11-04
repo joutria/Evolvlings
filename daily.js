@@ -21,7 +21,7 @@ const TX = {
     "cal.title": "Calendario de visitas", "cal.sub": "Avanza una casilla por cada día que entras. Si faltas, no se pierde nada.", "cal.claim": "Recoger el día {n}", "cal.claimed": "Hoy ya recogiste tu casilla.",
     "pantry.title": "Despensa", "pantry.sub": "Una tirada gratis al día. Las demás cuestan {c} Chispas.", "pantry.free": "Tirada gratis ({n})", "pantry.pay": "Tirar · {c} ✦",
     "pantry.odds": "Probabilidades: comida 50 %, medicinas 20 %, Chispas 20 %, juguete 6 %, 1 Nota 4 %. Premio especial seguro cada {p} tiradas (faltan {n}).",
-    "pantry.got": "La Despensa te da: {what}", "pantry.special": "¡Premio especial!",
+    "pantry.bonus": "Obras de la Despensa: la tirada gratis tiene +{n} puntos de premio especial.", "pantry.got": "La Despensa te da: {what}", "pantry.special": "¡Premio especial!",
     "ex.title": "Cambiar Chispas por Notas", "ex.sub": "{c} Chispas = 1 Nota. Máximo {m} a la semana (te quedan {n}).", "ex.btn": "Cambiar {c} ✦ → 1 ♪",
     "stars.title": "Estrellas y Cofres de Constelación", "stars.sub": "Cada guardián da hasta 3 estrellas según la vida con la que termine el equipo, y otras 3 en Modo Savia. Tienes {n} de {m}.",
     "chest.open": "Abrir", "chest.opened": "Abierto", "chest.soon": "Llegará con los huevos",
@@ -46,7 +46,7 @@ const TX = {
     "cal.title": "Visit calendar", "cal.sub": "Moves one square for every day you come in. Missing a day costs nothing.", "cal.claim": "Collect day {n}", "cal.claimed": "You already collected today's square.",
     "pantry.title": "Pantry", "pantry.sub": "One free pull a day. The rest cost {c} Chispas.", "pantry.free": "Free pull ({n})", "pantry.pay": "Pull · {c} ✦",
     "pantry.odds": "Odds: food 50%, medicine 20%, Chispas 20%, toy 6%, 1 Note 4%. A special prize is guaranteed every {p} pulls ({n} to go).",
-    "pantry.got": "The Pantry gives you: {what}", "pantry.special": "Special prize!",
+    "pantry.bonus": "Pantry builds: the free pull has +{n} points of special prize.", "pantry.got": "The Pantry gives you: {what}", "pantry.special": "Special prize!",
     "ex.title": "Trade Chispas for Notes", "ex.sub": "{c} Chispas = 1 Note. Up to {m} a week ({n} left).", "ex.btn": "Trade {c} ✦ → 1 ♪",
     "stars.title": "Stars and Constellation chests", "stars.sub": "Each guardian gives up to 3 stars depending on the health the team ends with, and 3 more in Savia Mode. You have {n} of {m}.",
     "chest.open": "Open", "chest.opened": "Opened", "chest.soon": "Arrives with eggs",
@@ -212,13 +212,16 @@ function itemName(id) { const it = EV.STR[L()].item && EV.STR[L()].item[id]; ret
 // Pantry: food 50, medicine 20, Chispas 20, toy 6 (Chispas if you own both), 1 Note 4; special every 30 pulls
 function pantry() {
   const d = D(), P = EV.P;
-  if (d.pantry.free > 0) d.pantry.free--;
+  const free = d.pantry.free > 0;
+  if (free) d.pantry.free--;
   else if (!EV.spendCoins(PANTRY_COST)) { EV.toast(tx("toast.poor")); EV.sfx("deny"); return; }
   P.c.pantry = (P.c.pantry || 0) + 1;
   d.pantry.pity++;
   let what;
   const toys = ["ball", "kite"].filter((k) => !P.owned[k]);
-  if (d.pantry.pity >= PANTRY_PITY) {
+  // the Pantry build (build.js) makes the free pull more likely to give the special prize (up to +10 points)
+  const lucky = free && EV.BUILD && Math.random() * 100 < EV.BUILD.pantryBonus();
+  if (d.pantry.pity >= PANTRY_PITY || lucky) {
     d.pantry.pity = 0;
     if (toys.length) { P.owned[toys[0]] = 1; what = tx("pantry.special") + " " + itemName(toys[0]); }
     else { P.notes += 2; what = tx("pantry.special") + " " + tx("r.notes", { n: 2 }); }
@@ -291,7 +294,7 @@ function render() {
     return `<span class="dc${got ? " got" : ""}${next ? " next" : ""}${r.notes ? " big" : ""}" title="${esc(r.notes ? tx("r.notes", { n: r.notes }) : r.food ? itemName(r.food) : tx("r.coins", { n: r.coins }))}"><small>${n}</small>${ic}</span>`;
   }).join("")}</div>${calDone ? `<p class="muted">✓ ${esc(tx("cal.claimed"))}</p>` : `<button class="btn" type="button" data-dcal="1">${esc(tx("cal.claim", { n: d.cal.n % 28 + 1 }))}</button>`}</div>`;
   // pantry
-  h += `<div class="dsec"><h3>${esc(tx("pantry.title"))}</h3><p class="muted">${esc(tx("pantry.sub", { c: PANTRY_COST }))}</p><div class="rc-btns">${d.pantry.free > 0 ? `<button class="btn" type="button" data-dpantry="1">${esc(tx("pantry.free", { n: d.pantry.free }))}</button>` : `<button class="btn ghost" type="button" data-dpantry="1" ${P.coins < PANTRY_COST ? "disabled" : ""}>${esc(tx("pantry.pay", { c: PANTRY_COST }))}</button>`}</div><p class="muted dsmall">${esc(tx("pantry.odds", { p: PANTRY_PITY, n: PANTRY_PITY - d.pantry.pity }))}</p></div>`;
+  h += `<div class="dsec"><h3>${esc(tx("pantry.title"))}</h3><p class="muted">${esc(tx("pantry.sub", { c: PANTRY_COST }))}</p>${EV.BUILD && EV.BUILD.pantryBonus() ? `<p class="muted"><b>${esc(tx("pantry.bonus", { n: EV.BUILD.pantryBonus() }))}</b></p>` : ""}<div class="rc-btns">${d.pantry.free > 0 ? `<button class="btn" type="button" data-dpantry="1">${esc(tx("pantry.free", { n: d.pantry.free }))}</button>` : `<button class="btn ghost" type="button" data-dpantry="1" ${P.coins < PANTRY_COST ? "disabled" : ""}>${esc(tx("pantry.pay", { c: PANTRY_COST }))}</button>`}</div><p class="muted dsmall">${esc(tx("pantry.odds", { p: PANTRY_PITY, n: PANTRY_PITY - d.pantry.pity }))}</p></div>`;
   // weekly
   const gotW = d.week.tasks.filter((t) => t.got).length;
   h += `<div class="dsec"><h3>${esc(tx("week.title"))}</h3><p class="muted">${esc(tx("week.reset"))} ${esc(tx("week.bonus"))}</p>`;

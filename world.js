@@ -36,7 +36,7 @@ const TX = {
     "tila.a3": "¿Esto? El aceite de Albor mancha que da gusto. En mi barrio decimos que si no te manchas, no has encendido nada.",
     trailName: "Sendero", trailAsk: "El sendero sale del Vado hacia las zonas del valle. Cuesta 3 pasos y la energía de siempre.", go: "Salir ({n} pasos)", stay: "Ahora no",
     bedName: "Antes de dormir", "bed.sum": "Así ha ido el día de {name}:", "bed.none": "Ha sido un día tranquilo, sin mucho que contar.", "bed.board": "En el tablón hay algo nuevo esperando.",
-    "bed.steps": "Le quedan {n} pasos y mañana se recargan 10.", "bed.sleep": "Dormir", "bed.later": "Todavía no",
+    "bed.steps": "Le quedan {n} pasos y mañana se recargan {d}.", "bed.sleep": "Dormir", "bed.later": "Todavía no",
     "p.bottle": "Botella", "p.bottle.d": "Algo flota en la charca", "p.patch": "Rincón de búsqueda", "p.patch.d": "Buscar a su manera",
     "pd.sol": "Cosechar", "pd.sky": "Atrapar brisas", "pd.lake": "Excavar", "pd.frost": "Recoger hojas de escarcha", "pd.star": "Cantar al Claro",
     bottleName: "Mensaje en una botella", "bottle.0": "Dentro hay un papel enrollado:", "bottle.wet": "El papel está tan mojado que no se lee nada.", "bottle.gift": "Atado al cuello de la botella había un regalo: {g}.",
@@ -68,7 +68,7 @@ const TX = {
     "tila.a3": "These? Albor oil stains like nothing else. In my quarter we say if you don't get stained, you haven't lit anything.",
     trailName: "Trail", trailAsk: "The trail leaves El Vado for the valley's zones. It costs 3 steps and the usual energy.", go: "Set out ({n} steps)", stay: "Not now",
     bedName: "Before bed", "bed.sum": "Here's how {name}'s day went:", "bed.none": "It was a quiet day, not much to tell.", "bed.board": "Something new is waiting on the notice board.",
-    "bed.steps": "It has {n} steps left, and 10 come back tomorrow.", "bed.sleep": "Sleep", "bed.later": "Not yet",
+    "bed.steps": "It has {n} steps left, and {d} come back tomorrow.", "bed.sleep": "Sleep", "bed.later": "Not yet",
     "p.bottle": "Bottle", "p.bottle.d": "Something is floating in the pond", "p.patch": "Foraging nook", "p.patch.d": "Search in its own way",
     "pd.sol": "Harvest", "pd.sky": "Catch breezes", "pd.lake": "Dig", "pd.frost": "Gather frost leaves", "pd.star": "Sing to the Glade",
     bottleName: "Message in a bottle", "bottle.0": "Inside there's a rolled-up note:", "bottle.wet": "The note is so wet that nothing can be read.", "bottle.gift": "Tied to the bottle's neck was a gift: {g}.",
@@ -90,7 +90,8 @@ function steps() {
   P.steps = P.steps || {};
   let s = P.steps[k];
   if (!s) s = P.steps[k] = { day: today(), n: STEPS.daily, bought: 0 };
-  if (s.day !== today()) { s.n = Math.min(STEPS.keep, s.n + STEPS.daily); s.bought = 0; s.day = today(); }
+  // the Path build (build.js) adds steps to the daily recharge
+  if (s.day !== today()) { const extra = EV.BUILD ? EV.BUILD.pathBonus() : 0; s.n = Math.min(STEPS.keep + extra, s.n + STEPS.daily + extra); s.bought = 0; s.day = today(); }
   return s;
 }
 function spendSteps(n) { const s = steps(); if (!s || s.n < n) return false; s.n -= n; EV.saveProfile(); refreshChip(); return true; }
@@ -382,6 +383,14 @@ function routeTo(stand) {
 
 /* ---------- Drawing one frame of the map onto a 240 x 176 context ---------- */
 function messTile(m) { const k = Math.round(m.x); return [2 + Math.round(((k - 30) / 300) * 10), 6 + (k % 3)]; }
+// upgraded places (build.js) wear a little row of gold marks, one per level above 1
+const BUILD_OF = { well: "well", pantry: "pantry", nest: "inc", patch: "nook", toVado: "path" };
+function buildMarks(g, p) {
+  const id = BUILD_OF[p.id]; if (!id || !EV.BUILD) return;
+  const n = EV.BUILD.lvl(id) - 1; if (n <= 0) return;
+  const x0 = p.x * TW + 8 - (n * 3 - 1) / 2, y = p.y * TW - 3;
+  for (let i = 0; i < n; i++) { rect(g, x0 + i * 3 - 0.5, y - 0.5, 3, 3, C.ink); rect(g, x0 + i * 3, y, 2, 2, n >= 4 ? C.gold : "#f2d27a"); }
+}
 function drawWorld(g, now) {
   const w = ws(), m = curMap(), S = EV.S;
   g.imageSmoothingEnabled = false;
@@ -394,7 +403,7 @@ function drawWorld(g, now) {
   const items = [];
   const deco = w.map === "home" ? m.deco.concat(homeExtras()) : m.deco;
   for (const [k, x, y] of deco) items.push({ y: y * TW + TW, draw: () => drawObj(g, k, x * TW + 8, y * TW + TW - 1, now) });
-  for (const p of placesNow()) if (p.obj) items.push({ y: p.y * TW + TW, draw: () => drawObj(g, p.obj, p.x * TW + 8, p.y * TW + TW - 1, now) });
+  for (const p of placesNow()) if (p.obj) items.push({ y: p.y * TW + TW, draw: () => { drawObj(g, p.obj, p.x * TW + 8, p.y * TW + TW - 1, now); buildMarks(g, p); } });
   const walking = w.path.length > 0;
   // asleep at home: curled up on the moss bed
   const bed = MAPS.home.places.find((p) => p.id === "bed");
@@ -517,7 +526,7 @@ function summary() {
   const parts = SNAP.map((k) => [k, (P.c[k] || 0) - (b[k] || 0)]).filter(([, n]) => n > 0).map(([k, n]) => tx("s." + k) + ": " + n);
   let text = parts.length ? tx("bed.sum", { name: S.name }) + " " + parts.join(" · ") + "." : tx("bed.none");
   if (boardNew()) text += " " + tx("bed.board");
-  if (s) text += " " + tx("bed.steps", { n: s.n });
+  if (s) text += " " + tx("bed.steps", { n: s.n, d: STEPS.daily + (EV.BUILD ? EV.BUILD.pathBonus() : 0) });
   dialog = { who: "bed", pet: "sleep", text, opts: ["bed.sleep"], close: "bed.later" };
 }
 function bedtime() {
@@ -550,9 +559,12 @@ function openBottle() {
 function forage() {
   const S = EV.S, P = EV.P, key = creatureKey();
   P.forage = P.forage || {};
-  if (P.forage[key] === today()) { dialog = { who: "pet", emo: "normal", text: tx("f.done", { name: S.name }), opts: [] }; return; }
+  // the Nook build (build.js) allows more searches a day; old saves kept just the day
+  let fg = P.forage[key]; if (typeof fg === "string") fg = { day: fg, n: 1 };
+  if (!fg || fg.day !== today()) fg = { day: today(), n: 0 };
+  if (fg.n >= (EV.BUILD ? EV.BUILD.nookN() : 1)) { dialog = { who: "pet", emo: "normal", text: tx("f.done", { name: S.name }), opts: [] }; return; }
   if (!spendSteps(2)) { EV.toast(tx("noSteps", { name: S.name })); EV.sfx("deny"); return; }
-  P.forage[key] = today(); P.c.forage = (P.c.forage || 0) + 1;
+  fg.n++; P.forage[key] = fg; P.c.forage = (P.c.forage || 0) + 1;
   const k = circle(); let text;
   if (k === "sol") { P.inv.melon = (P.inv.melon || 0) + 1; text = tx("f.sol", { name: S.name, g: tx("g.item", { item: EV.itemName("melon") }) }); }
   else if (k === "sky") { EV.addCoins(12); S.stats.fun = EV.clamp(S.stats.fun + 10); text = tx("f.sky", { name: S.name, n: 12 }); }
