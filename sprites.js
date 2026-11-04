@@ -81,7 +81,9 @@ function canvas(w, h) { const c = document.createElement("canvas"); c.width = w;
 // part: {cx,cy,rx,ry,ramp,group,z,spec,flat,rot}
 function rasterOut(W, H, parts) {
   const id = new Int16Array(W * H).fill(-1), col = new Array(W * H).fill(null);
-  parts.forEach((p, i) => {
+  // parts keep their index (extras look them up by it); "ord" changes only the drawing order, "hide" skips one
+  const order = parts.map((p, i) => i).sort((a, b) => (parts[a].ord != null ? parts[a].ord : a) - (parts[b].ord != null ? parts[b].ord : b));
+  order.forEach((i) => { const p = parts[i]; if (p.hide) return;
     const cs = Math.cos(p.rot || 0), sn = Math.sin(p.rot || 0);
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
       let dx = x + .5 - p.cx, dy = y + .5 - p.cy;
@@ -518,6 +520,56 @@ const KIND_TYPE = { lumo:"light", fizz:"air", pebb:"stone", fuellito:"fire", bro
   yunqueron:"fire", espinardo:"plant", nim:"shadow", centinela:"shadow", vidriela:"water", ecolito:"stone", relampin:"bolt", trinilla:"music",
   carambano:"ice", capuchon:"mush", guardatumba:"ice", unisona:"star" };
 
+/* ---------- Back and side views ----------
+   The SPEC parts are posed from the front. For the other views we move them:
+   - pairs (wings, legs, ears, claws: same height, mirrored left/right) fold together in profile, the far one behind and darker;
+   - "front" parts (bellies, snouts, face patches) disappear from behind and slide forward in profile;
+   - "back" parts (tails, tail flames, fins, a single wing) come over the body from behind and trail behind in profile;
+   - wings sit over the body from behind, so you see them spread on the creature's back.
+   Profiles face right; world.js mirrors them for left. */
+const VIEW = {
+  lumo: { wings: ["w"], noSideExtra: true }, nim: { wings: ["w"], noSideExtra: true }, bostezo: { wings: ["w"], front: ["face"] },
+  fuellito: { front: ["bl"], back: ["t", "fl"] }, trinilla: { front: ["bl"], back: ["w"] }, remolin: { front: ["bl"], back: ["t"] },
+  vidriela: { back: ["t"] }, mecha: { front: ["d"] }, espinardo: { front: ["fc"] }, centinela: { front: ["void", "hand"] },
+  carambano: { front: ["sn"], noSideExtra: true }, relampin: { front: ["m"] }, yunqueron: { front: ["h"], back: ["horn"] }, fizz: { back: ["s"] },
+};
+function viewParts(kind, sp, n, dir) {
+  const v = VIEW[kind] || {}, c = n / 2 + 1, parts = sp.parts.map((p) => Object.assign({}, p));
+  const has = (list, p) => (list || []).includes(p.group);
+  // find mirrored pairs by shape, whatever their group names are
+  const pairOf = new Map();
+  parts.forEach((a, i) => parts.forEach((b, j) => {
+    if (j <= i || pairOf.has(i) || pairOf.has(j)) return;
+    const da = a.cx - c, db = b.cx - c;
+    if (Math.abs(da) > 1 && Math.abs(da + db) < .8 && Math.abs(a.cy - b.cy) < .8 && Math.abs(a.rx - b.rx) < .5) { pairOf.set(i, j); pairOf.set(j, i); }
+  }));
+  const body = parts.reduce((m, p) => (Math.abs(p.cx - c) < 1 && p.rx * p.ry > m.rx * m.ry ? p : m), parts[0]);
+  const bodyRx = body.rx;
+  parts.forEach((p, i) => {
+    const dx = p.cx - c;
+    if (dir === "back") {
+      if (has(v.front, p)) p.hide = true;
+      else if (has(v.back, p)) { p.cx = c + dx * .35; p.z = 6; p.group += "_bk"; }
+      else if (has(v.wings, p)) { p.z = 6; p.cx = c + dx * .85; }
+      // seen from behind, light comes over the shoulder: no shine spot
+      p.spec = false;
+    } else if (dir === "side") {
+      if (has(v.front, p)) { p.cx = c + Math.max(dx, 0) + bodyRx * .45; p.rx *= .6; p.rot = 0; }
+      else if (has(v.back, p)) { p.cx = c - Math.abs(dx) * .9; if (p.rot) p.rot = -p.rot; }
+      else if (pairOf.has(i)) {
+        const near = dx > 0;
+        // wings fold onto the back: the near one over the shoulder, the far one peeking out behind it
+        if (has(v.wings, p)) { p.cx = c - bodyRx * (near ? .55 : .8); p.cy -= n * (near ? .04 : .1); p.rx *= near ? .62 : .5; p.ry *= near ? .9 : .8; p.z = near ? 6 : -1; if (!near) { p.flat = 0; p.group += "_far"; } }
+        else { p.cx = c + (near ? .3 : -.05) * Math.abs(dx); if (!near) { p.z = (p.z || 0) - 1; p.flat = 0; p.group += "_far"; } }
+      } else if (Math.abs(dx) < 1) p.rx *= .82;
+      else p.cx = c + dx * .55;
+    }
+  });
+  // from behind and in profile, whatever is nearer to us is drawn last
+  parts.forEach((p, i) => { p.ord = (p.z || 0) * 100 + i; });
+  return parts;
+}
+
 const CACHE = new Map();
 // dir: "front" (default), "back" (no face) or "side" (facing right: face turned to the side, body a little narrower;
 // mirror it for left). Used by the walkable map in world.js.
@@ -525,19 +577,17 @@ function sprite(kind, n = 24, st = 1, sq = 0, emo = "normal", dull = false, dir 
   const key = [kind, n, st, sq, emo, dull ? 1 : 0, dir].join(":");
   if (CACHE.has(key)) return CACHE.get(key);
   const sp = SPEC[kind](n, st, sq), W = n + 2, H = n + 2;
-  const { out, id } = rasterOut(W, H, sp.parts);
-  if (sp.extra) sp.extra(out, W, H, id);
+  const parts = dir === "front" ? sp.parts : viewParts(kind, sp, n, dir);
+  const { out, id } = rasterOut(W, H, parts);
+  // the hand-placed details (stripes, antenna stalks, spikes, sparkles) are posed for the front; skip them where they no longer fit
+  const vw = VIEW[kind] || {};
+  if (sp.extra && !(dir === "side" && vw.noSideExtra) && !(dir === "back" && vw.noBackExtra)) sp.extra(out, W, H, id);
   if (sp.face !== false && dir !== "back") {
     const f = Object.assign({}, sp.face, dull ? { cheek: false } : {});
     if (dir === "side") { f.dx = (f.dx || 0) + Math.round(n * .14); f.gap = (f.gap || .13) * .6; f.cheek = false; }
     face(out, W, f, n, emo === "normal" && sp.sleepy && sq ? "sleep" : emo);
   }
   let c = toCanvas(out, W, H, dull);
-  if (dir === "side") {
-    // drop every fifth column so the body reads narrower in profile
-    const w2 = Math.round(W * .8), c2 = canvas(w2, H), g = c2.getContext("2d");
-    g.imageSmoothingEnabled = false; g.drawImage(c, 0, 0, W, H, 0, 0, w2, H); c = c2;
-  }
   CACHE.set(key, c); return c;
 }
 // silhouette in one colour (hit flash, evolution)
