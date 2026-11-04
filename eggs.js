@@ -25,7 +25,12 @@ const TX = {
     "bond.2": "{n} no se separa de ti en todo el día.", "bond.3": "{n} y tú os entendéis sin palabras.",
     "bondWhy": "El Vínculo sube al viajar juntos (+1), al ganar (+1 más) y al acariciarla una vez al día (+1). Cada nivel da +1,5 % a sus estadísticas y +1 % de crítico. Con Vínculo 5 y 10 sus cartas suben de rareza.",
     "badge": "Refugio · Nv {l} · ♥ {b}", "born": "¡Ha nacido {n}!", "bornSub": "Ya vive en el Refugio y puede acompañarte en tu próxima expedición.",
-    "dup": "¡Otra vez {n}!", "dupSub": "{n} ya vive en el Refugio. Su hermano se queda con la familia de Tila y te deja {d} ∴ de Polvo y +1 de Vínculo.",
+    "dup": "¡Otra vez {n}!", "dupSub": "{n} ya tiene sus 5 estrellas. Su hermano se queda con la familia de Tila y te deja {d} ∴ de Polvo y +1 de Vínculo.",
+    "dupStar": "¡Otra vez {n}! ★ {s}", "dupStarSub": "Su hermano se queda con la familia de Tila, y crecer juntos le ha hecho bien: {n} llega a {s} estrellas (+4 % a sus estadísticas por estrella) y +1 de Vínculo.",
+    "starTrait": "Nuevo rasgo: {t}.", "starFrag": "Nuevo fragmento de su historia.", "starMax": "Ya tiene todas las estrellas. Lleva un borde dorado.",
+    "trait.1": "Instinto (+5 % de crítico)", "trait.2": "Reflejos de camada (+6 % de esquiva)",
+    "stars": "Estrellas", "frags": "Su historia ({n} de 2)", "fragLock": "Se abre con ★ {n}",
+    "starWhy": "Cada vez que nace una criatura que ya tienes, gana una estrella (hasta 5): +4 % a sus estadísticas por estrella, un rasgo y un fragmento de su historia en ★2 y ★4, y borde dorado en ★5.",
     "petted": "{n} se acurruca contra tu mano. +1 Vínculo",
     // incubator
     "inc.sub": "Los huevos tardan de 12 a 44 horas en abrirse. Dales calor, háblales y sal de expedición para que vayan más rápido: cada expedición terminada los adelanta 3 h.",
@@ -45,7 +50,7 @@ const TX = {
     "last": "Lo que devolvió el Pozo", "toBag": "Los huevos van a la Incubadora.",
     "rules": "Cómo funciona el Pozo de Huevos", "odds": "Probabilidad por tirada y quién puede salir",
     "r.floor": "Suelo de 10: cada 10 tiradas sale al menos un huevo lila.", "r.soft": "Pity suave: desde la tirada 70 sin huevo dorado, su probabilidad sube 6 puntos por tirada.",
-    "r.hard": "Pity duro: la tirada 90 sin huevo dorado siempre lo da.", "r.dup": "Si nace una criatura que ya vive en el Refugio, te da Polvo de estrella ({list}) y +1 de Vínculo.",
+    "r.hard": "Pity duro: la tirada 90 sin huevo dorado siempre lo da.", "r.dup": "Si nace una criatura que ya vive en el Refugio, gana una estrella (hasta 5) y +1 de Vínculo; con 5 estrellas te da Polvo de estrella ({list}). Si aún te faltan criaturas de esa rareza, un huevo repetido tiene un 50 % de traer una nueva.",
     "r.story": "Lumo, Fizz, Pebb y Unísona nunca salen de huevos: se ganan jugando.", "r.money": "Nunca hay dinero real. El contador se comparte entre los dos banners.",
     "hist": "Historial ({n})", "histNone": "Todavía no has tirado.",
     // keeper level
@@ -71,7 +76,12 @@ const TX = {
     "bond.2": "{n} stays by your side all day.", "bond.3": "{n} and you understand each other without words.",
     "bondWhy": "Bond grows when you travel together (+1), when you win (+1 more) and when you pet it once a day (+1). Each level gives +1.5% stats and +1% crit. At Bond 5 and 10 its cards go up a grade.",
     "badge": "Refuge · Lv {l} · ♥ {b}", "born": "{n} has hatched!", "bornSub": "It lives in the Refuge now and can join your next expedition.",
-    "dup": "{n} again!", "dupSub": "{n} already lives in the Refuge. Its sibling stays with Tila's family and leaves you {d} ∴ Stardust and +1 Bond.",
+    "dup": "{n} again!", "dupSub": "{n} already has all 5 stars. Its sibling stays with Tila's family and leaves you {d} ∴ Stardust and +1 Bond.",
+    "dupStar": "{n} again! ★ {s}", "dupStarSub": "Its sibling stays with Tila's family, and growing up together did it good: {n} reaches {s} stars (+4% to its stats per star) and +1 Bond.",
+    "starTrait": "New trait: {t}.", "starFrag": "A new piece of its story.", "starMax": "It has every star now. It wears a golden border.",
+    "trait.1": "Instinct (+5% crit)", "trait.2": "Litter reflexes (+6% dodge)",
+    "stars": "Stars", "frags": "Its story ({n} of 2)", "fragLock": "Opens at ★ {n}",
+    "starWhy": "Every time a creature you already have hatches, it gains a star (up to 5): +4% to its stats per star, a trait and a piece of its story at ★2 and ★4, and a golden border at ★5.",
     "petted": "{n} snuggles into your hand. +1 Bond",
     "inc.sub": "Eggs take 12 to 44 hours to open. Keep them warm, talk to them and go on expeditions to speed things up: each finished trip brings them 3 h closer.",
     "tripEggs": "The trip warms the Refuge: the eggs in the incubator move {n} h closer.",
@@ -89,7 +99,7 @@ const TX = {
     "last": "What the Well sent back", "toBag": "The eggs go to the Incubator.",
     "rules": "How the Egg Well works", "odds": "Odds per pull and who can hatch",
     "r.floor": "Floor of 10: every 10 pulls give at least one lilac egg.", "r.soft": "Soft pity: from pull 70 without a golden egg, its chance goes up 6 points per pull.",
-    "r.hard": "Hard pity: pull 90 without a golden egg always gives one.", "r.dup": "If a creature that already lives in the Refuge hatches, you get Stardust ({list}) and +1 Bond.",
+    "r.hard": "Hard pity: pull 90 without a golden egg always gives one.", "r.dup": "If a creature that already lives in the Refuge hatches, it gains a star (up to 5) and +1 Bond; at 5 stars you get Stardust ({list}) instead. If you're still missing creatures of that rarity, a repeat egg has a 50% chance to bring a new one.",
     "r.story": "Lumo, Fizz, Pebb and Unísona never come from eggs: you earn them by playing.", "r.money": "Never real money. Both banners share the same counters.",
     "hist": "History ({n})", "histNone": "You haven't pulled yet.",
     "cl.title": "Keeper Level {n}", "cl.sub": "Grows with everything you do: feeding, playing, travelling, calming guardians, doing tasks, pulling at the wells, hatching eggs and earning achievements.",
@@ -133,6 +143,38 @@ const WELCOME = [
   { id: "cl5", n: 5, ok: () => clLvl() >= 5 },
 ];
 const pick = (a) => a[Math.floor(Math.random() * a.length)];
+/* ---------- Stars for repeats (Jose, 2026-11-04) ----------
+   A repeat hatch gives that creature a star, up to 5: +4 % stats each, a trait and a piece of its story at ★2 and ★4,
+   a golden border at ★5. While a rarity still has creatures you don't own, a repeat roll has a 50 % chance to swap to a new one. */
+const STAR_MAX = 5, STAR_F = 0.04, NEW_BIAS = 0.5;
+// two pieces of each creature's story, opened by its 2nd and 4th star (Jose's character rule: nobody is a saint)
+const FRAG = {
+  fuellito: { es: ["En el Gremio de la Brasa los aprendices duermen junto al horno. Fuellito todavía se despierta de noche para avivar un fuego que ya no le toca.", "El maestro del Gremio echó a toda su camada por quemar un encargo. Fuellito nunca ha dicho quién encendió la chispa."], en: ["In the Ember Guild, apprentices sleep beside the furnace. Fuellito still wakes at night to tend a fire that's no longer its job.", "The Guild master threw out its whole litter for burning an order. Fuellito has never said who lit the spark."] },
+  brotin: { es: ["Brotín cuenta los anillos de cada tocón que encuentra. Si son muchos, se queda quieto un rato, por respeto.", "Los leñadores del Bosque Hondo le dan de comer. Brotín acepta, y por la noche entierra bellotas donde ellos talaron."], en: ["Brotin counts the rings of every stump it finds. If there are many, it stays still for a while, out of respect.", "The Deep Wood loggers feed it. Brotin accepts, and at night it buries acorns where they cut."] },
+  remolin: { es: ["Remolín no se queda en ningún río. Dice que el agua quieta se estanca. Su madre dice que lo que no aguanta es despedirse.", "Desde que represaron el arroyo, Remolín sube a la presa cada luna y le quita una piedra. Nadie le ha pedido que pare. Todavía."], en: ["Remolin never stays in one river. It says still water goes stale. Its mother says what it can't stand is saying goodbye.", "Since the stream was dammed, Remolin climbs the dam every moon and pulls out one stone. Nobody has asked it to stop. Yet."] },
+  bostezo: { es: ["En el Fondo Blanco se duerme por turnos. Bostezo siempre se duerme en el suyo, y en el de los demás.", "Sus nanas calman a cualquiera. Lo que no cuenta es que las aprendió para no oír lo que pasaba fuera del redil."], en: ["In the White Hollow they sleep in shifts. Bostezo always falls asleep on its own shift, and on everyone else's.", "Its lullabies calm anyone. What it doesn't say is that it learned them so it wouldn't hear what went on outside the fold."] },
+  mecha: { es: ["Mecha se consume un poco cada vez que alumbra. Lo sabe. Alumbra igual, pero cobra.", "La única calle con luz del Barrio Apagado es la suya. Los vecinos de las otras calles no le saludan."], en: ["Mecha burns down a little every time it gives light. It knows. It gives light anyway, but it charges for it.", "The only lit street in the Dim Quarter is its street. The neighbours on the other streets don't greet it."] },
+  nim: { es: ["Nim vigila la ventana por la que se fue su madre. No la cierra nunca, ni en invierno.", "El pueblo de la Sombra no se fía de los que viven de día. Nim tampoco, aunque ahora duerma en tu Refugio."], en: ["Nim keeps watch at the window its mother left through. It never shuts it, not even in winter.", "The Shadow folk don't trust those who live by day. Neither does Nim, even though it sleeps in your Refuge now."] },
+  relampin: { es: ["Relampín jamás ha entregado un recado tarde. Alguno lo ha entregado a quien no era.", "En la Aguja del Trueno se cobra por noticia, no por noticia cierta. Relampín aprendió rápido."], en: ["Relampin has never delivered an errand late. It has delivered a few to the wrong person.", "At the Thunder Spire you're paid per piece of news, not per true piece of news. Relampin learned fast."] },
+  trinilla: { es: ["Trinilla canta lo que la plaza quiere oír. Lo que ella quiere cantar lo guarda para cuando nadie paga.", "La casa del Verso la echó por vender una canción ajena. Ella dice que esa canción ya era de todos."], en: ["Trinilla sings what the square wants to hear. What she wants to sing she keeps for when nobody is paying.", "The House of Verse threw her out for selling someone else's song. She says that song already belonged to everyone."] },
+  carambano: { es: ["La familia de Carámbano cava túneles bajo la Tumba Helada desde hace generaciones. Ninguno llega a la puerta. Ninguno lo intenta.", "Los topos de hielo velan a muertos que no conocieron. Carámbano preguntó por qué; le contestaron que siempre se hizo así."], en: ["Carambano's family has dug tunnels under the Frozen Tomb for generations. None reach the door. None try.", "Ice moles keep vigil over the dead they never knew. Carambano asked why; they answered that it's always been done that way."] },
+  yunqueron: { es: ["Yunquerón se deja golpear para que aprendan los aprendices de la Forja Madre. Las marcas de su caparazón tienen nombre.", "Una vez le preguntaron si le dolía. Tardó tanto en contestar que el que preguntó ya se había ido."], en: ["Yunqueron lets itself be struck so the apprentices of the Mother Forge can learn. The marks on its shell have names.", "Someone once asked if it hurt. It took so long to answer that whoever asked had already left."] },
+  vidriela: { es: ["En el Lago Espejo, Vidriela ve dónde caerá cada golpe. No ve quién lo da, y eso le basta para no meterse.", "Desde que bajó el agua, su reflejo llega tarde. Vidriela no se lo ha contado a nadie."], en: ["In Mirror Lake, Vidriela sees where every blow will land. It doesn't see who throws it, and that's enough for it to stay out of things.", "Since the water dropped, its reflection arrives late. Vidriela hasn't told anyone."] },
+  ecolito: { es: ["Ecolito repite lo último que oyó. En las Cuevas del Eco, lo último que oyó fue un derrumbe.", "Los mineros lo usaban para saber si una galería aguantaba. Un día calló para que no bajaran. Nadie le dio las gracias: perdieron un mes de jornal."], en: ["Ecolito repeats the last thing it heard. In the Echo Caves, the last thing it heard was a cave-in.", "The miners used it to tell whether a tunnel would hold. One day it went silent so they wouldn't go down. Nobody thanked it: they lost a month's wages."] },
+  espinardo: { es: ["Espinardo nació en el Seto, que crece para proteger y acaba encerrando. A él le pasa lo mismo.", "Tiene más púas por dentro que por fuera. Cuando alguien se acerca demasiado, las de dentro se notan primero."], en: ["Espinardo was born in the Hedge, which grows to protect and ends up shutting in. The same happens to it.", "It has more spines inside than out. When someone gets too close, the inner ones are felt first."] },
+  capuchon: { es: ["Su seta crece mejor donde la Savia es más negra. Capuchón no la busca. Tampoco se aparta.", "Cambió de concha tres veces antes de la seta. Esta es la única que no le aprieta, y la única que le da miedo."], en: ["Its mushroom grows best where the Sap is blackest. Capuchon doesn't seek it out. It doesn't move away either.", "It changed shells three times before the mushroom. This is the only one that doesn't pinch, and the only one that scares it."] },
+  centinela: { es: ["Centinela juró guardar al Rey Lóbrego. Ahora guarda tu puerta y dice que no es lo mismo. Pero se queda.", "Dejó la guardia la noche en que le mandaron cerrar el paso a una familia con niños. No se arrepiente. Tampoco duerme bien."], en: ["Centinela swore to guard King Lóbrego. Now it guards your door and says it isn't the same. But it stays.", "It left the guard the night it was ordered to close the pass to a family with children. It doesn't regret it. It doesn't sleep well either."] },
+  guardatumba: { es: ["Guardatumba vigiló la Tumba mil años sin mirar dentro. Aquí está aprendiendo a abrir puertas, y le cuesta.", "Golpeaba en nombre de un rey al que nunca vio. Ahora nadie le da órdenes, y a veces las echa de menos."], en: ["Guardatumba watched the Tomb for a thousand years without looking inside. Here it's learning to open doors, and it's hard for it.", "It struck in the name of a king it never saw. Now nobody gives it orders, and sometimes it misses them."] },
+};
+const owned = (k) => { const g = G(); return !!g.roster[k] || g.bag.some((e) => e.kind === k) || g.inc.some((e) => e.kind === k); };
+function rollKind(tier) {
+  const k = pick(TIERS[tier]);
+  if (!owned(k) || Math.random() >= NEW_BIAS) return k;
+  const fresh = TIERS[tier].filter((x) => !owned(x));
+  return fresh.length ? pick(fresh) : k;
+}
+const starsOf = (k) => { const r = G().roster[k]; return r ? r.st || 0 : 0; };
+const fragsOf = (k) => { const f = FRAG[k]; return f ? (f[L()] || f.en) : null; };
 const today = () => (EV.DAILY ? EV.DAILY.dayKey() : new Date().toISOString().slice(0, 10));
 const monName = (k) => RPG.monName(k);
 
@@ -179,7 +221,7 @@ function pullOne(banner, forceGood) {
   if (forceGood && tier < GOOD) tier = GOOD;
   if (tier >= GOOD) g.floor = 0;
   if (tier === TOP) g.pity = 0;
-  const kind = tier === 1 && BANNERS[banner].featured && Math.random() < 0.5 ? BANNERS[banner].featured : pick(TIERS[tier]);
+  const kind = tier === 1 && BANNERS[banner].featured && Math.random() < 0.5 ? BANNERS[banner].featured : rollKind(tier);
   const egg = { id: g.seq++, kind, tier };
   g.bag.push(egg);
   g.hist.unshift({ tier, b: banner, t: Date.now() });
@@ -209,7 +251,7 @@ function pull(n) {
 // an egg from elsewhere (season journal, chests): tier at least `min`
 function giveEgg(min) {
   const g = G(), r = Math.random(), tier = Math.max(min, r < 0.03 ? 4 : r < 0.25 ? 3 : 2);
-  const egg = { id: g.seq++, kind: pick(TIERS[tier]), tier };
+  const egg = { id: g.seq++, kind: rollKind(tier), tier };
   g.bag.push(egg); autoIncubate(); save();
   return egg;
 }
@@ -246,7 +288,8 @@ function hatch(id) {
   if (i < 0 || left(g.inc[i]) > 0) return;
   const e = g.inc.splice(i, 1)[0], r = g.roster[e.kind];
   EV.P.c.eggHatched = (EV.P.c.eggHatched || 0) + 1;
-  if (r) { r.bxp++; EV.P.dust = (EV.P.dust || 0) + DUP_DUST[e.tier]; born = { kind: e.kind, dup: DUP_DUST[e.tier] }; }
+  if (r && (r.st || 0) < STAR_MAX) { r.st = (r.st || 0) + 1; r.bxp++; born = { kind: e.kind, star: r.st }; EV.P.c.eggStars = (EV.P.c.eggStars || 0) + 1; }
+  else if (r) { r.bxp++; EV.P.dust = (EV.P.dust || 0) + DUP_DUST[e.tier]; born = { kind: e.kind, dup: DUP_DUST[e.tier] }; }
   else { g.roster[e.kind] = { lvl: startLvl(), xp: 0, bxp: 0, pet: null, at: Date.now() }; born = { kind: e.kind }; }
   autoIncubate();
   tab = "refuge";
@@ -267,14 +310,14 @@ function pet(k) {
 function unitOf(k) {
   const r = G().roster[k]; if (!r) return null;
   const bond = bondLvl(r.bxp);
-  return { lvl: r.lvl, bond, grade: gradeOf(bond) };
+  return { lvl: r.lvl, bond, grade: gradeOf(bond), star: r.st || 0 };
 }
 // Refuge companions offered first on the pick screen (up to 4, strongest first)
 function offer(species) {
   const R = G().roster;
   return Object.keys(R).filter((k) => k !== species && RPG.MONS[k]).sort((a, b) => R[b].lvl - R[a].lvl || R[b].bxp - R[a].bxp).slice(0, 4);
 }
-const badge = (k) => { const u = unitOf(k); return u ? tx("badge", { l: u.lvl, b: u.bond }) : ""; };
+const badge = (k) => { const u = unitOf(k); return u ? tx("badge", { l: u.lvl, b: u.bond }) + (u.star ? " · ★" + u.star : "") : ""; };
 // called by rpg.js when a trip ends; returns lines for the end screen
 function afterTrip(res, xp, party, plvl) {
   const R = G().roster, out = [];
@@ -338,8 +381,11 @@ function refugeHtml() {
   const g = G(), ks = Object.keys(g.roster);
   let h = "";
   if (born) {
-    const t = born.dup ? tx("dup", { n: monName(born.kind) }) : tx("born", { n: monName(born.kind) });
-    const s = born.dup ? tx("dupSub", { n: monName(born.kind), d: born.dup }) : tx("bornSub");
+    const n = monName(born.kind), st = born.star;
+    const t = st ? tx("dupStar", { n, s: st }) : born.dup ? tx("dup", { n }) : tx("born", { n });
+    let s = st ? tx("dupStarSub", { n, s: st }) : born.dup ? tx("dupSub", { n, d: born.dup }) : tx("bornSub");
+    if (st === 2 || st === 4) s += " " + tx("starTrait", { t: tx("trait." + st / 2) }) + (fragsOf(born.kind) ? " " + tx("starFrag") : "");
+    if (st === STAR_MAX) s += " " + tx("starMax");
     h += `<div class="rf-born"><canvas width="96" height="80" data-mon="${born.kind}"></canvas><div><h3>${esc(t)}</h3><p class="muted">${esc(s)}</p></div></div>`;
   }
   if (!ks.length) return h + `<p class="muted">${esc(tx("empty"))}</p>`;
@@ -348,13 +394,17 @@ function refugeHtml() {
     const pct = b >= 10 ? 100 : Math.round(100 * (r.bxp - pv) / (nx - pv));
     const band = b >= 10 ? 3 : b >= 7 ? 2 : b >= 4 ? 1 : 0;
     const xpPct = Math.round(100 * r.xp / RPG.xpNeed(r.lvl));
-    return `<div class="rf-mon${b >= 10 ? " max" : ""}"><canvas width="96" height="80" data-mon="${k}"></canvas>
+    const st = r.st || 0, fr = fragsOf(k) || [];
+    const traits = [1, 2].filter((i) => st >= i * 2).map((i) => `<small class="rf-trait">✦ ${esc(tx("trait." + i))}</small>`).join("");
+    const frags = fr.length ? `<details class="rf-frags"><summary>${esc(tx("frags", { n: Math.min(2, Math.floor(st / 2)) }))}</summary>${fr.map((f, i) => st >= (i + 1) * 2 ? `<p>${esc(f)}</p>` : `<p class="muted">🔒 ${esc(tx("fragLock", { n: (i + 1) * 2 }))}</p>`).join("")}</details>` : "";
+    return `<div class="rf-mon${b >= 10 ? " max" : ""}${st >= STAR_MAX ? " star5" : ""}"><canvas width="96" height="80" data-mon="${k}"></canvas>
       <strong>${esc(monName(k))}</strong>${RPG.typeChip(RPG.MONS[k].types[0])}
+      <small class="rf-stars" title="${esc(tx("stars"))}" aria-label="${esc(tx("stars"))}: ${st}">${"★".repeat(st)}<i>${"☆".repeat(STAR_MAX - st)}</i></small>${traits}
       <small class="progress">${esc(tx("lvl", { n: r.lvl }))}</small><div class="bar"><i style="width:${xpPct}%"></i></div>
       <small class="progress rf-bond">♥ ${esc(b >= 10 ? tx("bondMax") : tx("bond", { n: b }))}</small><div class="bar bond"><i style="width:${pct}%"></i></div>
       <small class="muted">${esc(tx("bond." + band, { n: monName(k) }))}</small>
-      <button class="btn${r.pet === today() ? " ghost" : ""}" type="button" data-rpet="${k}" ${r.pet === today() ? "disabled" : ""}>${esc(r.pet === today() ? tx("petDone") : tx("pet"))}</button></div>`;
-  }).join("")}</div><p class="muted rf-small">${esc(tx("bondWhy"))}</p>`;
+      ${frags}<button class="btn${r.pet === today() ? " ghost" : ""}" type="button" data-rpet="${k}" ${r.pet === today() ? "disabled" : ""}>${esc(r.pet === today() ? tx("petDone") : tx("pet"))}</button></div>`;
+  }).join("")}</div><p class="muted rf-small">${esc(tx("bondWhy"))}</p><p class="muted rf-small">${esc(tx("starWhy"))}</p>`;
   return h;
 }
 function incHtml() {
@@ -463,6 +513,10 @@ css.textContent = `
 .rf-mon { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; border: 2px solid var(--line); padding: 10px; background: var(--bg); }
 .rf-mon canvas, .rf-born canvas { width: 96px; height: 80px; image-rendering: pixelated; align-self: center; }
 .rf-mon .bar { width: 100%; height: 7px; }
+.rf-stars { color: #d9a520; letter-spacing: 1px; font-size: 15px; } .rf-stars i { color: var(--muted); font-style: normal; opacity: .6; }
+.rf-trait { font-size: 12px; color: var(--moss, #3c7a2c); }
+.rf-mon.star5 { border-color: #d9a520; box-shadow: inset 0 0 0 2px #f2d27a; }
+.rf-frags { width: 100%; font-size: 13px; } .rf-frags summary { cursor: pointer; font-weight: 600; } .rf-frags p { margin: 4px 0; font-family: Georgia, serif; line-height: 1.45; }
 .rf-mon .bar.bond i { background: #c25e9a; }
 .rf-mon.max { border-color: #c25e9a; box-shadow: 4px 4px 0 color-mix(in srgb, #c25e9a 35%, transparent); }
 .rf-mon .btn { align-self: stretch; margin-top: 4px; }
@@ -515,5 +569,5 @@ EV.HOOKS.showScreen = function () { if (prevShow) prevShow.apply(this, arguments
 // countdowns and the chip dot move on their own
 setInterval(() => { refreshChip(); const el = $("refugePanel"); if (el && !el.hidden && tab === "inc") render(); }, 20000);
 G(); refreshChip();
-EV.EGGS = { giveEgg, eggName: (t) => tx("egg." + t), unitOf, offer, badge, afterTrip, pullOne, topChance, clXP, clLvl, clNeed, bondLvl, left, hatchMs, hasNews, render, TIERS, ODDS, BANNERS, BOND_AT, WELCOME, G };
+EV.EGGS = { hatch, STAR_MAX, STAR_F, starsOf, fragsOf, rollKind, FRAG, giveEgg, eggName: (t) => tx("egg." + t), unitOf, offer, badge, afterTrip, pullOne, topChance, clXP, clLvl, clNeed, bondLvl, left, hatchMs, hasNews, render, TIERS, ODDS, BANNERS, BOND_AT, WELCOME, G };
 })(typeof window !== "undefined" ? window : globalThis);

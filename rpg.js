@@ -329,7 +329,7 @@ function makeUnit(o) {
   const careF = (k) => (o.care ? 0.75 + 0.5 * (o.care[k] || 0) / 100 : 1);
   const stageF = o.stage === 2 ? (o.form === "bright" ? 1.15 : 1.1) : 1;
   const hollowF = o.hollow ? 0.8 : 1;
-  const bondF = 1 + 0.015 * (o.bond || 0); // Refuge companions: +1.5 % per Bond level
+  const bondF = (1 + 0.015 * (o.bond || 0)) * (1 + 0.04 * (o.star || 0)); // Refuge companions: +1.5 % per Bond level, +4 % per star
   const base = {
     hp: m.st.hp * 3 * sc * careF("health") * stageF * hollowF * bondF,
     str: m.st.str * sc * careF("full") * stageF * hollowF * bondF,
@@ -345,8 +345,8 @@ function makeUnit(o) {
     uid: Math.random().toString(36).slice(2, 9), kind: o.kind, name: o.name, side: o.side, own: !!o.own, wild: !!o.wild, hollow: !!o.hollow, boss: !!o.boss,
     lvl: o.lvl, types, stage: o.stage == null ? 1 : o.stage, form: o.form || "bright",
     base, maxHp, hp: Math.max(1, Math.round(maxHp * (o.hpPct == null ? 1 : o.hpPct))),
-    crit: Math.min(40, base.cr / 4) + (o.bond || 0) + (pm.crit || 0) + (o.lowFun && pm.lowFun ? pm.lowFun : 0),
-    dodge: Math.max(0, base.spd / 20 + (pm.dodge || 0)),
+    crit: Math.min(40, base.cr / 4) + (o.bond || 0) + ((o.star || 0) >= 2 ? 5 : 0) + (pm.crit || 0) + (o.lowFun && pm.lowFun ? pm.lowFun : 0),
+    dodge: Math.max(0, base.spd / 20 + (pm.dodge || 0) + ((o.star || 0) >= 4 ? 6 : 0)),
     mods: pm, cards: o.cards || {}, cd: 0, st: {}, shield: 0, shieldT: 0, hitOnce: false, skip: 0, sUsed: false, sCount: 0, hitsTaken: 0,
   };
   if (u.cards.a) u.cd = Math.ceil(u.cards.a.a.cd / 2);
@@ -2179,7 +2179,7 @@ function setOut() {
   const S = EV.S;
   S.stats.energy = Math.max(0, S.stats.energy - (X.deep ? DEEP_COST : 25));
   const R = rpgState();
-  X.party = [{ own: true, kind: S.species, hp: 1 }].concat(X.chosen.map((k) => { const r = refOf(k); return { own: false, kind: k, hp: 1, lvl: r ? r.lvl : R.lvl, bond: r ? r.bond : 0, roster: !!r }; }));
+  X.party = [{ own: true, kind: S.species, hp: 1 }].concat(X.chosen.map((k) => { const r = refOf(k); return { own: false, kind: k, hp: 1, lvl: r ? r.lvl : R.lvl, bond: r ? r.bond : 0, star: r ? r.star : 0, roster: !!r }; }));
   if (X.echo) { echoInfo(); EV.P.echo.tries++; if (X.echo === "tired") for (const m of X.party) m.hp = 0.8; }
   if (X.deep && X.deepRule === "tired") for (const m of X.party) m.hp = 0.8;
   // a team from three different type circles (for the Types achievements)
@@ -2217,7 +2217,7 @@ function partyUnits() {
     if (m.lvl >= SLOT_LVL.s || m.kind === "unisona") cards.s = scaled(mc[2], gr(mc[2]));
     // a Refuge companion carries the cards you gave it; empty slots keep its usual ones
     if (m.roster) for (const k of ["a", "p", "s"]) { const c = compCard(m.kind, k); if (c) cards[k] = scaled(c.id, c.g); }
-    return makeUnit({ kind: m.kind, lvl: m.lvl, side: "ally", name: monName(m.kind), wild: true, cards, hpPct: m.hp, stage: 1, form: "bright", bond: m.bond || 0 });
+    return makeUnit({ kind: m.kind, lvl: m.lvl, side: "ally", name: monName(m.kind), wild: true, cards, hpPct: m.hp, stage: 1, form: "bright", bond: m.bond || 0, star: m.star || 0 });
   });
 }
 function foeUnits(boss) {
@@ -2254,7 +2254,7 @@ function foeUnits(boss) {
 function show(v) { view = v; render(); const el = $("scrExp"); if (el && !el.hidden) el.scrollIntoView({ behavior: "smooth", block: "start" }); }
 function pickStats(k) {
   const r = refOf(k);
-  const u = makeUnit({ kind: k, lvl: r ? r.lvl : rpgState().lvl, side: "ally", wild: true, stage: 1, bond: r ? r.bond : 0 });
+  const u = makeUnit({ kind: k, lvl: r ? r.lvl : rpgState().lvl, side: "ally", wild: true, stage: 1, bond: r ? r.bond : 0, star: r ? r.star : 0 });
   const v = { hp: u.maxHp, str: Math.round(u.base.str), def: Math.round(u.base.def), spd: Math.round(u.base.spd), cr: Math.round(u.crit) + " %" };
   return `<span class="mstats">${Object.keys(v).map((k) => `<span><i>${esc(tx("sh." + k))}</i><b>${v[k]}</b></span>`).join("")}</span>`;
 }
