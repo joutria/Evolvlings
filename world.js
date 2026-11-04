@@ -852,7 +852,7 @@ document.addEventListener("keydown", (e) => { if (e.key === "Escape" && menuOn) 
 if ($("topScene")) $("topScene").addEventListener("pointerdown", onTopTap);
 requestAnimationFrame(homeFrame);
 $("btnMap").addEventListener("click", () => { EV.sfx("tap"); toggleMenu(); });
-setInterval(() => { refreshChip(); stageBits(); if (EV.S && EV.S.phase === "alive") dayBase(); }, 5000);
+EV.every(5000, () => { refreshChip(); stageBits(); if (EV.S && EV.S.phase === "alive") dayBase(); });
 refreshChip(); if (EV.S && EV.S.phase === "alive") dayBase();
 EV.WORLD = { MAPS, STEPS, steps, spendSteps, gainFromEnergy, path, choose, render, refreshChip, careWalk, bedtime, topOn, homeExtras, circle, bottleHere, get state() { return ws(); }, get dialog() { return dialog; } };
 })();

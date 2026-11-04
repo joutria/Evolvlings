@@ -1398,7 +1398,14 @@ function paintThumbs(root) {
     if (cv.dataset.sil) { g.fillStyle = "rgba(29,22,38,.84)"; g.fillRect(0, 0, 64, 48); }
   });
 }
-new MutationObserver(() => { paintCardArt(); paintThumbs(); }).observe(document.body, { childList: true, subtree: true });
+// paint new card canvases once per frame, and only when a change actually added a canvas
+let paintQ = false;
+new MutationObserver((ms) => {
+  if (paintQ) return;
+  for (const m of ms) for (const n of m.addedNodes) if (n.nodeType === 1 && (n.tagName === "CANVAS" || n.querySelector("canvas"))) {
+    paintQ = true; requestAnimationFrame(() => { paintQ = false; paintCardArt(); paintThumbs(); }); return;
+  }
+}).observe(document.body, { childList: true, subtree: true });
 
 /* ---------- Saved data ---------- */
 function rpgState() {
@@ -3678,7 +3685,7 @@ $("teamsPanel").addEventListener("keydown", (e) => { if (e.key === "Enter" && e.
 $("btnTeams").addEventListener("click", () => { EV.sfx("tap"); EV.togglePanel("teams"); });
 EV.HOOKS.renderTeams = renderTeams;
 $("cardsPanel").addEventListener("click", onCardsClick);
-setInterval(refreshHome, 1000);
+EV.every(1000, refreshHome);
 rpgState(); EV.showScreen();
 // a random card your creature can use, at least minGrade (for chests and rewards outside expeditions)
 function pickUsable(n, minGrade) {
@@ -3688,5 +3695,7 @@ function pickUsable(n, minGrade) {
   return ids.map((id) => ({ id, g: Math.max(minGrade, rollGrade(minGrade)) }));
 }
 function takeCard(id, g) { rpgState(); const c = giveCard(id, g); EV.save(); return c; }
-EV.RPG = Object.defineProperties(Object.assign(api, { renderCards, startExpedition, finish, cardHtml, cardName, pickUsable, takeCard, starStr, paintMon, monName, typeChip, rpgState, MON_DESC, deepState, deepTotal, deepZone, deepOpen, deepNo, deepRule, deepWin, DEEP_CHESTS }), { X: { get: () => X }, battle: { get: () => battle } });
+EV.RPG = Object.defineProperties(Object.assign(api, { renderCards, startExpedition, finish, cardHtml, cardName, pickUsable, takeCard, starStr, paintMon, monName, typeChip, rpgState, MON_DESC, deepState, deepTotal, deepZone, deepOpen, deepNo, deepRule, deepWin, DEEP_CHESTS }), { X: { get: () => X }, battle: { get: () => battle },
+  // read-only view of the data tables for tools/check.js
+  DATA: { get: () => ({ CT, EVT, ZT, PMAP, TX, CIRCLE, ZONES, MONS, CARDS, EVENTS, TYPES, DROP_POOL }) } });
 })(typeof window !== "undefined" ? window : null);

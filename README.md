@@ -117,3 +117,17 @@ Six more places in the Builds menu, each improved on its own:
 - **Refuge jobs**: in the Builds menu, send a hatched companion to work at the Garden (food, Wood), the Guild workshop (Stardust), the Pantry (Chispas) or the Foraging nook (items) for 2, 4 or 8 hours (a sixth of that while builds are in fast mode). A companion whose type fits the place earns 1.5×, and each level of the place adds 10%. Up to 2 jobs at once, 3 with Refuge nests at level 3. Working companions can't go on expeditions. Collecting gives +1 Bond.
 - **El Vado requests**: a new board on the El Vado map (also listed in the Builds menu). Every day two neighbours (Ruda the baker, Bruno the boatman, Esporina the mushroom forager, Mirlo the postman) ask for food, Wood or Stardust and pay in Chispas and Wood, with a 15% chance of a Note. Mirlo also passes on a rumour.
 - **Storage**: the Garden only holds so much food (4 to 12 by level) and 6 Wood, and finished jobs wait until you collect them. The Builds button shows a dot when something is ready.
+
+## Checking the game data
+
+`node tools/check.js` checks that the game's data fits together, and the **Check game data** GitHub Action runs it on every pull request:
+
+- every zone's foes, allies and boss exist, and every zone has texts in both languages, a place on the map and a background that is drawn;
+- every event a zone can roll has its text and choices in both languages;
+- every card has a name and flavour line in both languages and a lore scene, and every card a player can own has its small art and an animation;
+- the text tables have the same keys in Spanish and English;
+- 200 battles with fixed random seeds all end cleanly.
+
+It needs the `playwright` package (`npm i --no-save playwright`), because the second half runs in a headless browser.
+
+All modules share one clock, `EV.every(ms, fn)`, which stops while the tab is hidden and catches up when it comes back.

@@ -585,7 +585,7 @@ $("btnRefuge").addEventListener("click", () => { EV.sfx("tap"); EV.togglePanel("
 const prevShow = EV.HOOKS.showScreen;
 EV.HOOKS.showScreen = function () { if (prevShow) prevShow.apply(this, arguments); refreshChip(); };
 // countdowns and the chip dot move on their own
-setInterval(() => { refreshChip(); const el = $("refugePanel"); if (el && !el.hidden && tab === "inc") render(); }, 20000);
+EV.every(20000, () => { refreshChip(); const el = $("refugePanel"); if (el && !el.hidden && tab === "inc") render(); });
 G(); refreshChip();
 EV.EGGS = { hatch, STAR_MAX, STAR_F, starsOf, fragsOf, rollKind, FRAG, giveEgg, eggName: (t) => tx("egg." + t), unitOf, offer, badge, afterTrip, pullOne, topChance, clXP, clLvl, clNeed, bondLvl, left, hatchMs, hasNews, render, TIERS, ODDS, BANNERS, BOND_AT, WELCOME, G };
 })(typeof window !== "undefined" ? window : globalThis);

@@ -1581,10 +1581,12 @@ function frame(now) {
     for (const e of effects) if (e.type === "txt") drawEffect(ec, e);
     updateEffects(dt);
   } else if (S.phase === "alive" && !$("scrGame").hidden) {
+    // when the home is drawn from above (world.js), only move things along here and skip drawing the side scene
+    const draw = !(EV.WORLD && EV.WORLD.topOn());
     const c = sc, g = low.g; g.setTransform(1, 0, 0, 1, 0, 0);
-    drawSceneLow(g, t);
+    if (draw) drawSceneLow(g, t);
     g.save(); g.scale(0.5, 0.5);
-    for (const m of S.messes) drawMess(g, m.x, t);
+    if (draw) for (const m of S.messes) drawMess(g, m.x, t);
     // movement
     if (!S.sleeping && !mini && !foodAnim) {
       if (Math.abs(petTarget - petX) < 2 && Math.random() < 0.006) petTarget = rand(90, 270);
@@ -1600,7 +1602,7 @@ function frame(now) {
       foodAnim.t += dt; const ft = foodAnim.t;
       const fy = Math.min(190, 60 + ft * 260);
       if (ft < 1.1) {
-        if (ft < 0.9) drawFood(g, petX, fy, foodAnim.kind);
+        if (ft < 0.9 && draw) drawFood(g, petX, fy, foodAnim.kind);
       }
       eat = ft > 0.5 && ft < 1.6;
       if (ft > 1.6) foodAnim = null;
@@ -1608,20 +1610,24 @@ function frame(now) {
     // bloom on growth
     if (bloom) {
       bloom.t += dt;
-      if (bloom.t < 1.6) { g.save(); g.strokeStyle = "#ffd57a"; g.lineWidth = 6; ell(g, petX, 190, 20 + bloom.t * 120, 20 + bloom.t * 120); g.stroke(); g.restore(); }
+      if (bloom.t < 1.6 && draw) { g.save(); g.strokeStyle = "#ffd57a"; g.lineWidth = 6; ell(g, petX, 190, 20 + bloom.t * 120, 20 + bloom.t * 120); g.stroke(); g.restore(); }
       if (!bloom.burst && (bloom.burst = true)) for (let i = 0; i < 24; i++) { const a = rand(0, 6.28), v = rand(40, 120); effects.push({ type: "petal", x: petX, y: 180, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 40, life: rand(1.2, 2.2), r: rand(3, 6), hue: ["#ffd76a", "#f4a6c4", "#ffffff", "#a895ff"][i % 4] }); }
       if (bloom.t > 2) bloom = null;
     }
-    if (mini) for (const st of mini.stars) drawStar(g, st.x, st.y, 13, st.rot);
-    for (const e of effects) if (e.type !== "txt") drawEffect(g, e);
+    if (draw) {
+      if (mini) for (const st of mini.stars) drawStar(g, st.x, st.y, 13, st.rot);
+      for (const e of effects) if (e.type !== "txt") drawEffect(g, e);
+    }
     g.restore();
-    PX.quantize(g, LW, LH, false);
     const po = { kind: S.species, stage: S.stage, form: S.form, t, mood, sleeping: S.sleeping, sick: S.sick, blink: now < blinkUntil, eat, jump: jumpY };
-    drawPetLow(g, Math.round(petX / 2), po);
     const top = petTop(po);
-    if (S.sick && !S.sleeping) drawSickSign(g, Math.round(petX / 2) + 14, top - 4);
-    c.clearRect(0, 0, W, H); PX.blit(c, low, W, H);
-    if (S.sleeping) for (let i = 0; i < 3; i++) { const p = ((t * 0.5 + i / 3) % 1); c.globalAlpha = 1 - p; pixelText(c, "z", Math.round((petX + 30 + p * 30) / 2) * 2, Math.round((top * 2 - p * 50 - i * 2) / 2) * 2, 16 + i * 2, "#c8eef5"); } c.globalAlpha = 1;
+    if (draw) {
+      PX.quantize(g, LW, LH, false);
+      drawPetLow(g, Math.round(petX / 2), po);
+      if (S.sick && !S.sleeping) drawSickSign(g, Math.round(petX / 2) + 14, top - 4);
+      c.clearRect(0, 0, W, H); PX.blit(c, low, W, H);
+    }
+    if (draw && S.sleeping) for (let i = 0; i < 3; i++) { const p = ((t * 0.5 + i / 3) % 1); c.globalAlpha = 1 - p; pixelText(c, "z", Math.round((petX + 30 + p * 30) / 2) * 2, Math.round((top * 2 - p * 50 - i * 2) / 2) * 2, 16 + i * 2, "#c8eef5"); } c.globalAlpha = 1;
     if (cleanAnim) { cleanAnim.t += dt; if (cleanAnim.t > 1.5) cleanAnim = null; }
     // mini game
     if (mini) {
@@ -1634,9 +1640,9 @@ function frame(now) {
       c.fillText(`★ ${mini.caught}   ${Math.max(0, left).toFixed(1)}s`, 22, 26);
       if (left <= 0) endPlay();
     }
-    for (const e of effects) if (e.type === "txt") drawEffect(c, e);
+    if (draw) for (const e of effects) if (e.type === "txt") drawEffect(c, e);
     updateEffects(dt);
-    if (bubble && now < bubble.until) drawBubble(c, petX, top * 2 - 10, bubble.text);
+    if (draw && bubble && now < bubble.until) drawBubble(c, petX, top * 2 - 10, bubble.text);
   }
   requestAnimationFrame(frame);
 }
@@ -1881,7 +1887,14 @@ function quietTick() {
   saveProfile();
   toast(t("toast.quiet", { n: extra }), "+" + extra * QUIET_DUST + " ∴");
 }
-setInterval(quietTick, 1500);
+/* ---------- One clock for every module ----------
+   EV.every(ms, fn) runs fn about every ms. It stops while the tab is hidden and catches up as soon as it is visible again. */
+const TICKS = []; let tickId = 0;
+function runTicks() { const now = Date.now(); for (const k of TICKS) if (now >= k.next) { k.next = now + k.ms; try { k.fn(); } catch (e) { console.error(e); } } }
+function clock(on) { clearInterval(tickId); tickId = on ? setInterval(runTicks, 250) : 0; }
+function every(ms, fn) { TICKS.push({ ms, fn, next: Date.now() + ms }); }
+clock(!document.hidden);
+every(1500, quietTick);
 $("quietSeg").addEventListener("click", (e) => { const b = e.target.closest("button[data-v]"); if (!b) return; setQuiet(b.dataset.v === "1"); sfx("tap"); });
 $("viewSeg").addEventListener("click", (e) => { const b = e.target.closest("button[data-v]"); if (!b) return; P.view = b.dataset.v; saveProfile(); renderSettings(); sfx("tap"); });
 $("hapticSeg").addEventListener("click", (e) => { const b = e.target.closest("button[data-v]"); if (!b) return; P.haptics = b.dataset.v === "1"; saveProfile(); renderSettings(); buzz(20); });
@@ -1913,7 +1926,7 @@ window.EV = {
   feed, cleanUp, toggleSleep, startPlay, cuddle, ITEMS,
   // what the side scene is showing right now, so the view from above can draw the same hearts, bubbles and speech
   get FX() { return { effects, bubble, petX, foodAnim, mini }; }, miniOn: () => !!mini, itemName, quietOn, STR, ACH, ACH_META, SPECIES, SFX, HOOKS, $, clamp, rand, pick, t, tone, sfx, buzz, save, saveProfile, addCoins, spendCoins, toast, addLog,
-  renderAll, renderStats, showScreen, stocked, applyStatic, escapeHtml, drawCreature, setupCanvas, ell, drawStar, checkAch, togglePanel, closeSheets, stageName, careNow, pixelText,
+  renderAll, renderStats, showScreen, stocked, every, applyStatic, escapeHtml, drawCreature, setupCanvas, ell, drawStar, checkAch, togglePanel, closeSheets, stageName, careNow, pixelText,
 };
 
 /* ---------- Boot ---------- */
@@ -1924,13 +1937,17 @@ if (S.phase === "gone" && !S.goneName) S = freshState();
 if (S.phase === "alive") { P.seen.species[S.species] = 1; if (S.stage === 2 && S.form) P.seen.forms[S.species + ":" + S.form] = 1; }
 $("speedSel").value = String(S.speed || 1);
 catchUp(); save(); showScreen(); renderCoins(); checkAch();
-setInterval(() => {
+every(1000, () => {
   if (!S) return;
   if (S.phase === "egg" && S.egg < 100) { catchUp(); renderEggScreen(); if (S.egg >= 100) { sfx("hatch"); renderEggScreen(); $("nameIn").focus(); } save(); return; }
   if (S.phase === "alive") { catchUp(); renderStats(); save(); checkAch(); }
   else S.lastReal = Date.now();
-}, 1000);
-document.addEventListener("visibilitychange", () => { if (!document.hidden && S) { catchUp(); if (S.phase === "alive") renderAll(); save(); } });
+});
+document.addEventListener("visibilitychange", () => {
+  clock(!document.hidden);
+  if (!S) return;
+  if (!document.hidden) { catchUp(); if (S.phase === "alive") renderAll(); save(); runTicks(); }
+});
 requestAnimationFrame(frame);
 })();
 </script>
