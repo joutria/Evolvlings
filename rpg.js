@@ -1274,14 +1274,24 @@ function slotText(sc, slot) {
   if (slot === "a") return fxText(sc.a) + (L() === "es" ? ` (enfr. ${sc.a.cd})` : ` (cd ${sc.a.cd})`);
   return supportText(sc.s);
 }
-const typeChip = (ty) => `<span class="ty ty-${ty}" title="${esc(TYPES[ty][L()])}">${TYPES[ty].icon} ${esc(TYPES[ty][L()])}</span>`;
+/* Pixel sprites from sprites.js (window.EVS): creatures, card art, 9x9 type icons and card-use animations.
+   Everything falls back to the vector drawings when sprites.js isn't loaded or doesn't know a creature (guardians). */
+const HAS_EVS = typeof EVS !== "undefined";
+const evsKind = (k) => HAS_EVS && EVS.KINDS.includes(k);
+const TYI = {};
+function tyIcon(ty) {
+  if (!HAS_EVS || typeof document === "undefined") return TYPES[ty].icon;
+  if (!TYI[ty]) { const src = EVS.typeIcon(ty), c = document.createElement("canvas"); c.width = 27; c.height = 27; const g = c.getContext("2d"); g.imageSmoothingEnabled = false; g.drawImage(src, 0, 0, 27, 27); TYI[ty] = c.toDataURL(); }
+  return `<img class="tyi" src="${TYI[ty]}" alt="">`;
+}
+const typeChip = (ty) => `<span class="ty ty-${ty}" title="${esc(TYPES[ty][L()])}">${tyIcon(ty)} ${esc(TYPES[ty][L()])}</span>`;
 const gradeChip = (gi) => `<span class="gr" style="--g:${GRADES[gi].col}">${esc(GRADES[gi][L()])}</span>`;
 /* TCG-style card: frame in the type colour, name bar with type gem and cooldown orb,
    pixel-art box, type line with grade pips, effect box, lore, and a set number. */
 const TCOL = { fire: "#d9542c", plant: "#4f9a3c", light: "#e2ae2e", bolt: "#d8b81c", air: "#6fb8d0", music: "#cf5f9f", water: "#3f7fc9", stone: "#8a7a64", shadow: "#5b4b8e", ice: "#8fcbe0", mush: "#b0603c", dream: "#8a78d4", star: "#e0b84a" };
 const CARD_NO = Object.keys(CARDS);
-function tcgArt(by, ty, sil) {
-  return `<div class="tcg-art"><canvas class="rc-art" width="120" height="72" data-by="${by || ""}" data-ty="${ty}"${sil ? " data-sil=\"1\"" : ""}></canvas></div>`;
+function tcgArt(by, ty, sil, id) {
+  return `<div class="tcg-art"><canvas class="rc-art" width="120" height="72" data-by="${by || ""}" data-ty="${ty}" data-card="${id || ""}"${sil ? " data-sil=\"1\"" : ""}></canvas></div>`;
 }
 function tcgFrame(ty, gi, inner, ghost) {
   const v = gi == null ? { mat: ["#9d93ad", "#d2cbd9"], anim: null } : GRADE_VIS[gi];
@@ -1293,8 +1303,8 @@ function cardHtml(id, gi, opts) {
   const rows = ["a", "p", "s"].map((sl) => `<li class="${opts.slot === sl ? "on" : ""}"><b>${esc(tx("slot." + sl))}</b> ${esc(slotText(sc, sl))}</li>`).join("");
   const by = C.by && MONS[C.by] ? monName(C.by) : "";
   const no = String(CARD_NO.indexOf(id) + 1).padStart(3, "0") + "/" + CARD_NO.length;
-  const inner = `<div class="tcg-name"><span class="tcg-gem" title="${esc(TYPES[ty][L()])}">${TYPES[ty].icon}</span><strong>${esc(cardName(id))}</strong>${opts.count > 1 ? `<span class="cnt">×${opts.count}</span>` : ""}<span class="tcg-cd" title="${esc(tx("slot.a"))}">⟳${sc.a.cd}</span></div>
-  ${tcgArt(C.by, ty)}
+  const inner = `<div class="tcg-name"><span class="tcg-gem" title="${esc(TYPES[ty][L()])}">${tyIcon(ty)}</span><strong>${esc(cardName(id))}</strong>${opts.count > 1 ? `<span class="cnt">×${opts.count}</span>` : ""}<span class="tcg-cd" title="${esc(tx("slot.a"))}">⟳${sc.a.cd}</span></div>
+  ${tcgArt(C.by, ty, false, id)}
   <div class="tcg-line"><span>${esc(TYPES[ty][L()])}${by ? " · " + esc(by) : ""}${C.boss ? " · 👑" : ""}</span><span class="tcg-pips" title="${esc(GRADES[gi][L()])}">${"◆".repeat(gi + 1)}<i>${"◇".repeat(5 - gi)}</i></span></div>
   <div class="tcg-box"><ul class="rc-fx">${rows}</ul><p class="rc-lore">${esc(cardLore(id))}</p></div>
   <div class="tcg-foot"><span>${esc(GRADES[gi][L()])}</span><span>EV · ${no}</span></div>`;
@@ -1302,7 +1312,7 @@ function cardHtml(id, gi, opts) {
 }
 function ghostCardHtml(id, note, foot) {
   const C = CARDS[id], ty = C.type;
-  const inner = `<div class="tcg-name"><span class="tcg-gem">${TYPES[ty].icon}</span><strong>???</strong></div>${tcgArt(C.by, ty, true)}<div class="tcg-line"><span>${esc(TYPES[ty][L()])}</span></div><div class="tcg-box"><p class="rc-lore">${esc(note)}</p></div><div class="tcg-foot"><span></span><span>EV · ${String(CARD_NO.indexOf(id) + 1).padStart(3, "0")}/${CARD_NO.length}</span></div>`;
+  const inner = `<div class="tcg-name"><span class="tcg-gem">${tyIcon(ty)}</span><strong>???</strong></div>${tcgArt(C.by, ty, true, id)}<div class="tcg-line"><span>${esc(TYPES[ty][L()])}</span></div><div class="tcg-box"><p class="rc-lore">${esc(note)}</p></div><div class="tcg-foot"><span></span><span>EV · ${String(CARD_NO.indexOf(id) + 1).padStart(3, "0")}/${CARD_NO.length}</span></div>`;
   return `<div class="rcard ghost">${tcgFrame(ty, null, inner, true)}${foot}</div>`;
 }
 // paint card art boxes whenever cards appear in the page
@@ -1319,6 +1329,17 @@ function paintCardArt(root) {
     c.globalAlpha = 0.45; c.beginPath(); c.ellipse(30, 66, 50, 22, 0, 0, Math.PI * 2); c.ellipse(96, 70, 44, 26, 0, 0, Math.PI * 2); c.fill();
     c.globalAlpha = 0.8; c.fillRect(0, 60, 120, 12); c.globalAlpha = 1;
     c.fillStyle = "#ffffff"; for (const [x, y] of [[12, 9], [104, 15], [84, 6], [26, 27]]) c.fillRect(x, y, 3, 3);
+    const cid = cv.dataset.card;
+    if (hasPX && HAS_EVS && cid && EVS.CARD[cid]) {
+      // pixel art: the creature that carries the card on the left, the skill's own art on the right
+      c.setTransform(1, 0, 0, 1, 0, 0); PX.quantize(c, 40, 24, false);
+      const sil = (im) => (cv.dataset.sil ? EVS.silhouette(im, "#1d1626") : im);
+      const art = sil(EVS.cardArt(cid));
+      if (evsKind(by)) { const m = sil(EVS.sprite(by, 16, 1, 0, "happy")); c.drawImage(m, 2, 24 - m.height - 1); c.drawImage(art, 22, 4); }
+      else c.drawImage(art, 12, 4);
+      PX.blit(out, Lr, 120, 72);
+      return;
+    }
     if (by && (MONS[by] || ["lumo", "fizz", "pebb"].includes(by))) {
       const story = ["lumo", "fizz", "pebb"].includes(by), boss = MONS[by] && MONS[by].boss, k = story ? 0.42 : boss ? 0.46 : 0.66;
       c.save(); c.translate(60, story ? 42 : boss ? 38 : 30); c.scale(k, k);
@@ -1511,6 +1532,9 @@ const css = `
 .rstats { font: 500 12px var(--font-mono); color: var(--muted); margin: 0; }
 .mstats { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 10px; margin-top: 6px; width: 100%; font-size: 12px; text-align: left; }
 @media (max-width: 520px) { .mstats { grid-template-columns: 1fr; } }
+.tyi { width: 1.15em; height: 1.15em; image-rendering: pixelated; vertical-align: -0.2em; }
+.node .ic .tyi { width: 27px; height: 27px; vertical-align: middle; }
+.tcg-gem .tyi { width: 18px; height: 18px; vertical-align: middle; }
 .rumor { margin: 0 0 10px; font-style: italic; color: var(--muted); border-left: 3px solid var(--line); padding-left: 10px; }
 .escritos { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; margin-top: 8px; }
 .esc { border: 2px solid var(--line); padding: 8px 10px; background: color-mix(in srgb, #e9d8b4 35%, var(--surface)); display: flex; flex-direction: column; gap: 4px; }
@@ -1880,12 +1904,12 @@ function extraZonesHtml() {
   const e = echoInfo();
   if (e) {
     const can = e.lvlOk && e.left > 0, boss = monName(ZONES[e.zone].boss);
-    h += `<h3 class="cat-title">${esc(tx("echo.title"))}</h3><div class="nodes zones"><button type="button" class="node zone echo" data-echo="1" ${can ? "" : "disabled"}><span class="ic" aria-hidden="true">${TYPES[ZONES[e.zone].type].icon}</span><strong>${esc(boss)}</strong>
+    h += `<h3 class="cat-title">${esc(tx("echo.title"))}</h3><div class="nodes zones"><button type="button" class="node zone echo" data-echo="1" ${can ? "" : "disabled"}><span class="ic" aria-hidden="true">${tyIcon(ZONES[e.zone].type)}</span><strong>${esc(boss)}</strong>
       <small>${esc(tx("echo.sub", { boss, rule: tx("echo.r." + e.rule) }))}</small><small>${esc(!e.lvlOk ? tx("echo.lock", { n: ECHO_LVL }) : e.left > 0 ? tx("echo.left", { n: e.left }) : tx("echo.none"))}</small></button></div>`;
   }
   const sav = Object.keys(ZONES).filter((id) => (st[id] || 0) >= 3);
   h += `<h3 class="cat-title">${esc(tx("sav.title"))}</h3><p class="muted" style="margin:0">${esc(tx(sav.length ? "sav.sub" : "sav.hint"))}</p>`;
-  if (sav.length) h += `<div class="nodes zones">${sav.map((id) => `<button type="button" class="node zone savia" data-zone="${id}" data-savia="1"><span class="ic" aria-hidden="true">${TYPES[ZONES[id].type].icon}</span><strong>${esc(zt("name", null, id))}</strong><small>${esc(tx("zones.lvl", { n: ZONES[id].min + 2 }))}</small><small class="ok">${starStr(sS[id] || 0)}</small></button>`).join("")}</div>`;
+  if (sav.length) h += `<div class="nodes zones">${sav.map((id) => `<button type="button" class="node zone savia" data-zone="${id}" data-savia="1"><span class="ic" aria-hidden="true">${tyIcon(ZONES[id].type)}</span><strong>${esc(zt("name", null, id))}</strong><small>${esc(tx("zones.lvl", { n: ZONES[id].min + 2 }))}</small><small class="ok">${starStr(sS[id] || 0)}</small></button>`).join("")}</div>`;
   return h;
 }
 function zonesHtml() {
@@ -1893,7 +1917,7 @@ function zonesHtml() {
   return `<div class="nodes zones">${Object.keys(ZONES).map((id) => {
     const z = ZONES[id], open = zoneOpen(id);
     const done = cl[id] || 0;
-    return `<button type="button" class="node zone" data-zone="${id}" ${open ? "" : "disabled"}><span class="ic" aria-hidden="true">${TYPES[z.type].icon}</span>
+    return `<button type="button" class="node zone" data-zone="${id}" ${open ? "" : "disabled"}><span class="ic" aria-hidden="true">${tyIcon(z.type)}</span>
       <strong>${esc(zt("name", null, id))}</strong><small>${esc(zt("sub", null, id))}</small>
       <small>${open ? esc(tx("zones.lvl", { n: z.min })) : "🔒 " + esc(tx(z.unlockAll ? "zones.lockHeart" : Array.isArray(z.unlock) ? (z.unlock.includes("hollow") ? "zones.lockHigh" : "zones.lockEnv") : "zones.lock"))}</small>
       ${done ? `<small class="ok">✓ ${esc(tx("zones.done", { n: done }))} · ${starStr((EV.P.stars || {})[id] || 0)}<br>${esc(tx("zones.verse", { v: zt("verse", null, id) }))}</small>` : ""}</button>`;
@@ -2028,6 +2052,7 @@ function render() {
 // small pixel portrait of a creature on a 96x80 canvas with data-mon
 function paintMon(cv) {
   const out = EV.setupCanvas(cv, 96, 80);
+  if (evsKind(cv.dataset.mon)) { const spr = EVS.sprite(cv.dataset.mon, 24, 1, 0, "happy"); out.imageSmoothingEnabled = false; out.drawImage(spr, (96 - spr.width * 3) / 2, 80 - spr.height * 3, spr.width * 3, spr.height * 3); return; }
   if (typeof PX === "undefined") { out.translate(48, 44); out.scale(0.62, 0.62); drawMon(out, cv.dataset.mon, { t: 0.5, stage: 1, form: "bright", hp: 1 }); return; }
   const L = PX.layer(32, 27), c = L.g; c.scale(1 / 3, 1 / 3); c.translate(48, 44); c.scale(0.62, 0.62);
   drawMon(c, cv.dataset.mon, { t: 0.5, stage: 1, form: "bright", hp: 1 });
@@ -2101,8 +2126,11 @@ function flushEvents() {
   let hitSfx = null;
   for (const e of ev) {
     const a = e.u && battle.anim[e.u];
+    // who the card being cast lands on
+    if (battle.cast && e.k !== "act" && e.u && ["dmg", "heal", "st", "shield", "miss", "cleanse"].includes(e.k) && !battle.cast.tg.includes(e.u)) battle.cast.tg.push(e.u);
     switch (e.k) {
-      case "act": { const u = b.units.find((x) => x.uid === e.u); if (a) a.lunge = 1; if (e.card) { blog(tx("log.act", { name: u.name, card: cardName(e.card) })); EV.sfx("card"); } else blog(tx("log.basic", { name: u.name })); break; }
+      case "act": { const u = b.units.find((x) => x.uid === e.u); if (a) a.lunge = 1;
+        battle.cast = e.card && HAS_EVS && EVS.CARD[e.card] && !REDUCE ? { id: e.card, uid: e.u, t0: performance.now(), dur: (EVS.DUR[EVS.anim(e.card).style] || 1) * 1000, tg: [] } : null; if (e.card) { blog(tx("log.act", { name: u.name, card: cardName(e.card) })); EV.sfx("card"); } else blog(tx("log.basic", { name: u.name })); break; }
       case "support": if (b.units.some((x) => x.uid === e.u && x.side === "ally")) EV.P.c.supportUsed = (EV.P.c.supportUsed || 0) + 1; blog(tx("log.support", { name: uName(e.u), card: cardName(e.card) })); if (a) battle.floats.push({ x: a.x, y: a.y - 44, text: "★ " + cardName(e.card), col: "#ffe27a", life: 1.4, small: true }); break;
       case "dmg":
         if ((e.eff === "up" || e.eff === "opp") && e.by && b.units.some((x) => x.uid === e.by && x.side === "ally")) EV.P.c.advHits = (EV.P.c.advHits || 0) + 1;
@@ -2326,6 +2354,19 @@ function drawDecor(c, decor, t, day) {
 }
 // Battles are drawn at half resolution, snapped to the Glimmer-32 palette and blown up x2; names and numbers stay sharp on top.
 const BLOW = typeof PX !== "undefined" ? PX.layer(BW / 2, BH / 2) : null;
+const REDUCE = typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+// how the caster moves while its card plays (low-res pixels), or null
+function castPose(u, now) {
+  const cs = battle.cast; if (!cs || cs.uid !== u.uid) return null;
+  const k = (now - cs.t0) / cs.dur; if (k >= 1) return null;
+  const dir = u.side === "ally" ? 1 : -1, p = EVS.pose(cs.id, k, dir);
+  if (p.rel) {
+    const a = battle.anim[u.uid], q = battle.anim[cs.tg[0]];
+    const dist = q ? Math.max(0, Math.abs(q.x - a.x) / 2 - 16) : 20;
+    return Object.assign({}, p, { dx: Math.round(p.dx * dist) });
+  }
+  return p;
+}
 function drawBattle(now) {
   if (!battle || !battle.c) return;
   const out = battle.c, b = battle.b, t = now / 1000, z = ZONES[X.zone];
@@ -2348,16 +2389,35 @@ function drawBattle(now) {
     a.lunge = Math.max(0, a.lunge - 0.06); a.flash = Math.max(0, a.flash - 0.07);
     a.shownHp += (u.hp - a.shownHp) * 0.15;
     const dir = u.side === "ally" ? 1 : -1;
+    const spr = BLOW && evsKind(u.kind), cp = spr ? castPose(u, now) : null;
+    if (cp) a.lunge = 0;
     const lx = Math.round(Math.sin(a.lunge * Math.PI) * 9 * dir) * 2;
     const ko = u.hp <= 0;
     const x = Math.round((a.x + lx) / 2) * 2, y = a.y + (ko ? 8 : 0);
     place.push({ u, a, x, y, ko });
     c.save(); c.translate(x, y);
+    if (spr) {
+      // pixel sprite: 1 sprite pixel = 2 battle units (the layer is drawn at half size)
+      const n = u.boss ? 32 : 24, emo = ko ? "sad" : a.flash > 0.5 ? "surprised" : cp ? "happy" : u.hp / u.maxHp < 0.3 ? "sad" : "normal";
+      const frame = cp && cp.sq != null ? cp.sq : REDUCE ? 0 : Math.floor(t * 2 + a.x / 50) % 2;
+      let im = EVS.sprite(u.kind, n, u.own ? Math.max(0, Math.min(2, u.stage)) : 1, frame, emo, !!u.hollow);
+      if (cp && cp.flash) im = EVS.silhouette(im);
+      const w = im.width * 2, h = im.height * 2, feet = u.boss ? 24 : 16;
+      const hov = !REDUCE && EVS.hovers(u.kind) ? Math.round(Math.sin(t * 2 + a.x)) * 2 - 4 : 0;
+      c.save();
+      c.fillStyle = "rgba(29,22,38,.35)"; c.fillRect(Math.round(-w * 0.3 / 2) * 2, feet - 2, Math.round(w * 0.6 / 2) * 2, 4);
+      if (ko) c.globalAlpha = 0.35; else if (cp && cp.alpha != null) c.globalAlpha = cp.alpha;
+      c.translate(cp ? cp.dx * 2 : 0, (cp ? cp.dy * 2 : 0) + hov);
+      if (u.side === "foe") c.scale(-1, 1);
+      c.drawImage(im, -Math.round(w / 4) * 2, feet - h, w, h);
+      c.restore();
+    } else {
     const sc = u.boss ? 0.62 : 0.4;
     c.save(); if (u.side === "foe" && !u.boss) c.scale(-1, 1); c.scale(sc, sc);
     if (ko) c.globalAlpha = 0.35;
     drawMon(c, u.kind, { t: t + a.x, stage: u.own ? u.stage : 1, form: u.form, hollow: u.hollow, hp: u.hp / u.maxHp, ko });
     c.restore();
+    }
     if (a.flash > 0) { c.save(); c.globalAlpha = a.flash * 0.6; c.fillStyle = "#ffffff"; EV.ell(c, 0, -4, 22 * (u.boss ? 1.5 : 1), 22 * (u.boss ? 1.8 : 1)); c.fill(); c.restore(); }
     // shield ring
     if (u.shield > 0) { c.save(); c.strokeStyle = "#7cc8e3"; c.lineWidth = 2; c.beginPath(); c.arc(0, -4, u.boss ? 40 : 24, 0, Math.PI * 2); c.stroke(); c.restore(); }
@@ -2369,6 +2429,19 @@ function drawBattle(now) {
     if (u.shield > 0) { c.fillStyle = "#c8eef5"; c.fillRect(-bw / 2, by, Math.min(bw, bw * u.shield / u.maxHp), 2); }
     if (u.cards.a && u.cd <= 0 && !ko) { c.fillStyle = "#ffd57a"; c.fillRect(bw / 2 + 4, by - 2, 4, 4); c.fillStyle = "#1d1626"; c.fillRect(bw / 2 + 4, by + 2, 4, 2); }
     c.restore();
+  }
+  // card-use effect on top of the units, in low-res pixels
+  const cs = battle.cast;
+  if (BLOW && cs) {
+    const k = (now - cs.t0) / cs.dur, from = battle.anim[cs.uid];
+    if (k >= 1 || !from) battle.cast = null;
+    else {
+      const pos = (uid) => { const q = battle.anim[uid]; return q ? { x: Math.round(q.x / 2), y: Math.round(q.y / 2) - 4 } : null; };
+      const tg = cs.tg.map(pos).filter(Boolean), f = pos(cs.uid), dir = b.units.find((x) => x.uid === cs.uid).side === "ally" ? 1 : -1;
+      c.save(); c.setTransform(1, 0, 0, 1, 0, 0);
+      try { EVS.fx(c, cs.id, k, { x: f.x + 6 * dir, y: f.y }, tg[0] || f, tg.length ? tg : [f]); } catch (e) { battle.cast = null; }
+      c.restore();
+    }
   }
   if (BLOW) { c.setTransform(1, 0, 0, 1, 0, 0); PX.quantize(c, BW / 2, BH / 2, false); out.clearRect(0, 0, BW, BH); PX.blit(out, BLOW, BW, BH); }
   // names, status icons and floating numbers stay sharp
