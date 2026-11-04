@@ -293,7 +293,7 @@ const isDay = () => { const h = new Date().getHours(); return h >= 7 && h < 19; 
 
 /* ---------- State ---------- */
 let W0 = null; // { map, x, y, px, py, path, face, dir, then, cb }
-let cv = null, ctx = null, raf = 0, dialog = null, foodPick = false;
+let cv = null, ctx = null, raf = 0, dialog = null, foodPick = false, menuOn = false;
 function ws() {
   const P = EV.P;
   if (!P.world || !MAPS[P.world.map]) P.world = { map: "home", x: MAPS.home.start[0], y: MAPS.home.start[1] };
@@ -564,6 +564,7 @@ function choose(id) {
   const route = routeTo(p.stand);
   if (!route) return;
   EV.sfx("tap");
+  menuOn = false;
   w.path = route; w.then = p.id; w.cb = null;
   if (!route.length) arrived();
   render(); kick();
@@ -591,7 +592,7 @@ function act(p) {
     case "bowl": foodPick = true; break;
     case "bed": if (!S.sleeping && S.stats.energy <= 85) summary(); else EV.toggleSleep(); break;
     case "pond": EV.cleanUp(); break;
-    case "lawn": if (panelOpen()) EV.togglePanel("map"); EV.startPlay(); break;
+    case "lawn": if (panelOpen()) EV.togglePanel("map"); menuOn = false; EV.startPlay(); break;
     case "board": EV.togglePanel("daily", true); break;
     case "root": rootTalk(); break;
     case "well": if (EV.HOOKS.openWell) EV.HOOKS.openWell(); else EV.togglePanel("cards", true); break;
@@ -626,7 +627,8 @@ function answer(k) {
     if ((steps() || {}).n < STEPS.trail) { EV.toast(tx("noSteps", { name: S.name })); EV.sfx("deny"); render(); return; }
     const before = EV.RPG && EV.RPG.X;
     if (!EV.RPG) return;
-    EV.togglePanel("map");
+    if (panelOpen()) EV.togglePanel("map");
+    menuOn = false;
     EV.RPG.startExpedition(); EV.showScreen();
     // only pay if the expedition really started (it can refuse: asleep, sick, tired)
     if (EV.RPG.X && EV.RPG.X !== before) spendSteps(STEPS.trail);
@@ -680,14 +682,50 @@ function dlgHtml(alive) {
   }
   return "";
 }
-// dialogues show in the map panel when it is open, otherwise under the home seen from above
+// the window over the home: dialogues at the bottom, the list of places as a menu over the map, and where you are in the corner
+function menuHtml() {
+  const S = EV.S, w = ws(), s = steps(), alive = S && S.phase === "alive";
+  return `<div class="wmenu-head"><b>${esc(tx("map." + w.map))}</b><span class="steps" title="${esc(tx("stepsT", { n: s ? s.n : 0 }))}">👣 ${esc(tx("steps", { n: s ? s.n : 0 }))}</span><button type="button" class="wmenu-x" data-wmenu="close" aria-label="${esc(tx("d.close"))}">✕</button></div><div class="wmenu-sub">${esc(tx(w.map + ".sub"))}</div><div class="wmenu-grid">${placesNow().map((p) => {
+    const c = costOf(p), poor = c && s && s.n < c;
+    const d = p.id === "patch" ? tx("pd." + circle()) : tx("p." + p.id + ".d");
+    return `<button type="button" class="wchip${p.go ? " go" : ""}" data-wgo="${p.id}" title="${esc(d)}" ${alive ? "" : "disabled"}><strong>${esc(tx("p." + p.id))}</strong><small class="${poor ? "poor" : c ? "" : "ok"}">${esc(c ? "👣 " + c : tx("free"))}</small></button>`;
+  }).join("")}</div>`;
+}
 function renderHomeDlg() {
   const el = $("topDlg"); if (!el) return;
-  const S = EV.S, h = !panelOpen() && topOn() ? dlgHtml(S && S.phase === "alive") : "";
+  const S = EV.S, on = !panelOpen() && topOn();
+  if (!on) menuOn = false;
+  const h = on ? dlgHtml(S && S.phase === "alive") : "";
+  stageBits(on, !!h);
   if (el.innerHTML === h) return;
   el.innerHTML = h;
-  // on a phone the care buttons sit far below the home: bring a new dialogue into view
+  // on a phone the window can be scrolled away: bring a new dialogue into view
   if (h) { const r = el.getBoundingClientRect(); if (r.top < 0 || r.bottom > window.innerHeight) el.scrollIntoView({ behavior: "smooth", block: "nearest" }); }
+}
+function stageBits(on, talking) {
+  if (on == null) on = !panelOpen() && topOn();
+  if (talking == null) talking = !!$("topDlg") && $("topDlg").innerHTML !== "";
+  const mn = $("wMenu"), tag = $("wTag"), w = ws();
+  if (mn) {
+    const show = on && menuOn && !talking, mh = show ? menuHtml() : "";
+    if (mn.innerHTML !== mh) mn.innerHTML = mh;
+    mn.hidden = !show;
+  }
+  if (tag) {
+    const s = steps(), th = on && !menuOn && w.map !== "home" ? `${esc(tx("map." + w.map))} · 👣 ${s ? s.n : 0}` : "";
+    if (tag.innerHTML !== th) tag.innerHTML = th;
+    tag.hidden = !th;
+  }
+  const b = $("btnMap"); if (b) b.classList.toggle("on", !!(menuOn && on));
+}
+// the Map button opens the list of places over the window; in the side view it still opens the map panel
+function toggleMenu(force) {
+  if (!topOn()) { EV.togglePanel("map"); return; }
+  if (EV.closeSheets) EV.closeSheets();
+  menuOn = force != null ? force : !menuOn;
+  if (menuOn) { dialog = null; foodPick = false; }
+  renderHomeDlg();
+  if (menuOn) { const st = $("topScene"); if (st) { const r = st.getBoundingClientRect(); if (r.top < 0 || r.bottom > window.innerHeight) st.scrollIntoView({ behavior: "smooth", block: "nearest" }); } }
 }
 function render() {
   renderHomeDlg();
@@ -711,7 +749,8 @@ function onClick(e) {
   const b = e.target.closest("button");
   if (b && !b.disabled) {
     const d = b.dataset;
-    if (d.wgo) choose(d.wgo);
+    if (d.wmenu) { EV.sfx("tap"); toggleMenu(false); }
+    else if (d.wgo) choose(d.wgo);
     else if (d.wans) answer(d.wans);
     else if (d.wfood != null) { foodPick = false; if (d.wfood) EV.feed(d.wfood); render(); }
     return;
@@ -748,7 +787,24 @@ const css = `
 .wdlg-opts { display: flex; flex-wrap: wrap; gap: 6px; }
 .steps { white-space: nowrap; }
 .wmap-walk { margin: 0; font-style: italic; }
-#topDlg .wdlg { margin: 8px 0 0; }
+#topDlg { position: absolute; left: 6px; right: 6px; bottom: 6px; z-index: 3; max-height: calc(100% - 12px); overflow: auto; }
+#topDlg:empty { display: none; }
+#topDlg .wdlg { margin: 0; padding: 8px; gap: 8px; background: color-mix(in srgb, #e9d8b4 55%, var(--surface)); box-shadow: 0 3px 0 rgba(0,0,0,.35); }
+#topDlg .wdlg-face { width: 56px; height: 56px; } #topDlg .wdlg-pet { width: 34px; height: 34px; }
+#topDlg .wdlg-body p { font-size: 14px; line-height: 1.4; margin: 2px 0 6px; }
+#topDlg .wdlg-opts .btn { padding: 5px 10px; font-size: 13px; min-height: 0; }
+.wmenu { position: absolute; left: 6px; right: 6px; bottom: 6px; z-index: 3; max-height: calc(100% - 12px); overflow: auto; border: 3px solid var(--line); background: color-mix(in srgb, var(--surface) 92%, transparent); padding: 6px 8px 8px; box-shadow: 0 3px 0 rgba(0,0,0,.35); }
+.wmenu-head { display: flex; align-items: center; gap: 8px; } .wmenu-head b { font-size: 15px; flex: 1; }
+.wmenu-head .steps { font-size: 12px; color: var(--muted); }
+.wmenu-x { border: 2px solid var(--line); background: var(--bg); color: inherit; font: inherit; width: 30px; height: 30px; cursor: pointer; padding: 0; }
+.wmenu-sub { font-size: 12px; color: var(--muted); margin: 0 0 6px; }
+.wmenu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 5px; }
+.wchip { border: 2px solid var(--line); background: var(--bg); color: inherit; font: inherit; padding: 5px 6px; text-align: left; display: flex; flex-direction: column; gap: 1px; cursor: pointer; min-width: 0; }
+.wchip strong { font-size: 12.5px; line-height: 1.2; overflow-wrap: anywhere; } .wchip small { font-size: 11px; color: var(--muted); }
+.wchip small.ok { color: var(--moss, #3c7a2c); } .wchip small.poor { color: #b8364b; }
+.wchip.go { border-style: dashed; } .wchip[disabled] { opacity: .55; cursor: default; }
+.wtag { position: absolute; left: 8px; top: 8px; z-index: 2; background: rgba(29,22,38,.78); color: #fbf6ef; font-size: 12px; padding: 3px 8px; border-radius: 3px; pointer-events: none; }
+#btnMap.on { outline: 2px solid var(--gold, #e0b04a); }
 @media (max-width: 480px) { .wdlg-face { width: 56px; height: 56px; } .wdlg-pet { width: 36px; height: 36px; } }
 `;
 const st = document.createElement("style"); st.textContent = css; document.head.appendChild(st);
@@ -758,10 +814,12 @@ const prevShow = EV.HOOKS.showScreen;
 EV.HOOKS.showScreen = function () { if (prevShow) prevShow.apply(this, arguments); refreshChip(); renderHomeDlg(); };
 $("mapPanel").addEventListener("click", onClick);
 if ($("topDlg")) $("topDlg").addEventListener("click", onClick);
+if ($("wMenu")) $("wMenu").addEventListener("click", onClick);
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && menuOn) toggleMenu(false); });
 if ($("topScene")) $("topScene").addEventListener("pointerdown", onTopTap);
 requestAnimationFrame(homeFrame);
-$("btnMap").addEventListener("click", () => { EV.sfx("tap"); EV.togglePanel("map"); });
-setInterval(() => { refreshChip(); if (EV.S && EV.S.phase === "alive") dayBase(); }, 5000);
+$("btnMap").addEventListener("click", () => { EV.sfx("tap"); toggleMenu(); });
+setInterval(() => { refreshChip(); stageBits(); if (EV.S && EV.S.phase === "alive") dayBase(); }, 5000);
 refreshChip(); if (EV.S && EV.S.phase === "alive") dayBase();
 EV.WORLD = { MAPS, STEPS, steps, spendSteps, gainFromEnergy, path, choose, render, refreshChip, careWalk, bedtime, topOn, homeExtras, circle, bottleHere, get state() { return ws(); }, get dialog() { return dialog; } };
 })();

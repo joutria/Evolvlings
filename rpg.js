@@ -833,7 +833,7 @@ const TX = {
     "log.shield": "{name} gana un escudo de {n}.", "log.break": "¡Escudo roto!", "log.cleanse": "{name} se libra de {st}.",
     "log.resist": "{name} resiste el estado.", "log.save": "¡Una nube amortigua el golpe!", "log.burn": "{name} se quema: {n}.", "log.thorns": "{name} se pincha con las espinas: {n}.", "log.bleed": "{name} paga su Pacto: {n}.", "log.cost": "{name} gasta {n} de vida.",
     "r.title": "Botín", "r.xp": "+{n} XP", "r.coins": "+{n} Chispas", "r.pick": "Elige una carta", "r.skip": "No quiero ninguna",
-    "r.card": "Carta nueva: {card}", "r.continue": "Seguir",
+    "r.card": "Carta nueva: {card}", "r.continue": "Seguir", "r.view": "Ver carta",
     "end.win": "¡El Gran Farol vuelve a brillar limpio!", "end.winText": "La savia oscura se escurre de su cristal y el prado se ilumina. {name} vuelve a casa orgullosa.",
     "end.lose": "Vuelta a casa", "end.loseText": "El equipo no pudo seguir. {name} se trae la mitad de lo ganado y todas las cartas.",
     "end.hurt": "{name} vuelve con heridas: −{e} de energía y −{h} de salud.", "end.unhurt": "{name} vuelve sin un rasguño.",
@@ -850,7 +850,7 @@ const TX = {
     "cards.unequip": "Quitar", "cards.inUse": "En uso", "cards.mode": "Modo de combate",
     "log.expGo": "{name} sale de expedición {to}.", "log.expWin": "{name} volvió {from} con el guardián en paz.",
     "log.expLose": "{name} volvió {from} un poco magullada.",
-    "zones.title": "¿Adónde vas?", "zones.sub": "Expedición", "zones.lock": "Calma al Gran Farol del Prado Aurora para abrir este camino.",
+    "zones.title": "¿Adónde vas?", "ztab.zones": "Zonas", "ztab.deep": "Raíz Profunda", "ztab.echo": "Eco", "zones.sub": "Expedición", "zones.lock": "Calma al Gran Farol del Prado Aurora para abrir este camino.",
     "zones.lvl": "Nivel recomendado {n}", "zones.done": "Guardián calmado ×{n}", "zones.verse": "Fragmento: «{v}»",
     "esc.title": "Escritos", "esc.desc": "Papeles, cartas y canciones que encuentras por el Claro. No sirven para combatir; cuentan lo que nadie dice en voz alta.", "esc.got": "Nuevo Escrito: {t}",
     "esc.from.event": "Sale de un encuentro.", "esc.from.chest": "En un cofre de {z}.", "esc.from.guardian": "Lo guarda el guardián de {z}.", "esc.from.shop": "Se vende en la tienda del evento.", "esc.from.deep": "Puede salir en los cofres de la Raíz Profunda.", "esc.hilos": "Hilos que se juntan", "deep.esc": "Dentro del cofre hay un escrito: «{t}».", "rumor": "Se oye en el Vado:",
@@ -922,7 +922,7 @@ const TX = {
     "log.shield": "{name} gains a {n} shield.", "log.break": "Shield broken!", "log.cleanse": "{name} shakes off {st}.",
     "log.resist": "{name} resists the status.", "log.save": "A cloud cushions the blow!", "log.burn": "{name} burns: {n}.", "log.thorns": "{name} is pricked by thorns: {n}.", "log.bleed": "{name} pays its Pact: {n}.", "log.cost": "{name} spends {n} health.",
     "r.title": "Loot", "r.xp": "+{n} XP", "r.coins": "+{n} Chispas", "r.pick": "Pick a card", "r.skip": "None for me",
-    "r.card": "New card: {card}", "r.continue": "Continue",
+    "r.card": "New card: {card}", "r.continue": "Continue", "r.view": "See card",
     "end.win": "The Great Lantern shines clean again!", "end.winText": "The dark sap drains from its glass and the meadow lights up. {name} heads home proud.",
     "end.lose": "Back home", "end.loseText": "The team couldn't go on. {name} brings back half the loot and every card.",
     "end.hurt": "{name} comes back hurt: −{e} energy and −{h} health.", "end.unhurt": "{name} comes back without a scratch.",
@@ -939,7 +939,7 @@ const TX = {
     "cards.unequip": "Remove", "cards.inUse": "In use", "cards.mode": "Battle mode",
     "log.expGo": "{name} set out {to}.", "log.expWin": "{name} came back {from} with the guardian at peace.",
     "log.expLose": "{name} came back {from} a bit bruised.",
-    "zones.title": "Where to?", "zones.sub": "Expedition", "zones.lock": "Calm the Great Lantern of the Aurora Meadow to open this path.",
+    "zones.title": "Where to?", "ztab.zones": "Zones", "ztab.deep": "Deep Root", "ztab.echo": "Echo", "zones.sub": "Expedition", "zones.lock": "Calm the Great Lantern of the Aurora Meadow to open this path.",
     "zones.lvl": "Recommended level {n}", "zones.done": "Guardian calmed ×{n}", "zones.verse": "Fragment: “{v}”",
     "esc.title": "Writings", "esc.desc": "Papers, letters and songs you find around the Glade. They don't help in battle; they tell what nobody says out loud.", "esc.got": "New Writing: {t}",
     "esc.from.event": "Comes from an encounter.", "esc.from.chest": "In a chest in {z}.", "esc.from.guardian": "The guardian of {z} keeps it.", "esc.from.shop": "Sold at the event shop.", "esc.from.deep": "May turn up in the Deep Root chests.", "esc.hilos": "Threads that meet", "deep.esc": "Inside the chest there's a writing: \"{t}\".", "rumor": "Heard in the Ford:",
@@ -1611,6 +1611,23 @@ const css = `
 .xpbar { height: 8px; }
 .evt-text { margin: 0; font-size: 15px; line-height: 1.55; }
 .evt-out { margin: 0; font-weight: 600; }
+.bend-pan { padding: 0; overflow: hidden; }
+.xtabs { display: flex; gap: 4px; margin: 10px 0 0; border-bottom: 3px solid var(--line); overflow-x: auto; scrollbar-width: none; }
+.xtabs button { flex: 1 1 auto; border: 2px solid var(--line); border-bottom: 0; background: var(--bg); color: var(--muted); font: inherit; font-weight: 600; padding: 7px 12px; cursor: pointer; white-space: nowrap; }
+.xtabs button[aria-selected="true"] { background: var(--line); color: var(--surface); }
+.xtab-body { padding-top: 8px; }
+.xtab-body > .cat-title:first-child { display: none; }
+.bend { position: relative; background: #1d1626; }
+.bshot { display: block; width: 100%; height: auto; image-rendering: pixelated; filter: brightness(.72) saturate(.85); }
+.bcard { position: relative; margin: -30% 10px 10px; background: var(--surface); border: 3px solid var(--line); box-shadow: 0 4px 0 rgba(0,0,0,.4); padding: 12px; display: grid; gap: 8px; }
+.bcard h3 { margin: 0; }
+.bminis { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; }
+.bmini { display: flex; gap: 8px; align-items: flex-start; border: 2px solid var(--line); background: var(--bg); padding: 6px; min-width: 0; }
+.bmini .rc-thumb { flex: none; width: 64px; height: 48px; }
+.bm-txt { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1; } .bm-txt strong { line-height: 1.2; }
+.bm-txt .rc-cant { margin: 0; font-size: 12px; }
+.bm-btns { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 2px; } .bm-btns .btn { padding: 4px 10px; font-size: 13px; min-height: 0; }
+@media (max-width: 520px) { .bcard { margin: -22% 6px 6px; padding: 10px; } }
 .choices { display: flex; flex-direction: column; gap: 8px; }
 .choices .btn { text-align: left; justify-content: flex-start; }
 .loot { display: flex; gap: 10px; flex-wrap: wrap; font: 600 14px var(--font-mono); }
@@ -2041,15 +2058,27 @@ function deepHtml() {
   }
   return h + `</div><p class="muted" style="margin:0">${esc(tx("deep.cost"))}</p>`;
 }
-function extraZonesHtml() {
-  const st = EV.P.stars || {}, sS = EV.P.starsS || {};
-  let h = deepHtml();
-  const e = echoInfo();
+// the expedition screen: the parchment map on top, then tabs for the zones, the Deep Root and the Guardian's Echo
+let ztab = "zones";
+function zoneTabsHtml() {
+  const tabs = [["zones", tx("ztab.zones")], ["deep", tx("ztab.deep")]];
+  if (echoInfo()) tabs.push(["echo", tx("ztab.echo")]);
+  if (!tabs.some((t) => t[0] === ztab)) ztab = "zones";
+  const body = ztab === "deep" ? deepHtml() : ztab === "echo" ? echoHtml() : zonesHtml() + saviaHtml();
+  return `<div class="xtabs" role="tablist">${tabs.map(([k, l]) => `<button type="button" role="tab" data-ztab="${k}" aria-selected="${k === ztab}">${esc(l)}</button>`).join("")}</div><div class="xtab-body">${body}</div>`;
+}
+function echoHtml() {
+  const e = echoInfo(); let h = "";
   if (e) {
     const can = e.lvlOk && e.left > 0, boss = monName(ZONES[e.zone].boss);
     h += `<h3 class="cat-title">${esc(tx("echo.title"))}</h3><div class="nodes zones"><button type="button" class="node zone echo" data-echo="1" ${can ? "" : "disabled"}><span class="ic" aria-hidden="true">${tyIcon(ZONES[e.zone].type)}</span><strong>${esc(boss)}</strong>
       <small>${esc(tx("echo.sub", { boss, rule: tx("echo.r." + e.rule) }))}</small><small>${esc(!e.lvlOk ? tx("echo.lock", { n: ECHO_LVL }) : e.left > 0 ? tx("echo.left", { n: e.left }) : tx("echo.none"))}</small></button></div>`;
   }
+  return h;
+}
+function saviaHtml() {
+  const st = EV.P.stars || {}, sS = EV.P.starsS || {};
+  let h = "";
   const sav = Object.keys(ZONES).filter((id) => (st[id] || 0) >= 3);
   h += `<h3 class="cat-title">${esc(tx("sav.title"))}</h3><p class="muted" style="margin:0">${esc(tx(sav.length ? "sav.sub" : "sav.hint"))}</p>`;
   if (sav.length) h += `<div class="nodes zones">${sav.map((id) => `<button type="button" class="node zone savia" data-zone="${id}" data-savia="1"><span class="ic" aria-hidden="true">${tyIcon(ZONES[id].type)}</span><strong>${esc(zt("name", null, id))}</strong><small>${esc(tx("zones.lvl", { n: ZONES[id].min + 2 }))}</small><small class="ok">${starStr(sS[id] || 0)}</small></button>`).join("")}</div>`;
@@ -2245,11 +2274,11 @@ function render() {
   const el = $("scrExp"); if (!el) return;
   if (!X) { el.innerHTML = ""; return; }
   const z = ZONES[X.zone];
-  const head = `<div class="panel"><div class="panel-head"><div><div class="sub">${esc(view === "zones" ? tx("zones.sub") : zt("sub"))}</div><h2>${esc(view === "zones" ? tx("zones.title") : zt("name") + (X.savia ? " · " + tx("sav.tag") : X.echo ? " · " + tx("echo.tag") : X.deep ? " · " + tx("deep.tag", { n: X.deep }) : ""))}</h2></div>${view !== "pick" && view !== "zones" && view !== "end" && view !== "battle" ? `<button class="btn ghost" type="button" data-x="quit">${esc(tx("quit"))}</button>` : ""}</div>${view !== "pick" && view !== "zones" ? trailHtml() : ""}</div>`;
+  const head = `<div class="panel"><div class="panel-head"><div><div class="sub">${esc(view === "zones" ? tx("zones.sub") : zt("sub"))}</div><h2>${esc(view === "zones" ? tx("zones.title") : zt("name") + (X.savia ? " · " + tx("sav.tag") : X.echo ? " · " + tx("echo.tag") : X.deep ? " · " + tx("deep.tag", { n: X.deep }) : ""))}</h2></div>${view !== "pick" && view !== "zones" && view !== "end" && view !== "battle" && !(view === "reward" && X.shot) ? `<button class="btn ghost" type="button" data-x="quit">${esc(tx("quit"))}</button>` : ""}</div>${view !== "pick" && view !== "zones" ? trailHtml() : ""}</div>`;
   let body = "";
   if (view === "zones") {
     const rumor = LORE ? LORE.loadingLine(EV.P, L()) : "";
-    body = `<div class="panel">${rumor ? `<p class="rumor">${esc(tx("rumor"))} ${esc(rumor)}</p>` : ""}${pmapHtml()}${zonesHtml()}${extraZonesHtml()}<div class="bctl"><button class="btn ghost" type="button" data-x="cancel">${esc(tx("exp.cancel"))}</button></div></div>`;
+    body = `<div class="panel">${rumor ? `<p class="rumor">${esc(tx("rumor"))} ${esc(rumor)}</p>` : ""}${pmapHtml()}${zoneTabsHtml()}<div class="bctl"><button class="btn ghost" type="button" data-x="cancel">${esc(tx("exp.cancel"))}</button></div></div>`;
   } else if (view === "pick") {
     body = `<div class="panel"><p class="lead">${esc(zt("desc"))}</p>
       ${setBarHtml()}<h3>${esc(tx("exp.pick"))}</h3><p class="muted" style="margin:0">${esc(tx("exp.pickSub"))}</p>
@@ -2639,6 +2668,9 @@ function endBattle(res) {
     const u = allies[i++]; if (!u) continue;
     m.hp = u.hp / u.maxHp;
   }
+  // the last frame of the fight stays behind the summary card
+  try { X.shot = battle.cv ? battle.cv.toDataURL() : null; } catch (e) { X.shot = null; }
+  if (battle.raf) cancelAnimationFrame(battle.raf);
   battle = null;
   for (const m of X.party) if (m.own && m.hp <= 0) X.ownFalls = (X.ownFalls || 0) + 1;
   if (res !== "win") { finish("lose"); return; }
@@ -2681,22 +2713,31 @@ function offerCards(n, minGrade) {
   while (ids.length < n) { const id = weighted[Math.floor(rnd() * weighted.length)]; if (!ids.includes(id)) ids.push(id); }
   return ids.map((id) => ({ id, g: rollGrade(minGrade) }));
 }
+// a found card, small: thumbnail, name, type and grade, its active effect; a button to see the whole card
+function miniCardHtml(o, btn) {
+  const C = CARDS[o.id], sc = scaled(o.id, o.g);
+  return `<div class="bmini">${thumbHtml(o.id, o.g)}<div class="bm-txt"><strong>${esc(cardName(o.id))}</strong><span class="lr-meta">${typeChip(C.type)} ${gradeChip(o.g)}</span><span class="lr-fx">${esc(slotText(sc, "a"))}</span>${btn ? cantNote(o.id) : ""}<span class="bm-btns"><button class="btn ghost" type="button" data-bview="${o.id}:${o.g}">${esc(tx("r.view"))}</button>${btn || ""}</span></div></div>`;
+}
+// after a fight the summary is a card laid over the last frame of the battle
+const sceneCard = (inner) => X.shot ? `<div class="panel bend-pan"><div class="bend"><img class="bshot" alt="" src="${X.shot}"><div class="bcard">${inner}</div></div></div>` : `<div class="panel">${inner}</div>`;
 function rewardHtml() {
   const r = X.reward;
   const parts = [];
   if (r.xp) parts.push(`<span>${esc(tx("r.xp", { n: r.xp }))}</span>`);
   if (r.coins) parts.push(`<span>✦ ${esc(tx("r.coins", { n: r.coins }))}</span>`);
-  let html = `<div class="panel"><h3>${esc(r.title || tx("r.title"))}</h3>${r.text ? `<p class="evt-out">${esc(r.text)}</p>` : ""}${parts.length ? `<div class="loot">${parts.join("")}</div>` : ""}`;
-  if (r.guard) html += `<h3>${esc(tx("r.guard"))}</h3><div class="rcards">${cardHtml(r.guard.id, r.guard.g)}</div>`;
+  const fromFight = r.xp != null && X.shot;
+  let html = `<h3>${esc(r.title || tx("r.title"))}</h3>${r.text ? `<p class="evt-out">${esc(r.text)}</p>` : ""}${parts.length ? `<div class="loot">${parts.join("")}</div>` : ""}`;
+  if (r.guard) html += `<h3>${esc(tx("r.guard"))}</h3><div class="bminis">${miniCardHtml(r.guard)}</div>`;
+  const home = fromFight && r.after === "next" ? `<button class="btn ghost" type="button" data-x="quit">${esc(tx("end.home"))}</button>` : "";
   if (r.offer) {
-    html += `<h3>${esc(tx("r.pick"))}</h3><div class="rcards">${r.offer.map((o, i) => cardHtml(o.id, o.g, { foot: `${cantNote(o.id)}<div class="rc-btns"><button class="btn" type="button" data-take="${i}">${esc(tx("r.pick"))}</button></div>` })).join("")}</div>
-      <div class="bctl"><button class="btn ghost" type="button" data-take="-1">${esc(tx("r.skip"))}</button></div>`;
-  } else html += `<div class="bctl"><button class="btn" type="button" data-x="continue">${esc(tx("r.continue"))}</button></div>`;
-  return html + `</div><div class="panel"><h3>${esc(tx("exp.party"))}</h3>${partyHtml()}${lootHtml()}</div>`;
+    html += `<h3>${esc(tx("r.pick"))}</h3><div class="bminis">${r.offer.map((o, i) => miniCardHtml(o, `<button class="btn" type="button" data-take="${i}">${esc(tx("r.pick"))}</button>`)).join("")}</div>
+      <div class="bctl"><button class="btn ghost" type="button" data-take="-1">${esc(tx("r.skip"))}</button>${home}</div>`;
+  } else html += `<div class="bctl"><button class="btn" type="button" data-x="continue">${esc(tx("r.continue"))}</button>${home}</div>`;
+  return (fromFight ? sceneCard(html) : `<div class="panel">${html}</div>`) + `<div class="panel"><h3>${esc(tx("exp.party"))}</h3>${partyHtml()}${lootHtml()}</div>`;
 }
 function afterReward() {
   const a = X.reward && X.reward.after;
-  X.reward = null;
+  X.reward = null; if (a !== "win") X.shot = null;
   if (a === "win") finish("win"); else nextSection();
 }
 
@@ -3331,7 +3372,7 @@ function endHtml() {
   const nm = S && S.name ? S.name : "";
   const title = e.res === "win" ? (X.deep ? tx("deep.win", { n: X.deep }) : zt("win")) : e.res === "quit" ? tx("end.quit") : tx("end.lose");
   const text = e.res === "win" ? (X.deep ? tx("deep.winText") : zt("winText", { name: nm })) : X.deep ? tx("deep.lose", { n: X.deep }) : tx("end.loseText", { name: nm });
-  let html = `<div class="panel"><h3>${esc(title)}</h3><p class="evt-text">${esc(text)}</p>
+  let html = `<h3>${esc(title)}</h3><p class="evt-text">${esc(text)}</p>
     <div class="loot"><span>${esc(tx("r.xp", { n: e.xp }))}</span><span>✦ ${esc(tx("r.coins", { n: e.coins }))}</span><span>🃏 ${e.cards.length}</span></div>`;
   if (X.hurt && (X.hurt.energy || X.hurt.health)) html += `<p class="evt-out">${esc(tx("end.hurt", { name: nm, e: X.hurt.energy, h: X.hurt.health }))}</p>`;
   else html += `<p class="evt-out">${esc(tx("end.unhurt", { name: nm }))}</p>`;
@@ -3350,11 +3391,11 @@ function endHtml() {
   if (e.after > e.before) html += `<p class="evt-out">${esc(tx("end.lvl", { name: nm, n: e.after }))}</p>`;
   for (const k of e.unlocked) html += `<p class="evt-out">${esc(tx("end.slot", { slot: tx("slot." + k) }))}</p>`;
   for (const line of e.bondNews || []) html += `<p class="evt-out">♥ ${esc(line)}</p>`;
-  if (e.cards.length) html += `<div class="rcards">${e.cards.map((c) => cardHtml(c.id, c.g)).join("")}</div>`;
+  if (e.cards.length) html += `<div class="bminis">${e.cards.map((c) => miniCardHtml(c)).join("")}</div>`;
   if (e.lvlPick) {
-    html += `<h3>${esc(tx("end.lvlPick"))}</h3><div class="rcards">${e.lvlPick.map((o, i) => cardHtml(o.id, o.g, { foot: `<div class="rc-btns"><button class="btn" type="button" data-lvlpick="${i}">${esc(tx("r.pick"))}</button></div>` })).join("")}</div>`;
+    html += `<h3>${esc(tx("end.lvlPick"))}</h3><div class="bminis">${e.lvlPick.map((o, i) => miniCardHtml(o, `<button class="btn" type="button" data-lvlpick="${i}">${esc(tx("r.pick"))}</button>`)).join("")}</div>`;
   } else html += `<div class="bctl"><button class="btn" type="button" data-x="home">${esc(tx("end.home"))}</button></div>`;
-  return html + "</div>";
+  return sceneCard(html);
 }
 function goHome() {
   if (battle) { cancelAnimationFrame(battle.raf); battle = null; }
@@ -3393,6 +3434,8 @@ function onExpClick(e) {
     if (i >= 0 && r && r.offer) { const o = r.offer[i]; giveCard(o.id, o.g); X.loot.cards.push(o); EV.toast(tx("r.card", { card: cardName(o.id) }), GRADES[o.g][L()]); EV.sfx("card"); EV.save(); EV.checkAch(); }
     afterReward(); return;
   }
+  if (d.bview) { const [id, g] = d.bview.split(":"); EV.sfx("tap"); openCardView(id, cardHtml(id, +g)); return; }
+  if (d.ztab) { ztab = d.ztab; EV.sfx("tap"); render(); return; }
   if (d.lvlpick != null) { const o = X.end.lvlPick[+d.lvlpick]; giveCard(o.id, o.g); X.end.cards.push(o); X.end.lvlPick = null; EV.toast(tx("r.card", { card: cardName(o.id) }), GRADES[o.g][L()]); EV.sfx("card"); EV.save(); EV.checkAch(); render(); return; }
   if (d.b) { if (battle && battle.waiting) { const w = battle.waiting; battle.waiting = null; renderTurn(); EV.sfx("tap"); w.resolve(d.b === "card"); } return; }
   if (d.m) { EV.P.rpgMode = d.m; EV.saveProfile(); t.parentNode.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === t))); if (d.m === "auto" && battle && battle.waiting) { const w = battle.waiting; battle.waiting = null; renderTurn(); w.resolve(battle.b.wantPlay(w.u)); } return; }
@@ -3498,11 +3541,10 @@ function renderCards() {
   }).join("")}</div>`;
   el.innerHTML = html;
 }
-function openCardView(id) {
-  if (!colCard) return;
+function openCardView(id, html) {
   let el = $("cview");
   if (!el) { el = document.createElement("div"); el.id = "cview"; el.className = "cpick-wrap"; document.body.appendChild(el); el.addEventListener("click", (e) => { if (e.target.closest("[data-cp]")) { closeCardView(); return; } const b = e.target.closest("button"); if (b && !b.disabled) { closeCardView(); onCardsClick(e); } }); }
-  el.innerHTML = `<div class="cpick-back" data-cp="close"></div><div class="cpick cview" role="dialog" aria-modal="true"><div class="cp-head"><h3>${esc(cardName(id))}</h3><button class="sheet-x" type="button" data-cp="close" aria-label="${esc(tx("load.close"))}">✕</button></div><div class="cp-list">${colCard(id)}</div></div>`;
+  el.innerHTML = `<div class="cpick-back" data-cp="close"></div><div class="cpick cview" role="dialog" aria-modal="true"><div class="cp-head"><h3>${esc(cardName(id))}</h3><button class="sheet-x" type="button" data-cp="close" aria-label="${esc(tx("load.close"))}">✕</button></div><div class="cp-list">${html || colCard(id)}</div></div>`;
   el.hidden = false;
 }
 function closeCardView() { const el = $("cview"); if (el) el.hidden = true; }
