@@ -23,7 +23,7 @@ const TX = {
     "pantry.odds": "Probabilidades: comida 50 %, medicinas 20 %, Chispas 20 %, juguete 6 %, 1 Nota 4 %. Premio especial seguro cada {p} tiradas (faltan {n}).",
     "pantry.got": "La Despensa te da: {what}", "pantry.special": "¡Premio especial!",
     "ex.title": "Cambiar Chispas por Notas", "ex.sub": "{c} Chispas = 1 Nota. Máximo {m} a la semana (te quedan {n}).", "ex.btn": "Cambiar {c} ✦ → 1 ♪",
-    "stars.title": "Estrellas y Cofres de Constelación", "stars.sub": "Cada guardián da hasta 3 estrellas según la vida con la que termine el equipo. Tienes {n} de {m}.",
+    "stars.title": "Estrellas y Cofres de Constelación", "stars.sub": "Cada guardián da hasta 3 estrellas según la vida con la que termine el equipo, y otras 3 en Modo Savia. Tienes {n} de {m}.",
     "chest.open": "Abrir", "chest.opened": "Abierto", "chest.soon": "Llegará con los huevos",
     "chest.pick": "Elige una carta", "chest.picked": "¡{card} es tuya!",
     "r.coins": "{n} Chispas", "r.notes": "{n} Notas", "r.food": "{item}", "r.cardPick": "Carta {g} a elegir", "r.cosm": "Cosmético (próximamente)",
@@ -32,7 +32,7 @@ const TX = {
     "t.win3": "Ganar 3 combates", "t.trip1": "Terminar una expedición", "t.support1": "Que salte una carta de Soporte del equipo", "t.adv3": "Golpear 3 veces con ventaja de tipo",
     "t.pantry1": "Tirar en la Despensa", "t.equip1": "Equipar o cambiar una carta", "t.event1": "Elegir una opción en un encuentro",
     "w.daily15": "Completar 15 tareas diarias", "w.win15": "Ganar 15 combates", "w.trip3": "Terminar 3 expediciones", "w.guard2": "Calmar a 2 guardianes",
-    "w.stars3": "Conseguir 3 estrellas nuevas", "w.fuse3": "Mejorar 3 cartas", "w.pantry7": "Tirar 7 veces en la Despensa", "w.feed15": "Dar de comer 15 veces",
+    "w.stars3": "Conseguir 3 estrellas nuevas", "w.fuse3": "Mejorar 3 cartas", "w.pantry7": "Tirar 7 veces en la Despensa", "w.feed15": "Dar de comer 15 veces", "w.echo1": "Calmar al Eco del Guardián", "w.hatch1": "Abrir un huevo del Refugio",
   },
   en: {
     "nav": "Tasks", "title": "Tasks and rewards", "notes": "♪ {n} Song Notes",
@@ -48,7 +48,7 @@ const TX = {
     "pantry.odds": "Odds: food 50%, medicine 20%, Chispas 20%, toy 6%, 1 Note 4%. A special prize is guaranteed every {p} pulls ({n} to go).",
     "pantry.got": "The Pantry gives you: {what}", "pantry.special": "Special prize!",
     "ex.title": "Trade Chispas for Notes", "ex.sub": "{c} Chispas = 1 Note. Up to {m} a week ({n} left).", "ex.btn": "Trade {c} ✦ → 1 ♪",
-    "stars.title": "Stars and Constellation chests", "stars.sub": "Each guardian gives up to 3 stars depending on the health the team ends with. You have {n} of {m}.",
+    "stars.title": "Stars and Constellation chests", "stars.sub": "Each guardian gives up to 3 stars depending on the health the team ends with, and 3 more in Savia Mode. You have {n} of {m}.",
     "chest.open": "Open", "chest.opened": "Opened", "chest.soon": "Arrives with eggs",
     "chest.pick": "Pick a card", "chest.picked": "{card} is yours!",
     "r.coins": "{n} Chispas", "r.notes": "{n} Notes", "r.food": "{item}", "r.cardPick": "{g} card of your choice", "r.cosm": "Cosmetic (coming soon)",
@@ -57,7 +57,7 @@ const TX = {
     "t.win3": "Win 3 battles", "t.trip1": "Finish an expedition", "t.support1": "Have a team Support card trigger", "t.adv3": "Land 3 hits with type advantage",
     "t.pantry1": "Pull at the Pantry", "t.equip1": "Equip or swap a card", "t.event1": "Choose an option in an encounter",
     "w.daily15": "Complete 15 daily tasks", "w.win15": "Win 15 battles", "w.trip3": "Finish 3 expeditions", "w.guard2": "Calm 2 guardians",
-    "w.stars3": "Earn 3 new stars", "w.fuse3": "Upgrade 3 cards", "w.pantry7": "Pull 7 times at the Pantry", "w.feed15": "Feed 15 times",
+    "w.stars3": "Earn 3 new stars", "w.fuse3": "Upgrade 3 cards", "w.pantry7": "Pull 7 times at the Pantry", "w.feed15": "Feed 15 times", "w.echo1": "Calm the Guardian's Echo", "w.hatch1": "Hatch a Refuge egg",
   },
 };
 const tx = (k, v) => { let s = TX[L()][k]; if (s == null) s = TX.en[k]; if (s == null) return k; if (v) s = s.replace(/\{(\w+)\}/g, (m, n) => (v[n] != null ? v[n] : m)); return s; };
@@ -97,6 +97,8 @@ const WEEKLY = {
   fuse3:   { c: "fused",     n: 3,  r: 40 },
   pantry7: { c: "pantry",    n: 7,  r: 40 },
   feed15:  { c: "fed",       n: 15, r: 40 },
+  echo1:   { c: "echoWins",  n: 1,  r: 40 },
+  hatch1:  { c: "eggHatched", n: 1, r: 40 },
 };
 const CHESTS = [
   { at: 6, notes: 3 }, { at: 12, card: 3 }, { at: 18, notes: 5 }, { at: 27, card: 4 },
@@ -119,7 +121,7 @@ function rollDaily() {
   return out.map(newTask);
 }
 function rollWeekly() {
-  const ids = Object.keys(WEEKLY).filter((id) => expOK() || !["win15", "trip3", "guard2", "stars3", "fuse3"].includes(id));
+  const ids = Object.keys(WEEKLY).filter((id) => expOK() || !["win15", "trip3", "guard2", "stars3", "fuse3", "echo1"].includes(id));
   const out = [];
   while (out.length < 6 && ids.length) out.push(ids.splice(Math.floor(Math.random() * ids.length), 1)[0]);
   return out.map(newTask);
@@ -159,7 +161,7 @@ function hasNews() {
   if (CHESTS.some((c) => !c.cosm && !d.chests[c.at] && totalStars() >= c.at)) return true;
   return false;
 }
-const totalStars = () => Object.values(EV.P.stars || {}).reduce((a, n) => a + n, 0);
+const totalStars = () => [EV.P.stars, EV.P.starsS].reduce((t, o) => t + Object.values(o || {}).reduce((a, n) => a + n, 0), 0); // normal + Savia Mode
 
 /* ---------- Actions ---------- */
 function claimTask(si, ti) {
@@ -189,7 +191,7 @@ function lightLamp(si) {
 function claimWeek(ti) {
   const d = D(), t = d.week.tasks[ti];
   if (!t || t.got || !isDone(t)) return;
-  t.got = true; EV.addCoins(WEEKLY[t.id].r); save();
+  t.got = true; EV.P.c.weeklyDone = (EV.P.c.weeklyDone || 0) + 1; EV.addCoins(WEEKLY[t.id].r); save();
 }
 function claimWeekBonus() {
   const d = D();
@@ -299,7 +301,7 @@ function render() {
   });
   h += `<div class="dlamp${d.week.bonus ? " lit" : ""}"><span class="ic">♪</span><div><b>${gotW} / 4</b></div>${d.week.bonus ? `<span class="progress">✓ ${esc(tx("week.bonusDone"))}</span>` : `<button class="btn" type="button" data-wbonus="1" ${gotW >= 4 ? "" : "disabled"}>${esc(tx("week.claimBonus"))}</button>`}</div></div>`;
   // stars and chests
-  const ts = totalStars(), max = Object.keys((EV.RPG && EV.RPG.ZONES) || {}).length * 3;
+  const ts = totalStars(), max = Object.keys((EV.RPG && EV.RPG.ZONES) || {}).length * 6;
   h += `<div class="dsec"><h3>${esc(tx("stars.title"))}</h3><p class="muted">${esc(tx("stars.sub", { n: ts, m: max }))}</p><div class="dchests">${CHESTS.map((c) => {
     const what = c.notes ? tx("r.notes", { n: c.notes }) : c.card ? tx("r.cardPick", { g: GR() ? GR()[c.card][L()] : "" }) : tx("r.cosm");
     const opened = d.chests[c.at], can = !opened && !c.cosm && ts >= c.at;
