@@ -1,5 +1,5 @@
 /* Evolvlings: daily habits (Song Notes, daily and weekly tasks, visit calendar, Pantry, Constellation chests).
-   Loaded after rpg.js. Everything lives in the profile (EV.P) and works off counters the game already keeps
+   Loaded after the rpg/ scripts. Everything lives in the profile (EV.P) and works off counters the game already keeps
    in P.c: a task stores the counter value when it starts and is done when the counter has grown enough. */
 (function (root) {
 "use strict";

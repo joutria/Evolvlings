@@ -310,7 +310,7 @@ function pet(k) {
   EV.toast(tx("petted", { n: monName(k), b: EV.BUILD ? EV.BUILD.nestPet() : 1 }), "♥"); EV.sfx(bondLvl(r.bxp) > before ? "grow" : "tap");
   save();
 }
-// for rpg.js: what this creature brings to an expedition
+// for rpg/ui-expedition.js: what this creature brings to an expedition
 function unitOf(k) {
   const r = G().roster[k]; if (!r) return null;
   const bond = bondLvl(r.bxp);
@@ -322,7 +322,7 @@ function offer(species) {
   return Object.keys(R).filter((k) => k !== species && RPG.MONS[k]).sort((a, b) => R[b].lvl - R[a].lvl || R[b].bxp - R[a].bxp).slice(0, 4);
 }
 const badge = (k) => { const u = unitOf(k); return u ? tx("badge", { l: u.lvl, b: u.bond }) + (u.star ? " · ★" + u.star : "") : ""; };
-// called by rpg.js when a trip ends; returns lines for the end screen
+// called by rpg/ui-events.js when a trip ends; returns lines for the end screen
 function afterTrip(res, xp, party, plvl) {
   const R = G().roster, out = [];
   for (const m of party || []) {

@@ -5,7 +5,7 @@
 
    API (window.EVS):
      EVS.sprite(kind, n, st, sq, emo, dull) -> canvas (n+2)x(n+2). n = 16 | 24 | 32, st = 0..2, sq = frame A/B
-     EVS.KINDS                                -> list of creature ids (same ids as MONS in rpg.js)
+     EVS.KINDS                                -> list of creature ids (same ids as MONS in rpg/data-mons.js)
      EVS.typeIcon(type)                       -> 9x9 canvas
      EVS.cardArt(cardId)                      -> 16x16 canvas (the art in the card window)
      EVS.card(cardId, gradeIdx, opts)         -> 56x84 canvas, full pixel card (frame by grade, art, type, pips)
@@ -64,7 +64,7 @@ const TYPE = {
   dream: { ramp:[P.sea0,P.glim0,P.glim1,P.fog],        sig:P.glim1,  fx:"bubble",    day:false, icon: R.dream },
   star:  { ramp:[P.ember4,P.sea3,P.rose2,P.glim1],     sig:P.cream,  fx:"converge",  day:null,  icon: R.gold },
 };
-// rarity = frame material + pips (Común, Rara, Súper rara, Épica, Mítica, Legendaria in rpg.js order)
+// rarity = frame material + pips (Común, Rara, Súper rara, Épica, Mítica, Legendaria in rpg/data-cards.js order)
 const GRADE = [
   { mat:[P.soil1,P.soil2], pips:1, anim:null },
   { mat:[P.ember1,P.ember3], pips:2, anim:null },
@@ -698,7 +698,7 @@ function outline(o, W) {
     if (n) o[y * W + x] = P.ink;
   }
 }
-// card id -> [glyph, type] (types follow rpg.js; glyph chosen from the card's name)
+// card id -> [glyph, type] (types follow rpg/data-cards.js; glyph chosen from the card's name)
 const CARD = {
   flash:["flash","light"], lantern:["lantern","light"], spark:["sparkle","light"],
   gust:["spiral","air"], cloud:["cloud","air"], rain:["drops","air"],

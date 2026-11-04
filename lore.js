@@ -1,7 +1,7 @@
 /* Evolvlings — lore data (eventos con diálogo, Escritos y frases de carga)
  * Fuente: biblia del mundo, pestaña "Cómo se revela" (https://claude.ai/artifact/42UGYufJJ1iCzo5DzZGCzH)
  *
- * Pensado para encajar con rpg.js:
+ * Pensado para encajar con rpg/ (antes rpg.js):
  *  - LORE_EVT tiene la misma forma que EVT[lang][key] ({ t, c, o }) para que eventHtml() lo pinte igual.
  *  - Los efectos van declarados en `fx` (uno por opción) en vez de un switch, para aplicarlos con una sola función.
  *    Claves de fx, todas opcionales:
