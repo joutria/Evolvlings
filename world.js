@@ -248,18 +248,18 @@ let cv = null, ctx = null, raf = 0, dialog = null, foodPick = false;
 function ws() {
   const P = EV.P;
   if (!P.world || !MAPS[P.world.map]) P.world = { map: "home", x: MAPS.home.start[0], y: MAPS.home.start[1] };
-  if (!W0) W0 = { map: P.world.map, x: P.world.x, y: P.world.y, px: P.world.x * TW, py: P.world.y * TW, path: [], face: 1, then: null };
+  if (!W0) W0 = { map: P.world.map, x: P.world.x, y: P.world.y, px: P.world.x * TW, py: P.world.y * TW, path: [], face: 1, dir: "front", then: null };
   return W0;
 }
 const curMap = () => MAPS[ws().map];
 const quiet = () => (EV.quietOn ? EV.quietOn() : false);
 const placesNow = () => curMap().places.filter((p) => !(p.hideQuiet && quiet()));
 
-function petSprite() {
+function petSprite(dir, sq) {
   const S = EV.S; if (!S) return null;
   if (typeof EVS !== "undefined" && EVS.KINDS && EVS.KINDS.includes(S.species)) {
     const n = S.stage >= 2 ? 24 : 16;
-    try { return EVS.sprite(S.species, n, Math.min(2, S.stage || 1), 0, S.sleeping ? "sleep" : "normal", false); } catch (e) { return null; }
+    try { return EVS.sprite(S.species, n, Math.min(2, S.stage || 1), sq || 0, S.sleeping ? "sleep" : "normal", false, dir || "front"); } catch (e) { return null; }
   }
   return null;
 }
@@ -271,8 +271,9 @@ function frame(now) {
   if (w.path.length) {
     const [tx2, ty2] = w.path[0], gx = tx2 * TW, gy = ty2 * TW, sp = 80 / 60;
     const dx = gx - w.px, dy = gy - w.py, d = Math.hypot(dx, dy);
-    if (dx) w.face = Math.sign(dx);
-    if (d <= sp) { w.px = gx; w.py = gy; w.x = tx2; w.y = ty2; w.path.shift(); if (!w.path.length) arrived(); }
+    // 4 directions: side when moving across (mirrored for left), back when walking up, front when walking down
+    if (dx) { w.face = Math.sign(dx); w.dir = "side"; } else if (dy) w.dir = dy < 0 ? "back" : "front";
+    if (d <= sp) { w.px = gx; w.py = gy; w.x = tx2; w.y = ty2; w.path.shift(); if (!w.path.length) { w.dir = "front"; arrived(); } }
     else { w.px += (dx / d) * sp; w.py += (dy / d) * sp; }
   }
   ctx.imageSmoothingEnabled = false;
@@ -281,13 +282,14 @@ function frame(now) {
   const items = [];
   for (const [k, x, y] of m.deco) items.push({ y: y * TW + TW, draw: () => drawObj(ctx, k, x * TW + 8, y * TW + TW - 1, now) });
   for (const p of placesNow()) if (p.obj) items.push({ y: p.y * TW + TW, draw: () => drawObj(ctx, p.obj, p.x * TW + 8, p.y * TW + TW - 1, now) });
-  const img = petSprite();
+  // two-frame step while walking
+  const img = petSprite(w.dir, w.path.length ? Math.floor(now / 160) % 2 : 0);
   items.push({ y: w.py + TW + 0.5, draw: () => {
     const bob = w.path.length ? Math.abs(Math.sin(now / 90)) * 2 : Math.sin(now / 400) * 0.6;
     const bx = Math.round(w.px + 8), by = Math.round(w.py + TW - 1);
     ctx.fillStyle = C.shadow; ctx.beginPath(); ctx.ellipse(bx, by - 1, 6, 2.5, 0, 0, Math.PI * 2); ctx.fill();
     if (img) {
-      ctx.save(); ctx.translate(bx, by - Math.round(bob)); if (w.face < 0) ctx.scale(-1, 1);
+      ctx.save(); ctx.translate(bx, by - Math.round(bob)); if (w.dir === "side" && w.face < 0) ctx.scale(-1, 1);
       ctx.drawImage(img, -Math.round(img.width / 2), -img.height); ctx.restore();
     } else { ctx.fillStyle = C.gold; ctx.beginPath(); ctx.arc(bx, by - 7 - bob, 6, 0, Math.PI * 2); ctx.fill(); }
   } });

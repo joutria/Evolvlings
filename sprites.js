@@ -519,14 +519,25 @@ const KIND_TYPE = { lumo:"light", fizz:"air", pebb:"stone", fuellito:"fire", bro
   carambano:"ice", capuchon:"mush", guardatumba:"ice", unisona:"star" };
 
 const CACHE = new Map();
-function sprite(kind, n = 24, st = 1, sq = 0, emo = "normal", dull = false) {
-  const key = [kind, n, st, sq, emo, dull ? 1 : 0].join(":");
+// dir: "front" (default), "back" (no face) or "side" (facing right: face turned to the side, body a little narrower;
+// mirror it for left). Used by the walkable map in world.js.
+function sprite(kind, n = 24, st = 1, sq = 0, emo = "normal", dull = false, dir = "front") {
+  const key = [kind, n, st, sq, emo, dull ? 1 : 0, dir].join(":");
   if (CACHE.has(key)) return CACHE.get(key);
   const sp = SPEC[kind](n, st, sq), W = n + 2, H = n + 2;
   const { out, id } = rasterOut(W, H, sp.parts);
   if (sp.extra) sp.extra(out, W, H, id);
-  if (sp.face !== false) face(out, W, Object.assign({}, sp.face, dull ? { cheek: false } : {}), n, emo === "normal" && sp.sleepy && sq ? "sleep" : emo);
-  const c = toCanvas(out, W, H, dull);
+  if (sp.face !== false && dir !== "back") {
+    const f = Object.assign({}, sp.face, dull ? { cheek: false } : {});
+    if (dir === "side") { f.dx = (f.dx || 0) + Math.round(n * .14); f.gap = (f.gap || .13) * .6; f.cheek = false; }
+    face(out, W, f, n, emo === "normal" && sp.sleepy && sq ? "sleep" : emo);
+  }
+  let c = toCanvas(out, W, H, dull);
+  if (dir === "side") {
+    // drop every fifth column so the body reads narrower in profile
+    const w2 = Math.round(W * .8), c2 = canvas(w2, H), g = c2.getContext("2d");
+    g.imageSmoothingEnabled = false; g.drawImage(c, 0, 0, W, H, 0, 0, w2, H); c = c2;
+  }
   CACHE.set(key, c); return c;
 }
 // silhouette in one colour (hit flash, evolution)
