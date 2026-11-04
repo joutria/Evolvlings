@@ -42,13 +42,25 @@ function isDayNow(d) { const h = (d || new Date()).getHours(); return h >= 7 && 
 /* Grades                                                                 */
 /* ====================================================================== */
 const GRADES = [
-  { id: "c",  mult: 1.00, dur: 0, cd: 0, trade: 1.0,  w: 80,  es: "Común",      en: "Common",     col: "#8a9580" },
-  { id: "r",  mult: 1.20, dur: 0, cd: 0, trade: 0.9,  w: 15,  es: "Rara",       en: "Rare",       col: "#3f8fc9" },
-  { id: "vr", mult: 1.40, dur: 1, cd: 1, trade: 0.8,  w: 4,   es: "Súper rara", en: "Super rare", col: "#4c9a3c" },
-  { id: "sr", mult: 1.65, dur: 1, cd: 1, trade: 0.65, w: 0.8, es: "Épica",      en: "Epic",       col: "#8a55d6" },
-  { id: "ep", mult: 1.95, dur: 2, cd: 2, trade: 0.5,  w: 0.18,es: "Mítica",     en: "Mythic",     col: "#d0612c" },
-  { id: "lg", mult: 2.30, dur: 2, cd: 2, trade: 0.4,  w: 0.02,es: "Legendaria", en: "Legendary",  col: "#d4a017" },
+  { id: "c",  mult: 1.00, dur: 0, cd: 0, trade: 1.0,  w: 80,  es: "Común",      en: "Common",     col: "#6b4a3a" },
+  { id: "r",  mult: 1.20, dur: 0, cd: 0, trade: 0.9,  w: 15,  es: "Rara",       en: "Rare",       col: "#a3343b" },
+  { id: "vr", mult: 1.40, dur: 1, cd: 1, trade: 0.8,  w: 4,   es: "Súper rara", en: "Super rare", col: "#6e6283" },
+  { id: "sr", mult: 1.65, dur: 1, cd: 1, trade: 0.65, w: 0.8, es: "Épica",      en: "Epic",       col: "#2f5d96" },
+  { id: "ep", mult: 1.95, dur: 2, cd: 2, trade: 0.5,  w: 0.18,es: "Mítica",     en: "Mythic",     col: "#c25e9a" },
+  { id: "lg", mult: 2.30, dur: 2, cd: 2, trade: 0.4,  w: 0.02,es: "Legendaria", en: "Legendary",  col: "#e0603f" },
 ];
+/* Rarity is read from the frame's material (Visual language of the Glade, section 7):
+   wood, copper, silver, lake glass, nacre, root-light. Colours are Glimmer-32. */
+const GRADE_VIS = [
+  { mat: ["#6b4a3a", "#a07a55"], anim: null },    // Común: madera del Bosque Hondo
+  { mat: ["#a3343b", "#f39a52"], anim: null },    // Rara: cobre del Gremio
+  { mat: ["#9d93ad", "#fbf6ef"], anim: null },    // Súper rara: plata de Los Altos
+  { mat: ["#3f93c4", "#c8eef5"], anim: "shine" }, // Épica: cristal del Lago Espejo
+  { mat: ["#f4a6c4", "#c7a6ff"], anim: "irid" },  // Mítica: nácar del Fondo Blanco
+  { mat: ["#ffd57a", "#fff0b8"], anim: "pulse" }, // Legendaria: luz de raíz
+];
+// The Black Sap keeps its own colours, outside Glimmer-32 on purpose; nothing else uses them
+const SAP = { c0: "#0e0814", c1: "#241030", c2: "#3b1d4a", sheen: "#7dffb0" };
 function rollGrade(minIdx, rnd) {
   rnd = rnd || Math.random;
   const pool = GRADES.slice(minIdx || 0);
@@ -195,8 +207,15 @@ const CARDS = {
   beam:     { type: "light", by: "farol", boss: true, p: { dmg: 10 }, a: { cd: 4, tgt: "foes", pow: 100, st: ["blind", 1, 1] }, s: { on: "start", fx: { tgt: "foes", st: ["slow", 2, 1, 10] } } },
   pride:    { type: "light", by: "farol", boss: true, p: { dmg: 15 }, a: { cd: 3, tgt: "foe", pow: 130 }, s: { on: "allyLow", pct: 50, fx: { tgt: "self", shield: [20, 2] } } },
   law:      { type: "light", by: "farol", boss: true, p: { spd: 10 }, a: { cd: 4, tgt: "foes", st: ["slow", 2, 1, 10] }, s: { on: "start", fx: { tgt: "foes", st: ["slow", 2, 1, 10] } } },
+  // the Aching Root (final guardian, Star) and Unísona (story creature, Star: never from pulls)
+  ache:     { type: "star", by: "raiz", boss: true, p: { dmg: 10 }, a: { cd: 4, tgt: "foes", pow: 90, st: ["dull", 2, 1, 10] }, s: { on: "start", fx: { tgt: "foes", st: ["slow", 1, 1, 10] } } },
+  eight:    { type: "star", by: "raiz", boss: true, p: { teamCrit: 6, dmg: 10 }, a: { cd: 3, tgt: "strongFoe", pow: 120, strip: 1 }, s: { on: "allyLow", pct: 50, fx: { tgt: "self", st: ["fury", 99, 1, 20] } } },
+  rootheart:{ type: "star", by: "raiz", boss: true, p: { def: 15 }, a: { cd: 5, tgt: "self", shield: [30, 2] }, s: { on: "allyLow", pct: 25, fx: { tgt: "theAlly", shield: [30, 2] } } },
+  duet:     { type: "star", by: "unisona", story: true, p: { spd: 10 }, a: { cd: 3, tgt: "foe", pow: 120, st: ["blind", 1, 1] }, s: { on: "start", fx: { tgt: "fastestFoe", st: ["blind", 1, 1] } } },
+  unison:   { type: "star", by: "unisona", story: true, p: { healGive: 15 }, a: { cd: 4, tgt: "allies", heal: 12 }, s: { on: "allyStatus", status: "blind", fx: { tgt: "theAlly", cleanse: "blind" } } },
+  firstnote:{ type: "star", by: "unisona", story: true, p: { teamCrit: 6 }, a: { cd: 4, tgt: "allies", shield: [20, 2] }, s: { on: "allyLow", pct: 40, fx: { tgt: "theAlly", st: ["guard", 2, 1, 20] } } },
 };
-const DROP_POOL = Object.keys(CARDS).filter((k) => !CARDS[k].boss);
+const DROP_POOL = Object.keys(CARDS).filter((k) => !CARDS[k].boss && !CARDS[k].story);
 // Which card types each home creature can use: its own type, two from its circle or close to it,
 // and one for coverage. Adults also learn their evolution's type, and a creature can always use its own signature cards.
 const COMPAT = {
@@ -207,6 +226,7 @@ const COMPAT = {
 function canUse(species, form, id) {
   const c = CARDS[id], list = COMPAT[species];
   if (!c || !list) return true;
+  if (c.type === "star") return true; // Star cards fit every creature
   if (c.by === species || list.includes(c.type)) return true;
   const adult = MONS[species] && MONS[species].adult && form && MONS[species].adult[form];
   return adult === c.type;
@@ -288,6 +308,8 @@ const MONS = {
   guardatumba:{ types: ["ice"], rar: 4, st: { hp: 66, str: 50, def: 66, spd: 30, cr: 48 }, cards: ["regent", "thousand", "sealed"] },
   veleta:   { types: ["air"],   rar: 3, st: { hp: 160, str: 42, def: 38, spd: 48, cr: 34 }, cards: ["gale", "voices", "spin"], boss: true },
   micelio:  { types: ["mush"],  rar: 3, st: { hp: 175, str: 38, def: 44, spd: 22, cr: 28 }, cards: ["spores", "threads", "sapbed"], boss: true },
+  raiz:     { types: ["star"],  rar: 4, st: { hp: 230, str: 48, def: 50, spd: 38, cr: 36 }, cards: ["ache", "eight", "rootheart"], boss: true },
+  unisona:  { types: ["star"],  rar: 4, st: { hp: 48, str: 48, def: 44, spd: 54, cr: 52 }, cards: ["duet", "unison", "firstnote"], story: true },
   trono:    { types: ["shadow"], rar: 3, st: { hp: 150, str: 46, def: 40, spd: 42, cr: 32 }, cards: ["court", "crown", "law"], boss: true },
   mira:     { types: ["water"],  rar: 3, st: { hp: 130, str: 38, def: 36, spd: 36, cr: 30 }, cards: ["mirror", "gaze", "core"], boss: true },
   grava:    { types: ["stone"],  rar: 3, st: { hp: 155, str: 38, def: 50, spd: 20, cr: 28 }, cards: ["cavein", "song", "core"], boss: true },
@@ -498,7 +520,7 @@ B.hit = function (src, tgt, pow, card, extra) {
   if (left >= tgt.hp && ts.cloud > 0) { ts.cloud--; left = Math.round(left / 2); this.emit({ k: "save", u: tgt.uid }); }
   tgt.hp = Math.max(0, tgt.hp - left);
   src.hitOnce = true; tgt.hitsTaken++;
-  this.emit({ k: "dmg", u: tgt.uid, by: src.uid, n: d, crit, eff: tm > 1 ? "up" : tm < 1 ? "down" : "", ty });
+  this.emit({ k: "dmg", u: tgt.uid, by: src.uid, n: d, crit, eff: tm >= 1.5 ? "up" : tm > 1 ? "opp" : tm < 1 ? "down" : "", ty });
   if (crit && src.mods.critSpark) side.spark = src.mods.critSpark;
   if (crit) this.trigger("allyCrit", tgt, {});
   if (src.mods.onHit) this.addStatus(src, tgt, src.mods.onHit, card ? card.type : null);
@@ -712,55 +734,62 @@ const ZONES = {
   aurora: {
     type: "light", bonus: { light: 10, shadow: -10 }, sections: 4, min: 1, unlock: null, decor: "lanterns",
     foes: ["lumo", "fuellito", "brotin", "lumo"], allies: ["brotin", "remolin", "fuellito", "bostezo", "lumo", "fizz", "pebb", "mecha"],
-    boss: "farol", sky: ["#ffe9b8", "#f6c97a"], skyN: ["#2b2f5c", "#57508a"], ground: "#9cc46a", groundN: "#4f6b47",
+    boss: "farol", sky: ["#fff0b8", "#ffd57a"], skyN: ["#1f2f5c", "#2f5d96"], ground: "#86b85a", groundN: "#4f8a46",
     events: ["farol", "patrol", "tila", "well"],
   },
   crater: {
     type: "fire", bonus: { fire: 10, water: -10 }, sections: 4, min: 2, unlock: "aurora", decor: "forge",
     foes: ["fuellito", "fuellito", "yunqueron", "mecha"], allies: ["remolin", "brotin", "bostezo", "pebb", "fizz", "lumo", "mecha", "yunqueron"],
-    boss: "forja", sky: ["#ffd7a8", "#e9875a"], skyN: ["#2a1b2b", "#5d2e3a"], ground: "#9a7458", groundN: "#4a3838",
+    boss: "forja", sky: ["#fff0b8", "#f39a52"], skyN: ["#1d1626", "#5c1f2e"], ground: "#a07a55", groundN: "#3d2a2a",
     events: ["dam", "apprentice", "ola", "well"],
   },
   forest: {
     type: "plant", bonus: { plant: 10, light: -10 }, sections: 4, min: 3, unlock: "aurora", decor: "forest",
     foes: ["brotin", "brotin", "espinardo", "fuellito"], allies: ["fuellito", "remolin", "bostezo", "pebb", "fizz", "lumo", "yunqueron", "espinardo"],
-    boss: "seto", sky: ["#d6ecc4", "#86b67e"], skyN: ["#12251e", "#26443a"], ground: "#5f8f4a", groundN: "#2f4a33",
+    boss: "seto", sky: ["#c4df7f", "#86b85a"], skyN: ["#1d1626", "#1f3b35"], ground: "#4f8a46", groundN: "#1f3b35",
     events: ["liquen", "vines", "loggers", "well"],
   },
   // the Underside (Envés): the night half of the valley, past the Ford
   hollow: {
     type: "shadow", bonus: { shadow: 10, light: -10 }, sections: 4, min: 4, unlock: ["crater", "forest"], decor: "mist",
     foes: ["nim", "nim", "centinela", "ecolito"], allies: ["lumo", "fuellito", "remolin", "pebb", "bostezo", "mecha", "nim", "ecolito"],
-    boss: "trono", sky: ["#b9b4c6", "#7d7891"], skyN: ["#17151f", "#2c2838"], ground: "#6d6a78", groundN: "#2a2833",
+    boss: "trono", sky: ["#d2cbd9", "#6e6283"], skyN: ["#1d1626", "#2e2440"], ground: "#6e6283", groundN: "#2e2440",
     events: ["court", "dig", "whisper"],
   },
   lake: {
     type: "water", bonus: { water: 10, fire: -10 }, sections: 4, min: 5, unlock: ["crater", "forest"], decor: "lake",
     foes: ["remolin", "vidriela", "remolin", "nim"], allies: ["brotin", "fizz", "pebb", "bostezo", "remolin", "vidriela", "nim", "espinardo"],
-    boss: "mira", sky: ["#cfe6f2", "#8cb9d6"], skyN: ["#0f1b2e", "#25385a"], ground: "#5d8fa8", groundN: "#1f3448",
+    boss: "mira", sky: ["#c8eef5", "#7cc8e3"], skyN: ["#1d1626", "#1f2f5c"], ground: "#3f93c4", groundN: "#1f2f5c",
     events: ["orilla", "reflection", "boats"],
   },
   caves: {
     type: "stone", bonus: { stone: 10, air: -10 }, sections: 4, min: 5, unlock: ["crater", "forest"], decor: "caves",
     foes: ["pebb", "ecolito", "pebb", "remolin"], allies: ["remolin", "brotin", "fizz", "bostezo", "yunqueron", "ecolito", "vidriela", "espinardo"],
-    boss: "grava", sky: ["#8a7a6a", "#5a4c40"], skyN: ["#1c1714", "#2f2620"], ground: "#7a6a58", groundN: "#2e2620",
+    boss: "grava", sky: ["#a07a55", "#6b4a3a"], skyN: ["#1d1626", "#3d2a2a"], ground: "#6b4a3a", groundN: "#3d2a2a",
     events: ["gravasong", "tunnels", "miners"],
   },
   // Los Altos (above the Dayside) and the White Deep (under the Underside)
   heights: {
     type: "air", bonus: { air: 10, stone: -10 }, sections: 4, min: 6, unlock: ["hollow", "lake", "caves"], decor: "peaks",
     foes: ["relampin", "trinilla", "fizz", "relampin"], allies: ["lumo", "fizz", "pebb", "fuellito", "remolin", "relampin", "trinilla", "ecolito"],
-    boss: "veleta", sky: ["#dff0ff", "#9cc8ec"], skyN: ["#141c34", "#2e3e6a"], ground: "#a8b8a0", groundN: "#38424a",
+    boss: "veleta", sky: ["#c8eef5", "#7cc8e3"], skyN: ["#1d1626", "#1f2f5c"], ground: "#9d93ad", groundN: "#4a3d5e",
     events: ["coplo", "news", "pass"],
   },
   deep: {
     type: "mush", bonus: { mush: 10, plant: -10 }, sections: 4, min: 7, unlock: ["hollow", "lake", "caves"], decor: "ice",
     foes: ["carambano", "capuchon", "bostezo", "carambano"], allies: ["fuellito", "brotin", "bostezo", "pebb", "carambano", "capuchon", "guardatumba", "vidriela"],
-    boss: "micelio", sky: ["#eef6fa", "#c4dcea"], skyN: ["#121a22", "#26343f"], ground: "#dfe9ee", groundN: "#3a4650",
+    boss: "micelio", sky: ["#fbf6ef", "#c8eef5"], skyN: ["#1d1626", "#1f3b35"], ground: "#c8eef5", groundN: "#4a3d5e",
     events: ["esporina", "tomb", "dreams"],
   },
+  // the Heart of the Glade: the stump above the single Root, opens once all eight guardians are calm
+  heart: {
+    type: "star", bonus: {}, sections: 4, min: 8, unlock: ["aurora", "crater", "forest", "hollow", "lake", "caves", "heights", "deep"], unlockAll: true, decor: "heart",
+    foes: ["lumo", "fizz", "pebb", "nim", "vidriela", "relampin", "capuchon", "yunqueron", "trinilla", "carambano"], allies: ["lumo", "fizz", "pebb", "fuellito", "remolin", "nim", "trinilla", "vidriela", "capuchon", "relampin"],
+    boss: "raiz", sky: ["#fbf6ef", "#d2cbd9"], skyN: ["#1d1626", "#2e2440"], ground: "#a07a55", groundN: "#2e2440",
+    events: ["duo", "albor", "cantora"],
+  },
 };
-const EVENTS = ["farol", "patrol", "tila", "well", "dam", "apprentice", "ola", "liquen", "vines", "loggers", "court", "dig", "whisper", "orilla", "reflection", "boats", "gravasong", "tunnels", "miners", "coplo", "news", "pass", "esporina", "tomb", "dreams"];
+const EVENTS = ["farol", "patrol", "tila", "well", "dam", "apprentice", "ola", "liquen", "vines", "loggers", "court", "dig", "whisper", "orilla", "reflection", "boats", "gravasong", "tunnels", "miners", "coplo", "news", "pass", "esporina", "tomb", "dreams", "duo", "albor", "cantora"];
 
 const api = { COMPAT, canUse, UPGRADE_N, TYPES, BEATS, OPPOSITE, typeMult, GRADES, rollGrade, STATUS, CARDS, DROP_POOL, scaled, MONS, makeUnit, Battle, lvlScale, xpNeed, SLOT_LVL, ZONES, EVENTS, isDayNow };
 if (typeof module !== "undefined" && module.exports) module.exports = api;
@@ -795,7 +824,7 @@ const TX = {
     "b.noCard": "Sin carta activa",
     "b.win": "¡Victoria!", "b.lose": "El equipo se retira…",
     "log.act": "{name} juega {card}.", "log.basic": "{name} ataca.", "log.dmg": "{name} recibe {n}{crit}{eff}.", "log.crit": " (¡crítico!)",
-    "log.up": " · es muy eficaz", "log.down": " · no es muy eficaz", "log.miss": "{name} esquiva.", "log.blindMiss": "{name} falla: no ve nada.",
+    "log.up": " · es muy eficaz", "log.opp": " · tipo opuesto", "log.down": " · no es muy eficaz", "b.opp": "Opuesto", "log.miss": "{name} esquiva.", "log.blindMiss": "{name} falla: no ve nada.",
     "log.heal": "{name} recupera {n}.", "log.st": "{name}: {st}.", "log.ko": "{name} cae.", "log.skip.stun": "{name} está aturdido.",
     "log.skip.trap": "{name} está atrapado.", "log.skip.tired": "{name} se toma un respiro.", "log.support": "Soporte de {name}: {card}.",
     "log.shield": "{name} gana un escudo de {n}.", "log.break": "¡Escudo roto!", "log.cleanse": "{name} se libra de {st}.",
@@ -814,6 +843,7 @@ const TX = {
     "cards.cant": "{name} no puede usar cartas de {type}", "cards.canTypes": "{name} puede usar cartas de: {types}, y las suyas propias.", "cards.copies": "Copias",
     "cards.desc": "Cada carta trae tres efectos; solo funciona el del hueco donde la pongas. Si el tipo de la carta coincide con el de tu criatura, resuena (+15 %).",
     "cards.noCreature": "Ten una criatura joven para usar cartas.", "cards.stats": "Vida {hp} · Fuerza {str} · Defensa {def} · Velocidad {spd} · Crítico {cr} %",
+    "sh.title": "Ficha de combate", "sh.sub": "Nivel {n}. Los cuidados de hoy suben o bajan cada valor.", "sh.hp": "Vida", "sh.str": "Fuerza", "sh.def": "Defensa", "sh.spd": "Velocidad", "sh.cr": "Crítico", "sh.dodge": "Esquiva", "sh.by": "por {c}", "sh.need": "Aparece cuando tu criatura sea joven.",
     "cards.unequip": "Quitar", "cards.inUse": "En uso", "cards.mode": "Modo de combate",
     "log.expGo": "{name} sale de expedición {to}.", "log.expWin": "{name} volvió {from} con el guardián en paz.",
     "log.expLose": "{name} volvió {from} un poco magullada.",
@@ -827,18 +857,19 @@ const TX = {
     "ach.cards10": ["Coleccionista", "Reúne 10 cartas."], "ach.fuse1": ["Cinco en una", "Mejora una carta juntando cinco iguales."],
     "ach.grimSol": ["Círculo del Sol", "Descubre en el Grimorio todas las cartas de Fuego, Planta y Luz."], "ach.grimSky": ["Círculo del Cielo", "Descubre todas las cartas de Rayo, Aire y Música."],
     "ach.grimLake": ["Círculo del Lago", "Descubre todas las cartas de Agua, Piedra y Sombra."], "ach.grimFrost": ["Círculo de la Escarcha", "Descubre todas las cartas de Hielo, Seta y Sueño."],
-    "ach.grimAll": ["El Grimorio completo", "Descubre todas las cartas del Claro."], "ach.dust1": ["Polvo de estrella", "Deshaz una copia sobrante en Polvo de estrella."],
+    "ach.grimAll": ["El Grimorio completo", "Descubre todas las cartas del Claro."], "ach.heart1": ["El Canto entero", "Calma a la Raíz Doliente en el Corazón del Claro."], "ach.dust1": ["Polvo de estrella", "Deshaz una copia sobrante en Polvo de estrella."],
     "ctab.col": "Colección", "ctab.grim": "Grimorio", "ctab.shop": "Taller",
     "grim.desc": "Todas las cartas del Claro. Las que aún no has visto aparecen en silueta. Completa un círculo entero para ganar un logro.",
     "grim.count": "{n} de {m} descubiertas", "grim.unknown": "Carta sin descubrir", "grim.boss": "Solo la entrega un guardián.", "grim.by": "La lleva {mon}.",
-    "grim.craft": "Crear Común · {c} ✧", "grim.crafted": "¡Has creado {card}!", "grim.circle.sol": "Círculo del Sol", "grim.circle.sky": "Círculo del Cielo", "grim.circle.lake": "Círculo del Lago", "grim.circle.frost": "Círculo de la Escarcha", "grim.circle.star": "Estrella",
-    "dust.have": "Polvo de estrella: {n} ✧", "dust.btn": "Deshacer 1 → +{n} ✧", "dust.got": "+{n} Polvo de estrella", "dust.poor": "Te falta Polvo de estrella.",
-    "dust.desc": "Deshaz las copias que te sobran (nunca la última ni la que llevas puesta). Cada grado vale 5 veces más: Común 1 ✧, Rara 5 ✧, Súper rara 25 ✧… Con {c} ✧ creas en el Grimorio una carta Común que te falte.",
+    "grim.craft": "Crear Común · {c} ∴", "grim.crafted": "¡Has creado {card}!", "grim.circle.sol": "Círculo del Sol", "grim.circle.sky": "Círculo del Cielo", "grim.circle.lake": "Círculo del Lago", "grim.circle.frost": "Círculo de la Escarcha", "grim.circle.star": "Estrella",
+    "dust.have": "Polvo de estrella: {n} ∴", "dust.btn": "Deshacer 1 → +{n} ∴", "dust.got": "+{n} Polvo de estrella", "dust.poor": "Te falta Polvo de estrella.",
+    "dust.desc": "Deshaz las copias que te sobran (nunca la última ni la que llevas puesta). Cada grado vale 5 veces más: Común 1 ∴, Rara 5 ∴, Súper rara 25 ∴… Con {c} ∴ creas en el Grimorio una carta Común que te falte.",
     "pack.title": "Sobre de cartas", "pack.desc": "Tres cartas al azar, la mitad pensadas para tu criatura. Puedes abrir {m} al día; te quedan {n}.",
     "pack.btn": "Abrir sobre · {c} ✦", "pack.none": "Ya abriste todos los sobres de hoy. Vuelve mañana.", "pack.got": "Del sobre:",
-    "foe.hollow": "{name} apagado", "boss.farol": "El Gran Farol", "boss.forja": "La Forja Despierta", "boss.seto": "El Seto Hambriento", "boss.trono": "El Trono Vacío", "boss.mira": "La Que Mira desde Abajo", "boss.grava": "Grava", "boss.veleta": "La Veleta Mayor", "boss.micelio": "La Madre Micelio",
+    "foe.hollow": "{name} apagado", "boss.farol": "El Gran Farol", "boss.forja": "La Forja Despierta", "boss.seto": "El Seto Hambriento", "boss.trono": "El Trono Vacío", "boss.mira": "La Que Mira desde Abajo", "boss.grava": "Grava", "boss.veleta": "La Veleta Mayor", "boss.micelio": "La Madre Micelio", "boss.raiz": "La Raíz Doliente",
     "zones.lockEnv": "Calma a un guardián del Cráter o del Bosque para cruzar el Vado hacia el Envés.",
-    "zones.lockHigh": "Calma a un guardián del Envés para abrir este camino.",
+    "zones.lockHigh": "Calma a un guardián del Envés para abrir este camino.", "zones.lockHeart": "Calma a los ocho guardianes para llegar al Corazón.",
+    "r.guard": "El guardián te deja una de sus cartas", "grim.story": "Solo la da Unísona.", "end.unisona": "Unísona se queda contigo. Desde ahora puede acompañarte en cualquier expedición, y sus cartas Estrella valen para todas las criaturas.", "end.unisonaUp": "Unísona canta contigo otra vez y te da otra copia de una de sus cartas. Fusiónalas para que suba de rareza.",
     "log.strip": "{name} pierde {st}.", "log.cdup": "La carta de {name} tardará {n} más en estar lista.",
     "ach.guard8": ["El Canto casi entero", "Calma a los ocho guardianes del valle."],
     "log.lost": "{name} no encuentra a nadie en la niebla.", "log.echo": "¡El golpe de {name} resuena otra vez!", "log.revive": "¡{name} se levanta con {n} de vida!",
@@ -863,7 +894,7 @@ const TX = {
     "b.noCard": "No active card",
     "b.win": "Victory!", "b.lose": "The team pulls back…",
     "log.act": "{name} plays {card}.", "log.basic": "{name} attacks.", "log.dmg": "{name} takes {n}{crit}{eff}.", "log.crit": " (critical!)",
-    "log.up": " · super effective", "log.down": " · not very effective", "log.miss": "{name} dodges.", "log.blindMiss": "{name} misses: it can't see.",
+    "log.up": " · super effective", "log.opp": " · opposite type", "log.down": " · not very effective", "b.opp": "Opposite", "log.miss": "{name} dodges.", "log.blindMiss": "{name} misses: it can't see.",
     "log.heal": "{name} recovers {n}.", "log.st": "{name}: {st}.", "log.ko": "{name} is down.", "log.skip.stun": "{name} is stunned.",
     "log.skip.trap": "{name} is trapped.", "log.skip.tired": "{name} takes a breather.", "log.support": "{name}'s support: {card}.",
     "log.shield": "{name} gains a {n} shield.", "log.break": "Shield broken!", "log.cleanse": "{name} shakes off {st}.",
@@ -882,6 +913,7 @@ const TX = {
     "cards.cant": "{name} can't use {type} cards", "cards.canTypes": "{name} can use cards of: {types}, plus its own.", "cards.copies": "Copies",
     "cards.desc": "Each card carries three effects; only the one for the slot you put it in works. If the card's type matches your creature's, it resonates (+15%).",
     "cards.noCreature": "Raise a creature to kid stage to use cards.", "cards.stats": "Health {hp} · Strength {str} · Defence {def} · Speed {spd} · Crit {cr}%",
+    "sh.title": "Battle stats", "sh.sub": "Level {n}. Today's care raises or lowers each value.", "sh.hp": "Health", "sh.str": "Strength", "sh.def": "Defence", "sh.spd": "Speed", "sh.cr": "Crit", "sh.dodge": "Dodge", "sh.by": "from {c}", "sh.need": "Shows up once your creature is a kid.",
     "cards.unequip": "Remove", "cards.inUse": "In use", "cards.mode": "Battle mode",
     "log.expGo": "{name} set out {to}.", "log.expWin": "{name} came back {from} with the guardian at peace.",
     "log.expLose": "{name} came back {from} a bit bruised.",
@@ -895,18 +927,19 @@ const TX = {
     "ach.cards10": ["Collector", "Gather 10 cards."], "ach.fuse1": ["Five in one", "Upgrade a card by combining five of the same."],
     "ach.grimSol": ["Circle of the Sun", "Discover every Fire, Plant and Light card in the Grimoire."], "ach.grimSky": ["Circle of the Sky", "Discover every Bolt, Air and Music card."],
     "ach.grimLake": ["Circle of the Lake", "Discover every Water, Stone and Shadow card."], "ach.grimFrost": ["Circle of the Frost", "Discover every Ice, Mushroom and Dream card."],
-    "ach.grimAll": ["The full Grimoire", "Discover every card of the Glade."], "ach.dust1": ["Stardust", "Break a spare copy into Stardust."],
+    "ach.grimAll": ["The full Grimoire", "Discover every card of the Glade."], "ach.heart1": ["The whole Song", "Calm the Aching Root in the Heart of the Glade."], "ach.dust1": ["Stardust", "Break a spare copy into Stardust."],
     "ctab.col": "Collection", "ctab.grim": "Grimoire", "ctab.shop": "Workshop",
     "grim.desc": "Every card of the Glade. The ones you haven't seen yet show as silhouettes. Complete a whole circle to earn an achievement.",
     "grim.count": "{n} of {m} discovered", "grim.unknown": "Undiscovered card", "grim.boss": "Only a guardian gives it.", "grim.by": "Carried by {mon}.",
-    "grim.craft": "Make Common · {c} ✧", "grim.crafted": "You made {card}!", "grim.circle.sol": "Circle of the Sun", "grim.circle.sky": "Circle of the Sky", "grim.circle.lake": "Circle of the Lake", "grim.circle.frost": "Circle of the Frost", "grim.circle.star": "Star",
-    "dust.have": "Stardust: {n} ✧", "dust.btn": "Break 1 → +{n} ✧", "dust.got": "+{n} Stardust", "dust.poor": "Not enough Stardust.",
-    "dust.desc": "Break the copies you don't need (never the last one or the one in use). Each grade is worth 5 times more: Common 1 ✧, Rare 5 ✧, Super rare 25 ✧… With {c} ✧ you can make a Common card you're missing in the Grimoire.",
+    "grim.craft": "Make Common · {c} ∴", "grim.crafted": "You made {card}!", "grim.circle.sol": "Circle of the Sun", "grim.circle.sky": "Circle of the Sky", "grim.circle.lake": "Circle of the Lake", "grim.circle.frost": "Circle of the Frost", "grim.circle.star": "Star",
+    "dust.have": "Stardust: {n} ∴", "dust.btn": "Break 1 → +{n} ∴", "dust.got": "+{n} Stardust", "dust.poor": "Not enough Stardust.",
+    "dust.desc": "Break the copies you don't need (never the last one or the one in use). Each grade is worth 5 times more: Common 1 ∴, Rare 5 ∴, Super rare 25 ∴… With {c} ∴ you can make a Common card you're missing in the Grimoire.",
     "pack.title": "Card pack", "pack.desc": "Three random cards, half of them suited to your creature. You can open {m} a day; {n} left.",
     "pack.btn": "Open pack · {c} ✦", "pack.none": "You've opened all of today's packs. Come back tomorrow.", "pack.got": "From the pack:",
-    "foe.hollow": "Dimmed {name}", "boss.farol": "The Great Lantern", "boss.forja": "The Wakeful Forge", "boss.seto": "The Hungry Hedge", "boss.trono": "The Empty Throne", "boss.mira": "She Who Watches from Below", "boss.grava": "Grava", "boss.veleta": "The Great Weathervane", "boss.micelio": "Mother Mycelium",
+    "foe.hollow": "Dimmed {name}", "boss.farol": "The Great Lantern", "boss.forja": "The Wakeful Forge", "boss.seto": "The Hungry Hedge", "boss.trono": "The Empty Throne", "boss.mira": "She Who Watches from Below", "boss.grava": "Grava", "boss.veleta": "The Great Weathervane", "boss.micelio": "Mother Mycelium", "boss.raiz": "The Aching Root",
     "zones.lockEnv": "Calm a guardian of the Crater or the Wood to cross the Ford to the Underside.",
-    "zones.lockHigh": "Calm a guardian of the Underside to open this path.",
+    "zones.lockHigh": "Calm a guardian of the Underside to open this path.", "zones.lockHeart": "Calm all eight guardians to reach the Heart.",
+    "r.guard": "The guardian leaves you one of its cards", "grim.story": "Only Unísona gives it.", "end.unisona": "Unísona stays with you. From now on it can join you on any expedition, and its Star cards work for every creature.", "end.unisonaUp": "Unísona sings with you again and gives you another copy of one of its cards. Fuse them to raise its grade.",
     "log.strip": "{name} loses {st}.", "log.cdup": "{name}'s card will take {n} longer to be ready.",
     "ach.guard8": ["The Song almost whole", "Calm all eight guardians of the valley."],
     "log.lost": "{name} can't find anyone in the fog.", "log.echo": "{name}'s blow rings out again!", "log.revive": "{name} gets back up with {n} health!",
@@ -943,6 +976,10 @@ const ZT = {
       desc: "Picos y nubes donde viven mensajeros, juglares y meteorólogos. Venden noticias al mejor postor y cierran los pasos cuando les conviene. Aquí el Aire pega un 10 % más fuerte y la Piedra un 10 % menos.",
       bossD: "La Veleta Mayor, un remolino de voces robadas.", win: "¡La Veleta Mayor deja de girar!",
       winText: "Las voces robadas se escapan del remolino y vuelven a sus dueños, cada una por su valle. {name} vuelve a casa con el pelo revuelto por el viento.", verse: "El verso de la voz que no se vende" },
+    heart: { name: "Corazón del Claro", sub: "El centro del valle · zona de Estrella", to: "al Corazón del Claro", from: "del Corazón del Claro",
+      desc: "El tocón enorme del centro del valle, justo encima de la Raíz. Es lugar de peregrinos y nadie entra. De aquí sube la savia negra. Aquí no hay ventajas de tipo: la Estrella no gana ni pierde contra nadie.",
+      bossD: "La Raíz Doliente, de todos los tipos y de ninguno.", win: "¡La Raíz Doliente deja de doler!",
+      winText: "Cantas los ocho versos y la Raíz responde con el noveno. La savia negra se aclara y baja despacio hacia todos los valles a la vez. {name} vuelve a casa con Unísona al lado, y el Claro entero suena distinto.", verse: "El verso que solo se canta con los otros ocho" },
     deep: { name: "El Fondo Blanco", sub: "Bajo el Envés · zona de Seta", to: "al Fondo Blanco", from: "del Fondo Blanco",
       desc: "Cavernas heladas bajo el Envés, casi aisladas del resto. La savia derritió el hielo y sus pueblos tuvieron que salir. Aquí la Seta pega un 10 % más fuerte y la Planta un 10 % menos.",
       bossD: "La Madre Micelio duerme sobre la savia.", win: "¡La Madre Micelio despierta tranquila!",
@@ -977,6 +1014,10 @@ const ZT = {
       desc: "Peaks and clouds where messengers, minstrels and weather-watchers live. They sell news to the highest bidder and close the passes when it suits them. Here Air hits 10% harder and Stone 10% softer.",
       bossD: "The Great Weathervane, a whirlwind of stolen voices.", win: "The Great Weathervane stops spinning!",
       winText: "The stolen voices slip out of the whirlwind and go back to their owners, each down its own valley. {name} heads home with wind-tousled fur.", verse: "The verse of the voice that isn't for sale" },
+    heart: { name: "Heart of the Glade", sub: "The centre of the valley · Star zone", to: "to the Heart of the Glade", from: "from the Heart of the Glade",
+      desc: "The huge stump at the centre of the valley, right above the Root. Pilgrims come here and nobody goes in. The black sap rises from here. There are no type advantages here: Star neither wins nor loses against anyone.",
+      bossD: "The Aching Root, of every type and of none.", win: "The Aching Root stops aching!",
+      winText: "You sing the eight verses and the Root answers with the ninth. The black sap clears and flows slowly down into every valley at once. {name} heads home with Unísona alongside, and the whole Glade sounds different.", verse: "The verse that is only sung with the other eight" },
     deep: { name: "The White Deep", sub: "Beneath the Underside · Mushroom zone", to: "to the White Deep", from: "from the White Deep",
       desc: "Frozen caverns beneath the Underside, almost cut off from everything. The sap melted the ice and its peoples had to leave. Here Mushroom hits 10% harder and Plant 10% softer.",
       bossD: "Mother Mycelium sleeps on the sap.", win: "Mother Mycelium wakes up calm!",
@@ -987,12 +1028,12 @@ const zt = (k, v, zone) => { let s = ZT[L()][zone || (X && X.zone) || "aurora"][
 const tx = (k, v) => { let s = TX[L()][k]; if (s == null) s = TX.en[k]; if (s == null) return k; if (v) s = s.replace(/\{(\w+)\}/g, (m, n) => (v[n] != null ? v[n] : m)); return s; };
 
 const MON_NAMES = {
-  lumo: "Lumo", fizz: "Fizz", pebb: "Pebb", fuellito: "Fuellito", brotin: "Brotín", remolin: "Remolín", bostezo: "Bostezo",
+  unisona: "Unísona", lumo: "Lumo", fizz: "Fizz", pebb: "Pebb", fuellito: "Fuellito", brotin: "Brotín", remolin: "Remolín", bostezo: "Bostezo",
   mecha: "Mecha", yunqueron: "Yunquerón", espinardo: "Espinardo", nim: "Nim", centinela: "Centinela", vidriela: "Vidriela", ecolito: "Ecolito", relampin: "Relampín", trinilla: "Trinilla", carambano: "Carámbano", capuchon: "Capuchón", guardatumba: "Guardatumba",
 };
 const MON_DESC = {
-  es: { lumo: "Chispa juguetona de las Casas del Farol", fizz: "Nube dormilona de los Altos", pebb: "Comilón tozudo de la Hondura", fuellito: "Aprendiz del Gremio de la Brasa", brotin: "Bellota paciente del Bosque Hondo", remolin: "Nutria viajera de las Mareas", bostezo: "Ovejita-polilla del Fondo Blanco", mecha: "Vela con patas del Barrio Apagado", yunqueron: "Tortuga-yunque de la Forja Madre", espinardo: "Erizo de zarza nacido en el Seto", nim: "Murcielaguito del pueblo de la Sombra", centinela: "Guardia del Rey Lóbrego", vidriela: "Pez de cristal del Lago Espejo", ecolito: "Piedra que canta, de las Cuevas del Eco", relampin: "Hurón mensajero de la Aguja del Trueno", trinilla: "Pájaro juglar de la casa del Verso", carambano: "Topo de hielo de la Tumba Helada", capuchon: "Cangrejo ermitaño con una seta por concha", guardatumba: "Gigante de hielo que guarda la Tumba" },
-  en: { lumo: "Playful spark from the Lantern Houses", fizz: "Sleepy cloud from the Heights", pebb: "Stubborn glutton from the Deep", fuellito: "Apprentice of the Ember Guild", brotin: "Patient acorn from the Deep Wood", remolin: "Wandering otter of the Tides", bostezo: "Woolly moth-lamb from the White Hollow", mecha: "Candle on legs from the Dim Quarter", yunqueron: "Anvil turtle of the Mother Forge", espinardo: "Bramble hedgehog born in the Hedge", nim: "Little bat of the Shadow folk", centinela: "Guard of King Lóbrego", vidriela: "Glass fish of Mirror Lake", ecolito: "Singing stone of the Echo Caves", relampin: "Messenger ferret of the Thunder Spire", trinilla: "Minstrel bird of the House of Verse", carambano: "Ice mole of the Frozen Tomb", capuchon: "Hermit crab with a mushroom for a shell", guardatumba: "Ice giant who guards the Tomb" },
+  es: { unisona: "Criatura Estrella nacida de dos nanas a la vez", raiz: "La Raíz que hay bajo el Claro", lumo: "Chispa juguetona de las Casas del Farol", fizz: "Nube dormilona de los Altos", pebb: "Comilón tozudo de la Hondura", fuellito: "Aprendiz del Gremio de la Brasa", brotin: "Bellota paciente del Bosque Hondo", remolin: "Nutria viajera de las Mareas", bostezo: "Ovejita-polilla del Fondo Blanco", mecha: "Vela con patas del Barrio Apagado", yunqueron: "Tortuga-yunque de la Forja Madre", espinardo: "Erizo de zarza nacido en el Seto", nim: "Murcielaguito del pueblo de la Sombra", centinela: "Guardia del Rey Lóbrego", vidriela: "Pez de cristal del Lago Espejo", ecolito: "Piedra que canta, de las Cuevas del Eco", relampin: "Hurón mensajero de la Aguja del Trueno", trinilla: "Pájaro juglar de la casa del Verso", carambano: "Topo de hielo de la Tumba Helada", capuchon: "Cangrejo ermitaño con una seta por concha", guardatumba: "Gigante de hielo que guarda la Tumba" },
+  en: { unisona: "Star creature born of two lullabies at once", raiz: "The Root beneath the Glade", lumo: "Playful spark from the Lantern Houses", fizz: "Sleepy cloud from the Heights", pebb: "Stubborn glutton from the Deep", fuellito: "Apprentice of the Ember Guild", brotin: "Patient acorn from the Deep Wood", remolin: "Wandering otter of the Tides", bostezo: "Woolly moth-lamb from the White Hollow", mecha: "Candle on legs from the Dim Quarter", yunqueron: "Anvil turtle of the Mother Forge", espinardo: "Bramble hedgehog born in the Hedge", nim: "Little bat of the Shadow folk", centinela: "Guard of King Lóbrego", vidriela: "Glass fish of Mirror Lake", ecolito: "Singing stone of the Echo Caves", relampin: "Messenger ferret of the Thunder Spire", trinilla: "Minstrel bird of the House of Verse", carambano: "Ice mole of the Frozen Tomb", capuchon: "Hermit crab with a mushroom for a shell", guardatumba: "Ice giant who guards the Tomb" },
 };
 
 /* ---------- Card names, lore and effect text ---------- */
@@ -1073,6 +1114,12 @@ const CT = {
   regent:   { es: ["Golpe del Regente", "Golpea en nombre de alguien a quien nunca ha visto."], en: ["Regent's Blow", "It strikes in the name of someone it has never seen."] },
   thousand: { es: ["Mil Años de Hielo", "«Nadie ha cruzado la puerta de la Tumba. Él tampoco. Nunca se le ocurrió mirar dentro.»"], en: ["A Thousand Years of Ice", "\"Nobody has crossed the Tomb's door. Neither has he. It never occurred to him to look inside.\""] },
   sealed:   { es: ["Puerta Sellada", "Lo que está sellado no se abre. Ni siquiera desde dentro."], en: ["Sealed Door", "What is sealed doesn't open. Not even from inside."] },
+  ache:     { es: ["Dolor Antiguo", "Lleva siglos doliendo en silencio. Hoy por fin lo dice."], en: ["Old Ache", "It has ached in silence for centuries. Today it finally says so."] },
+  eight:    { es: ["Ocho Voces", "Cada pueblo le cantó algo distinto. Se acuerda de todo."], en: ["Eight Voices", "Every people sang it something different. It remembers all of it."] },
+  rootheart:{ es: ["Corazón de Raíz", "Late una vez cada cien años. Hoy ha latido tres."], en: ["Root Heart", "It beats once every hundred years. Today it has beaten three times."] },
+  duet:     { es: ["Dueto", "Una nota de luz y otra de sombra. Juntas no se tapan."], en: ["Duet", "One note of light and one of shadow. Together they don't drown each other out."] },
+  unison:   { es: ["Al Unísono", "Cuando todos cantan lo mismo, nadie canta solo."], en: ["In Unison", "When everyone sings the same thing, nobody sings alone."] },
+  firstnote:{ es: ["La Primera Nota", "La que dio la Primera Cantora antes de partir el Canto."], en: ["The First Note", "The one the First Singer sang before she split the Song."] },
   gale:     { es: ["Vendaval", "Sopla todas las noticias a la vez. Nadie entiende ninguna."], en: ["Gale", "It blows every piece of news at once. Nobody understands any of them."] },
   voices:   { es: ["Voces Robadas", "Cada voz que gira en la Veleta era de alguien que la vendió barata."], en: ["Stolen Voices", "Every voice spinning in the Weathervane belonged to someone who sold it cheap."] },
   spin:     { es: ["Giro sin Fin", "Apunta a donde sopla el viento. Siempre."], en: ["Endless Spin", "It points wherever the wind blows. Always."] },
@@ -1216,14 +1263,62 @@ function slotText(sc, slot) {
 }
 const typeChip = (ty) => `<span class="ty ty-${ty}" title="${esc(TYPES[ty][L()])}">${TYPES[ty].icon} ${esc(TYPES[ty][L()])}</span>`;
 const gradeChip = (gi) => `<span class="gr" style="--g:${GRADES[gi].col}">${esc(GRADES[gi][L()])}</span>`;
+/* TCG-style card: frame in the type colour, name bar with type gem and cooldown orb,
+   pixel-art box, type line with grade pips, effect box, lore, and a set number. */
+const TCOL = { fire: "#d9542c", plant: "#4f9a3c", light: "#e2ae2e", bolt: "#d8b81c", air: "#6fb8d0", music: "#cf5f9f", water: "#3f7fc9", stone: "#8a7a64", shadow: "#5b4b8e", ice: "#8fcbe0", mush: "#b0603c", dream: "#8a78d4", star: "#e0b84a" };
+const CARD_NO = Object.keys(CARDS);
+function tcgArt(by, ty, sil) {
+  return `<div class="tcg-art"><canvas class="rc-art" width="120" height="72" data-by="${by || ""}" data-ty="${ty}"${sil ? " data-sil=\"1\"" : ""}></canvas></div>`;
+}
+function tcgFrame(ty, gi, inner, ghost) {
+  const v = gi == null ? { mat: ["#9d93ad", "#d2cbd9"], anim: null } : GRADE_VIS[gi];
+  return `<div class="tcg${ghost ? " ghost" : ""}${v.anim ? " m-" + v.anim : ""}" style="--tc:${TCOL[ty]};--m0:${v.mat[0]};--m1:${v.mat[1]};--g:${gi == null ? "#9d93ad" : GRADES[gi].col}">${inner}</div>`;
+}
 function cardHtml(id, gi, opts) {
   opts = opts || {};
-  const sc = scaled(id, gi);
+  const sc = scaled(id, gi), C = CARDS[id], ty = C.type;
   const rows = ["a", "p", "s"].map((sl) => `<li class="${opts.slot === sl ? "on" : ""}"><b>${esc(tx("slot." + sl))}</b> ${esc(slotText(sc, sl))}</li>`).join("");
-  return `<div class="rcard" style="--g:${GRADES[gi].col}"><div class="rc-top"><strong>${esc(cardName(id))}</strong>${opts.count > 1 ? `<span class="cnt">×${opts.count}</span>` : ""}</div>
-  <div class="rc-tags">${typeChip(CARDS[id].type)}${gradeChip(gi)}</div>
-  <ul class="rc-fx">${rows}</ul><p class="rc-lore">${esc(cardLore(id))}</p>${opts.foot || ""}</div>`;
+  const by = C.by && MONS[C.by] ? monName(C.by) : "";
+  const no = String(CARD_NO.indexOf(id) + 1).padStart(3, "0") + "/" + CARD_NO.length;
+  const inner = `<div class="tcg-name"><span class="tcg-gem" title="${esc(TYPES[ty][L()])}">${TYPES[ty].icon}</span><strong>${esc(cardName(id))}</strong>${opts.count > 1 ? `<span class="cnt">×${opts.count}</span>` : ""}<span class="tcg-cd" title="${esc(tx("slot.a"))}">⟳${sc.a.cd}</span></div>
+  ${tcgArt(C.by, ty)}
+  <div class="tcg-line"><span>${esc(TYPES[ty][L()])}${by ? " · " + esc(by) : ""}${C.boss ? " · 👑" : ""}</span><span class="tcg-pips" title="${esc(GRADES[gi][L()])}">${"◆".repeat(gi + 1)}<i>${"◇".repeat(5 - gi)}</i></span></div>
+  <div class="tcg-box"><ul class="rc-fx">${rows}</ul><p class="rc-lore">${esc(cardLore(id))}</p></div>
+  <div class="tcg-foot"><span>${esc(GRADES[gi][L()])}</span><span>EV · ${no}</span></div>`;
+  return `<div class="rcard">${tcgFrame(ty, gi, inner)}${opts.foot || ""}</div>`;
 }
+function ghostCardHtml(id, note, foot) {
+  const C = CARDS[id], ty = C.type;
+  const inner = `<div class="tcg-name"><span class="tcg-gem">${TYPES[ty].icon}</span><strong>???</strong></div>${tcgArt(C.by, ty, true)}<div class="tcg-line"><span>${esc(TYPES[ty][L()])}</span></div><div class="tcg-box"><p class="rc-lore">${esc(note)}</p></div><div class="tcg-foot"><span></span><span>EV · ${String(CARD_NO.indexOf(id) + 1).padStart(3, "0")}/${CARD_NO.length}</span></div>`;
+  return `<div class="rcard ghost">${tcgFrame(ty, null, inner, true)}${foot}</div>`;
+}
+// paint card art boxes whenever cards appear in the page
+function paintCardArt(root) {
+  (root || document).querySelectorAll("canvas.rc-art:not([data-done])").forEach((cv) => {
+    cv.dataset.done = "1";
+    const out = EV.setupCanvas(cv, 120, 72), ty = cv.dataset.ty, by = cv.dataset.by, col = TCOL[ty] || "#888";
+    const hasPX = typeof PX !== "undefined";
+    const Lr = hasPX ? PX.layer(40, 24) : null, c = hasPX ? Lr.g : out;
+    if (hasPX) c.scale(1 / 3, 1 / 3);
+    // backdrop: pale sky, tinted hills and ground, a few sparkles
+    c.fillStyle = "#fbf3e4"; c.fillRect(0, 0, 120, 72);
+    c.fillStyle = col; c.globalAlpha = 0.28; c.fillRect(0, 0, 120, 72);
+    c.globalAlpha = 0.45; c.beginPath(); c.ellipse(30, 66, 50, 22, 0, 0, Math.PI * 2); c.ellipse(96, 70, 44, 26, 0, 0, Math.PI * 2); c.fill();
+    c.globalAlpha = 0.8; c.fillRect(0, 60, 120, 12); c.globalAlpha = 1;
+    c.fillStyle = "#ffffff"; for (const [x, y] of [[12, 9], [104, 15], [84, 6], [26, 27]]) c.fillRect(x, y, 3, 3);
+    if (by && (MONS[by] || ["lumo", "fizz", "pebb"].includes(by))) {
+      const story = ["lumo", "fizz", "pebb"].includes(by), boss = MONS[by] && MONS[by].boss, k = story ? 0.42 : boss ? 0.46 : 0.66;
+      c.save(); c.translate(60, story ? 42 : boss ? 38 : 30); c.scale(k, k);
+      if (cv.dataset.sil) { c.globalAlpha = 1; c.filter = "brightness(0)"; }
+      try { drawMon(c, by, { t: 0.5, stage: 1, form: "bright", hp: 1 }); } catch (e) { /* art is decoration */ }
+      c.restore();
+    } else {
+      c.font = "28px system-ui, sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(TYPES[ty] ? TYPES[ty].icon : "?", 60, 38);
+    }
+    if (hasPX) { c.setTransform(1, 0, 0, 1, 0, 0); PX.quantize(c, 40, 24, false); PX.blit(out, Lr, 120, 72); }
+  });
+}
+new MutationObserver(() => paintCardArt()).observe(document.body, { childList: true, subtree: true });
 
 /* ---------- Saved data ---------- */
 function rpgState() {
@@ -1276,6 +1371,31 @@ function ownUnitOpts(hpPct) {
   for (const k of ["a", "p", "s"]) { const c = R.eq[k] && cardByUid(R.eq[k]); if (c && R.lvl >= SLOT_LVL[k]) cards[k] = scaled(c.id, c.g); }
   return { kind: S.species, lvl: R.lvl, side: "ally", name: S.name, own: true, care: S.stats, stage: S.stage, form: S.form, cards, hpPct, lowFun: S.stats.fun < 30 };
 }
+/* Stat sheet: bars are relative to a strong creature of the same level, so they stay readable as levels go up.
+   care: own creature only, shows how today's care shifts each stat. */
+const SHEET = [["hp", "health", 70], ["str", "full", 70], ["def", "clean", 70], ["spd", "energy", 70]];
+function sheetHtml(u, care) {
+  const sc = lvlScale(u.lvl);
+  const row = (key, val, pct, mod, unit) => `<div class="fstat"><label>${esc(tx("sh." + key))}</label><div class="bar"><i style="width:${Math.max(3, Math.min(100, Math.round(pct)))}%"></i></div><output>${val}${unit || ""}</output><small>${mod}</small></div>`;
+  const modTxt = (ck) => {
+    if (!care) return "";
+    const d = Math.round(50 * (care[ck] || 0) / 100 - 25);
+    return `<span class="${d > 0 ? "up" : d < 0 ? "down" : ""}">${d > 0 ? "+" : ""}${d} %</span> ${esc(tx("sh.by", { c: EV.t("stat." + ck).toLowerCase() }))}`;
+  };
+  let h = SHEET.map(([k, ck, ref]) => {
+    const v = k === "hp" ? u.maxHp : Math.round(u.base[k]);
+    const raw = k === "hp" ? u.maxHp / 3 : u.base[k];
+    return row(k, v, 100 * raw / (ref * sc), modTxt(ck));
+  }).join("");
+  h += row("cr", Math.round(u.crit), 100 * u.crit / 25, modTxt("fun"), " %");
+  h += row("dodge", Math.round(u.dodge), 100 * u.dodge / 4, "", " %");
+  return `<div class="sheet">${h}</div>`;
+}
+function ownSheetHtml() {
+  const S = EV.S, R = rpgState();
+  if (!S || !R || S.stage < 1) return "";
+  return sheetHtml(makeUnit(ownUnitOpts(1)), S.stats);
+}
 function expCheck() {
   const S = EV.S;
   if (!S || S.phase !== "alive") return "stage";
@@ -1312,6 +1432,9 @@ const css = `
 .node { border: 2px solid var(--line); border-radius: 16px; background: var(--bg); padding: 12px; text-align: left; cursor: pointer; font: inherit; color: inherit; display: flex; flex-direction: column; gap: 4px; min-height: 96px; }
 .node:hover { border-color: var(--accent); }
 .node .ic { font-size: 26px; line-height: 1; }
+.evd { display: block; width: 16px; height: 16px; margin: 5px; background: #fbf6ef; border: 2px solid #1d1626; transform: rotate(45deg); animation: evd 1.6s steps(2) infinite; }
+@keyframes evd { 50% { background: #fff0b8; } }
+@media (prefers-reduced-motion: reduce) { .evd { animation: none; } }
 .node strong { font-family: var(--font-display); font-size: 17px; }
 .node small { color: var(--muted); font-size: 13px; line-height: 1.35; }
 .node:disabled { opacity: .55; cursor: not-allowed; }
@@ -1333,18 +1456,38 @@ const css = `
 .bctl .btn { flex: 1 1 160px; }
 .bturn { font-weight: 700; margin: 0; }
 .rcards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
-.rcard { border: 2px solid color-mix(in srgb, var(--g) 55%, var(--line)); border-radius: 14px; background: var(--bg); padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
-.rc-top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
-.rc-top strong { font-family: var(--font-display); font-size: 16px; line-height: 1.2; }
-.rc-top .cnt { font: 600 12px var(--font-mono); color: var(--muted); }
-.rc-tags { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.rcard { display: flex; flex-direction: column; gap: 6px; }
+.tcg { position: relative; background: var(--tc); border: 3px solid #1d1626; padding: 9px; display: flex; flex-direction: column; gap: 5px; box-shadow: 4px 4px 0 #1d1626; color: #1d1626; }
+.tcg::before { content: ""; position: absolute; inset: 0; border: 4px solid var(--m0); box-shadow: inset 0 0 0 2px var(--m1), inset 0 0 0 3px #1d1626; pointer-events: none; }
+.tcg.m-irid::before { animation: irid 6s ease-in-out infinite; }
+@keyframes irid { 0%, 100% { border-color: #f4a6c4; } 33% { border-color: #c7a6ff; } 66% { border-color: #c8eef5; } }
+.tcg.m-pulse::before { animation: pulse 2.4s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { box-shadow: inset 0 0 0 2px var(--m1), inset 0 0 0 3px #1d1626; } 50% { box-shadow: inset 0 0 0 2px var(--m1), inset 0 0 0 3px #1d1626, 0 0 10px 2px #ffd57a; } }
+@media (prefers-reduced-motion: reduce) { .tcg.m-irid::before, .tcg.m-pulse::before { animation: none; } }
+.tcg-name { position: relative; display: flex; align-items: center; gap: 6px; background: #fbf6ef; border: 2px solid #1d1626; padding: 3px 6px; min-height: 32px; }
+.tcg-name strong { font-family: var(--font-display); font-size: 15px; line-height: 1.1; flex: 1; min-width: 0; }
+.tcg-name .cnt { font: 700 12px var(--font-mono); color: #5b5266; }
+.tcg-gem { width: 22px; height: 22px; display: grid; place-items: center; background: var(--tc); border: 2px solid #1d1626; font: 13px/1 system-ui, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; flex: none; }
+.tcg-cd { font: 700 12px var(--font-mono); background: #1d1626; color: #fbf6ef; padding: 2px 6px; flex: none; }
+.tcg-art { position: relative; border: 2px solid #1d1626; background: #fbf3e4; overflow: hidden; line-height: 0; }
+.tcg-art canvas { width: 100%; height: auto; aspect-ratio: 120 / 72; image-rendering: pixelated; display: block; }
+.tcg.m-shine .tcg-art::after, .tcg.m-pulse .tcg-art::after { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.55) 45%, rgba(255,240,180,.35) 52%, transparent 66%); background-size: 250% 100%; animation: foil 4s linear infinite; mix-blend-mode: screen; pointer-events: none; }
+@keyframes foil { from { background-position: 120% 0; } to { background-position: -120% 0; } }
+@media (prefers-reduced-motion: reduce) { .tcg.m-shine .tcg-art::after, .tcg.m-pulse .tcg-art::after { animation: none; background-position: 50% 0; } }
+.tcg-line { position: relative; display: flex; justify-content: space-between; align-items: center; gap: 6px; background: #1d1626; color: #fbf6ef; padding: 2px 6px; font-size: 12px; font-weight: 700; }
+.tcg-pips { color: var(--m1); letter-spacing: 1px; font-size: 11px; } .tcg-pips i { font-style: normal; color: #6e6283; }
+.tcg-box { position: relative; background: #fbf6ef; border: 2px solid #1d1626; padding: 6px 7px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+.tcg-box .rc-fx li { color: #4a4255; } .tcg-box .rc-fx li b { color: #1d1626; } .tcg-box .rc-fx li.on { color: #1d1626; background: color-mix(in srgb, var(--tc) 22%, transparent); }
+.tcg-box .rc-lore { color: #5b5266; border-top: 1px dashed #b9ad9c; padding-top: 5px; }
+.tcg-foot { position: relative; display: flex; justify-content: space-between; font: 700 10px var(--font-mono); color: #1d1626; padding: 0 2px; text-transform: uppercase; letter-spacing: .04em; }
+.tcg-foot span:first-child { color: #1d1626; background: var(--m1); border: 1px solid var(--m0); padding: 0 4px; }
 .rc-fx { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; font-size: 13px; line-height: 1.35; }
-.rc-fx li { color: var(--muted); }
-.rc-fx li b { font: 700 11px var(--font-mono); text-transform: uppercase; letter-spacing: .06em; color: var(--ink); margin-right: 4px; }
-.rc-fx li.on { color: var(--ink); background: color-mix(in srgb, var(--accent) 10%, transparent); border-radius: 6px; padding: 2px 4px; margin: 0 -4px; }
+.rc-fx li b { font: 700 11px var(--font-mono); text-transform: uppercase; letter-spacing: .06em; margin-right: 4px; }
+.rc-fx li.on { border-radius: 0; padding: 2px 4px; margin: 0 -4px; }
 .rc-lore { margin: 0; font-size: 12px; font-style: italic; color: var(--muted); }
+.rcard.ghost .tcg { --tc: #b9b1a6 !important; opacity: .8; }
+.rcard.ghost .tcg-art { filter: grayscale(1); }
 .rc-btns { display: flex; gap: 6px; flex-wrap: wrap; margin-top: auto; }
-.rcard.ghost { --g: var(--muted); border-style: dashed; opacity: .75; background: repeating-linear-gradient(45deg, transparent 0 6px, color-mix(in srgb, var(--line) 12%, transparent) 6px 8px); }
 .ctabs { margin-left: auto; }
 .rc-btns .btn { padding: 6px 10px; font-size: 12px; min-height: 34px; }
 .slots { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
@@ -1353,6 +1496,16 @@ const css = `
 .slotbox .muted { font-size: 13px; margin: 0; }
 .slotbox select { font: 600 14px var(--font-body); padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); min-height: 40px; width: 100%; }
 .rstats { font: 500 12px var(--font-mono); color: var(--muted); margin: 0; }
+.mstats { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 10px; margin-top: 6px; width: 100%; font-size: 12px; text-align: left; }
+@media (max-width: 520px) { .mstats { grid-template-columns: 1fr; } }
+.mstats span { display: flex; justify-content: space-between; gap: 4px; } .mstats i { font-style: normal; color: var(--muted); } .mstats b { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.sheet { display: flex; flex-direction: column; gap: 6px; }
+.fstat { display: grid; grid-template-columns: 76px minmax(0, 1fr) 44px 112px; gap: 8px; align-items: center; font-size: 14px; }
+.fstat label { font-weight: 700; }
+.fstat output { font-family: var(--font-mono); font-size: 13px; text-align: right; font-variant-numeric: tabular-nums; }
+.fstat small { font-size: 12px; color: var(--muted); white-space: nowrap; }
+.fstat .up { color: #3c8a3a; font-weight: 700; } .fstat .down { color: #c0453a; font-weight: 700; }
+@media (max-width: 420px) { .fstat { grid-template-columns: 70px minmax(0, 1fr) 40px; } .fstat small { grid-column: 2 / -1; margin-top: -4px; } }
 .xpbar { height: 8px; }
 .evt-text { margin: 0; font-size: 15px; line-height: 1.55; }
 .evt-out { margin: 0; font-weight: 600; }
@@ -1360,7 +1513,7 @@ const css = `
 .choices .btn { text-align: left; justify-content: flex-start; }
 .loot { display: flex; gap: 10px; flex-wrap: wrap; font: 600 14px var(--font-mono); }
 .loot span { background: var(--bg); border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; }
-@media (max-width: 520px) { .mons { grid-template-columns: repeat(2, minmax(0, 1fr)); } .rcards { grid-template-columns: 1fr; } }
+@media (max-width: 520px) { .mons { grid-template-columns: repeat(2, minmax(0, 1fr)); } .rcards { grid-template-columns: minmax(0, 340px); justify-content: center; } }
 `;
 const styleEl = document.createElement("style"); styleEl.textContent = css; document.head.appendChild(styleEl);
 
@@ -1376,12 +1529,12 @@ Object.assign(EV.SFX, {
 });
 
 /* ---------- Achievements ---------- */
-EV.ACH.push(["exp1", 15, (p) => (p.c.expWins || 0) >= 1], ["guard1", 40, (p) => ((p.cleared || {}).aurora || 0) >= 1], ["guard3", 60, (p) => ["aurora", "crater", "forest"].every((z) => ((p.cleared || {})[z] || 0) >= 1)], ["guard6", 80, (p) => ["hollow", "lake", "caves"].every((z) => ((p.cleared || {})[z] || 0) >= 1)], ["guard8", 120, (p) => Object.keys(ZONES).every((z) => ((p.cleared || {})[z] || 0) >= 1)], ["cards10", 20, (p) => (p.cards || []).length >= 10], ["fuse1", 15, (p) => (p.c.fused || 0) >= 1],
+EV.ACH.push(["exp1", 15, (p) => (p.c.expWins || 0) >= 1], ["guard1", 40, (p) => ((p.cleared || {}).aurora || 0) >= 1], ["guard3", 60, (p) => ["aurora", "crater", "forest"].every((z) => ((p.cleared || {})[z] || 0) >= 1)], ["guard6", 80, (p) => ["hollow", "lake", "caves"].every((z) => ((p.cleared || {})[z] || 0) >= 1)], ["guard8", 120, (p) => ZONES.heart.unlock.every((z) => ((p.cleared || {})[z] || 0) >= 1)], ["heart1", 200, (p) => ((p.cleared || {}).heart || 0) >= 1], ["cards10", 20, (p) => (p.cards || []).length >= 10], ["fuse1", 15, (p) => (p.c.fused || 0) >= 1],
   ["grimSol", 40, (p) => grimDone(p, ["fire", "plant", "light"])], ["grimSky", 40, (p) => grimDone(p, ["bolt", "air", "music"])],
   ["grimLake", 40, (p) => grimDone(p, ["water", "stone", "shadow"])], ["grimFrost", 40, (p) => grimDone(p, ["ice", "mush", "dream"])],
   ["grimAll", 150, (p) => grimDone(p, GRIM_ORDER)], ["dust1", 10, (p) => (p.c.dusted || 0) >= 1]);
 for (const lg of ["es", "en"]) {
-  for (const id of ["exp1", "guard1", "guard3", "guard6", "guard8", "cards10", "fuse1", "grimSol", "grimSky", "grimLake", "grimFrost", "grimAll", "dust1"]) EV.STR[lg].ach[id] = TX[lg]["ach." + id];
+  for (const id of ["exp1", "guard1", "guard3", "guard6", "guard8", "cards10", "fuse1", "grimSol", "grimSky", "grimLake", "grimFrost", "grimAll", "dust1", "heart1"]) EV.STR[lg].ach[id] = TX[lg]["ach." + id];
   EV.STR[lg]["nav.cards"] = TX[lg]["nav.cards"];
 }
 EV.applyStatic();
@@ -1412,6 +1565,8 @@ const MONCOL = {
   trono:    { body: "#2e2a3a", belly: "#6a6090", line: "#110f18", cheek: "#a080c0" },
   mira:     { body: "#2f5f80", belly: "#a8e0f0", line: "#142c3e", cheek: "#f0a0b8" },
   grava:    { body: "#7a6c5c", belly: "#c8b89a", line: "#352c22", cheek: "#e0a080" },
+  raiz:     { body: "#6a4a3a", belly: "#c8a070", line: "#2a1a18", cheek: "#e0a080" },
+  unisona:  { body: "#f2c94c", belly: "#4a3f8a", line: "#2a2140", cheek: "#f0a0b8" },
 };
 function drawMon(c, kind, o) {
   const ell = EV.ell;
@@ -1458,9 +1613,30 @@ function drawMon(c, kind, o) {
       c.fillStyle = "#c0a040"; EV.ell(c, 0, -62, 6, 6); c.fill();
       c.fillStyle = col.belly; for (const x of [-10, 10]) { EV.ell(c, x, -20, 5, o.ko ? 1 : 6); c.fill(); }
       c.fillStyle = "#3a3440"; c.font = "700 14px system-ui"; c.textAlign = "center"; c.globalAlpha = 0.6; for (let k = 0; k < 3; k++) c.fillText("♪", Math.cos(o.t * 2 + k * 2.1) * 34, -10 + Math.sin(o.t * 2 + k * 2.1) * 10); c.globalAlpha = 1;
+    } else if (kind === "raiz") {
+      // the Root under the Glade: a stump of rings, eight eyes in the eight colours, dripping sap
+      const ec = ["#d9542c", "#4f9a3c", "#e2ae2e", "#6fb8d0", "#3f7fc9", "#a08a6a", "#8a78d4", "#b0603c"];
+      c.fillStyle = SAP.c1; EV.ell(c, 0, 36, 62, 10); c.fill();
+      c.fillStyle = col.body;
+      for (const sx of [-1, 1]) { c.beginPath(); c.moveTo(sx * 22, 28); c.quadraticCurveTo(sx * 52, 28, sx * 64, 40); c.lineTo(sx * 46, 40); c.quadraticCurveTo(sx * 34, 36, sx * 18, 36); c.closePath(); c.fill(); c.stroke(); }
+      c.beginPath(); c.moveTo(-38, 36); c.lineTo(-44, -40); c.quadraticCurveTo(0, -54, 44, -40); c.lineTo(38, 36); c.closePath(); c.fill(); c.stroke();
+      c.fillStyle = col.belly; EV.ell(c, 0, -42, 42, 10); c.fill(); c.stroke();
+      c.lineWidth = 1.5; for (const r of [30, 19, 8]) { EV.ell(c, 0, -42, r, r * 0.24); c.stroke(); }
+      for (let k = 0; k < 8; k++) { const x = -27 + (k % 4) * 18, y = -18 + Math.floor(k / 4) * 22; c.save(); c.globalAlpha = o.ko ? 0.3 : 0.65 + 0.35 * Math.sin(o.t * 2 + k); c.fillStyle = ec[k]; EV.ell(c, x, y, 5, o.ko ? 1 : 4); c.fill(); c.restore(); }
+      for (let k = 0; k < 4; k++) { const ph = (Math.floor(o.t * 6) / 12 + k / 4) % 1; c.fillStyle = SAP.c0; c.fillRect(-31 + k * 20, 30 - ph * 60, 3, 6); c.fillStyle = SAP.sheen; c.fillRect(-31 + k * 20, 30 - ph * 60, 1, 1); }
+    } else if (kind === "unisona") {
+      // half dawn, half night: a round body split down the middle, a star crest and small wings
+      const fl = Math.sin(o.t * 5) * 5;
+      c.fillStyle = "#f6e6a8"; for (const sx of [-1, 1]) { c.beginPath(); c.moveTo(sx * 24, -4); c.quadraticCurveTo(sx * 52, -26 + fl, sx * 46, 8); c.closePath(); c.fill(); c.stroke(); }
+      c.save(); ell(c, 0, 6, 32, 32); c.clip(); c.fillStyle = col.body; c.fillRect(-40, -30, 40, 80); c.fillStyle = col.belly; c.fillRect(0, -30, 40, 80); c.restore();
+      ell(c, 0, 6, 32, 32); c.stroke();
+      c.fillStyle = "#fff4c0"; c.beginPath(); for (let k = 0; k < 10; k++) { const r = k % 2 ? 6 : 14, a = -Math.PI / 2 + k * Math.PI / 5; c.lineTo(Math.cos(a) * r, -30 + Math.sin(a) * r); } c.closePath(); c.fill(); c.stroke();
+      c.fillStyle = "#1d1626"; ell(c, -11, 2, 4, o.ko ? 1 : 5); c.fill(); c.fillStyle = "#fff4c0"; ell(c, 11, 2, 4, o.ko ? 1 : 5); c.fill();
+      c.fillStyle = col.cheek; ell(c, -19, 13, 4, 3); c.fill(); ell(c, 19, 13, 4, 3); c.fill();
+      c.save(); c.globalAlpha = 0.6; c.fillStyle = "#fff4c0"; c.font = "700 12px system-ui"; c.textAlign = "center"; c.fillText("♪", Math.cos(o.t * 2) * 42, -20 + Math.sin(o.t * 2) * 8); c.restore();
     } else if (kind === "micelio") {
       // a great pale mushroom mother sleeping on dark sap
-      c.fillStyle = "#24122e"; EV.ell(c, 0, 34, 54, 10); c.fill();
+      c.fillStyle = SAP.c1; EV.ell(c, 0, 34, 54, 10); c.fill();
       c.strokeStyle = "#f4efe6"; c.lineWidth = 2; for (let k = 0; k < 7; k++) { const a = Math.PI * (0.1 + k * 0.13); c.beginPath(); c.moveTo(0, 30); c.quadraticCurveTo(Math.cos(a) * 30, 40, Math.cos(a) * 56, 36 + Math.sin(o.t + k) * 2); c.stroke(); }
       c.strokeStyle = col.line; c.lineWidth = 3; c.fillStyle = col.belly; c.fillRect(-14, -14, 28, 46); c.strokeRect(-14, -14, 28, 46);
       c.fillStyle = col.body; c.beginPath(); c.moveTo(-56, -10); c.quadraticCurveTo(-50, -70, 0, -72); c.quadraticCurveTo(50, -70, 56, -10); c.quadraticCurveTo(0, -24, -56, -10); c.fill(); c.stroke();
@@ -1624,9 +1800,10 @@ function drawMon(c, kind, o) {
   }
   if (o.hollow) {
     // the Black Sap: dark drips and a dim violet haze
-    c.save(); c.globalAlpha = 0.28; c.fillStyle = "#3b1d4a"; ell(c, 0, 0, 42, 42); c.fill(); c.restore();
-    c.fillStyle = "#24122e";
-    for (let i = 0; i < 3; i++) { const dy = (o.t * 18 + i * 17) % 30; c.globalAlpha = 1 - dy / 30; EV.ell(c, -18 + i * 18, 26 + dy, 3, 5); c.fill(); }
+    // drops fall upward, in steps (choppy on purpose), with one oily glint each
+    c.save(); c.globalAlpha = 0.28; c.fillStyle = SAP.c2; ell(c, 0, 0, 42, 42); c.fill(); c.restore();
+    const tq = Math.floor(o.t * 6) / 6;
+    for (let i = 0; i < 3; i++) { const dy = (tq * 18 + i * 17) % 30; c.globalAlpha = 1 - dy / 30; c.fillStyle = SAP.c1; EV.ell(c, -18 + i * 18, 30 - dy, 3, 5); c.fill(); c.fillStyle = SAP.sheen; c.fillRect(-19 + i * 18, 27 - dy, 2, 2); }
     c.globalAlpha = 1;
   }
 }
@@ -1652,12 +1829,14 @@ function startExpedition() {
   X = { zone: null, offer: [], chosen: [], party: [], section: 0, nodes: [], loot: { xp: 0, coins: 0, cards: [] }, nextFoeBuff: 0, wins: 0 };
   show("zones");
 }
-const zoneOpen = (id) => { const u = ZONES[id].unlock; if (!u) return true; return [].concat(u).some((z) => ((EV.P.cleared || {})[z] || 0) > 0); };
+const zoneOpen = (id) => { const u = ZONES[id].unlock; if (!u) return true; const ok = (z) => ((EV.P.cleared || {})[z] || 0) > 0; return ZONES[id].unlockAll ? u.every(ok) : [].concat(u).some(ok); };
 function pickZone(id) {
   if (!ZONES[id] || !zoneOpen(id)) { EV.sfx("deny"); return; }
   const S = EV.S, z = ZONES[id];
   X.zone = id;
   X.offer = pickN(z.allies.filter((k) => k !== S.species), 3);
+  // Unísona: brought by Tila and Nim to the Heart; after the Heart is calm it can join any trip
+  if (id === "heart" || (EV.P.flags || {}).unisona) X.offer.unshift("unisona");
   X.chosen = [];
   show("pick");
 }
@@ -1668,7 +1847,7 @@ function zonesHtml() {
     const done = cl[id] || 0;
     return `<button type="button" class="node zone" data-zone="${id}" ${open ? "" : "disabled"}><span class="ic" aria-hidden="true">${TYPES[z.type].icon}</span>
       <strong>${esc(zt("name", null, id))}</strong><small>${esc(zt("sub", null, id))}</small>
-      <small>${open ? esc(tx("zones.lvl", { n: z.min })) : "🔒 " + esc(tx(Array.isArray(z.unlock) ? (z.unlock.includes("hollow") ? "zones.lockHigh" : "zones.lockEnv") : "zones.lock"))}</small>
+      <small>${open ? esc(tx("zones.lvl", { n: z.min })) : "🔒 " + esc(tx(z.unlockAll ? "zones.lockHeart" : Array.isArray(z.unlock) ? (z.unlock.includes("hollow") ? "zones.lockHigh" : "zones.lockEnv") : "zones.lock"))}</small>
       ${done ? `<small class="ok">✓ ${esc(tx("zones.done", { n: done }))} · ${starStr((EV.P.stars || {})[id] || 0)}<br>${esc(tx("zones.verse", { v: zt("verse", null, id) }))}</small>` : ""}</button>`;
   }).join("")}</div>`;
 }
@@ -1696,8 +1875,11 @@ function nextSection() {
 function partyUnits() {
   return X.party.map((m) => {
     if (m.own) return makeUnit(ownUnitOpts(m.hp));
-    const cards = { a: scaled(MONS[m.kind].cards[0], 0), p: scaled(MONS[m.kind].cards[1], 0) };
-    if (m.lvl >= SLOT_LVL.s) cards.s = scaled(MONS[m.kind].cards[2], 0);
+    // Unísona uses your best copy of each of its cards, so it grows as you fuse them
+    const gr = (id) => (m.kind === "unisona" ? Math.max(0, ...EV.P.cards.filter((c) => c.id === id).map((c) => c.g)) : 0);
+    const mc = MONS[m.kind].cards;
+    const cards = { a: scaled(mc[0], gr(mc[0])), p: scaled(mc[1], gr(mc[1])) };
+    if (m.lvl >= SLOT_LVL.s || m.kind === "unisona") cards.s = scaled(mc[2], gr(mc[2]));
     return makeUnit({ kind: m.kind, lvl: m.lvl, side: "ally", name: monName(m.kind), wild: true, cards, hpPct: m.hp, stage: 1, form: "bright" });
   });
 }
@@ -1723,6 +1905,11 @@ function foeUnits(boss) {
 
 /* ---------- Views ---------- */
 function show(v) { view = v; render(); const el = $("scrExp"); if (el && !el.hidden) el.scrollIntoView({ behavior: "smooth", block: "start" }); }
+function pickStats(k) {
+  const u = makeUnit({ kind: k, lvl: rpgState().lvl, side: "ally", wild: true, stage: 1 });
+  const v = { hp: u.maxHp, str: Math.round(u.base.str), def: Math.round(u.base.def), spd: Math.round(u.base.spd), cr: Math.round(u.crit) + " %" };
+  return `<span class="mstats">${Object.keys(v).map((k) => `<span><i>${esc(tx("sh." + k))}</i><b>${v[k]}</b></span>`).join("")}</span>`;
+}
 function partyHtml() {
   return `<div class="party">${X.party.map((m) => {
     const nm = m.own ? EV.S.name : monName(m.kind);
@@ -1746,14 +1933,14 @@ function render() {
   } else if (view === "pick") {
     body = `<div class="panel"><p class="lead">${esc(zt("desc"))}</p>
       <h3>${esc(tx("exp.pick"))}</h3><p class="muted" style="margin:0">${esc(tx("exp.pickSub"))}</p>
-      <div class="mons">${X.offer.map((k) => `<button type="button" class="mon" data-pick="${k}" aria-pressed="${X.chosen.includes(k)}"><canvas width="96" height="80" data-mon="${k}"></canvas><strong>${esc(monName(k))}</strong>${typeChip(MONS[k].types[0])}<small>${esc(MON_DESC[L()][k])}</small></button>`).join("")}</div>
+      <div class="mons">${X.offer.map((k) => `<button type="button" class="mon" data-pick="${k}" aria-pressed="${X.chosen.includes(k)}"><canvas width="96" height="80" data-mon="${k}"></canvas><strong>${esc(monName(k))}</strong>${typeChip(MONS[k].types[0])}<small>${esc(MON_DESC[L()][k])}</small>${pickStats(k)}</button>`).join("")}</div>
       </div>${loadoutHtml()}<div class="panel">
       <div class="bctl"><button class="btn" type="button" data-x="go" ${X.chosen.length === 2 ? "" : "disabled"}>${esc(tx("exp.go"))} · ${esc(tx("exp.cost"))}</button><button class="btn ghost" type="button" data-x="cancel">${esc(tx("exp.cancel"))}</button></div></div>`;
   } else if (view === "map") {
     const icons = { fight: "⚔️", event: "❓", chest: "🎁", rest: "🔥", boss: "🏮" };
     body = `<div class="panel"><div class="sub">${esc(X.nodes[0] === "boss" ? tx("node.boss") : tx("exp.section", { n: X.section, m: z.sections }))}</div>
       <h3>${esc(X.nodes[0] === "boss" ? tx("exp.bossNext") : tx("exp.choose"))}</h3>
-      <div class="nodes">${X.nodes.map((n) => `<button type="button" class="node${n === "boss" ? " boss" : ""}" data-node="${n}"><span class="ic" aria-hidden="true">${icons[n]}</span><strong>${esc(tx("node." + n))}</strong><small>${esc((n === "boss" ? zt("bossD") : tx("node." + n + ".d")))}</small></button>`).join("")}</div></div>
+      <div class="nodes">${X.nodes.map((n) => `<button type="button" class="node${n === "boss" ? " boss" : ""}" data-node="${n}"><span class="ic" aria-hidden="true">${n === "event" ? '<i class="evd"></i>' : icons[n]}</span><strong>${esc(tx("node." + n))}</strong><small>${esc((n === "boss" ? zt("bossD") : tx("node." + n + ".d")))}</small></button>`).join("")}</div></div>
       <div class="panel"><h3>${esc(tx("exp.party"))}</h3>${partyHtml()}${lootHtml()}</div>`;
   } else if (view === "battle") {
     body = `<div class="panel"><div class="bbar"><span class="sub grow" id="bRound"></span>
@@ -1851,14 +2038,20 @@ function flushEvents() {
       case "act": { const u = b.units.find((x) => x.uid === e.u); if (a) a.lunge = 1; if (e.card) { blog(tx("log.act", { name: u.name, card: cardName(e.card) })); EV.sfx("card"); } else blog(tx("log.basic", { name: u.name })); break; }
       case "support": if (b.units.some((x) => x.uid === e.u && x.side === "ally")) EV.P.c.supportUsed = (EV.P.c.supportUsed || 0) + 1; blog(tx("log.support", { name: uName(e.u), card: cardName(e.card) })); if (a) battle.floats.push({ x: a.x, y: a.y - 44, text: "★ " + cardName(e.card), col: "#ffe27a", life: 1.4, small: true }); break;
       case "dmg":
-        if (e.eff === "up" && e.by && b.units.some((x) => x.uid === e.by && x.side === "ally")) EV.P.c.advHits = (EV.P.c.advHits || 0) + 1;
-        if (a) { a.flash = 1; battle.floats.push({ x: a.x + (Math.random() * 16 - 8), y: a.y - 34, text: (e.crit ? "¡" : "") + e.n + (e.crit ? "!" : ""), col: e.dot ? "#ff9a4a" : e.crit ? "#ffd35a" : e.eff === "up" ? "#ff7a6a" : "#ffffff", life: 1.1, big: e.crit }); }
+        if ((e.eff === "up" || e.eff === "opp") && e.by && b.units.some((x) => x.uid === e.by && x.side === "ally")) EV.P.c.advHits = (EV.P.c.advHits || 0) + 1;
+        if (a) {
+          a.flash = 1;
+          // normal cream; ×1.5 gold and bigger; ×1.25 pink with an "Opposite" tag; ×0.75 grey and smaller; damage over time falls in its cause's colour
+          const col = e.dot ? (e.dot === "burn" ? TCOL.fire : "#d2cbd9") : e.eff === "up" ? "#ffd57a" : e.eff === "opp" ? "#f4a6c4" : e.eff === "down" ? "#9d93ad" : "#fbf6ef";
+          battle.floats.push({ x: a.x + (Math.random() * 16 - 8), y: a.y - (e.dot ? 20 : 34), vy: e.dot ? -0.3 : 0.45, text: (e.crit ? "¡" : "") + e.n + (e.crit ? "!" : ""), col, life: 1.1, big: e.crit || e.eff === "up", small: e.eff === "down" });
+          if (e.eff === "opp") battle.floats.push({ x: a.x, y: a.y - 20, text: tx("b.opp"), col: "#fbf6ef", stroke: "#4a3d5e", life: 1.1, small: true });
+        }
         if (e.dot) blog(tx("log." + e.dot, { name: uName(e.u), n: e.n }));
         else blog(tx("log.dmg", { name: uName(e.u), n: e.n, crit: e.crit ? tx("log.crit") : "", eff: e.eff ? tx("log." + e.eff) : "" }));
         hitSfx = e.crit ? "crit" : hitSfx || "hit"; break;
       case "miss": if (a) battle.floats.push({ x: a.x, y: a.y - 34, text: e.blind ? "✴" : "~", col: "#cfe8ff", life: 1 }); blog(e.blind ? tx("log.blindMiss", { name: uName(e.by) }) : tx("log.miss", { name: uName(e.u) })); hitSfx = hitSfx || "miss"; break;
-      case "heal": if (a) battle.floats.push({ x: a.x, y: a.y - 34, text: "+" + e.n, col: "#8fe08a", life: 1.1 }); blog(tx("log.heal", { name: uName(e.u), n: e.n })); break;
-      case "st": if (a) battle.floats.push({ x: a.x, y: a.y - 48, text: STATUS[e.st].icon + " " + STATUS[e.st][L()], col: STATUS[e.st].neg ? "#ffb0c8" : "#bfe8ff", life: 1.3, small: true }); blog(tx("log.st", { name: uName(e.u), st: STATUS[e.st][L()] })); break;
+      case "heal": if (a) battle.floats.push({ x: a.x, y: a.y - 34, vy: 0.3, text: "+" + e.n, col: "#86b85a", life: 1.1 }); blog(tx("log.heal", { name: uName(e.u), n: e.n })); break;
+      case "st": if (a) battle.floats.push(STATUS[e.st].neg ? { x: a.x, y: a.y + (a.boss ? 66 : 58), vy: -0.25, text: STATUS[e.st].icon + " " + STATUS[e.st][L()], col: "#9d93ad", life: 1.3, small: true } : { x: a.x, y: a.y - 48, text: STATUS[e.st].icon + " " + STATUS[e.st][L()], col: "#1d1626", stroke: "#fbf6ef", life: 1.3, small: true }); blog(tx("log.st", { name: uName(e.u), st: STATUS[e.st][L()] })); break;
       case "shield": blog(tx("log.shield", { name: uName(e.u), n: e.n })); break;
       case "break": blog(tx("log.break")); break;
       case "cleanse": blog(tx("log.cleanse", { name: uName(e.u), st: e.st.map((s) => STATUS[s][L()]).join(", ") })); break;
@@ -1945,7 +2138,14 @@ function endBattle(res) {
   const coins = boss ? 30 : 3 + Math.floor(rnd() * 4) + foes.length;
   X.loot.xp += xp; X.loot.coins += coins;
   const offer = boss ? offerCards(3, 1) : rnd() < 0.12 ? offerCards(3, 0) : null;
-  X.reward = { xp, coins, offer, after: boss ? "win" : "next" };
+  // the guardian leaves one of its own cards (one you haven't found yet, if any)
+  let guard = null;
+  if (boss) {
+    const gc = MONS[ZONES[X.zone].boss].cards, fresh = gc.filter((id) => !(EV.P.grim || {})[id]), pool = fresh.length ? fresh : gc;
+    const id = pool[Math.floor(rnd() * pool.length)];
+    giveCard(id, 0); guard = { id, g: 0 }; X.loot.cards.push(guard); EV.save();
+  }
+  X.reward = { xp, coins, offer, guard, after: boss ? "win" : "next" };
   EV.checkAch();
   show("reward");
 }
@@ -1963,6 +2163,7 @@ function rewardHtml() {
   if (r.xp) parts.push(`<span>${esc(tx("r.xp", { n: r.xp }))}</span>`);
   if (r.coins) parts.push(`<span>✦ ${esc(tx("r.coins", { n: r.coins }))}</span>`);
   let html = `<div class="panel"><h3>${esc(r.title || tx("r.title"))}</h3>${r.text ? `<p class="evt-out">${esc(r.text)}</p>` : ""}${parts.length ? `<div class="loot">${parts.join("")}</div>` : ""}`;
+  if (r.guard) html += `<h3>${esc(tx("r.guard"))}</h3><div class="rcards">${cardHtml(r.guard.id, r.guard.g)}</div>`;
   if (r.offer) {
     html += `<h3>${esc(tx("r.pick"))}</h3><div class="rcards">${r.offer.map((o, i) => cardHtml(o.id, o.g, { foot: `${cantNote(o.id)}<div class="rc-btns"><button class="btn" type="button" data-take="${i}">${esc(tx("r.pick"))}</button></div>` })).join("")}</div>
       <div class="bctl"><button class="btn ghost" type="button" data-take="-1">${esc(tx("r.skip"))}</button></div>`;
@@ -1977,6 +2178,17 @@ function afterReward() {
 
 /* ---------- Battle drawing ---------- */
 function drawDecor(c, decor, t, day) {
+  if (decor === "heart") {
+    // the great stump at the centre of the valley, root veins with black sap, floating star motes
+    const m = BW / 2;
+    c.fillStyle = day ? "#7a5a48" : "#3a2a30";
+    c.beginPath(); c.moveTo(m - 70, 70); c.lineTo(m - 56, 16); c.quadraticCurveTo(m, 6, m + 56, 16); c.lineTo(m + 70, 70); c.closePath(); c.fill();
+    c.fillStyle = day ? "#c8a070" : "#6a5040"; EV.ell(c, m, 16, 56, 9); c.fill();
+    c.strokeStyle = day ? "#8a6a50" : "#4a3838"; c.lineWidth = 1; for (const r of [40, 26, 12]) { EV.ell(c, m, 16, r, r * 0.16); c.stroke(); }
+    c.strokeStyle = SAP.c0; c.lineWidth = 3; for (const [x1, x2] of [[m - 60, 0], [m + 60, BW], [m - 30, 60], [m + 30, BW - 60]]) { c.beginPath(); c.moveTo(x1, 66); c.quadraticCurveTo((x1 + x2) / 2, 58, x2, 70); c.stroke(); }
+    c.save(); for (let i = 0; i < 14; i++) { const x = (i * 53 + t * 8) % BW, y = 60 - ((i * 17 + t * 10) % 60); c.globalAlpha = (0.5 + 0.5 * Math.sin(t * 3 + i)) * (day ? 0.7 : 1); c.fillStyle = i % 2 ? "#ffe9a0" : "#c8b8ff"; c.fillRect(x, y, 2, 2); } c.restore();
+    return;
+  }
   if (decor === "peaks") {
     // snowy peaks, drifting clouds and a spinning vane far away
     c.fillStyle = day ? "#8ea6c0" : "#26304a";
@@ -2098,15 +2310,16 @@ function drawBattle(now) {
     out.font = font(600, 10); out.textAlign = "center"; out.textBaseline = "alphabetic"; out.fillStyle = "#fbf6ef"; out.strokeStyle = "#1d1626"; out.lineWidth = 3; out.lineJoin = "round";
     const label = u.name.length > 14 ? u.name.slice(0, 13) + "…" : u.name;
     out.strokeText(label + " · " + u.lvl, 0, by + 16); out.fillText(label + " · " + u.lvl, 0, by + 16);
-    const icons = Object.keys(u.st).map((k) => STATUS[k].icon).join("") + TYPES[u.types[0]].icon;
-    out.font = "10px system-ui"; out.fillText(icons, 0, -(u.boss ? 56 : 30));
+    const ks = Object.keys(u.st), good = ks.filter((k) => !STATUS[k].neg).map((k) => STATUS[k].icon).join(""), bad = ks.filter((k) => STATUS[k].neg).map((k) => STATUS[k].icon).join("");
+    out.font = "10px system-ui"; out.fillText(good + TYPES[u.types[0]].icon, 0, -(u.boss ? 56 : 30));
+    if (bad) out.fillText(bad, 0, by + 28);
     out.restore();
   }
   for (const f of battle.floats) {
-    f.life -= 0.016; f.y -= 0.45;
+    f.life -= 0.016; f.y -= f.vy == null ? 0.45 : f.vy;
     out.save(); out.globalAlpha = Math.max(0, Math.min(1, f.life)); out.textAlign = "center";
     out.font = f.big ? font(700, 17) : f.small ? font(600, 10) : font(700, 14);
-    out.lineWidth = 3; out.lineJoin = "round"; out.strokeStyle = "#1d1626"; out.strokeText(f.text, f.x, Math.round(f.y)); out.fillStyle = f.col; out.fillText(f.text, f.x, Math.round(f.y)); out.restore();
+    out.lineWidth = 3; out.lineJoin = "round"; out.strokeStyle = f.stroke || "#1d1626"; out.strokeText(f.text, f.x, Math.round(f.y)); out.fillStyle = f.col; out.fillText(f.text, f.x, Math.round(f.y)); out.restore();
   }
   battle.floats = battle.floats.filter((f) => f.life > 0);
   battle.raf = requestAnimationFrame(drawBattle);
@@ -2167,6 +2380,12 @@ const EVT = {
       o: ["Sabe a tierra mojada y a algo dulce. El equipo recupera mucha vida. Esporina sonríe: «¿Ves? Nadie se muere por probarlo.»", "«La Casa Albor. Dicen que es para protegernos.» Baja la voz: «Si la savia se puede curar, alguien preguntará de dónde sale.» Ganas experiencia.", "Esporina asiente. Está acostumbrada."] },
     tomb: { t: "La puerta de la Tumba Helada gotea. Junto a ella, un gigante de hielo duerme de pie, con la maza apoyada en el suelo.", c: ["Asomarte por una grieta", "Tapar la gotera con nieve", "Pasar de puntillas"],
       o: ["Dentro solo ves oscuridad y un brillo pequeño, al alcance de la mano. Lo coges sin hacer ruido.", "Cuesta, pero la gotera para. El gigante suspira en sueños. Ganas experiencia.", "Pasáis de puntillas. El gigante no se mueve."] },
+    duo: { t: "Tila y Nim te esperan en la entrada del tocón. Unísona dormita entre los dos. «Las nanas de nuestros pueblos son el mismo verso», dice Tila. Nim asiente sin mirarla.", c: ["Pedirles que canten juntos", "Preguntar quién reclama a Unísona", "Dejar que Unísona elija el camino"],
+      o: ["Las dos nanas se trenzan y la savia negra retrocede un palmo. El equipo recupera mucha vida.", "«Albor dice que es suya porque nació de la luz. Lóbrego, que de la sombra. Albina, que la soñó primero.» Nim escupe al suelo. «Es de quien la cuide.» Ganas experiencia.", "Unísona revolotea hacia un brillo entre las raíces y vuelve con algo con forma de carta."] },
+    albor: { t: "Bajo el tocón hay tubos de cristal clavados en la Raíz, con el sello de la Casa Albor. Por ellos sube luz de raíz hacia los Pozos de Albor, y por las grietas rezuma savia negra.", c: ["Arrancar un tubo", "Seguir los tubos hasta su origen", "Guardar un tubo como prueba"],
+      o: ["La Raíz suspira y la savia se calma un poco, pero el cristal os corta. El equipo pierde vida y gana mucha experiencia.", "Los tubos llegan a las Casas del Farol: cada farol del prado bebe de aquí. Ahora sabes de dónde viene la savia negra. Ganas Chispas.", "Te guardas el tubo. Alguien en la Casa Albor tendrá que dar explicaciones. Las próximas criaturas apagadas pegarán más flojo."] },
+    cantora: { t: "En medio del Claro hay una estatua cubierta de musgo: la Primera Cantora, la que partió el Canto en nueve. Todos los pueblos le rezan, cada uno con otra cara. Esta tiene la boca abierta, como a mitad de una nota.", c: ["Cantar los versos que llevas", "Quitarle el musgo", "Descansar a su sombra"],
+      o: ["Tus versos resuenan en la piedra y, muy lejos, se oyen los otros. Ganas experiencia por cada verso que llevas.", "Bajo el musgo la estatua no tiene una cara: tiene nueve, una por pueblo, mirando hacia fuera. Entre ellas encuentras algo con forma de carta.", "El equipo duerme un rato sin pesadillas y recupera vida."] },
     dreams: { t: "Una familia de la casa del Sueño se acaba de despertar y, como cada mañana, se cuenta lo que ha soñado antes de que se le olvide.", c: ["Contar tu sueño", "Escuchar los suyos", "Seguir tu camino"],
       o: ["Cuentas un sueño sobre un farol y una sombra que cantaban juntos. La abuela se queda muy callada. Ganas experiencia.", "Sueñan con agua que sube, con hielo que llora y con una raíz que tiene sed. El equipo descansa escuchando.", "La familia sigue contando sueños a tu espalda."] },
   },
@@ -2222,6 +2441,12 @@ const EVT = {
       o: ["It tastes of wet earth and something sweet. The team recovers a lot of health. Esporina smiles: \"See? Nobody dies from trying it.\"", "\"House Albor. They say it's to protect us.\" She lowers her voice: \"If the sap can be cured, someone will ask where it comes from.\" You gain experience.", "Esporina nods. She's used to it."] },
     tomb: { t: "The door of the Frozen Tomb is dripping. Beside it an ice giant sleeps standing up, its club resting on the ground.", c: ["Peek through a crack", "Plug the leak with snow", "Tiptoe past"],
       o: ["Inside you see only darkness and a small glint, within arm's reach. You take it without a sound.", "It's hard work, but the leak stops. The giant sighs in its sleep. You gain experience.", "You tiptoe past. The giant doesn't move."] },
+    duo: { t: "Tila and Nim wait for you at the mouth of the stump. Unísona dozes between them. \"Our peoples' lullabies are the same verse,\" says Tila. Nim nods without looking at her.", c: ["Ask them to sing together", "Ask who claims Unísona", "Let Unísona pick the path"],
+      o: ["The two lullabies braid together and the black sap pulls back a hand's width. The team recovers a lot of health.", "\"Albor says it's theirs because it was born of light. Lóbrego says of shadow. Albina says she dreamed it first.\" Nim spits on the ground. \"It belongs to whoever looks after it.\" You gain experience.", "Unísona flutters toward a glint among the roots and comes back with something card-shaped."] },
+    albor: { t: "Under the stump, glass tubes are driven into the Root, stamped with the seal of House Albor. Root-light rises through them toward the Wells of Albor, and black sap seeps from the cracks they leave.", c: ["Pull out a tube", "Follow the tubes to their source", "Keep a tube as proof"],
+      o: ["The Root sighs and the sap calms a little, but the glass cuts you. The team loses health and gains a lot of experience.", "The tubes run to the Lantern Houses: every lantern in the meadow drinks from here. Now you know where the black sap comes from. You gain Chispas.", "You keep the tube. Someone in House Albor will have to explain. The next dimmed creatures will hit softer."] },
+    cantora: { t: "In the middle of the Glade stands a moss-covered statue: the First Singer, who split the Song into nine. Every people prays to her, each with a different face. This one has its mouth open, as if halfway through a note.", c: ["Sing the verses you carry", "Clear away the moss", "Rest in her shade"],
+      o: ["Your verses ring in the stone and, far away, the others can be heard. You gain experience for every verse you carry.", "Under the moss the statue doesn't have one face: it has nine, one per people, looking outward. Among them you find something card-shaped.", "The team sleeps a while without nightmares and recovers health."] },
     dreams: { t: "A family of the House of Dreams has just woken up and, like every morning, they tell each other what they dreamed before they forget.", c: ["Tell your dream", "Listen to theirs", "Keep walking"],
       o: ["You tell a dream about a lantern and a shadow singing together. The grandmother goes very quiet. You gain experience.", "They dream of rising water, of ice that weeps and of a thirsty root. The team rests while listening.", "The family keeps telling dreams behind you."] },
   },
@@ -2341,6 +2566,21 @@ function chooseEvent(i) {
       if (i === 1) { hurtParty(0.15); X.loot.xp += 18; }
       if (i === 2) { healParty(0.3); X.nextFoeBuff = 15; }
       break;
+    case "duo":
+      if (i === 0) healParty(0.45);
+      if (i === 1) X.loot.xp += 20;
+      if (i === 2) X.eventCard = true;
+      break;
+    case "albor":
+      if (i === 0) { hurtParty(0.15); X.loot.xp += 28; }
+      if (i === 1) { X.loot.coins += 18; EV.P.flags = Object.assign(EV.P.flags || {}, { alborTruth: 1 }); }
+      if (i === 2) { X.nextFoeBuff = -15; EV.P.flags = Object.assign(EV.P.flags || {}, { alborProof: 1 }); }
+      break;
+    case "cantora":
+      if (i === 0) X.loot.xp += 4 * Object.keys(EV.P.cleared || {}).filter((z) => EV.P.cleared[z] > 0).length;
+      if (i === 1) X.eventCard = true;
+      if (i === 2) healParty(0.35);
+      break;
     case "esporina":
       if (i === 0) { healParty(0.5); EV.P.flags = Object.assign(EV.P.flags || {}, { sporeRemedy: 1 }); }
       if (i === 1) X.loot.xp += 16;
@@ -2379,6 +2619,12 @@ function finish(res) {
   }
   if (coins > 0) EV.addCoins(coins, true);
   if (res === "win") { P.c.guard = (P.c.guard || 0) + 1; P.cleared = P.cleared || {}; P.cleared[X.zone] = (P.cleared[X.zone] || 0) + 1; }
+  X.unisona = null;
+  if (res === "win" && X.zone === "heart") {
+    const F = P.flags = P.flags || {};
+    if (!F.unisona) { F.unisona = 1; for (const id of MONS.unisona.cards) { giveCard(id, 0); l.cards.push({ id, g: 0 }); } X.unisona = "first"; }
+    else { const id = MONS.unisona.cards[Math.floor(rnd() * 3)]; giveCard(id, 0); l.cards.push({ id, g: 0 }); X.unisona = "again"; }
+  }
   if (res === "win" || res === "lose") P.c.expDone = (P.c.expDone || 0) + 1;
   // zone stars: keep the best, 3 Song Notes the first time a zone reaches 3
   X.starInfo = null;
@@ -2423,6 +2669,7 @@ function endHtml() {
   if (X.hurt && (X.hurt.energy || X.hurt.health)) html += `<p class="evt-out">${esc(tx("end.hurt", { name: nm, e: X.hurt.energy, h: X.hurt.health }))}</p>`;
   else html += `<p class="evt-out">${esc(tx("end.unhurt", { name: nm }))}</p>`;
   if (e.res === "win") html += `<p class="evt-out">✦ ${esc(tx("end.verse", { v: zt("verse") }))}</p>`;
+  if (X.unisona) html += `<p class="evt-out">✦ ${esc(tx(X.unisona === "first" ? "end.unisona" : "end.unisonaUp"))}</p>`;
   if (X.starInfo) html += `<p class="evt-out end-stars"><b>${esc(tx("end.stars", { s: starStr(X.starInfo.n) }))}</b>${X.starInfo.best ? " · " + esc(tx("end.starsNew")) : ""}${X.starInfo.bonus ? "<br>♪ " + esc(tx("end.star3")) : ""}<br><small>${esc(tx("end.starsWhy"))}</small></p>`;
   if (e.after > e.before) html += `<p class="evt-out">${esc(tx("end.lvl", { name: nm, n: e.after }))}</p>`;
   for (const k of e.unlocked) html += `<p class="evt-out">${esc(tx("end.slot", { slot: tx("slot." + k) }))}</p>`;
@@ -2502,10 +2749,10 @@ function grimHtml() {
       const tids = grimIds([ty]); if (!tids.length) continue;
       h += `<p class="rc-copies">${typeChip(ty)} <span class="progress">${tids.filter((id) => P.grim[id]).length} / ${tids.length}</span></p><div class="rcards">`;
       for (const id of tids) {
-        const C = CARDS[id], boss = !!C.boss, owner = C.by && MONS[C.by] ? monName(C.by) : "";
-        const craft = boss ? `<p class="rc-cant">${esc(tx("grim.boss"))}</p>` : `<div class="rc-btns"><button class="btn ghost" type="button" data-craft="${id}" ${(P.dust || 0) < CRAFT_COST ? "disabled" : ""}>${esc(tx("grim.craft", { c: CRAFT_COST }))}</button></div>`;
+        const C = CARDS[id], boss = !!C.boss || !!C.story, owner = C.by && MONS[C.by] ? monName(C.by) : "";
+        const craft = boss ? `<p class="rc-cant">${esc(tx(C.story ? "grim.story" : "grim.boss"))}</p>` : `<div class="rc-btns"><button class="btn ghost" type="button" data-craft="${id}" ${(P.dust || 0) < CRAFT_COST ? "disabled" : ""}>${esc(tx("grim.craft", { c: CRAFT_COST }))}</button></div>`;
         if (P.grim[id]) h += cardHtml(id, 0, { foot: craft });
-        else h += `<div class="rcard ghost"><div class="rc-top"><strong>???</strong></div><div class="rc-tags">${typeChip(ty)}</div><p class="rc-lore">${esc(tx("grim.unknown"))}${owner && !boss ? " · " + esc(tx("grim.by", { mon: owner })) : ""}</p>${craft}</div>`;
+        else h += ghostCardHtml(id, tx("grim.unknown") + (owner && !boss ? " · " + tx("grim.by", { mon: owner }) : ""), craft);
       }
       h += `</div>`;
     }
@@ -2532,7 +2779,7 @@ function renderCards() {
     const u = makeUnit(ownUnitOpts(1));
     const need = xpNeed(R.lvl);
     html += `<div class="slotbox" style="border-style:solid"><div class="panel-head"><strong style="font-family:var(--font-display);font-size:18px">${esc(S.name)} · ${esc(tx("cards.lvl", { n: R.lvl }))}</strong><span>${u.types.map(typeChip).join(" ")}</span></div>
-      <div class="bar xpbar"><i style="width:${Math.round(100 * R.xp / need)}%"></i></div><p class="rstats">${esc(tx("cards.xp", { x: R.xp, y: need }))} · ${esc(tx("cards.stats", { hp: u.maxHp, str: Math.round(u.base.str), def: Math.round(u.base.def), spd: Math.round(u.base.spd), cr: Math.round(u.crit) }))}</p></div>`;
+      <div class="bar xpbar"><i style="width:${Math.round(100 * R.xp / need)}%"></i></div><p class="rstats">${esc(tx("cards.xp", { x: R.xp, y: need }))}</p>${ownSheetHtml()}</div>`;
     html += `<div class="slots">${["a", "p", "s"].map((k) => {
       const locked = R.lvl < SLOT_LVL[k];
       const c = R.eq[k] && cardByUid(R.eq[k]);
@@ -2574,10 +2821,10 @@ function onCardsClick(e) {
     const c = cardByUid(t.dataset.dust), eqSet = R ? new Set(Object.values(R.eq).filter(Boolean)) : new Set();
     if (!c || eqSet.has(c.uid) || P.cards.filter((x) => x.id === c.id).length < 2) return;
     P.cards = P.cards.filter((x) => x !== c); P.dust = (P.dust || 0) + DUST_OF(c.g); P.c.dusted = (P.c.dusted || 0) + 1;
-    EV.toast(tx("dust.got", { n: DUST_OF(c.g) }), "✧"); EV.sfx("coin"); EV.save(); EV.checkAch(); renderCards(); return;
+    EV.toast(tx("dust.got", { n: DUST_OF(c.g) }), "∴"); EV.sfx("coin"); EV.save(); EV.checkAch(); renderCards(); return;
   }
   if (t.dataset.craft) {
-    const id = t.dataset.craft; if (!CARDS[id] || CARDS[id].boss) return;
+    const id = t.dataset.craft; if (!CARDS[id] || CARDS[id].boss || CARDS[id].story) return;
     if ((P.dust || 0) < CRAFT_COST) { EV.toast(tx("dust.poor")); EV.sfx("deny"); return; }
     P.dust -= CRAFT_COST; giveCard(id, 0);
     EV.toast(tx("grim.crafted", { card: cardName(id) })); EV.sfx("grow"); EV.save(); EV.checkAch(); renderCards(); return;
@@ -2621,6 +2868,7 @@ function refreshHome() {
   const S = EV.S, btn = $("aExp"), chip = $("btnCards");
   const alive = S && S.phase === "alive";
   chip.hidden = !(alive && S.stage >= 1) && !(EV.P.cards && EV.P.cards.length);
+  homeSheet(alive);
   if (!alive) { btn.hidden = true; return; }
   btn.hidden = false;
   const why = expCheck();
@@ -2635,6 +2883,18 @@ function refreshHome() {
   r.textContent = tx("recharge", { n: RECHARGE.amount, c: RECHARGE.price });
   r.hidden = S.stats.energy >= 70;
   r.disabled = EV.P.coins < RECHARGE.price;
+}
+function homeSheet(alive) {
+  let pn = $("sheetPanel");
+  if (!pn) {
+    const status = $("b_full") && $("b_full").closest(".panel"); if (!status) return;
+    pn = document.createElement("div"); pn.id = "sheetPanel"; pn.className = "panel"; status.after(pn);
+  }
+  const S = EV.S, R = rpgState();
+  if (!alive || !S || S.stage < 1 || !R) { pn.hidden = true; return; }
+  pn.hidden = false;
+  const html = `<h3>${esc(tx("sh.title"))}</h3><p class="muted" style="margin:0 0 6px;font-size:13px">${esc(tx("sh.sub", { n: R.lvl }))}</p>${ownSheetHtml()}`;
+  if (pn.innerHTML !== html) pn.innerHTML = html;
 }
 // pay Chispas for an energy boost (energy otherwise only refills slowly while sleeping)
 const RECHARGE = { amount: 40, price: 12 };
