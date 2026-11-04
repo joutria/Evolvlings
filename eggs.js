@@ -1,6 +1,6 @@
 /* Evolvlings: eggs, the Refuge and Bond (engagement delivery 3).
    Loaded after well.js. The Egg Well (paid with Song Notes, never real money) gives eggs; eggs incubate for
-   1 to 3 days (care makes it faster) and hatch into companions that live in the Refuge of el Vado. Each one
+   12 to 44 hours (care and expeditions make it faster) and hatch into companions that live in the Refuge of el Vado. Each one
    has its own level and Bond, and can join expeditions. Your home creature stays Lumo, Fizz or Pebb, and
    story creatures (Lumo, Fizz, Pebb, Unísona) never come from eggs.
    Also here: the Keeper Level (grows with everything you do and opens features) and welcome tasks. */
@@ -28,7 +28,8 @@ const TX = {
     "dup": "¡Otra vez {n}!", "dupSub": "{n} ya vive en el Refugio. Su hermano se queda con la familia de Tila y te deja {d} ∴ de Polvo y +1 de Vínculo.",
     "petted": "{n} se acurruca contra tu mano. +1 Vínculo",
     // incubator
-    "inc.sub": "Los huevos tardan de 1 a 3 días en abrirse. Dales calor y háblales para que vayan más rápido.",
+    "inc.sub": "Los huevos tardan de 12 a 44 horas en abrirse. Dales calor, háblales y sal de expedición para que vayan más rápido: cada expedición terminada los adelanta 3 h.",
+    "tripEggs": "El viaje calienta el Refugio: los huevos de la incubadora se adelantan {n} h.",
     "slot.lock": "Hueco libre con Nivel de Cuidador {n}", "slot.free": "Hueco libre",
     "left": "Faltan {t}", "ready": "¡Se está moviendo!", "warm": "Dar calor (−2 h)", "warmWait": "Calentito ({m} min)", "talk": "Hablarle (−4 h)", "talkDone": "Ya le hablaste hoy", "open": "Abrir",
     "bag": "Huevos en espera ({n})", "bagNone": "No tienes huevos esperando.", "incubate": "Incubar", "full": "La incubadora está llena.",
@@ -72,7 +73,8 @@ const TX = {
     "badge": "Refuge · Lv {l} · ♥ {b}", "born": "{n} has hatched!", "bornSub": "It lives in the Refuge now and can join your next expedition.",
     "dup": "{n} again!", "dupSub": "{n} already lives in the Refuge. Its sibling stays with Tila's family and leaves you {d} ∴ Stardust and +1 Bond.",
     "petted": "{n} snuggles into your hand. +1 Bond",
-    "inc.sub": "Eggs take 1 to 3 days to open. Keep them warm and talk to them to speed things up.",
+    "inc.sub": "Eggs take 12 to 44 hours to open. Keep them warm, talk to them and go on expeditions to speed things up: each finished trip brings them 3 h closer.",
+    "tripEggs": "The trip warms the Refuge: the eggs in the incubator move {n} h closer.",
     "slot.lock": "Free slot at Keeper Level {n}", "slot.free": "Free slot",
     "left": "{t} to go", "ready": "It's wiggling!", "warm": "Warm it (−2 h)", "warmWait": "Cosy ({m} min)", "talk": "Talk to it (−4 h)", "talkDone": "Talked today", "open": "Open",
     "bag": "Waiting eggs ({n})", "bagNone": "No eggs waiting.", "incubate": "Incubate", "full": "The incubator is full.",
@@ -113,7 +115,10 @@ const TOP = 4, GOOD = 3, FLOOR = 10, SOFT = 70, HARD = 90, HIST = 100;
 const BANNERS = { s1: { featured: "mecha", cost10: 10 }, new: { featured: null, cost10: 8, max: 20 } };
 const DUP_DUST = [5, 10, 25, 60, 150];
 const EGG_RAMP = ["bark", "moss", "sky", "lilac", "gold"];
-const hatchMs = (tier) => (24 + 12 * tier) * HOUR;
+// half a day for a bark egg, under two days for a golden one
+const hatchMs = (tier) => (12 + 8 * tier) * HOUR;
+// every finished expedition (won or lost) brings every egg in the incubator forward
+const TRIP_CUT = 3 * HOUR;
 const WARM_CUT = 2 * HOUR, WARM_CD = HOUR, TALK_CUT = 4 * HOUR;
 const BOND_AT = [0, 2, 5, 9, 14, 20, 27, 35, 44, 54]; // Bond XP for Bond 1 … 10
 const POOL_LVL = 3, SLOT_LVL = [1, 5, 8];
@@ -121,8 +126,8 @@ const WELCOME = [
   { id: "feed3", n: 5, ok: (p) => (p.c.fed || 0) >= 3 },
   { id: "exp1", n: 10, ok: (p) => (p.c.expDone || 0) >= 1 },
   { id: "equip", n: 5, ok: (p) => (p.c.equips || 0) >= 1 },
-  { id: "well1", n: 5, ok: (p) => (p.c.wellPulls || 0) >= 1 },
-  { id: "egg1", n: 10, ok: (p) => (p.c.eggPulls || 0) >= 1 },
+  { id: "well1", n: 5, ok: (p) => (p.c.wellPulls || 0) >= 1 || EV.quietOn() },
+  { id: "egg1", n: 10, ok: (p) => (p.c.eggPulls || 0) >= 1 || EV.quietOn() },
   { id: "hatch1", n: 10, ok: (p) => (p.c.eggHatched || 0) >= 1 },
   { id: "bond2", n: 10, ok: () => Object.values(G().roster).some((r) => bondLvl(r.bxp) >= 2) },
   { id: "cl5", n: 5, ok: () => clLvl() >= 5 },
@@ -287,6 +292,11 @@ function afterTrip(res, xp, party, plvl) {
     if (r.lvl > l0) out.push(tx("tripLvl", { n, l: r.lvl }));
     if (bondLvl(r.bxp) > b0) out.push(tx("tripBond", { n, b: bondLvl(r.bxp) }));
   }
+  if (res === "win" || res === "lose") {
+    const warm = G().inc.filter((e) => left(e) > 0);
+    for (const e of warm) e.cut = (e.cut || 0) + TRIP_CUT;
+    if (warm.length) out.push(tx("tripEggs", { n: TRIP_CUT / HOUR }));
+  }
   return out;
 }
 
@@ -404,7 +414,8 @@ function render() {
   const P = EV.P, g = G();
   autoIncubate();
   const ready = g.inc.some((e) => !left(e));
-  const tabs = ["refuge", "inc", "pool", "cl"];
+  const tabs = ["refuge", "inc", "pool", "cl"].filter((t) => t !== "pool" || !EV.quietOn());
+  if (tab === "pool" && EV.quietOn()) tab = "refuge";
   let h = `<div class="panel-head"><h2>${esc(tx("title"))}</h2><span class="progress">${esc(tx("have", { n: P.notes || 0, d: P.dust || 0 }))}</span></div><p class="muted" style="margin:0">${esc(tx("sub"))}</p>`;
   h += `<div class="seg rf-tabs" role="tablist">${tabs.map((t) => `<button type="button" role="tab" data-rtab="${t}" aria-pressed="${tab === t}" aria-selected="${tab === t}">${esc(tx("tab." + t))}${t === "inc" && ready ? " •" : ""}${t === "cl" && clPending().any ? " •" : ""}</button>`).join("")}</div>`;
   h += `<div class="rf-body">${tab === "inc" ? incHtml() : tab === "pool" ? poolHtml() : tab === "cl" ? clHtml() : refugeHtml()}</div>`;

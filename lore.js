@@ -8,6 +8,8 @@
  *      xp, coins (ganar)  · cost (gastar Chispas: EV.spendCoins)  · heal / hurt (fracción de vida del equipo)
  *      foeBuff (igual que X.nextFoeBuff)  · card (true = X.eventCard)  · fight (true = X.eventFight)
  *      flag (string o lista: se pone a 1 en EV.P.flags)  · escrito (id de LORE_ESCRITOS que se desbloquea)
+ *  - LORE_HILOS: pares de Escritos que, juntos, desbloquean una línea en el Grimorio.
+ *  - LORE_EPILOGOS: una línea por final de cada personaje; se muestran cuando el juego pone su `flag`.
  *  - `need` decide si el evento puede salir: { layer, flag, anyFlag, zone }. Si no se cumple, rollEvent() no lo elige.
  *  - `cNeed[i]` (opcional): flag necesaria para que se muestre la opción i (si falta, la opción no aparece).
  *
@@ -172,6 +174,123 @@
     { id: "nanas", layer: 4, from: "event", kind: "song", unlock: { flag: "unisona" },
       es: { title: "Dos nanas", text: "«Duerme, luz, que el sol te presta…» (Prado). «Duerme, sombra, que la noche te guarda…» (Hondonada). Escritas una al lado de la otra, con la misma música. Alguien ha subrayado las notas que coinciden: son todas." },
       en: { title: "Two lullabies", text: "\"Sleep, little light, the sun lends you…\" (Meadow). \"Sleep, little shadow, the night keeps you…\" (Hollow). Written side by side, to the same tune. Someone has underlined the notes that match: all of them." } },
+
+    /* --- Escritos de las historias de personajes (pestaña "Historias" de la biblia). `char` = de quién habla. --- */
+    { id: "candil", char: "tila", layer: 1, from: "chest", zone: "aurora", kind: "ledger",
+      es: { title: "Libro de calles de la Casa Candil", text: "Calle del Pozo Viejo: 14 faroles. Calle del Mercado: 9. Calle de los Tintes: 11. Las tres, tachadas con tinta de la Casa Albor. Última anotación, con letra de niña: «Calle del barrio nuevo: 6 faroles. A cargo de Tila. Sin apellido.»" },
+      en: { title: "Street book of House Candil", text: "Old Well Street: 14 lanterns. Market Street: 9. Dyers' Street: 11. All three crossed out in House Albor ink. Last entry, in a child's hand: \"New quarter street: 6 lanterns. In Tila's care. No surname.\"" } },
+    { id: "perdon", char: "tila", layer: 2, from: "chest", zone: "aurora", kind: "decree",
+      es: { title: "Orden de perdón", text: "Se perdona a la farolera Tila, antes de la Casa Candil, el robo de once medidas de aceite de los almacenes de Albor, a propuesta de la matriarca. Al margen, a mano: «Se parece a alguien que conocí. No a ella: a mí.»" },
+      en: { title: "Order of pardon", text: "The lamplighter Tila, formerly of House Candil, is pardoned for the theft of eleven measures of oil from the Albor stores, at the matriarch's request. In the margin, by hand: \"She reminds me of someone I knew. Not her mother. Me.\"" } },
+    { id: "guijarro", char: "nim", layer: 2, from: "event", kind: "object",
+      es: { title: "Un guijarro con una muesca", text: "Penumbra se lo dio a Nim la última mañana, sin decir de dónde lo había sacado. Tiene grabada una raya corta: el signo de la Hondura para «aquí sigue alguien». Nim no sabe leerlo. Lo lleva siempre." },
+      en: { title: "A notched pebble", text: "Penumbra gave it to Nim on the last morning, without saying where it came from. A short line is carved into it: the Deep-folk sign for \"someone is still here\". Nim can't read it. He carries it always." } },
+    { id: "adoquin", char: "nim", layer: 2, from: "chest", zone: "aurora", kind: "drawing",
+      es: { title: "Dibujo en un adoquín", text: "Carbón sobre piedra: una verja, un señor de luz con la boca muy abierta, una sombra con las manos amarillas que camina sin querer. Debajo, una palabra tachada tantas veces que ya no se lee. Nadie dibuja un nombre si no es para borrarlo." },
+      en: { title: "Drawing on a cobblestone", text: "Charcoal on stone: a gate, a man of light with his mouth wide open, a shadow with yellow hands walking against its will. Below, a word scratched out so many times it can't be read. Nobody draws a name except to erase it." } },
+    { id: "charcos", char: "orilla", layer: 2, from: "chest", zone: "lake", kind: "diary",
+      es: { title: "Lo que vi en los charcos", text: "Primer charco: un farol con raíces. Segundo: el mismo farol, más grande. Tercero: el farol bebiendo y, muy al fondo, una tumba de hielo que gotea. No sé qué es la tumba. Nadie me deja preguntar." },
+      en: { title: "What I saw in the puddles", text: "First puddle: a lantern with roots. Second: the same lantern, bigger. Third: the lantern drinking and, far below, a tomb of ice, dripping. I don't know what the tomb is. Nobody lets me ask." } },
+    { id: "piedras", char: "orilla", layer: 2, from: "chest", zone: "lake", kind: "note",
+      es: { title: "Nota escrita en una barca", text: "Hoy los niños del Prado cantaban mientras nos tiraban piedras. La melodía era bonita. Eso es lo que más me dolió: que alguien se hubiera tomado la molestia de hacerla bonita." },
+      en: { title: "Note written on a boat", text: "Today the Meadow children sang while they threw stones at us. The tune was pretty. That's what hurt the most: that someone had bothered to make it pretty." } },
+    { id: "cartaOla", char: "ola", layer: 2, from: "event", kind: "letter", unlock: { flag: "olaLetter" },
+      es: { title: "Carta de Ola, nunca enviada", text: "Orilla: trabajo en un sitio donde el agua sirve para que otros no se quemen. Tiene gracia, ¿no? Aquí hay un chico del Fuego que no se ríe de mí. Se quema igual que yo. No se lo digas a la abuela." },
+      en: { title: "Ola's letter, never sent", text: "Orilla: I work somewhere water is used so others don't get burned. Funny, isn't it? There's a Fire boy here who doesn't laugh at me. He burns just like I do. Don't tell Grandmother." } },
+    { id: "compuerta", char: "ola", layer: 3, from: "chest", zone: "crater", kind: "note",
+      es: { title: "Nota doblada en un guante", text: "Ola: la compuerta se abre con dos manos, y una se quema. Pon tú la otra. Esta noche, cuando la forja duerma. Si sale mal, que sea juntos. F." },
+      en: { title: "Note folded in a glove", text: "Ola: the sluice opens with two hands, and one of them burns. You bring the other. Tonight, when the forge sleeps. If it goes wrong, let it go wrong together. F." } },
+    { id: "voces", char: "grava", layer: 3, from: "chest", zone: "caves", kind: "inscription",
+      es: { title: "Lista en la pared de la Sala", text: "Voces apagadas: el abuelo Pizarra. La niña que cantaba en Agua. Un peregrino de Luz cuyo verso hablaba de una luz prestada. Dos hermanos del Trueno. Cada día escribo menos nombres. O quedan menos, o recuerdo menos." },
+      en: { title: "List on the wall of the Hall", text: "Voices gone silent: grandfather Slate. The girl who sang in Water. A Light pilgrim whose verse spoke of borrowed light. Two Thunder brothers. Each day I write fewer names. Either fewer remain, or I remember fewer." } },
+    { id: "sombraTunel", char: "grava", layer: 3, from: "chest", zone: "caves", kind: "inscription",
+      es: { title: "Grabado junto a la grieta del este", text: "Hoy encontré a una sombra cavando donde no debía. Tenía las manos de oro y miedo de su propio nombre. La saqué por esta grieta y le di mi guijarro. Que alguien, en algún sitio, sepa que aquí sigue alguien." },
+      en: { title: "Carving by the east crack", text: "Today I found a shadow digging where it shouldn't. It had golden hands and was afraid of its own name. I led it out through this crack and gave it my pebble. May someone, somewhere, know that someone is still here." } },
+    { id: "anuncio", char: "basalto", layer: 1, from: "chest", zone: "crater", kind: "decree",
+      es: { title: "Anuncio de la Hondura", text: "La Hondura comunica que la Guardiana del Eco, Grava, ha muerto en las Cuevas. No hay cuerpo que velar. El Primer Picador lo vio con sus propios ojos. Partimos al amanecer. Nadie se queda atrás, porque ya no queda nadie." },
+      en: { title: "Notice of the Deep-folk", text: "The Deep-folk announce that the Keeper of the Echo, Grava, has died in the Caves. There is no body to watch over. The First Pick saw it with his own eyes. We leave at dawn. No one stays behind, because no one is left." } },
+    { id: "flores", char: "basalto", layer: 2, from: "chest", zone: "caves", kind: "note",
+      es: { title: "Tarjeta atada a unas flores secas", text: "Para Grava, que no está. De quien no volvió. (La letra es grande y torpe, de alguien que escribe poco y pica mucho.)" },
+      en: { title: "Card tied to dried flowers", text: "For Grava, who is not here. From the one who did not go back. (The handwriting is large and clumsy, from someone who writes little and digs a lot.)" } },
+    { id: "versos", char: "coplo", layer: 2, from: "shop", zone: "heights", kind: "notebook",
+      es: { title: "Cuaderno de versos de Coplo", text: "Verso de la Piedra: incompleto. Verso del Agua: me lo cantó una barquera, pero no entera. Nana del Prado: ¿parte del Canto? La nana de las sombras tiene la misma música. Comprobar. Anotación posterior: «No me dio tiempo. Tenía un encargo.»" },
+      en: { title: "Coplo's book of verses", text: "Stone verse: incomplete. Water verse: a boatwoman sang it to me, but not all of it. Meadow lullaby: part of the Song? The shadows' lullaby has the same tune. Check. Later note: \"Didn't have time. I had a commission.\"" } },
+    { id: "acta", char: "coplo", layer: 3, from: "chest", zone: "heights", kind: "record",
+      es: { title: "Acta del Coro de los Tres", text: "Sesión de cierre. El sabio del Verso pregunta a su hijo si el viento trae tormenta. El hijo responde que sí. Votos: Verso, cerrar. Trueno, abrir. Soplo, cerrar. Se cierran los pasos. Que conste que el sabio del Verso no oyó la respuesta: la leyó en los labios." },
+      en: { title: "Minutes of the Choir of Three", text: "Closing session. The sage of the Verse asks his son whether the wind brings a storm. The son says yes. Votes: Verse, close. Thunder, open. Breath, close. The passes are closed. Let it be noted that the sage of the Verse did not hear the answer: he read it on the lips." } },
+    { id: "invierno", char: "esporina", layer: 3, from: "chest", zone: "deep", kind: "diary",
+      es: { title: "Cuaderno del invierno", text: "Día 40 junto a la tumba. Quedamos once. El hielo gotea y por la grieta se ve el fondo. No hay nadie. Lo he mirado tres veces. Albina, ¿lo sabías cuando me pediste que me quedara?" },
+      en: { title: "Winter notebook", text: "Day 40 by the tomb. Eleven of us left. The ice drips and through the crack you can see the bottom. There is no one. I've looked three times. Albina, did you know when you asked me to stay?" } },
+    { id: "receta", char: "esporina", layer: 2, from: "shop", zone: "crater", kind: "recipe",
+      es: { title: "Receta para unas manos quemadas", text: "Para la enfriadora de las manos quemadas: capuchón negro machacado, dos veces al día, sin agua. Pagado por alguien del Gremio que no quiere dar su nombre. Lleva hollín en las uñas y pregunta demasiado por ella." },
+      en: { title: "Recipe for burned hands", text: "For the cooler with the burned hands: crushed black-cap, twice a day, no water. Paid for by someone from the Guild who won't give his name. Soot under his nails, and too many questions about her." } },
+    { id: "nocheSinLuna", char: "aurelia", layer: 3, from: "chest", zone: "aurora", kind: "diary",
+      es: { title: "Página de un diario de juventud", text: "Noche Sin Luna. Me he escapado al Vado. Un chico de la Sombra me ha dicho su nombre de verdad, así, sin más, como quien regala una flor. No pienso escribirlo. Pero tampoco pienso olvidarlo nunca." },
+      en: { title: "Page from a girlhood diary", text: "Moonless Night. I slipped away to the Ford. A Shadow boy told me his true name, just like that, the way you'd give someone a flower. I won't write it down. But I will never forget it either." } },
+    { id: "alvar", char: "aurelia", layer: 4, from: "guardian", zone: "aurora", kind: "report",
+      es: { title: "Informe del médico de la Casa", text: "El joven Alvar presenta vetas oscuras en ambos brazos. Ningún tratamiento de las Casas surte efecto. Se ha informado a la matriarca de que existe un remedio, prohibido por decreto suyo. La matriarca no ha respondido. Lleva dos noches con la luz encendida." },
+      en: { title: "House physician's report", text: "Young Alvar shows dark veins in both arms. No House treatment has any effect. The matriarch has been informed that a remedy exists, banned by her own decree. The matriarch has not replied. Her light has been on for two nights." } },
+    { id: "adelanto", char: "tizon", layer: 3, from: "chest", zone: "crater", kind: "contract",
+      es: { title: "Contrato de adelanto", text: "La Casa Albor adelanta al Yunque Tizón el acero para la prueba de Maestro Mayor. A cambio, el Gremio atenderá los encargos de la Casa con prioridad durante diez años, sin discutir precio. Firma de Tizón, muy apretada, como si le costara." },
+      en: { title: "Advance contract", text: "House Albor advances to Anvil Tizón the steel for the Master's trial. In exchange, the Guild will serve the House's orders first for ten years, without haggling. Tizón's signature, pressed hard, as if it hurt." } },
+    { id: "tos", char: "tizon", layer: 2, from: "chest", zone: "crater", kind: "note",
+      es: { title: "Nota en el bolsillo de un delantal", text: "Comprar más de lo de la seta. Que no se entere nadie del Gremio. Si preguntan, es para la tos. Y que la chica del Agua no sepa quién paga." },
+      en: { title: "Note in an apron pocket", text: "Buy more of the mushroom stuff. Nobody in the Guild finds out. If they ask, it's for the cough. And the Water girl mustn't know who's paying." } },
+    { id: "bellota", char: "liquen", layer: 2, from: "chest", zone: "forest", kind: "record",
+      es: { title: "Registro del Concejo, año de la crecida", text: "Un niño de las tierras bajas del Envés planta una bellota en la linde. Se le permite quedarse. Nombre: Liquen. Nadie se opone en tres días. La semilla viaja." },
+      en: { title: "Council record, the year of the flood", text: "A boy from the low lands of the Underside plants an acorn at the edge. He is allowed to stay. Name: Liquen. No one objects in three days. The seed travels." } },
+    { id: "silencio", char: "liquen", layer: 3, from: "chest", zone: "forest", kind: "diary",
+      es: { title: "Hoja suelta del Largo Silencio", text: "Largo Silencio, el año pasado. Escuché a la Raíz. Tosía. No lo diré en el Concejo: si lo oyen, querrán abrir la Cripta, y fuera del bosque las semillas no durarán un invierno. Este año no habrá Largo Silencio." },
+      en: { title: "Loose page from the Long Silence", text: "Long Silence, last year. I listened to the Root. It was coughing. I won't say it in Council: if they hear it, they'll want to open the Vault, and outside the wood the seeds won't last a winter. This year there will be no Long Silence." } },
+    { id: "acuerdo", char: "marejada", layer: 2, from: "chest", zone: "aurora", kind: "contract",
+      es: { title: "Acuerdo de agua", text: "Las Mareas podrán sacar agua de los pozos del Prado mientras se mantenga la paz. La Casa Albor determinará qué es la paz. Marca de la Madre de las Aguas: una gota dibujada con mano firme." },
+      en: { title: "Water agreement", text: "The Tides may draw water from the Meadow wells as long as peace is kept. House Albor will determine what peace is. Mark of the Mother of Waters: a drop, drawn with a steady hand." } },
+    { id: "ayunos", char: "marejada", layer: 3, from: "chest", zone: "lake", kind: "record",
+      es: { title: "Cuenta de ayunos de la Madre", text: "Cuarenta y dos noches seguidas sin comer después del ocaso. Nadie sabe por qué ayuna la Madre. Las barcas creen que reza por el agua. Ella no lo desmiente." },
+      en: { title: "Tally of the Mother's fasts", text: "Forty-two nights in a row without eating after dusk. Nobody knows why the Mother fasts. The boats believe she prays for water. She doesn't deny it." } },
+  ];
+
+  /* ---------- Hilos del Grimorio: dos Escritos que juntos revelan algo ---------- */
+  const LORE_HILOS = [
+    { id: "h_guijarro", a: "guijarro", b: "sombraTunel", es: "El guijarro de Nim es el de Grava. Su madre pasó por las Cuevas, y alguien la sacó de allí.", en: "Nim's pebble is Grava's. His mother passed through the Caves, and someone led her out." },
+    { id: "h_perdon", a: "perdon", b: "nocheSinLuna", es: "Aurelia perdonó a Tila porque se vio a sí misma: la chica que una vez se escapó al Vado.", en: "Aurelia pardoned Tila because she saw herself: the girl who once slipped away to the Ford." },
+    { id: "h_grava", a: "anuncio", b: "voces", es: "El anuncio dice que Grava murió. La pared sigue recibiendo nombres nuevos.", en: "The notice says Grava died. The wall keeps getting new names." },
+    { id: "h_manos", a: "receta", b: "tos", es: "Quien paga los remedios de Ola es el mismo que ordenó no apuntar su accidente.", en: "The one paying for Ola's remedies is the same one who ordered her accident left off the books." },
+    { id: "h_tormenta", a: "acta", b: "trueno", es: "No hubo tormenta. El voto que cerró los pasos se decidió con una palabra de Coplo.", en: "There was no storm. The vote that closed the passes turned on one word from Coplo." },
+    { id: "h_piedras", a: "piedras", b: "balada", es: "La canción que acompañaba las piedras es la balada más vendida de Coplo.", en: "The song that went with the stones is Coplo's best-selling ballad." },
+    { id: "h_paz", a: "acuerdo", b: "marejada", es: "Marejada vio la verdad hace diez años, y firmó un acuerdo que le prohíbe decirla.", en: "Marejada saw the truth ten years ago, and signed an agreement that forbids her to say it." },
+    { id: "h_bellota", a: "bellota", b: "seto", es: "El anciano que cerró el bosque llegó a él como desplazado, plantando una bellota.", en: "The elder who closed the wood came to it as a displaced child, planting an acorn." },
+  ];
+
+  /* ---------- Epílogos: una línea por final, se leen en el Grimorio al terminar cada historia ---------- */
+  // flag = la que el juego pone al cerrar esa historia con ese final
+  const LORE_EPILOGOS = [
+    { char: "tila", end: "A", flag: "end_tila_A", es: "La Casa Candil vuelve a tener nombre. En la Torre del Alba hay una farolera muy puntual que nunca canta.", en: "House Candil has its name back. In the Tower of Dawn there's a very punctual lamplighter who never sings." },
+    { char: "tila", end: "B", flag: "end_tila_B", es: "La calle no gasta aceite. Los vecinos la llaman la Calle de Tila, aunque Tila sigue sin apellido.", en: "The street burns no oil. The neighbours call it Tila's Street, though Tila still has no surname." },
+    { char: "nim", end: "A", flag: "end_nim_A", es: "Penumbra tardó nueve días en volver a hablarle. El décimo, le dijo su propio nombre verdadero.", en: "It took Penumbra nine days to speak to him again. On the tenth, she told him her own true name." },
+    { char: "nim", end: "B", flag: "end_nim_B", es: "Las cartas de su madre siguen llegando. Nim las guarda bajo el adoquín, junto al guijarro.", en: "His mother's letters keep coming. Nim keeps them under the cobblestone, beside the pebble." },
+    { char: "orilla", end: "A", flag: "end_orilla_A", es: "La nueva Madre llevó a su pueblo de vuelta al Lago. El agua sigue turbia, pero ya no se la presta nadie.", en: "The new Mother led her people back to the Lake. The water is still clouded, but no one lends it to them anymore." },
+    { char: "orilla", end: "B", flag: "end_orilla_B", es: "Abuela y nieta leen el agua juntas, de noche. Ninguna de las dos ha vuelto a mentir sobre lo que ve.", en: "Grandmother and granddaughter read the water together at night. Neither has lied about what she sees again." },
+    { char: "ola", end: "A", flag: "end_ola_A", es: "Un Fuego vive en el campamento de las Mareas. Le han dado una barca, y la está aprendiendo a no quemar.", en: "A Fire lives in the Tides' camp. They gave him a boat, and he's learning not to burn it." },
+    { char: "ola", end: "B", flag: "end_ola_B", es: "Cada mes llega al campamento dinero sin firma. Orilla sabe de quién es por cómo huele a carbón.", en: "Every month unsigned money reaches the camp. Orilla knows whose it is by the smell of coal." },
+    { char: "ola", end: "C", flag: "end_ola_C", es: "Ola volvió del Lago sin reflejo. Dice que no lo echa de menos; nunca le gustó verse al lado de su hermana.", en: "Ola came back from the Lake with no reflection. She says she doesn't miss it; she never liked seeing herself beside her sister." },
+    { char: "grava", end: "A", flag: "end_grava_A", es: "Si hablas en el centro de la Sala, ahora te contesta una voz más. Es la más vieja y la más paciente.", en: "If you speak in the middle of the Hall, one more voice answers now. The oldest, and the most patient." },
+    { char: "grava", end: "B", flag: "end_grava_B", es: "Medio de piedra, Grava enseña el verso a los niños de la Hondura. Les pide que pongan las manos en la roca.", en: "Half stone, Grava teaches the verse to the Deep-folk children. She asks them to put their hands on the rock." },
+    { char: "basalto", end: "A", flag: "end_basalto_A", es: "Ya no es Primer Picador. En la Hondura lo llaman «el que volvió», y él no corrige a nadie.", en: "He is no longer First Pick. The Deep-folk call him \"the one who went back\", and he corrects no one." },
+    { char: "basalto", end: "B", flag: "end_basalto_B", es: "Cuarenta casas, cuarenta chimeneas. Basalto ya no oye ninguna, ni siquiera con las manos en la pared.", en: "Forty houses, forty chimneys. Basalto can't hear any of them now, not even with his hands on the wall." },
+    { char: "coplo", end: "A", flag: "end_coplo_A", es: "Nadie le paga por su canción nueva. Es la primera que la gente se aprende sin que se la paguen.", en: "Nobody pays him for his new song. It's the first one people learn without being paid to." },
+    { char: "coplo", end: "B", flag: "end_coplo_B", es: "Coplo canta en todas las plazas del Claro. Su cuaderno de versos sigue en la misma página.", en: "Coplo sings in every square of the Glade. His book of verses is still open to the same page." },
+    { char: "esporina", end: "A", flag: "end_esporina_A", es: "Las Setas viven aparte, y no deben nada a nadie. Albina sigue soñando por un rey que todos saben falso.", en: "The Mushrooms live apart and owe no one anything. Albina still dreams for a king everyone knows is false." },
+    { char: "esporina", end: "B", flag: "end_esporina_B", es: "El rey ha soñado que todos los desplazados son un solo pueblo. Lo han soñado dos personas, juntas.", en: "The king dreamed that all the displaced are one people. Two people dreamed it, together." },
+    { char: "esporina", end: "C", flag: "end_esporina_C", es: "Los pasos de los Altos están abiertos para siempre. En el Fondo Blanco nadie sabe a quién se lo deben.", en: "The passes of the Heights are open for good. In the White Deep nobody knows whom they owe it to." },
+    { char: "aurelia", end: "A", flag: "end_aurelia_A", es: "El Prado está a oscuras por primera vez en diez años. Dicen que esa noche se vieron las estrellas.", en: "The Meadow is dark for the first time in ten years. They say the stars came out that night." },
+    { char: "aurelia", end: "B", flag: "end_aurelia_B", es: "Alvar se ha curado. La Torre del Alba brilla más que nunca, y en la caja fuerte sigue una carta sin enviar.", en: "Alvar is cured. The Tower of Dawn shines brighter than ever, and an unsent letter is still in the safe." },
+    { char: "tizon", end: "A", flag: "end_tizon_A", es: "El primer Fuego del Consejo de las Casas votó en su primera sesión. Votó como le pidieron.", en: "The first Fire on the Council of Houses voted in his first session. He voted as he was asked." },
+    { char: "tizon", end: "B", flag: "end_tizon_B", es: "En el campamento de las Mareas arde una brasa del Cráter. Nadie la ha apagado todavía.", en: "A coal from the Crater burns in the Tides' camp. No one has put it out yet." },
+    { char: "liquen", end: "A", flag: "end_liquen_A", es: "Cada pueblo guarda ahora una parte de la Cripta. Fuera del bosque crece un roble joven junto a uno muy viejo.", en: "Every people now keeps part of the Vault. Outside the wood, a young oak grows beside a very old one." },
+    { char: "liquen", end: "B", flag: "end_liquen_B", es: "El Bosque Hondo es una isla cerrada y verde. Junto al Roble Sentado hay ahora dos ancianos que no hablan.", en: "The Deep Wood is a closed green island. Beside the Seated Oak there are now two elders who don't speak." },
+    { char: "marejada", end: "A", flag: "end_marejada_A", es: "Una anciana vive sola en la orilla del Lago corrompido. Dicen que lo vigila para que nadie más se ahogue.", en: "An old woman lives alone on the shore of the corrupted Lake. They say she watches it so no one else drowns." },
+    { char: "marejada", end: "B", flag: "end_marejada_B", es: "En el Corazón del Claro, la primera voz que se oyó fue la de una anciana pidiendo perdón.", en: "In the Heart of the Glade, the first voice heard was an old woman asking forgiveness." },
   ];
 
   /* ---------- Frases de carga: rumores vagos de lo que pasa en el mundo ---------- */
@@ -217,7 +336,7 @@
     return pick ? pick[lang === "en" ? "en" : "es"] : "";
   }
 
-  const api = { loreLayer, needOk, LORE_EVENTS, LORE_EVT, LORE_ESCRITOS, LORE_LOADING, loadingLine };
+  const api = { loreLayer, needOk, LORE_EVENTS, LORE_EVT, LORE_ESCRITOS, LORE_HILOS, LORE_EPILOGOS, LORE_LOADING, loadingLine };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.EvoLore = api;
 })(typeof window !== "undefined" ? window : this);

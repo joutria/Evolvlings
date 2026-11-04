@@ -851,11 +851,19 @@ const TX = {
     "zones.title": "¿Adónde vas?", "zones.sub": "Expedición", "zones.lock": "Calma al Gran Farol del Prado Aurora para abrir este camino.",
     "zones.lvl": "Nivel recomendado {n}", "zones.done": "Guardián calmado ×{n}", "zones.verse": "Fragmento: «{v}»",
     "esc.title": "Escritos", "esc.desc": "Papeles, cartas y canciones que encuentras por el Claro. No sirven para combatir; cuentan lo que nadie dice en voz alta.", "esc.got": "Nuevo Escrito: {t}",
-    "esc.from.event": "Sale de un encuentro.", "esc.from.chest": "En un cofre de {z}.", "esc.from.guardian": "Lo guarda el guardián de {z}.", "esc.from.shop": "Se vende en la tienda del evento.", "rumor": "Se oye en el Vado:",
+    "esc.from.event": "Sale de un encuentro.", "esc.from.chest": "En un cofre de {z}.", "esc.from.guardian": "Lo guarda el guardián de {z}.", "esc.from.shop": "Se vende en la tienda del evento.", "esc.from.deep": "Puede salir en los cofres de la Raíz Profunda.", "esc.hilos": "Hilos que se juntan", "deep.esc": "Dentro del cofre hay un escrito: «{t}».", "rumor": "Se oye en el Vado:",
     "sav.title": "Modo Savia", "sav.sub": "La misma zona con la Savia Negra más espesa: enemigos más fuertes y 3 estrellas nuevas por zona.", "sav.hint": "Consigue 3 estrellas en una zona para abrir su Modo Savia.", "sav.tag": "Savia",
     "echo.title": "Eco del Guardián", "echo.sub": "Esta semana vuelve {boss}, más fuerte, y {rule}", "echo.left": "Intentos esta semana: {n} de 3", "echo.none": "Ya usaste los 3 intentos. Vuelve el lunes.", "echo.lock": "Se abre con Nivel de Cuidador {n}.", "echo.tag": "Eco",
     "echo.r.shell": "empieza con un escudo de Savia (25 % de su vida).", "echo.r.fury": "pega más fuerte pero se defiende peor.", "echo.r.tired": "tu equipo empieza al 80 % de vida.", "echo.r.swift": "es mucho más rápido.",
     "end.echo": "El Eco se calma: +{d} ∴ de Polvo y +{c} Chispas.", "end.echoLose": "El Eco sigue sonando. Te quedan {n} intentos esta semana.",
+    "deep.title": "La Raíz Profunda", "deep.sub": "Doce pisos de bajada por la Raíz enferma. Cada piso es un combate con sus propias estrellas, y cada 4 pisos espera un guardián. Cambia cada 2 semanas.",
+    "deep.lock": "Se abre con Nivel de Cuidador {n}.", "deep.rule": "Estas dos semanas: {rule}", "deep.left": "Cambia en {n} días.", "deep.left1": "Cambia mañana.",
+    "deep.stars": "★ {n} de 36 en esta bajada", "deep.next": "Próximo cofre con {n} ★: {what}", "deep.allChests": "Has abierto todos los cofres de esta bajada.",
+    "deep.floor": "Piso {n}", "deep.tag": "Raíz · piso {n}", "deep.cost": "−15 de energía",
+    "deep.r.shell": "los enemigos empiezan con un escudo de Savia.", "deep.r.fury": "los enemigos pegan más fuerte pero se defienden peor.", "deep.r.tired": "tu equipo empieza cada piso al 80 % de vida.", "deep.r.swift": "los enemigos son más rápidos.",
+    "deep.win": "Piso {n} superado", "deep.winText": "La Savia se aparta un poco y deja ver el siguiente tramo de la Raíz.", "deep.lose": "La Savia os empuja hacia arriba. Puedes volver a intentar el piso {n} cuando quieras.",
+    "deep.first": "Primera vez en este piso: +{c} Chispas y +{d} ∴ de Polvo.", "deep.chest": "Cofre de la Raíz ({n} ★): {what}",
+    "deep.notes": "♪ {n} Notas", "deep.note1": "♪ 1 Nota", "deep.dust": "∴ {n} de Polvo",
     "end.verse": "Recibes un fragmento del Canto del Claro: «{v}».",
     "end.stars": "Estrellas: {s}", "end.starsWhy": "2 estrellas si el equipo termina con la mitad de la vida o más; 3 si termina con el 75 % y sin nadie derrotado en el combate final.",
     "end.starsNew": "¡Nueva mejor marca en esta zona!", "end.star3": "¡Zona con 3 estrellas! +3 Notas del Canto.", "zones.stars": "Mejor marca: {s}",
@@ -927,11 +935,19 @@ const TX = {
     "zones.title": "Where to?", "zones.sub": "Expedition", "zones.lock": "Calm the Great Lantern of the Aurora Meadow to open this path.",
     "zones.lvl": "Recommended level {n}", "zones.done": "Guardian calmed ×{n}", "zones.verse": "Fragment: “{v}”",
     "esc.title": "Writings", "esc.desc": "Papers, letters and songs you find around the Glade. They don't help in battle; they tell what nobody says out loud.", "esc.got": "New Writing: {t}",
-    "esc.from.event": "Comes from an encounter.", "esc.from.chest": "In a chest in {z}.", "esc.from.guardian": "The guardian of {z} keeps it.", "esc.from.shop": "Sold at the event shop.", "rumor": "Heard in the Ford:",
+    "esc.from.event": "Comes from an encounter.", "esc.from.chest": "In a chest in {z}.", "esc.from.guardian": "The guardian of {z} keeps it.", "esc.from.shop": "Sold at the event shop.", "esc.from.deep": "May turn up in the Deep Root chests.", "esc.hilos": "Threads that meet", "deep.esc": "Inside the chest there's a writing: \"{t}\".", "rumor": "Heard in the Ford:",
     "sav.title": "Savia Mode", "sav.sub": "The same zone with thicker Black Sap: stronger enemies and 3 new stars per zone.", "sav.hint": "Earn 3 stars in a zone to open its Savia Mode.", "sav.tag": "Savia",
     "echo.title": "Guardian's Echo", "echo.sub": "This week {boss} comes back stronger, and {rule}", "echo.left": "Tries this week: {n} of 3", "echo.none": "You've used all 3 tries. Come back on Monday.", "echo.lock": "Opens at Keeper Level {n}.", "echo.tag": "Echo",
     "echo.r.shell": "it starts with a Sap shield (25% of its health).", "echo.r.fury": "it hits harder but defends worse.", "echo.r.tired": "your team starts at 80% health.", "echo.r.swift": "it is much faster.",
     "end.echo": "The Echo calms down: +{d} ∴ Stardust and +{c} Chispas.", "end.echoLose": "The Echo keeps ringing. {n} tries left this week.",
+    "deep.title": "The Deep Root", "deep.sub": "Twelve floors down the sick Root. Each floor is one battle with its own stars, and a guardian waits every 4 floors. It changes every 2 weeks.",
+    "deep.lock": "Opens at Keeper Level {n}.", "deep.rule": "These two weeks: {rule}", "deep.left": "Changes in {n} days.", "deep.left1": "Changes tomorrow.",
+    "deep.stars": "★ {n} of 36 on this descent", "deep.next": "Next chest at {n} ★: {what}", "deep.allChests": "You've opened every chest on this descent.",
+    "deep.floor": "Floor {n}", "deep.tag": "Root · floor {n}", "deep.cost": "−15 energy",
+    "deep.r.shell": "enemies start with a Sap shield.", "deep.r.fury": "enemies hit harder but defend worse.", "deep.r.tired": "your team starts each floor at 80% health.", "deep.r.swift": "enemies are faster.",
+    "deep.win": "Floor {n} cleared", "deep.winText": "The Sap pulls back a little and shows the next stretch of the Root.", "deep.lose": "The Sap pushes you back up. You can try floor {n} again whenever you like.",
+    "deep.first": "First time on this floor: +{c} Chispas and +{d} ∴ Stardust.", "deep.chest": "Root chest ({n} ★): {what}",
+    "deep.notes": "♪ {n} Notes", "deep.note1": "♪ 1 Note", "deep.dust": "∴ {n} Stardust",
     "end.verse": "You receive a fragment of the Song of the Glade: “{v}”.",
     "end.stars": "Stars: {s}", "end.starsWhy": "2 stars if the team ends with half its health or more; 3 if it ends with 75% and nobody defeated in the final battle.",
     "end.starsNew": "New best in this zone!", "end.star3": "Zone at 3 stars! +3 Song Notes.", "zones.stars": "Best: {s}",
@@ -1536,12 +1552,19 @@ const css = `
 .node .ic .tyi { width: 27px; height: 27px; vertical-align: middle; }
 .tcg-gem .tyi { width: 18px; height: 18px; vertical-align: middle; }
 .rumor { margin: 0 0 10px; font-style: italic; color: var(--muted); border-left: 3px solid var(--line); padding-left: 10px; }
+.hilos { margin: 6px 0 0; padding-left: 18px; font-family: Georgia, serif; font-size: 14px; line-height: 1.5; } .hilos li { margin: 4px 0; }
 .escritos { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; margin-top: 8px; }
 .esc { border: 2px solid var(--line); padding: 8px 10px; background: color-mix(in srgb, #e9d8b4 35%, var(--surface)); display: flex; flex-direction: column; gap: 4px; }
 .esc summary { cursor: pointer; } .esc p { margin: 6px 0 0; font-size: 14px; line-height: 1.5; font-family: Georgia, serif; }
 .esc.locked { opacity: .6; background: var(--bg); padding: 4px 8px; font-size: 13px; }
 .node.zone.savia { border-color: #3b2a4a; background: linear-gradient(180deg, color-mix(in srgb, #3b2a4a 14%, var(--surface)), var(--surface)); }
 .node.zone.echo { border-color: #c25e9a; border-style: double; border-width: 4px; }
+.deep-info { margin: 8px 0; line-height: 1.5; }
+.deep-floors { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; margin: 8px 0; }
+.node.deep { min-height: 0; padding: 8px 10px; background: linear-gradient(180deg, color-mix(in srgb, #241030 10%, var(--surface)), var(--bg)); }
+.node.deep strong { font-size: 14px; } .node.deep small { font-size: 12px; }
+.node.deep.boss { border-color: #3b1d4a; border-width: 3px; }
+.node.deep.done { border-color: color-mix(in srgb, #7dffb0 55%, var(--line)); }
 .mref { display: block; margin-top: 4px; font: 700 11px var(--font-mono); color: var(--rose, #c25e9a); }
 .mstats span { display: flex; justify-content: space-between; gap: 4px; } .mstats i { font-style: normal; color: var(--muted); } .mstats b { font-variant-numeric: tabular-nums; white-space: nowrap; }
 .sheet { display: flex; flex-direction: column; gap: 6px; }
@@ -1879,7 +1902,7 @@ function pickZone(id, mode) {
   mode = mode || {};
   if (!ZONES[id] || !zoneOpen(id) || (mode.savia && ((EV.P.stars || {})[id] || 0) < 3)) { EV.sfx("deny"); return; }
   const S = EV.S, z = ZONES[id];
-  X.zone = id; X.savia = !!mode.savia; X.echo = mode.echo || null;
+  X.zone = id; X.savia = !!mode.savia; X.echo = mode.echo || null; X.deep = mode.deep || 0; X.deepRule = X.deep ? deepRule() : null;
   const home = EV.EGGS ? EV.EGGS.offer(S.species) : [];
   X.offer = home.concat(pickN(z.allies.filter((k) => k !== S.species && !home.includes(k)), 3));
   // Unísona: brought by Tila and Nim to the Heart; after the Heart is calm it can join any trip
@@ -1897,10 +1920,88 @@ function echoInfo() {
   if (!P.echo || P.echo.week !== w) P.echo = { week: w, zone: cl[w % cl.length], rule: ECHO_RULES[w % ECHO_RULES.length], tries: 0, wins: 0 };
   return { zone: P.echo.zone, rule: P.echo.rule, left: ECHO_TRIES - P.echo.tries, lvlOk: !EV.EGGS || EV.EGGS.clLvl() >= ECHO_LVL };
 }
+const CIRCLE = { fire: "sol", plant: "sol", light: "sol", bolt: "cielo", air: "cielo", music: "cielo", water: "lago", stone: "lago", shadow: "lago", ice: "escarcha", mush: "escarcha", dream: "escarcha" };
 function buffUnit(u, f) { u.base.hp *= f; u.maxHp = Math.round(u.maxHp * f); u.hp = u.maxHp; u.base.str *= f; u.base.def *= f; }
+/* The Deep Root: 12 floors down the sick Root. Floors 4, 8 and 12 hold a guardian.
+   Every 2 weeks the zones, the rule and the stars start over; chests pay out by total stars (10 Notes at 36). */
+const DEEP_EPOCH = Date.UTC(2026, 10, 2), DEEP_DAYS = 14, DEEP_FLOORS = 12, DEEP_LVL = 8, DEEP_COST = 15;
+const DEEP_CHESTS = [[6, { notes: 1 }], [12, { notes: 1, dust: 20 }], [18, { notes: 2 }], [24, { notes: 1, dust: 40 }], [30, { notes: 2 }], [36, { notes: 3, dust: 60 }]];
+const DEEP_RULES = ["fury", "shell", "swift", "tired"];
+const dayUTC = (d) => Date.UTC(d.getFullYear(), d.getMonth(), d.getDate());
+const deepNo = () => Math.max(0, Math.floor((dayUTC(new Date()) - DEEP_EPOCH) / 864e5 / DEEP_DAYS));
+const deepDaysLeft = () => DEEP_DAYS - (Math.floor((dayUTC(new Date()) - DEEP_EPOCH) / 864e5) - deepNo() * DEEP_DAYS);
+function deepState() {
+  const P = EV.P, n = deepNo();
+  if (!P.deep || P.deep.p !== n) P.deep = { p: n, st: {}, chest: {} };
+  return P.deep;
+}
+const deepZones = () => Object.keys(ZONES).filter((z) => z !== "heart" && ((EV.P.cleared || {})[z] || 0) > 0);
+const deepOpen = () => deepZones().length > 0 && (!EV.EGGS || EV.EGGS.clLvl() >= DEEP_LVL);
+const deepBoss = (f) => f % 4 === 0;
+const deepRule = () => DEEP_RULES[deepNo() % DEEP_RULES.length];
+// each stretch of 4 floors runs through one of the zones you have calmed
+function deepZone(f) { const zs = deepZones(), p = deepNo(); return zs[(p * 3 + Math.floor((f - 1) / 4)) % zs.length]; }
+const deepTotal = () => Object.values(deepState().st).reduce((a, n) => a + n, 0);
+const deepFloorOpen = (f) => f === 1 || (deepState().st[f - 1] || 0) > 0;
+function deepWhat(r) { const o = []; if (r.notes) o.push(r.notes === 1 ? tx("deep.note1") : tx("deep.notes", { n: r.notes })); if (r.dust) o.push(tx("deep.dust", { n: r.dust })); return o.join(" · "); }
+function deepFoes(boss) {
+  const f = X.deep, z = ZONES[X.zone], rule = X.deepRule;
+  // floor 1 is level 2, floor 12 is level 10; the guardians grow a little stronger each stretch
+  const lvl = 1 + Math.round(f * 0.75);
+  const tune = (u) => {
+    if (rule === "shell") { u.shield = Math.round(u.maxHp * (boss ? 0.2 : 0.12)); u.shieldT = 99; }
+    if (rule === "fury") { u.base.str *= 1.2; u.base.def *= 0.85; }
+    if (rule === "swift") u.base.spd *= 1.25;
+    return u;
+  };
+  if (boss) {
+    const m = MONS[z.boss];
+    const u = makeUnit({ kind: z.boss, lvl, side: "foe", name: monName(z.boss), boss: true, cards: { a: scaled(m.cards[0], 0), p: scaled(m.cards[1], 0), s: scaled(m.cards[2], 0) }, stage: 1 });
+    buffUnit(u, 1 + 0.05 * (f / 4));
+    return [tune(u)];
+  }
+  return pickN(z.foes.concat(z.foes), f <= 2 ? 2 : 3).map((k) => {
+    const cs = MONS[k].cards;
+    const cards = { a: scaled(cs[Math.floor(rnd() * 2)], 0) };
+    if (f >= 5) cards.p = scaled(cs[1], 0);
+    return tune(makeUnit({ kind: k, lvl, side: "foe", name: monName(k, true), hollow: true, cards, stage: 1 }));
+  });
+}
+// a floor won: keep its best stars, pay first clears and any chest the new total reaches
+function deepWin(f, stars) {
+  const P = EV.P, d = deepState(), before = d.st[f] || 0;
+  const out = { f, stars, first: null, chests: [] };
+  if (!before) { const c = 10 + 3 * f, du = 4 + f; EV.addCoins(c, true); P.dust = (P.dust || 0) + du; P.c.deepFloors = (P.c.deepFloors || 0) + 1; out.first = { c, d: du }; }
+  if (stars > before) { d.st[f] = stars; P.c.deepStars = (P.c.deepStars || 0) + stars - before; }
+  if (f === DEEP_FLOORS && stars === 3) P.c.deep12 = (P.c.deep12 || 0) + 1;
+  const tot = deepTotal();
+  DEEP_CHESTS.forEach(([need, r], i) => {
+    if (tot < need || d.chest[i]) return;
+    d.chest[i] = 1;
+    if (r.notes) P.notes = (P.notes || 0) + r.notes;
+    if (r.dust) P.dust = (P.dust || 0) + r.dust;
+    let esct = null;
+    if (need % 12 === 0) { const w = deepEscrito(); if (w) { giveEscrito(w); const lw = LORE.LORE_ESCRITOS.find((x) => x.id === w); esct = (lw[L()] || lw.es).title; } }
+    out.chests.push({ need, what: deepWhat(r), esct });
+  });
+  return out;
+}
+function deepHtml() {
+  let h = `<h3 class="cat-title">${esc(tx("deep.title"))}</h3><p class="muted" style="margin:0">${esc(tx("deep.sub"))}</p>`;
+  if (!deepOpen()) return h + `<p class="muted">🔒 ${esc(tx("deep.lock", { n: DEEP_LVL }))}</p>`;
+  const d = deepState(), tot = deepTotal(), left = deepDaysLeft();
+  const next = DEEP_CHESTS.find(([need], i) => !d.chest[i]);
+  h += `<p class="deep-info"><b>${esc(tx("deep.stars", { n: tot }))}</b> · ${esc(left <= 1 ? tx("deep.left1") : tx("deep.left", { n: left }))}<br>${esc(tx("deep.rule", { rule: tx("deep.r." + deepRule()) }))}<br>${esc(next ? tx("deep.next", { n: next[0], what: deepWhat(next[1]) }) : tx("deep.allChests"))}</p>`;
+  h += `<div class="deep-floors">`;
+  for (let f = 1; f <= DEEP_FLOORS; f++) {
+    const z = deepZone(f), open = deepFloorOpen(f), st = d.st[f] || 0, boss = deepBoss(f);
+    h += `<button type="button" class="node deep${boss ? " boss" : ""}${st ? " done" : ""}" data-deep="${f}" ${open ? "" : "disabled"}><span class="ic" aria-hidden="true">${tyIcon(ZONES[z].type)}</span><strong>${esc(tx("deep.floor", { n: f }))}</strong><small>${esc(boss ? monName(ZONES[z].boss) : zt("name", null, z))}</small><small class="ok">${open ? starStr(st) : "🔒"}</small></button>`;
+  }
+  return h + `</div><p class="muted" style="margin:0">${esc(tx("deep.cost"))}</p>`;
+}
 function extraZonesHtml() {
   const st = EV.P.stars || {}, sS = EV.P.starsS || {};
-  let h = "";
+  let h = deepHtml();
   const e = echoInfo();
   if (e) {
     const can = e.lvlOk && e.left > 0, boss = monName(ZONES[e.zone].boss);
@@ -1925,10 +2026,14 @@ function zonesHtml() {
 }
 function setOut() {
   const S = EV.S;
-  S.stats.energy = Math.max(0, S.stats.energy - 25);
+  S.stats.energy = Math.max(0, S.stats.energy - (X.deep ? DEEP_COST : 25));
   const R = rpgState();
   X.party = [{ own: true, kind: S.species, hp: 1 }].concat(X.chosen.map((k) => { const r = refOf(k); return { own: false, kind: k, hp: 1, lvl: r ? r.lvl : R.lvl, bond: r ? r.bond : 0, roster: !!r }; }));
   if (X.echo) { echoInfo(); EV.P.echo.tries++; if (X.echo === "tired") for (const m of X.party) m.hp = 0.8; }
+  if (X.deep && X.deepRule === "tired") for (const m of X.party) m.hp = 0.8;
+  // a team from three different type circles (for the Types achievements)
+  const circ = new Set(X.party.map((m) => CIRCLE[MONS[m.kind].types[0]]).filter(Boolean));
+  if (circ.size >= 3) EV.P.c.trio = (EV.P.c.trio || 0) + 1;
   EV.addLog(tx("log.expGo", { name: S.name, to: zt("to") }));
   EV.save();
   nextSection();
@@ -1937,6 +2042,7 @@ function nextSection() {
   const z = ZONES[X.zone];
   X.section++;
   if (X.echo) { X.section = z.sections + 1; X.nodes = ["boss"]; show("map"); return; }
+  if (X.deep) { X.section = z.sections + 1; X.nodes = [deepBoss(X.deep) ? "boss" : "fight"]; show("map"); return; }
   if (X.section > z.sections) { X.nodes = ["boss"]; healParty(0.3); show("map"); return; }
   const types = ["fight", "fight", "event", "chest", "rest", "event", "fight"];
   let n = X.section === 1 ? ["fight", "event"] : pickN(types, 3);
@@ -1963,6 +2069,7 @@ function partyUnits() {
 }
 function foeUnits(boss) {
   const z = ZONES[X.zone], R = rpgState();
+  if (X.deep) return deepFoes(boss);
   if (boss) {
     const lvl = Math.max(z.min, R.lvl);
     const m = MONS[z.boss];
@@ -2014,7 +2121,7 @@ function render() {
   const el = $("scrExp"); if (!el) return;
   if (!X) { el.innerHTML = ""; return; }
   const z = ZONES[X.zone];
-  const head = `<div class="panel"><div class="panel-head"><div><div class="sub">${esc(view === "zones" ? tx("zones.sub") : zt("sub"))}</div><h2>${esc(view === "zones" ? tx("zones.title") : zt("name") + (X.savia ? " · " + tx("sav.tag") : X.echo ? " · " + tx("echo.tag") : ""))}</h2></div>${view !== "pick" && view !== "zones" && view !== "end" && view !== "battle" ? `<button class="btn ghost" type="button" data-x="quit">${esc(tx("quit"))}</button>` : ""}</div>${view !== "pick" && view !== "zones" ? trailHtml() : ""}</div>`;
+  const head = `<div class="panel"><div class="panel-head"><div><div class="sub">${esc(view === "zones" ? tx("zones.sub") : zt("sub"))}</div><h2>${esc(view === "zones" ? tx("zones.title") : zt("name") + (X.savia ? " · " + tx("sav.tag") : X.echo ? " · " + tx("echo.tag") : X.deep ? " · " + tx("deep.tag", { n: X.deep }) : ""))}</h2></div>${view !== "pick" && view !== "zones" && view !== "end" && view !== "battle" ? `<button class="btn ghost" type="button" data-x="quit">${esc(tx("quit"))}</button>` : ""}</div>${view !== "pick" && view !== "zones" ? trailHtml() : ""}</div>`;
   let body = "";
   if (view === "zones") {
     const rumor = LORE ? LORE.loadingLine(EV.P, L()) : "";
@@ -2218,7 +2325,8 @@ function endBattle(res) {
   battle = null;
   for (const m of X.party) if (m.own && m.hp <= 0) X.ownFalls = (X.ownFalls || 0) + 1;
   if (res !== "win") { finish("lose"); return; }
-  if (boss) {
+  if (allies.length >= 2 && allies.filter((u) => u.hp > 0).length === 1) EV.P.c.lastOne = (EV.P.c.lastOne || 0) + 1;
+  if (boss || X.deep) {
     const avg = X.party.reduce((a, m) => a + Math.max(0, m.hp), 0) / X.party.length;
     const noKO = X.party.every((m) => m.hp > 0);
     X.stars = avg >= 0.75 && noKO ? 3 : avg >= 0.5 ? 2 : 1;
@@ -2232,17 +2340,19 @@ function endBattle(res) {
   const xp = foes.reduce((a, u) => a + 8 + 4 * u.lvl, 0) * (boss ? 2 : 1);
   const coins = boss ? 30 : 3 + Math.floor(rnd() * 4) + foes.length;
   X.loot.xp += xp; X.loot.coins += coins;
-  const offer = boss ? offerCards(3, 1) : rnd() < 0.12 ? offerCards(3, 0) : null;
+  // on the Deep Root a guardian only pays out the first time you pass its floor in a descent
+  const fresh = !X.deep || !deepState().st[X.deep];
+  const offer = boss && fresh ? offerCards(3, 1) : rnd() < 0.12 ? offerCards(3, 0) : null;
   // the guardian leaves one of its own cards (one you haven't found yet, if any)
   let guard = null;
-  if (boss) {
+  if (boss && fresh) {
     const gc = MONS[ZONES[X.zone].boss].cards, fresh = gc.filter((id) => !(EV.P.grim || {})[id]), pool = fresh.length ? fresh : gc;
     const id = pool[Math.floor(rnd() * pool.length)];
     giveCard(id, 0); guard = { id, g: 0 }; X.loot.cards.push(guard);
     const w = escritoFor("guardian", X.zone); if (w) giveEscrito(w);
     EV.save();
   }
-  X.reward = { xp, coins, offer, guard, after: boss ? "win" : "next" };
+  X.reward = { xp, coins, offer, guard, after: boss || X.deep ? "win" : "next" };
   EV.checkAch();
   show("reward");
 }
@@ -2501,14 +2611,36 @@ function escritosByFlag() {
     if (!fromFx) giveEscrito(w.id);
   }
 }
+// Writings with no other way into the game (no encounter, flag or shop sells them): the Deep Root chests hand them out
+const SHOP_ESC = () => (EV.SEASON ? EV.SEASON.SHOP.filter((x) => x.id.startsWith("esc:")).map((x) => x.id.slice(4)) : []);
+function isOrphan(w) {
+  if (w.from === "shop") return !SHOP_ESC().includes(w.id);
+  if (w.from !== "event" || w.unlock) return false;
+  return !Object.values(LORE.LORE_EVENTS).some((e) => e.fx.some((f) => f.escrito === w.id));
+}
+// one writing for a Deep Root chest: an orphan first, then any chest writing you could already have found
+function deepEscrito() {
+  if (!LORE) return null;
+  const P = EV.P, have = P.escritos || {}, lay = LORE.loreLayer(P.cleared);
+  const fit = (w) => !have[w.id] && w.layer <= lay && (!w.unlock || (P.flags || {})[w.unlock.flag]);
+  const o = LORE.LORE_ESCRITOS.filter((w) => fit(w) && isOrphan(w));
+  const c = o.length ? o : LORE.LORE_ESCRITOS.filter((w) => fit(w) && w.from === "chest");
+  return c.length ? c[0].id : null;
+}
+// threads: two writings that, read together, add a line to the Grimoire
+function hilosHtml(have) {
+  const H = (LORE.LORE_HILOS || []).filter((h) => have[h.a] && have[h.b]);
+  if (!H.length) return "";
+  return `<h3 class="cat-title">${esc(tx("esc.hilos"))}</h3><ul class="hilos">${H.map((h) => `<li>${esc(h[L()] || h.es)}</li>`).join("")}</ul>`;
+}
 function escritosHtml() {
   if (!LORE) return "";
   const have = EV.P.escritos || {}, all = LORE.LORE_ESCRITOS, n = all.filter((w) => have[w.id]).length;
   return `<h3 class="cat-title">${esc(tx("esc.title"))}</h3><p class="muted" style="margin:0">${esc(tx("esc.desc"))} ${esc(tx("grim.count", { n, m: all.length }))}</p><div class="escritos">${all.map((w) => {
-    if (!have[w.id]) return `<div class="esc locked"><b>???</b><small class="muted">${esc(tx("esc.from." + w.from, { z: w.zone ? zt("name", null, w.zone) : "" }))}</small></div>`;
+    if (!have[w.id]) return `<div class="esc locked"><b>???</b><small class="muted">${esc(isOrphan(w) ? tx("esc.from.deep") : tx("esc.from." + w.from, { z: w.zone ? zt("name", null, w.zone) : "" }))}</small></div>`;
     const t = w[L()] || w.es;
     return `<details class="esc"><summary><b>${esc(t.title)}</b></summary><p>${esc(t.text)}</p></details>`;
-  }).join("")}</div>`;
+  }).join("")}</div>${hilosHtml(have)}`;
 }
 const EVT = {
   es: {
@@ -2822,7 +2954,8 @@ function finish(res) {
     while (R.xp >= xpNeed(R.lvl)) { R.xp -= xpNeed(R.lvl); R.lvl++; for (const k of ["p", "s"]) if (SLOT_LVL[k] === R.lvl) unlocked.push(k); }
   }
   if (coins > 0) EV.addCoins(coins, true);
-  if (res === "win") { P.c.guard = (P.c.guard || 0) + 1; P.cleared = P.cleared || {}; if (!X.echo) P.cleared[X.zone] = (P.cleared[X.zone] || 0) + 1; }
+  if (res === "win" && !X.deep) { P.c.guard = (P.c.guard || 0) + 1; P.cleared = P.cleared || {}; if (!X.echo) P.cleared[X.zone] = (P.cleared[X.zone] || 0) + 1; }
+  X.deepRew = X.deep && res === "win" ? deepWin(X.deep, X.stars || 1) : null;
   // the Guardian's Echo: Stardust and Chispas instead of zone stars
   X.echoRew = null;
   if (X.echo && res === "win") {
@@ -2831,7 +2964,7 @@ function finish(res) {
     X.echoRew = { d, c };
   }
   X.unisona = null;
-  if (res === "win" && X.zone === "heart" && !X.echo && !X.savia) {
+  if (res === "win" && X.zone === "heart" && !X.echo && !X.savia && !X.deep) {
     const F = P.flags = P.flags || {};
     if (!F.unisona) { F.unisona = 1; for (const id of MONS.unisona.cards) { giveCard(id, 0); l.cards.push({ id, g: 0 }); } X.unisona = "first"; }
     else { const id = MONS.unisona.cards[Math.floor(rnd() * 3)]; giveCard(id, 0); l.cards.push({ id, g: 0 }); X.unisona = "again"; }
@@ -2839,7 +2972,7 @@ function finish(res) {
   if (res === "win" || res === "lose") P.c.expDone = (P.c.expDone || 0) + 1;
   // zone stars: keep the best, 3 Song Notes the first time a zone reaches 3
   X.starInfo = null;
-  if (res === "win" && X.stars && !X.echo) {
+  if (res === "win" && X.stars && !X.echo && !X.deep) {
     // Savia Mode keeps its own stars
     const SK = X.savia ? "starsS" : "stars", S3 = X.savia ? "star3S" : "star3";
     P[SK] = P[SK] || {}; P[S3] = P[S3] || {};
@@ -2877,13 +3010,19 @@ function woundsOf() {
 function endHtml() {
   const e = X.end, S = EV.S;
   const nm = S && S.name ? S.name : "";
-  const title = e.res === "win" ? zt("win") : e.res === "quit" ? tx("end.quit") : tx("end.lose");
-  const text = e.res === "win" ? zt("winText", { name: nm }) : tx("end.loseText", { name: nm });
+  const title = e.res === "win" ? (X.deep ? tx("deep.win", { n: X.deep }) : zt("win")) : e.res === "quit" ? tx("end.quit") : tx("end.lose");
+  const text = e.res === "win" ? (X.deep ? tx("deep.winText") : zt("winText", { name: nm })) : X.deep ? tx("deep.lose", { n: X.deep }) : tx("end.loseText", { name: nm });
   let html = `<div class="panel"><h3>${esc(title)}</h3><p class="evt-text">${esc(text)}</p>
     <div class="loot"><span>${esc(tx("r.xp", { n: e.xp }))}</span><span>✦ ${esc(tx("r.coins", { n: e.coins }))}</span><span>🃏 ${e.cards.length}</span></div>`;
   if (X.hurt && (X.hurt.energy || X.hurt.health)) html += `<p class="evt-out">${esc(tx("end.hurt", { name: nm, e: X.hurt.energy, h: X.hurt.health }))}</p>`;
   else html += `<p class="evt-out">${esc(tx("end.unhurt", { name: nm }))}</p>`;
-  if (e.res === "win") html += `<p class="evt-out">✦ ${esc(tx("end.verse", { v: zt("verse") }))}</p>`;
+  if (e.res === "win" && !X.deep) html += `<p class="evt-out">✦ ${esc(tx("end.verse", { v: zt("verse") }))}</p>`;
+  if (X.deepRew) {
+    const r = X.deepRew;
+    html += `<p class="evt-out end-stars"><b>${esc(tx("end.stars", { s: starStr(r.stars) }))}</b> · ${esc(tx("deep.stars", { n: deepTotal() }))}</p>`;
+    if (r.first) html += `<p class="evt-out">✦ ${esc(tx("deep.first", r.first))}</p>`;
+    for (const c of r.chests) html += `<p class="evt-out">🎁 ${esc(tx("deep.chest", { n: c.need, what: c.what }))}${c.esct ? "<br>📜 " + esc(tx("deep.esc", { t: c.esct })) : ""}</p>`;
+  }
   if (X.unisona) html += `<p class="evt-out">✦ ${esc(tx(X.unisona === "first" ? "end.unisona" : "end.unisonaUp"))}</p>`;
   if (X.echoRew) html += `<p class="evt-out">∴ ${esc(tx("end.echo", X.echoRew))}</p>`;
   else if (X.echo && EV.P.echo) html += `<p class="evt-out">${esc(tx("end.echoLose", { n: Math.max(0, ECHO_TRIES - EV.P.echo.tries) }))}</p>`;
@@ -2909,6 +3048,7 @@ function onExpClick(e) {
   const t = e.target.closest("button"); if (!t || !X) return;
   const d = t.dataset;
   if (d.zone) { EV.sfx("tap"); pickZone(d.zone, { savia: !!d.savia }); return; }
+  if (d.deep) { const f = +d.deep; if (!deepOpen() || !deepFloorOpen(f)) { EV.sfx("deny"); return; } EV.sfx("tap"); pickZone(deepZone(f), { deep: f }); return; }
   if (d.echo) { const e = echoInfo(); if (!e || !e.lvlOk || e.left <= 0) { EV.sfx("deny"); return; } EV.sfx("tap"); pickZone(e.zone, { echo: e.rule }); return; }
   if (d.pick) {
     const k = d.pick, i = X.chosen.indexOf(k);
@@ -2954,7 +3094,7 @@ function onExpClick(e) {
 /* ====================================================================== */
 let cTab = "col", lastPack = null;
 function cardTabs() {
-  return `<div class="seg ctabs" role="group">${["col", "grim", "shop"].concat(EV.WELL ? ["well"] : []).map((k) => `<button type="button" data-ctab="${k}" aria-pressed="${cTab === k}">${esc(k === "well" ? EV.WELL.tab() : tx("ctab." + k))}</button>`).join("")}</div>`;
+  return `<div class="seg ctabs" role="group">${["col", "grim", "shop"].concat(EV.WELL && !EV.quietOn() ? ["well"] : []).map((k) => `<button type="button" data-ctab="${k}" aria-pressed="${cTab === k}">${esc(k === "well" ? EV.WELL.tab() : tx("ctab." + k))}</button>`).join("")}</div>`;
 }
 function grimHtml() {
   const P = EV.P, all = Object.keys(CARDS), seen = all.filter((id) => (P.grim || {})[id]).length;
@@ -2990,6 +3130,7 @@ function renderCards() {
   const el = $("cardsPanel"); if (!el) return;
   const R = rpgState(), P = EV.P, S = EV.S;
   if (cTab !== "col") {
+    if (cTab === "well" && EV.quietOn()) cTab = "col";
     if (cTab === "well" && EV.WELL) { el.innerHTML = `<div class="panel-head"><h2>${esc(EV.WELL.title())}</h2>${cardTabs()}</div>` + EV.WELL.html(); return; }
     el.innerHTML = `<div class="panel-head"><h2>${esc(tx(cTab === "grim" ? "ctab.grim" : "ctab.shop"))}</h2>${cardTabs()}</div>` + (cTab === "grim" ? grimHtml() + escritosHtml() : workshopHtml());
     return;
@@ -3152,5 +3293,5 @@ function pickUsable(n, minGrade) {
   return ids.map((id) => ({ id, g: Math.max(minGrade, rollGrade(minGrade)) }));
 }
 function takeCard(id, g) { rpgState(); const c = giveCard(id, g); EV.save(); return c; }
-EV.RPG = Object.defineProperties(Object.assign(api, { renderCards, startExpedition, cardHtml, cardName, pickUsable, takeCard, starStr, paintMon, monName, typeChip, rpgState, MON_DESC }), { X: { get: () => X }, battle: { get: () => battle } });
+EV.RPG = Object.defineProperties(Object.assign(api, { renderCards, startExpedition, cardHtml, cardName, pickUsable, takeCard, starStr, paintMon, monName, typeChip, rpgState, MON_DESC, deepState, deepTotal, deepZone, deepOpen, deepNo, deepRule, deepWin, DEEP_CHESTS }), { X: { get: () => X }, battle: { get: () => battle } });
 })(typeof window !== "undefined" ? window : null);
