@@ -201,6 +201,14 @@ function pull(n) {
   save();
 }
 
+// an egg from elsewhere (season journal, chests): tier at least `min`
+function giveEgg(min) {
+  const g = G(), r = Math.random(), tier = Math.max(min, r < 0.03 ? 4 : r < 0.25 ? 3 : 2);
+  const egg = { id: g.seq++, kind: pick(TIERS[tier]), tier };
+  g.bag.push(egg); autoIncubate(); save();
+  return egg;
+}
+
 /* ---------- Incubator ---------- */
 const left = (e) => Math.max(0, hatchMs(e.tier) - (Date.now() - e.at) - (e.cut || 0));
 function autoIncubate() {
@@ -496,5 +504,5 @@ EV.HOOKS.showScreen = function () { if (prevShow) prevShow.apply(this, arguments
 // countdowns and the chip dot move on their own
 setInterval(() => { refreshChip(); const el = $("refugePanel"); if (el && !el.hidden && tab === "inc") render(); }, 20000);
 G(); refreshChip();
-EV.EGGS = { unitOf, offer, badge, afterTrip, pullOne, topChance, clXP, clLvl, clNeed, bondLvl, left, hatchMs, hasNews, render, TIERS, ODDS, BANNERS, BOND_AT, WELCOME, G };
+EV.EGGS = { giveEgg, eggName: (t) => tx("egg." + t), unitOf, offer, badge, afterTrip, pullOne, topChance, clXP, clLvl, clNeed, bondLvl, left, hatchMs, hasNews, render, TIERS, ODDS, BANNERS, BOND_AT, WELCOME, G };
 })(typeof window !== "undefined" ? window : globalThis);

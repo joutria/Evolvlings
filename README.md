@@ -43,7 +43,14 @@ To host it on **GitHub Pages**: open the repo's *Settings → Pages*, choose *De
   - **Incubator**: 1 to 3 slots (Keeper Levels 1, 5, 8). Eggs take 24 + 12 × tier hours; "Warm it" takes off 2 h (once an hour) and "Talk to it" 4 h (once a day).
   - **Companions** live in the Refuge with their own level and Bond, and are offered first on the expedition pick screen. They gain trip XP (double while below your creature's level, never above it). Bond (1 to 10) grows by travelling together (+1), winning (+1) and a daily pet (+1); each level gives +1.5 % stats and +1 % crit, and at Bond 5 and 10 their cards go up a grade. A duplicate gives Stardust (5/10/25/60/150 ∴) and +1 Bond.
   - **Keeper Level** grows from counters the game already keeps (care, trips, guardians, tasks, pulls, hatches, achievements). Each level gives 10 × level Chispas, and every 5 levels 2 Notes. Eight one-time welcome tasks give 60 Notes in total.
-- **41 achievements**, each with a Chispas reward.
+- **Seasons** (`seasons.js`, Season chip): 6-week seasons on a fixed calendar from 2 November 2026 (they repeat after the last written one).
+  - **Keeper's Journal**: a free 40-level pass, 450 XP a level, from daily tasks (100), weekly tasks (300) and the event. 20 Notes a season, a sky egg or better at level 10, an Epic-or-better card at 20, the "Lanterns" frame at 30, and a golden frame and the verse title at 40.
+  - **Night of Lanterns** (first 3 weeks of Season 1): earn Wax from daily tasks (3), expeditions (4), battle wins (1) and a daily visit to Tila (5); light her 12 lanterns (story beats at 3, 6, 9 and 12, keepsake + 3 Notes at the end); Tila's stall sells Notes, food, a Super rare Lantern card and two Writings.
+  - **Keepsakes**: frames for the home scene and titles under your creature's name.
+- **Savia Mode**: once a zone has 3 stars it can be played again with thicker Sap (+2 levels, +15 % stats) for 3 more stars, up to 54 in total with the normal ones.
+- **Guardian's Echo** (Keeper Level 6): each week a calmed guardian returns stronger with one rule (Sap shield, fury, tired team or extra speed). 3 tries a week; a win gives Stardust and Chispas and counts for a new weekly task.
+- **Lore** (`lore.js`, written in the lore thread): six one-time encounters with dialogue that unlock as you calm guardians, 15 Writings to collect and read in the Grimoire (from encounters, chests, guardians and the event stall), and rumours of the world on the zone screen.
+- **44 achievements**, each with a Chispas reward.
 - **Spanish and English**: picked from the browser language, switchable in Settings.
 - **Sound effects** generated with Web Audio (no audio files), plus optional vibration on phones. Mute from the header.
 - **Installable app (PWA)**: works offline once loaded; on Android use *Install app* in Settings, on iPhone use *Share → Add to Home Screen*.

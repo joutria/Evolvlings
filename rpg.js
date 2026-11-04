@@ -850,6 +850,12 @@ const TX = {
     "log.expLose": "{name} volvió {from} un poco magullada.",
     "zones.title": "¿Adónde vas?", "zones.sub": "Expedición", "zones.lock": "Calma al Gran Farol del Prado Aurora para abrir este camino.",
     "zones.lvl": "Nivel recomendado {n}", "zones.done": "Guardián calmado ×{n}", "zones.verse": "Fragmento: «{v}»",
+    "esc.title": "Escritos", "esc.desc": "Papeles, cartas y canciones que encuentras por el Claro. No sirven para combatir; cuentan lo que nadie dice en voz alta.", "esc.got": "Nuevo Escrito: {t}",
+    "esc.from.event": "Sale de un encuentro.", "esc.from.chest": "En un cofre de {z}.", "esc.from.guardian": "Lo guarda el guardián de {z}.", "esc.from.shop": "Se vende en la tienda del evento.", "rumor": "Se oye en el Vado:",
+    "sav.title": "Modo Savia", "sav.sub": "La misma zona con la Savia Negra más espesa: enemigos más fuertes y 3 estrellas nuevas por zona.", "sav.hint": "Consigue 3 estrellas en una zona para abrir su Modo Savia.", "sav.tag": "Savia",
+    "echo.title": "Eco del Guardián", "echo.sub": "Esta semana vuelve {boss}, más fuerte, y {rule}", "echo.left": "Intentos esta semana: {n} de 3", "echo.none": "Ya usaste los 3 intentos. Vuelve el lunes.", "echo.lock": "Se abre con Nivel de Cuidador {n}.", "echo.tag": "Eco",
+    "echo.r.shell": "empieza con un escudo de Savia (25 % de su vida).", "echo.r.fury": "pega más fuerte pero se defiende peor.", "echo.r.tired": "tu equipo empieza al 80 % de vida.", "echo.r.swift": "es mucho más rápido.",
+    "end.echo": "El Eco se calma: +{d} ∴ de Polvo y +{c} Chispas.", "end.echoLose": "El Eco sigue sonando. Te quedan {n} intentos esta semana.",
     "end.verse": "Recibes un fragmento del Canto del Claro: «{v}».",
     "end.stars": "Estrellas: {s}", "end.starsWhy": "2 estrellas si el equipo termina con la mitad de la vida o más; 3 si termina con el 75 % y sin nadie derrotado en el combate final.",
     "end.starsNew": "¡Nueva mejor marca en esta zona!", "end.star3": "¡Zona con 3 estrellas! +3 Notas del Canto.", "zones.stars": "Mejor marca: {s}",
@@ -920,6 +926,12 @@ const TX = {
     "log.expLose": "{name} came back {from} a bit bruised.",
     "zones.title": "Where to?", "zones.sub": "Expedition", "zones.lock": "Calm the Great Lantern of the Aurora Meadow to open this path.",
     "zones.lvl": "Recommended level {n}", "zones.done": "Guardian calmed ×{n}", "zones.verse": "Fragment: “{v}”",
+    "esc.title": "Writings", "esc.desc": "Papers, letters and songs you find around the Glade. They don't help in battle; they tell what nobody says out loud.", "esc.got": "New Writing: {t}",
+    "esc.from.event": "Comes from an encounter.", "esc.from.chest": "In a chest in {z}.", "esc.from.guardian": "The guardian of {z} keeps it.", "esc.from.shop": "Sold at the event shop.", "rumor": "Heard in the Ford:",
+    "sav.title": "Savia Mode", "sav.sub": "The same zone with thicker Black Sap: stronger enemies and 3 new stars per zone.", "sav.hint": "Earn 3 stars in a zone to open its Savia Mode.", "sav.tag": "Savia",
+    "echo.title": "Guardian's Echo", "echo.sub": "This week {boss} comes back stronger, and {rule}", "echo.left": "Tries this week: {n} of 3", "echo.none": "You've used all 3 tries. Come back on Monday.", "echo.lock": "Opens at Keeper Level {n}.", "echo.tag": "Echo",
+    "echo.r.shell": "it starts with a Sap shield (25% of its health).", "echo.r.fury": "it hits harder but defends worse.", "echo.r.tired": "your team starts at 80% health.", "echo.r.swift": "it is much faster.",
+    "end.echo": "The Echo calms down: +{d} ∴ Stardust and +{c} Chispas.", "end.echoLose": "The Echo keeps ringing. {n} tries left this week.",
     "end.verse": "You receive a fragment of the Song of the Glade: “{v}”.",
     "end.stars": "Stars: {s}", "end.starsWhy": "2 stars if the team ends with half its health or more; 3 if it ends with 75% and nobody defeated in the final battle.",
     "end.starsNew": "New best in this zone!", "end.star3": "Zone at 3 stars! +3 Song Notes.", "zones.stars": "Best: {s}",
@@ -1499,6 +1511,13 @@ const css = `
 .rstats { font: 500 12px var(--font-mono); color: var(--muted); margin: 0; }
 .mstats { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 10px; margin-top: 6px; width: 100%; font-size: 12px; text-align: left; }
 @media (max-width: 520px) { .mstats { grid-template-columns: 1fr; } }
+.rumor { margin: 0 0 10px; font-style: italic; color: var(--muted); border-left: 3px solid var(--line); padding-left: 10px; }
+.escritos { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; margin-top: 8px; }
+.esc { border: 2px solid var(--line); padding: 8px 10px; background: color-mix(in srgb, #e9d8b4 35%, var(--surface)); display: flex; flex-direction: column; gap: 4px; }
+.esc summary { cursor: pointer; } .esc p { margin: 6px 0 0; font-size: 14px; line-height: 1.5; font-family: Georgia, serif; }
+.esc.locked { opacity: .6; background: var(--bg); padding: 4px 8px; font-size: 13px; }
+.node.zone.savia { border-color: #3b2a4a; background: linear-gradient(180deg, color-mix(in srgb, #3b2a4a 14%, var(--surface)), var(--surface)); }
+.node.zone.echo { border-color: #c25e9a; border-style: double; border-width: 4px; }
 .mref { display: block; margin-top: 4px; font: 700 11px var(--font-mono); color: var(--rose, #c25e9a); }
 .mstats span { display: flex; justify-content: space-between; gap: 4px; } .mstats i { font-style: normal; color: var(--muted); } .mstats b { font-variant-numeric: tabular-nums; white-space: nowrap; }
 .sheet { display: flex; flex-direction: column; gap: 6px; }
@@ -1832,16 +1851,42 @@ function startExpedition() {
   show("zones");
 }
 const zoneOpen = (id) => { const u = ZONES[id].unlock; if (!u) return true; const ok = (z) => ((EV.P.cleared || {})[z] || 0) > 0; return ZONES[id].unlockAll ? u.every(ok) : [].concat(u).some(ok); };
-function pickZone(id) {
-  if (!ZONES[id] || !zoneOpen(id)) { EV.sfx("deny"); return; }
+function pickZone(id, mode) {
+  mode = mode || {};
+  if (!ZONES[id] || !zoneOpen(id) || (mode.savia && ((EV.P.stars || {})[id] || 0) < 3)) { EV.sfx("deny"); return; }
   const S = EV.S, z = ZONES[id];
-  X.zone = id;
+  X.zone = id; X.savia = !!mode.savia; X.echo = mode.echo || null;
   const home = EV.EGGS ? EV.EGGS.offer(S.species) : [];
   X.offer = home.concat(pickN(z.allies.filter((k) => k !== S.species && !home.includes(k)), 3));
   // Unísona: brought by Tila and Nim to the Heart; after the Heart is calm it can join any trip
   if (id === "heart" || (EV.P.flags || {}).unisona) X.offer.unshift("unisona");
   X.chosen = [];
   show("pick");
+}
+/* Savia Mode (a harder version of a 3-star zone) and the weekly Guardian's Echo */
+const ECHO_TRIES = 3, ECHO_LVL = 6, ECHO_RULES = ["shell", "fury", "tired", "swift"];
+const weekNo = () => { const k = EV.DAILY ? EV.DAILY.weekKey() : new Date().toISOString().slice(0, 10); return Math.round(Date.UTC(+k.slice(0, 4), +k.slice(5, 7) - 1, +k.slice(8, 10)) / 6048e5); };
+function echoInfo() {
+  const P = EV.P, cl = Object.keys(ZONES).filter((z) => ((P.cleared || {})[z] || 0) > 0);
+  if (!cl.length) return null;
+  const w = weekNo();
+  if (!P.echo || P.echo.week !== w) P.echo = { week: w, zone: cl[w % cl.length], rule: ECHO_RULES[w % ECHO_RULES.length], tries: 0, wins: 0 };
+  return { zone: P.echo.zone, rule: P.echo.rule, left: ECHO_TRIES - P.echo.tries, lvlOk: !EV.EGGS || EV.EGGS.clLvl() >= ECHO_LVL };
+}
+function buffUnit(u, f) { u.base.hp *= f; u.maxHp = Math.round(u.maxHp * f); u.hp = u.maxHp; u.base.str *= f; u.base.def *= f; }
+function extraZonesHtml() {
+  const st = EV.P.stars || {}, sS = EV.P.starsS || {};
+  let h = "";
+  const e = echoInfo();
+  if (e) {
+    const can = e.lvlOk && e.left > 0, boss = monName(ZONES[e.zone].boss);
+    h += `<h3 class="cat-title">${esc(tx("echo.title"))}</h3><div class="nodes zones"><button type="button" class="node zone echo" data-echo="1" ${can ? "" : "disabled"}><span class="ic" aria-hidden="true">${TYPES[ZONES[e.zone].type].icon}</span><strong>${esc(boss)}</strong>
+      <small>${esc(tx("echo.sub", { boss, rule: tx("echo.r." + e.rule) }))}</small><small>${esc(!e.lvlOk ? tx("echo.lock", { n: ECHO_LVL }) : e.left > 0 ? tx("echo.left", { n: e.left }) : tx("echo.none"))}</small></button></div>`;
+  }
+  const sav = Object.keys(ZONES).filter((id) => (st[id] || 0) >= 3);
+  h += `<h3 class="cat-title">${esc(tx("sav.title"))}</h3><p class="muted" style="margin:0">${esc(tx(sav.length ? "sav.sub" : "sav.hint"))}</p>`;
+  if (sav.length) h += `<div class="nodes zones">${sav.map((id) => `<button type="button" class="node zone savia" data-zone="${id}" data-savia="1"><span class="ic" aria-hidden="true">${TYPES[ZONES[id].type].icon}</span><strong>${esc(zt("name", null, id))}</strong><small>${esc(tx("zones.lvl", { n: ZONES[id].min + 2 }))}</small><small class="ok">${starStr(sS[id] || 0)}</small></button>`).join("")}</div>`;
+  return h;
 }
 function zonesHtml() {
   const cl = EV.P.cleared || {};
@@ -1859,6 +1904,7 @@ function setOut() {
   S.stats.energy = Math.max(0, S.stats.energy - 25);
   const R = rpgState();
   X.party = [{ own: true, kind: S.species, hp: 1 }].concat(X.chosen.map((k) => { const r = refOf(k); return { own: false, kind: k, hp: 1, lvl: r ? r.lvl : R.lvl, bond: r ? r.bond : 0, roster: !!r }; }));
+  if (X.echo) { echoInfo(); EV.P.echo.tries++; if (X.echo === "tired") for (const m of X.party) m.hp = 0.8; }
   EV.addLog(tx("log.expGo", { name: S.name, to: zt("to") }));
   EV.save();
   nextSection();
@@ -1866,6 +1912,7 @@ function setOut() {
 function nextSection() {
   const z = ZONES[X.zone];
   X.section++;
+  if (X.echo) { X.section = z.sections + 1; X.nodes = ["boss"]; show("map"); return; }
   if (X.section > z.sections) { X.nodes = ["boss"]; healParty(0.3); show("map"); return; }
   const types = ["fight", "fight", "event", "chest", "rest", "event", "fight"];
   let n = X.section === 1 ? ["fight", "event"] : pickN(types, 3);
@@ -1896,7 +1943,15 @@ function foeUnits(boss) {
     const lvl = Math.max(z.min, R.lvl);
     const m = MONS[z.boss];
     const cards = { a: scaled(m.cards[0], 0), p: scaled(m.cards[1], 0), s: scaled(m.cards[2], 0) };
-    return [makeUnit({ kind: z.boss, lvl, side: "foe", name: monName(z.boss), boss: true, cards, stage: 1 })];
+    const u = makeUnit({ kind: z.boss, lvl: lvl + (X.savia ? 2 : X.echo ? 1 : 0), side: "foe", name: monName(z.boss), boss: true, cards, stage: 1 });
+    if (X.savia) buffUnit(u, 1.15);
+    if (X.echo) {
+      buffUnit(u, 1.15);
+      if (X.echo === "shell") { u.shield = Math.round(u.maxHp * 0.25); u.shieldT = 99; }
+      if (X.echo === "fury") { u.base.str *= 1.25; u.base.def *= 0.85; }
+      if (X.echo === "swift") u.base.spd *= 1.4;
+    }
+    return [u];
   }
   const count = X.section <= 1 ? 2 : rnd() < 0.5 ? 3 : 2;
   const lvl = Math.max(z.min, Math.round(R.lvl * 0.8 + (X.section - 1) * 0.25));
@@ -1904,7 +1959,8 @@ function foeUnits(boss) {
     const cs = MONS[k].cards;
     const cards = { a: scaled(cs[Math.floor(rnd() * 2)], 0) };
     if (X.section >= 4) cards.p = scaled(cs[1], 0);
-    const u = makeUnit({ kind: k, lvl, side: "foe", name: monName(k, true), hollow: true, cards, stage: 1 });
+    const u = makeUnit({ kind: k, lvl: lvl + (X.savia ? 2 : 0), side: "foe", name: monName(k, true), hollow: true, cards, stage: 1 });
+    if (X.savia) buffUnit(u, 1.15);
     if (X.nextFoeBuff) { u.base.str *= 1 + X.nextFoeBuff / 100; }
     return u;
   });
@@ -1934,10 +1990,11 @@ function render() {
   const el = $("scrExp"); if (!el) return;
   if (!X) { el.innerHTML = ""; return; }
   const z = ZONES[X.zone];
-  const head = `<div class="panel"><div class="panel-head"><div><div class="sub">${esc(view === "zones" ? tx("zones.sub") : zt("sub"))}</div><h2>${esc(view === "zones" ? tx("zones.title") : zt("name"))}</h2></div>${view !== "pick" && view !== "zones" && view !== "end" && view !== "battle" ? `<button class="btn ghost" type="button" data-x="quit">${esc(tx("quit"))}</button>` : ""}</div>${view !== "pick" && view !== "zones" ? trailHtml() : ""}</div>`;
+  const head = `<div class="panel"><div class="panel-head"><div><div class="sub">${esc(view === "zones" ? tx("zones.sub") : zt("sub"))}</div><h2>${esc(view === "zones" ? tx("zones.title") : zt("name") + (X.savia ? " · " + tx("sav.tag") : X.echo ? " · " + tx("echo.tag") : ""))}</h2></div>${view !== "pick" && view !== "zones" && view !== "end" && view !== "battle" ? `<button class="btn ghost" type="button" data-x="quit">${esc(tx("quit"))}</button>` : ""}</div>${view !== "pick" && view !== "zones" ? trailHtml() : ""}</div>`;
   let body = "";
   if (view === "zones") {
-    body = `<div class="panel">${zonesHtml()}<div class="bctl"><button class="btn ghost" type="button" data-x="cancel">${esc(tx("exp.cancel"))}</button></div></div>`;
+    const rumor = LORE ? LORE.loadingLine(EV.P, L()) : "";
+    body = `<div class="panel">${rumor ? `<p class="rumor">${esc(tx("rumor"))} ${esc(rumor)}</p>` : ""}${zonesHtml()}${extraZonesHtml()}<div class="bctl"><button class="btn ghost" type="button" data-x="cancel">${esc(tx("exp.cancel"))}</button></div></div>`;
   } else if (view === "pick") {
     body = `<div class="panel"><p class="lead">${esc(zt("desc"))}</p>
       <h3>${esc(tx("exp.pick"))}</h3><p class="muted" style="margin:0">${esc(tx("exp.pickSub"))}</p>
@@ -2153,7 +2210,9 @@ function endBattle(res) {
   if (boss) {
     const gc = MONS[ZONES[X.zone].boss].cards, fresh = gc.filter((id) => !(EV.P.grim || {})[id]), pool = fresh.length ? fresh : gc;
     const id = pool[Math.floor(rnd() * pool.length)];
-    giveCard(id, 0); guard = { id, g: 0 }; X.loot.cards.push(guard); EV.save();
+    giveCard(id, 0); guard = { id, g: 0 }; X.loot.cards.push(guard);
+    const w = escritoFor("guardian", X.zone); if (w) giveEscrito(w);
+    EV.save();
   }
   X.reward = { xp, coins, offer, guard, after: boss ? "win" : "next" };
   EV.checkAch();
@@ -2336,7 +2395,48 @@ function drawBattle(now) {
 }
 
 /* ---------- Events on the path ---------- */
-function rollEvent() { const ev = ZONES[X.zone].events; return ev[Math.floor(rnd() * ev.length)]; }
+/* Lore events (lore.js): told once each, gated by how far the story has gone; Writings are collectable texts */
+const LORE = root.EvoLore || null;
+const loreEv = (k) => (LORE && LORE.LORE_EVENTS[k]) || null;
+function rollEvent() {
+  const P = EV.P, seen = P.loreSeen || {};
+  const lore = LORE ? Object.keys(LORE.LORE_EVENTS).filter((k) => { const e = LORE.LORE_EVENTS[k]; return e.zone === X.zone && !seen[k] && LORE.needOk(e.need, P); }) : [];
+  if (lore.length && rnd() < 0.45) return lore[Math.floor(rnd() * lore.length)];
+  const ev = ZONES[X.zone].events; return ev[Math.floor(rnd() * ev.length)];
+}
+function giveEscrito(id) {
+  const P = EV.P; P.escritos = P.escritos || {};
+  if (!LORE || P.escritos[id] || !LORE.LORE_ESCRITOS.some((w) => w.id === id)) return false;
+  P.escritos[id] = Date.now(); P.c.escritos = (P.c.escritos || 0) + 1;
+  const w = LORE.LORE_ESCRITOS.find((x) => x.id === id);
+  EV.toast(tx("esc.got", { t: w[L()].title }), "📜");
+  return true;
+}
+// a Writing that can turn up in this zone from a chest or a guardian
+function escritoFor(from, zone) {
+  if (!LORE) return null;
+  const P = EV.P, have = P.escritos || {}, lay = LORE.loreLayer(P.cleared);
+  const ok = LORE.LORE_ESCRITOS.filter((w) => w.from === from && w.zone === zone && !have[w.id] && w.layer <= lay && (!w.unlock || (P.flags || {})[w.unlock.flag]));
+  return ok.length ? ok[0].id : null;
+}
+// Writings that come from a story flag alone (for example, the two lullabies once Unísona joins)
+function escritosByFlag() {
+  if (!LORE) return;
+  const F = EV.P.flags || {};
+  for (const w of LORE.LORE_ESCRITOS) if (w.from === "event" && w.unlock && F[w.unlock.flag]) {
+    const fromFx = Object.values(LORE.LORE_EVENTS).some((e) => e.fx.some((f) => f.escrito === w.id));
+    if (!fromFx) giveEscrito(w.id);
+  }
+}
+function escritosHtml() {
+  if (!LORE) return "";
+  const have = EV.P.escritos || {}, all = LORE.LORE_ESCRITOS, n = all.filter((w) => have[w.id]).length;
+  return `<h3 class="cat-title">${esc(tx("esc.title"))}</h3><p class="muted" style="margin:0">${esc(tx("esc.desc"))} ${esc(tx("grim.count", { n, m: all.length }))}</p><div class="escritos">${all.map((w) => {
+    if (!have[w.id]) return `<div class="esc locked"><b>???</b><small class="muted">${esc(tx("esc.from." + w.from, { z: w.zone ? zt("name", null, w.zone) : "" }))}</small></div>`;
+    const t = w[L()] || w.es;
+    return `<details class="esc"><summary><b>${esc(t.title)}</b></summary><p>${esc(t.text)}</p></details>`;
+  }).join("")}</div>`;
+}
 const EVT = {
   es: {
     farol: { t: "Un farol del camino está tirado en la hierba. De su base gotea una savia negra y espesa, y la llama tiembla como si tuviera frío.", c: ["Levantarlo y limpiarle la savia", "Quitarle el aceite que le queda", "Dejarlo y seguir"],
@@ -2464,11 +2564,16 @@ const EVT = {
 const vineTx = { es: ["Las enredaderas se revuelven y despiertan a las criaturas del bosque…", "Pasáis sin que os toquen. Ganas experiencia.", "Las enredaderas os arañan al pasar. El equipo pierde algo de vida."], en: ["The vines thrash and wake the wood's creatures…", "You get through untouched. You gain experience.", "The vines scratch you as you pass. The team loses some health."] };
 const fogTx = { es: ["Corres a ciegas y sales al otro lado. En el suelo hay algo que se les cayó.", "La niebla se cierra a tu alrededor y salen criaturas apagadas…"], en: ["You run blind and come out the other side. On the ground there's something they dropped.", "The fog closes in around you and dimmed creatures appear…"] };
 const sneakTx = { es: ["Te cuelas sin que te vean. Al otro lado encuentras algo que se les cayó.", "Te pillan. «¡Alto ahí!» Los guardas llaman a unas criaturas apagadas…"], en: ["You slip past unseen. On the other side you find something they dropped.", "They spot you. \"Halt!\" The wardens call in some dimmed creatures…"] };
+// lore events share the encounter view
+if (LORE) for (const lg of ["es", "en"]) Object.assign(EVT[lg], LORE.LORE_EVT[lg]);
 function eventHtml() {
   const E = EVT[L()][X.event];
   if (X.eventOut == null) {
     const ch = X.event === "orilla" && hasLetter() ? E.cL : E.c;
+    const le = loreEv(X.event);
     return `<div class="panel"><div class="sub">${esc(tx("node.event"))}</div><p class="evt-text">${esc(E.t)}</p><div class="choices">${ch.map((c, i) => {
+      if (le && le.cNeed && le.cNeed[i] && !(EV.P.flags || {})[le.cNeed[i]]) return "";
+      if (le) return `<button class="btn ghost" type="button" data-ev="${i}" ${(le.fx[i].cost || 0) > EV.P.coins ? "disabled" : ""}>${esc(c)}</button>`;
       const poor = (X.event === "patrol" && i === 2 && EV.P.coins < 8) || ((X.event === "tila" || X.event === "liquen") && i === 0 && EV.P.coins < 10) || (X.event === "whisper" && i === 1 && EV.P.coins < 10) || (X.event === "coplo" && i === 0 && EV.P.coins < 8) || (X.event === "news" && i === 0 && EV.P.coins < 6) || (X.event === "pass" && i === 0 && EV.P.coins < 10);
       return `<button class="btn ghost" type="button" data-ev="${i}" ${poor ? "disabled" : ""}>${esc(c)}</button>`;
     }).join("")}</div></div><div class="panel"><h3>${esc(tx("exp.party"))}</h3>${partyHtml()}</div>`;
@@ -2482,6 +2587,22 @@ function chooseEvent(i) {
   const E = EVT[L()][X.event];
   X.eventFight = false; X.eventCard = null;
   let out = E.o[i];
+  const le = loreEv(X.event);
+  if (le) {
+    const f = le.fx[i] || {}, P = EV.P;
+    if (f.cost && !EV.spendCoins(f.cost)) return;
+    if (f.xp) X.loot.xp += f.xp;
+    if (f.coins) X.loot.coins += f.coins;
+    if (f.heal) healParty(f.heal);
+    if (f.hurt) hurtParty(f.hurt);
+    if (f.foeBuff) X.nextFoeBuff = f.foeBuff;
+    if (f.card) X.eventCard = true;
+    if (f.fight) X.eventFight = true;
+    if (f.flag) { P.flags = P.flags || {}; for (const k of [].concat(f.flag)) P.flags[k] = 1; }
+    if (f.escrito) giveEscrito(f.escrito);
+    (P.loreSeen = P.loreSeen || {})[X.event] = 1;
+    X.eventOut = out; EV.save(); EV.sfx("tap"); render(); return;
+  }
   switch (X.event) {
     case "farol":
       if (i === 0) { for (const m of X.party) if (m.hp > 0) m.hp = Math.max(0.05, m.hp - 0.1); X.loot.xp += 15; }
@@ -2628,9 +2749,16 @@ function finish(res) {
     while (R.xp >= xpNeed(R.lvl)) { R.xp -= xpNeed(R.lvl); R.lvl++; for (const k of ["p", "s"]) if (SLOT_LVL[k] === R.lvl) unlocked.push(k); }
   }
   if (coins > 0) EV.addCoins(coins, true);
-  if (res === "win") { P.c.guard = (P.c.guard || 0) + 1; P.cleared = P.cleared || {}; P.cleared[X.zone] = (P.cleared[X.zone] || 0) + 1; }
+  if (res === "win") { P.c.guard = (P.c.guard || 0) + 1; P.cleared = P.cleared || {}; if (!X.echo) P.cleared[X.zone] = (P.cleared[X.zone] || 0) + 1; }
+  // the Guardian's Echo: Stardust and Chispas instead of zone stars
+  X.echoRew = null;
+  if (X.echo && res === "win") {
+    const d = 20 + 10 * (X.stars || 1), c = 60;
+    P.dust = (P.dust || 0) + d; EV.addCoins(c, true); P.c.echoWins = (P.c.echoWins || 0) + 1; P.echo.wins++;
+    X.echoRew = { d, c };
+  }
   X.unisona = null;
-  if (res === "win" && X.zone === "heart") {
+  if (res === "win" && X.zone === "heart" && !X.echo && !X.savia) {
     const F = P.flags = P.flags || {};
     if (!F.unisona) { F.unisona = 1; for (const id of MONS.unisona.cards) { giveCard(id, 0); l.cards.push({ id, g: 0 }); } X.unisona = "first"; }
     else { const id = MONS.unisona.cards[Math.floor(rnd() * 3)]; giveCard(id, 0); l.cards.push({ id, g: 0 }); X.unisona = "again"; }
@@ -2638,13 +2766,15 @@ function finish(res) {
   if (res === "win" || res === "lose") P.c.expDone = (P.c.expDone || 0) + 1;
   // zone stars: keep the best, 3 Song Notes the first time a zone reaches 3
   X.starInfo = null;
-  if (res === "win" && X.stars) {
-    P.stars = P.stars || {}; P.star3 = P.star3 || {};
-    const before = P.stars[X.zone] || 0;
+  if (res === "win" && X.stars && !X.echo) {
+    // Savia Mode keeps its own stars
+    const SK = X.savia ? "starsS" : "stars", S3 = X.savia ? "star3S" : "star3";
+    P[SK] = P[SK] || {}; P[S3] = P[S3] || {};
+    const before = P[SK][X.zone] || 0;
     const gained = Math.max(0, X.stars - before);
-    if (gained) { P.stars[X.zone] = X.stars; P.c.starsGot = (P.c.starsGot || 0) + gained; }
+    if (gained) { P[SK][X.zone] = X.stars; P.c.starsGot = (P.c.starsGot || 0) + gained; }
     let bonus = false;
-    if (X.stars === 3 && !P.star3[X.zone]) { P.star3[X.zone] = 1; P.notes = (P.notes || 0) + 3; bonus = true; }
+    if (X.stars === 3 && !P[S3][X.zone]) { P[S3][X.zone] = 1; P.notes = (P.notes || 0) + 3; bonus = true; }
     X.starInfo = { n: X.stars, best: gained > 0, bonus };
   }
   if (S && S.phase === "alive") {
@@ -2661,6 +2791,7 @@ function finish(res) {
   let lvlPick = null;
   if (R) for (let lv = before + 1; lv <= R.lvl; lv++) if (lv % 2 === 0) { lvlPick = offerCards(3, 0); break; }
   const bondNews = EV.EGGS ? EV.EGGS.afterTrip(res, xp, X.party, R ? R.lvl : 1) : [];
+  escritosByFlag();
   X.end = { res, xp, coins, before, after: R ? R.lvl : 1, unlocked, lvlPick, cards: l.cards.slice(), bondNews };
   EV.save(); EV.checkAch();
   show("end");
@@ -2681,6 +2812,8 @@ function endHtml() {
   else html += `<p class="evt-out">${esc(tx("end.unhurt", { name: nm }))}</p>`;
   if (e.res === "win") html += `<p class="evt-out">✦ ${esc(tx("end.verse", { v: zt("verse") }))}</p>`;
   if (X.unisona) html += `<p class="evt-out">✦ ${esc(tx(X.unisona === "first" ? "end.unisona" : "end.unisonaUp"))}</p>`;
+  if (X.echoRew) html += `<p class="evt-out">∴ ${esc(tx("end.echo", X.echoRew))}</p>`;
+  else if (X.echo && EV.P.echo) html += `<p class="evt-out">${esc(tx("end.echoLose", { n: Math.max(0, ECHO_TRIES - EV.P.echo.tries) }))}</p>`;
   if (X.starInfo) html += `<p class="evt-out end-stars"><b>${esc(tx("end.stars", { s: starStr(X.starInfo.n) }))}</b>${X.starInfo.best ? " · " + esc(tx("end.starsNew")) : ""}${X.starInfo.bonus ? "<br>♪ " + esc(tx("end.star3")) : ""}<br><small>${esc(tx("end.starsWhy"))}</small></p>`;
   if (e.after > e.before) html += `<p class="evt-out">${esc(tx("end.lvl", { name: nm, n: e.after }))}</p>`;
   for (const k of e.unlocked) html += `<p class="evt-out">${esc(tx("end.slot", { slot: tx("slot." + k) }))}</p>`;
@@ -2702,7 +2835,8 @@ function goHome() {
 function onExpClick(e) {
   const t = e.target.closest("button"); if (!t || !X) return;
   const d = t.dataset;
-  if (d.zone) { EV.sfx("tap"); pickZone(d.zone); return; }
+  if (d.zone) { EV.sfx("tap"); pickZone(d.zone, { savia: !!d.savia }); return; }
+  if (d.echo) { const e = echoInfo(); if (!e || !e.lvlOk || e.left <= 0) { EV.sfx("deny"); return; } EV.sfx("tap"); pickZone(e.zone, { echo: e.rule }); return; }
   if (d.pick) {
     const k = d.pick, i = X.chosen.indexOf(k);
     if (i >= 0) X.chosen.splice(i, 1); else { if (X.chosen.length >= 2) X.chosen.shift(); X.chosen.push(k); }
@@ -2714,7 +2848,7 @@ function onExpClick(e) {
     if (n === "fight") startBattle(false);
     else if (n === "boss") startBattle(true);
     else if (n === "rest") { healParty(0.35); for (const m of X.party) if (m.hp <= 0) m.hp = 0.2; EV.sfx("heal"); X.reward = { title: tx("node.rest"), text: tx("node.rest.d"), after: "next" }; show("reward"); }
-    else if (n === "chest") { X.reward = { title: tx("node.chest"), offer: offerCards(3, 0), after: "next" }; show("reward"); }
+    else if (n === "chest") { const w = rnd() < 0.35 ? escritoFor("chest", X.zone) : null; if (w) giveEscrito(w); X.reward = { title: tx("node.chest"), offer: offerCards(3, 0), after: "next" }; show("reward"); }
     else if (n === "event") { X.event = rollEvent(); X.eventOut = null; show("event"); }
     return;
   }
@@ -2784,7 +2918,7 @@ function renderCards() {
   const R = rpgState(), P = EV.P, S = EV.S;
   if (cTab !== "col") {
     if (cTab === "well" && EV.WELL) { el.innerHTML = `<div class="panel-head"><h2>${esc(EV.WELL.title())}</h2>${cardTabs()}</div>` + EV.WELL.html(); return; }
-    el.innerHTML = `<div class="panel-head"><h2>${esc(tx(cTab === "grim" ? "ctab.grim" : "ctab.shop"))}</h2>${cardTabs()}</div>` + (cTab === "grim" ? grimHtml() : workshopHtml());
+    el.innerHTML = `<div class="panel-head"><h2>${esc(tx(cTab === "grim" ? "ctab.grim" : "ctab.shop"))}</h2>${cardTabs()}</div>` + (cTab === "grim" ? grimHtml() + escritosHtml() : workshopHtml());
     return;
   }
   let html = `<div class="panel-head"><h2>${esc(tx("cards.title"))}</h2>${cardTabs()}<span class="progress">${esc(tx("cards.owned", { n: P.cards.length }))}</span></div><p class="muted" style="margin:0">${esc(tx("cards.desc"))}</p>`;
