@@ -845,7 +845,7 @@ const TX = {
     "cards.cant": "{name} no puede usar cartas de {type}", "cards.canTypes": "{name} puede usar cartas de: {types}, y las suyas propias.", "cards.copies": "Copias",
     "cards.desc": "Cada carta trae tres efectos; solo funciona el del hueco donde la pongas. Si el tipo de la carta coincide con el de tu criatura, resuena (+15 %).",
     "cards.noCreature": "Ten una criatura joven para usar cartas.", "cards.stats": "Vida {hp} · Fuerza {str} · Defensa {def} · Velocidad {spd} · Crítico {cr} %",
-    "sh.title": "Ficha de combate", "sh.sub": "Nivel {n}. Los cuidados de hoy suben o bajan cada valor.", "sh.hp": "Vida", "sh.str": "Fuerza", "sh.def": "Defensa", "sh.spd": "Velocidad", "sh.cr": "Crítico", "sh.dodge": "Esquiva", "sh.by": "por {c}", "sh.need": "Aparece cuando tu criatura sea joven.",
+    "sh.title": "Ficha de combate", "sh.lvl": "Nivel {n}", "sh.sub": "Nivel {n}. Los cuidados de hoy suben o bajan cada valor.", "sh.hp": "Vida", "sh.str": "Fuerza", "sh.def": "Defensa", "sh.spd": "Velocidad", "sh.cr": "Crítico", "sh.dodge": "Esquiva", "sh.by": "por {c}", "sh.need": "Aparece cuando tu criatura sea joven.",
     "cards.unequip": "Quitar", "cards.inUse": "En uso", "cards.mode": "Modo de combate",
     "log.expGo": "{name} sale de expedición {to}.", "log.expWin": "{name} volvió {from} con el guardián en paz.",
     "log.expLose": "{name} volvió {from} un poco magullada.",
@@ -933,7 +933,7 @@ const TX = {
     "cards.cant": "{name} can't use {type} cards", "cards.canTypes": "{name} can use cards of: {types}, plus its own.", "cards.copies": "Copies",
     "cards.desc": "Each card carries three effects; only the one for the slot you put it in works. If the card's type matches your creature's, it resonates (+15%).",
     "cards.noCreature": "Raise a creature to kid stage to use cards.", "cards.stats": "Health {hp} · Strength {str} · Defence {def} · Speed {spd} · Crit {cr}%",
-    "sh.title": "Battle stats", "sh.sub": "Level {n}. Today's care raises or lowers each value.", "sh.hp": "Health", "sh.str": "Strength", "sh.def": "Defence", "sh.spd": "Speed", "sh.cr": "Crit", "sh.dodge": "Dodge", "sh.by": "from {c}", "sh.need": "Shows up once your creature is a kid.",
+    "sh.title": "Battle stats", "sh.lvl": "Level {n}", "sh.sub": "Level {n}. Today's care raises or lowers each value.", "sh.hp": "Health", "sh.str": "Strength", "sh.def": "Defence", "sh.spd": "Speed", "sh.cr": "Crit", "sh.dodge": "Dodge", "sh.by": "from {c}", "sh.need": "Shows up once your creature is a kid.",
     "cards.unequip": "Remove", "cards.inUse": "In use", "cards.mode": "Battle mode",
     "log.expGo": "{name} set out {to}.", "log.expWin": "{name} came back {from} with the guardian at peace.",
     "log.expLose": "{name} came back {from} a bit bruised.",
@@ -3407,16 +3407,20 @@ function refreshHome() {
   r.disabled = EV.P.coins < RECHARGE.price;
 }
 function homeSheet(alive) {
+  // folded at the top of the side column, so the home fits on one screen
   let pn = $("sheetPanel");
   if (!pn) {
-    const status = $("b_full") && $("b_full").closest(".panel"); if (!status) return;
-    pn = document.createElement("div"); pn.id = "sheetPanel"; pn.className = "panel"; status.after(pn);
+    const side = document.querySelector("#scrGame .side"); if (!side) return;
+    pn = document.createElement("details"); pn.id = "sheetPanel"; pn.className = "panel fold";
+    pn.innerHTML = `<summary><h3></h3></summary><div class="fold-body"></div>`; side.prepend(pn);
   }
   const S = EV.S, R = rpgState();
   if (!alive || !S || S.stage < 1 || !R) { pn.hidden = true; return; }
   pn.hidden = false;
-  const html = `<h3>${esc(tx("sh.title"))}</h3><p class="muted" style="margin:0 0 6px;font-size:13px">${esc(tx("sh.sub", { n: R.lvl }))}</p>${ownSheetHtml()}`;
-  if (pn.innerHTML !== html) pn.innerHTML = html;
+  pn.querySelector("h3").textContent = tx("sh.title") + " · " + tx("sh.lvl", { n: R.lvl });
+  const html = `<p class="muted" style="margin:0 0 6px;font-size:13px">${esc(tx("sh.sub", { n: R.lvl }))}</p>${ownSheetHtml()}`;
+  const body = pn.querySelector(".fold-body");
+  if (body.innerHTML !== html) body.innerHTML = html;
 }
 // pay Chispas for an energy boost (energy otherwise only refills slowly while sleeping)
 const RECHARGE = { amount: 40, price: 12 };

@@ -72,3 +72,7 @@ Progress is saved in your browser's `localStorage`: the creature in `glimmerglad
 ## Ideas for later
 
 An RPG expedition mode, a creature encyclopedia, more evolution branches and creature lines, more mini-games, and idle progression. See the project plan.
+
+## Compact home
+
+The home fits on one phone screen. Five status icons sit above the window (tap them to see names and numbers), the eight care buttons are one row under it, and the battle stats start folded. Every menu (shop, tasks, season, refuge, cards, map, achievements, settings, food and bag) opens as a sheet over the game instead of at the end of the page. The shop, the food menu and the bag are grids of pixel icons; tapping one opens a small card with the picture, price or amount, description, effects and one confirm button.
