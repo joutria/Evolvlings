@@ -92,3 +92,10 @@ Card art is now a lore scene for every card (`scenes.js`, built from the card-sc
 
 - A creature you already have that hatches again gains a star (up to 5): +4% to its stats per star, a trait at ★2 (+5% crit) and ★4 (+6% dodge), a piece of its story at ★2 and ★4, and a golden border at ★5. Past 5 stars, a repeat gives Stardust as before.
 - While a rarity still has creatures you don't own, a repeat roll has a 50% chance to become one of them.
+
+## Builds (upgradable places, delivery 1)
+
+- New **Builds** menu. Each place goes from level 1 to 5 for Chispas plus **Wood** (a new resource from the Garden and from expeditions: 2–3 per win, 1 per loss). Only one build runs at a time, and each finished expedition brings it 1 h closer. There's no real money and no paid speed-up.
+- Build times are short for now while the game is in development (15 min to 4 h). Set `FAST = false` in `build.js` to use the final times (2 h to 24 h).
+- **Garden** (home, next to the bowl): basic food (berries, honey buns) is no longer unlimited. It grows in the Garden while you're away: 3 meals a day at level 1, up to 8 at level 5. It holds up to 12 meals, and later levels also grow melon and stew, plus a little Wood. Harvest it by walking there or from the Builds menu. The Garden drawing grows with its level.
+- **Incubator**: eggs hatch 6% to 25% faster, and level 5 adds a 4th slot on top of the Keeper Level slots.

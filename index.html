@@ -382,6 +382,7 @@ body.sheet-on { overflow: hidden; }
       <button class="chip-btn" id="btnDaily" type="button" hidden><span id="dailyLbl">Tasks</span> <span class="notes" id="noteVal">♪ 0</span><i class="dot" id="dailyDot" hidden></i></button>
       <button class="chip-btn" id="btnSeason" type="button" hidden><span id="seasonLbl">Season</span><i class="dot" id="seasonDot" hidden></i></button>
       <button class="chip-btn" id="btnRefuge" type="button" hidden><span id="refugeLbl">Refuge</span><i class="dot" id="refugeDot" hidden></i></button>
+      <button class="chip-btn" id="btnBuild" type="button" hidden><span id="buildLbl">Builds</span><i class="dot" id="buildDot" hidden></i></button>
       <button class="chip-btn" id="btnCards" type="button" data-i18n="nav.cards" hidden>Cards</button>
       <button class="chip-btn" id="btnTeams" type="button" data-i18n="nav.teams" hidden>Teams</button>
       <button class="chip-btn" id="btnMap" type="button" hidden><span id="mapLbl">Map</span> <span class="notes" id="stepVal"></span></button>
@@ -464,6 +465,7 @@ body.sheet-on { overflow: hidden; }
   <section id="refugePanel" class="panel" hidden></section>
   <section id="seasonPanel" class="panel" hidden></section>
   <section id="mapPanel" class="panel" hidden></section>
+  <section id="buildPanel" class="panel" hidden></section>
   <section id="feedMenu" class="panel pick" hidden></section>
   <section id="itemMenu" class="panel pick" hidden></section>
 
@@ -580,7 +582,7 @@ const STR = {
     "badge.asleep": "Asleep", "badge.sick": "Has a sniffle", "badge.messes": (v) => `${v.n} ${plural(v.n, "mess", "messes")}`,
     "badge.hungry": "Hungry", "badge.bored": "Bored", "badge.sleepy": "Sleepy", "badge.happy": "Happy",
     "act.feed": "Feed", "act.play": "Play", "act.clean": "Clean", "act.sleep": "Sleep", "act.wake": "Wake up", "act.heal": "Herbs", "act.pet": "Cuddle", "act.items": "Items", "act.shop": "Shop",
-    "feed.title": "What will you give?", "items.title": "Bag", "icard.feed": "Feed it", "icard.use": "Use", "icard.back": "Back", "icard.inBag": "In bag: {n}", "icard.free": "Always in the pantry", "icard.cure": "Cures colds", "icard.wash": "Cleans every mess", "icard.poor": "You have {n} Chispas.", "icard.achGot": "Unlocked", "icard.achTodo": "Not yet",
+    "feed.title": "What will you give?", "feed.empty": "No food left. Harvest the Garden next to the bowl, or buy some at the shop.", "items.title": "Bag", "icard.feed": "Feed it", "icard.use": "Use", "icard.back": "Back", "icard.inBag": "In bag: {n}", "icard.free": "Always in the pantry", "icard.cure": "Cures colds", "icard.wash": "Cleans every mess", "icard.poor": "You have {n} Chispas.", "icard.achGot": "Unlocked", "icard.achTodo": "Not yet",
     "menu.close": "Never mind", "menu.closeSub": "Close", "menu.noItems": "Your bag is empty. Medicine and soap from the shop show up here.",
     "hint.sleeping": "{name} is sleeping. Energy refills while the lights are out.", "hint.sick": "{name} looks unwell. Give it herbs.",
     "hint.messy": "The glade is getting messy. Time to clean.", "hint.hungry": "{name}'s tummy is rumbling.", "hint.tired": "{name} keeps yawning. Maybe it's bedtime.",
@@ -679,7 +681,7 @@ const STR = {
     "badge.asleep": "Durmiendo", "badge.sick": "Con catarro", "badge.messes": (v) => `${v.n} ${plural(v.n, "caquita", "caquitas")}`,
     "badge.hungry": "Tiene hambre", "badge.bored": "Se aburre", "badge.sleepy": "Tiene sueño", "badge.happy": "Feliz",
     "act.feed": "Comer", "act.play": "Jugar", "act.clean": "Limpiar", "act.sleep": "Dormir", "act.wake": "Despertar", "act.heal": "Hierbas", "act.pet": "Mimar", "act.items": "Objetos", "act.shop": "Tienda",
-    "feed.title": "¿Qué le das?", "items.title": "Mochila", "icard.feed": "Dar de comer", "icard.use": "Usar", "icard.back": "Volver", "icard.inBag": "En la mochila: {n}", "icard.free": "Siempre hay en la despensa", "icard.cure": "Cura el catarro", "icard.wash": "Limpia todas las caquitas", "icard.poor": "Tienes {n} Chispas.", "icard.achGot": "Conseguido", "icard.achTodo": "Todavía no",
+    "feed.title": "¿Qué le das?", "feed.empty": "No te queda comida. Cosecha en el Huerto, junto al comedero, o compra en la tienda.", "items.title": "Mochila", "icard.feed": "Dar de comer", "icard.use": "Usar", "icard.back": "Volver", "icard.inBag": "En la mochila: {n}", "icard.free": "Siempre hay en la despensa", "icard.cure": "Cura el catarro", "icard.wash": "Limpia todas las caquitas", "icard.poor": "Tienes {n} Chispas.", "icard.achGot": "Conseguido", "icard.achTodo": "Todavía no",
     "menu.close": "Mejor no", "menu.closeSub": "Cerrar", "menu.noItems": "Tu mochila está vacía. Aquí aparecen las medicinas y el jabón de la tienda.",
     "hint.sleeping": "{name} está durmiendo. La energía se recupera con la luz apagada.", "hint.sick": "{name} no tiene buena cara. Dale hierbas.",
     "hint.messy": "El claro se está ensuciando. Toca limpiar.", "hint.hungry": "A {name} le ruge la barriga.", "hint.tired": "{name} no para de bostezar. Quizá sea hora de dormir.",
@@ -1077,15 +1079,17 @@ function hint(text) { $("hint").textContent = text; $("hint").dataset.auto = "0"
 function closeMenus() { $("feedMenu").hidden = true; $("itemMenu").hidden = true; closeCard(); }
 
 function applyEff(eff) { for (const k in eff) S.stats[k] = clamp(S.stats[k] + eff[k]); }
+// basic food is free unless the Garden (build.js) grows it: then it is counted in the bag like the rest
+function stocked(id) { return ITEMS[id].price > 0 || !!(HOOKS.gardenOn && HOOKS.gardenOn()); }
 function feed(id) {
   closeMenus();
   const it = ITEMS[id]; if (!it) return;
-  if (it.price > 0 && !(P.inv[id] > 0)) return;
+  if (stocked(id) && !(P.inv[id] > 0)) return;
   const s = S.stats;
   if (s.full > 94 && (it.eff.full || 0) >= 8) { say(t("say.full")); hint(t("hint.full", { name: S.name })); sfx("deny"); return; }
   const wasHungry = s.full < 70;
   applyEff(it.eff);
-  if (it.price > 0) P.inv[id]--;
+  if (stocked(id)) P.inv[id]--;
   // energy from food also gives map steps (see world.js)
   if (it.eff.energy && EV.WORLD) EV.WORLD.gainFromEnergy(it.eff.energy);
   P.c.fed++; P.seen.foods[id] = 1;
@@ -1226,8 +1230,8 @@ function openCard(mode, id) {
     meta = owned ? t("shop.owned") : `✦ ${it.price}${!it.perm ? ` · ${t("icard.inBag", { n: have })}` : ""}`;
     if (!owned) act = `<button class="btn" type="button" data-cact="buy"${P.coins < it.price ? " disabled" : ""}>${t("shop.buy")} · ${it.price}</button>`;
   } else {
-    meta = it.price ? t("icard.inBag", { n: have }) : t("icard.free");
-    const dis = it.price && !have;
+    meta = stocked(id) ? t("icard.inBag", { n: have }) : t("icard.free");
+    const dis = stocked(id) && !have;
     act = `<button class="btn" type="button" data-cact="${mode}"${dis ? " disabled" : ""}>${t(mode === "feed" ? "icard.feed" : "icard.use")}</button>`;
   }
   $("icard").innerHTML = `<div class="ic-top"><img src="${itemIcon(id)}" alt=""><div><strong>${escapeHtml(itemName(id))}</strong><span class="ic-meta">${meta}</span></div></div>` +
@@ -1272,8 +1276,8 @@ function renderAch() {
   $("achList").innerHTML = html;
 }
 function renderFeedMenu() {
-  const ids = Object.keys(ITEMS).filter((k) => ITEMS[k].cat === "food" && (ITEMS[k].price === 0 || P.inv[k] > 0));
-  $("feedMenu").innerHTML = `<h2>${t("feed.title")}</h2><div class="tiles">` + ids.map((id) => `<button type="button" class="tile" data-food="${id}" aria-label="${escapeHtml(itemName(id))}"><img src="${itemIcon(id)}" alt=""><span class="tp">${ITEMS[id].price ? "×" + P.inv[id] : "∞"}</span></button>`).join("") + `</div>`;
+  const ids = Object.keys(ITEMS).filter((k) => ITEMS[k].cat === "food" && (!stocked(k) || P.inv[k] > 0));
+  $("feedMenu").innerHTML = `<h2>${t("feed.title")}</h2>${ids.length ? "" : `<p class="muted">${t("feed.empty")}</p>`}<div class="tiles">` + ids.map((id) => `<button type="button" class="tile" data-food="${id}" aria-label="${escapeHtml(itemName(id))}"><img src="${itemIcon(id)}" alt=""><span class="tp">${ITEMS[id].price ? "×" + P.inv[id] : "∞"}</span></button>`).join("") + `</div>`;
 }
 function renderItemMenu() {
   const ids = Object.keys(ITEMS).filter((k) => ITEMS[k].cat === "med" && P.inv[k] > 0);
@@ -1769,7 +1773,7 @@ function renderSettings() {
 }
 
 /* ---------- Panels (one open at a time) ---------- */
-const PANELS = { settings: "settingsPanel", journal: "journalPanel", shop: "shopPanel", ach: "achPanel", cards: "cardsPanel", teams: "teamsPanel", daily: "dailyPanel", refuge: "refugePanel", season: "seasonPanel", map: "mapPanel" };
+const PANELS = { settings: "settingsPanel", journal: "journalPanel", shop: "shopPanel", ach: "achPanel", cards: "cardsPanel", teams: "teamsPanel", daily: "dailyPanel", refuge: "refugePanel", season: "seasonPanel", map: "mapPanel", build: "buildPanel" };
 function togglePanel(name, forceOpen) {
   const id = PANELS[name], el = $(id);
   const open = forceOpen || el.hidden;
@@ -1785,6 +1789,7 @@ function togglePanel(name, forceOpen) {
   if (name === "refuge" && HOOKS.renderRefuge) HOOKS.renderRefuge();
   if (name === "season" && HOOKS.renderSeason) HOOKS.renderSeason();
   if (name === "map" && HOOKS.renderMap) HOOKS.renderMap();
+  if (name === "build" && HOOKS.renderBuild) HOOKS.renderBuild();
   el.hidden = false;
   syncSheet(); $("sheetBody").scrollTop = 0;
 }
@@ -1908,7 +1913,7 @@ window.EV = {
   feed, cleanUp, toggleSleep, startPlay, cuddle, ITEMS,
   // what the side scene is showing right now, so the view from above can draw the same hearts, bubbles and speech
   get FX() { return { effects, bubble, petX, foodAnim, mini }; }, miniOn: () => !!mini, itemName, quietOn, STR, ACH, ACH_META, SPECIES, SFX, HOOKS, $, clamp, rand, pick, t, tone, sfx, buzz, save, saveProfile, addCoins, spendCoins, toast, addLog,
-  renderAll, renderStats, showScreen, applyStatic, escapeHtml, drawCreature, setupCanvas, ell, drawStar, checkAch, togglePanel, closeSheets, stageName, careNow, pixelText,
+  renderAll, renderStats, showScreen, stocked, applyStatic, escapeHtml, drawCreature, setupCanvas, ell, drawStar, checkAch, togglePanel, closeSheets, stageName, careNow, pixelText,
 };
 
 /* ---------- Boot ---------- */
@@ -1934,6 +1939,7 @@ requestAnimationFrame(frame);
 <script src="daily.js"></script>
 <script src="well.js"></script>
 <script src="eggs.js"></script>
+<script src="build.js"></script>
 <script src="seasons.js"></script>
 <script src="ach.js"></script>
 <script src="world.js"></script>
