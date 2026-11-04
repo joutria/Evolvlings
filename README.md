@@ -99,3 +99,15 @@ Card art is now a lore scene for every card (`scenes.js`, built from the card-sc
 - Build times are short for now while the game is in development (15 min to 4 h). Set `FAST = false` in `build.js` to use the final times (2 h to 24 h).
 - **Garden** (home, next to the bowl): basic food (berries, honey buns) is no longer unlimited. It grows in the Garden while you're away: 3 meals a day at level 1, up to 8 at level 5. It holds up to 12 meals, and later levels also grow melon and stew, plus a little Wood. Harvest it by walking there or from the Builds menu. The Garden drawing grows with its level.
 - **Incubator**: eggs hatch 6% to 25% faster, and level 5 adds a 4th slot on top of the Keeper Level slots.
+
+## Builds, delivery 2: luck and paths
+
+Six more places in the Builds menu, each improved on its own:
+
+- **Pantry**: the free daily pull gets +2 points of special-prize chance per level, up to +10.
+- **Well of Echoes**: one free pull every week for everyone. Each level adds +2 points of Rare or better to every Well pull, up to +10, taken from Common and Uncommon. Pity, floor and the Promise don't change.
+- **Path to El Vado**: +1, +2, +3, then +5 steps in the daily recharge.
+- **Foraging nook**: up to 3 searches a day.
+- **Refuge nests**: companions who stay home get 10% to 50% of the trip's experience. At level 5, petting gives +2 Bond.
+- **Guild workshop**: crafting a card in the Grimoire costs 9, then 8, then 7 Stardust instead of 10.
+- Upgraded places on the map show a small row of gold marks, one per level above 1.

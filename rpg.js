@@ -1428,7 +1428,9 @@ function rpgState() {
 const usable = (id) => { const S = EV.S; return !S || canUse(S.species, S.form, id); };
 function giveCard(id, gi) { const P = EV.P; const c = { uid: "c" + P.cardSeq++, id, g: gi }; P.cards.push(c); (P.grim = P.grim || {})[id] = 1; return c; }
 // Stardust: each grade is worth 5 times the one below, like upgrades
-const DUST_OF = (gi) => Math.pow(UPGRADE_N, gi), CRAFT_COST = 10, PACK = { price: 60, perDay: 3 };
+// the Workshop build (build.js) lowers the crafting cost
+const craftCost = () => (EV.BUILD ? EV.BUILD.craftCost() : CRAFT_BASE);
+const DUST_OF = (gi) => Math.pow(UPGRADE_N, gi), CRAFT_BASE = 10, PACK = { price: 60, perDay: 3 };
 const GRIM_ORDER = ["fire", "plant", "light", "bolt", "air", "music", "water", "stone", "shadow", "ice", "mush", "dream", "star"];
 const grimIds = (types) => Object.keys(CARDS).filter((id) => types.includes(CARDS[id].type));
 const grimDone = (p, types) => grimIds(types).every((id) => (p.grim || {})[id]);
@@ -3474,7 +3476,7 @@ function grimHtml() {
       h += `<p class="rc-copies">${typeChip(ty)} <span class="progress">${tids.filter((id) => P.grim[id]).length} / ${tids.length}</span></p><div class="rcards">`;
       for (const id of tids) {
         const C = CARDS[id], boss = !!C.boss || !!C.story, owner = C.by && MONS[C.by] ? monName(C.by) : "";
-        const craft = boss ? `<p class="rc-cant">${esc(tx(C.story ? "grim.story" : "grim.boss"))}</p>` : `<div class="rc-btns"><button class="btn ghost" type="button" data-craft="${id}" ${(P.dust || 0) < CRAFT_COST ? "disabled" : ""}>${esc(tx("grim.craft", { c: CRAFT_COST }))}</button></div>`;
+        const craft = boss ? `<p class="rc-cant">${esc(tx(C.story ? "grim.story" : "grim.boss"))}</p>` : `<div class="rc-btns"><button class="btn ghost" type="button" data-craft="${id}" ${(P.dust || 0) < craftCost() ? "disabled" : ""}>${esc(tx("grim.craft", { c: craftCost() }))}</button></div>`;
         if (P.grim[id]) h += cardHtml(id, 0, { foot: craft });
         else h += ghostCardHtml(id, tx("grim.unknown") + (owner && !boss ? " · " + tx("grim.by", { mon: owner }) : ""), craft);
       }
@@ -3485,7 +3487,7 @@ function grimHtml() {
 }
 function workshopHtml() {
   const P = EV.P, d = P.packDay === dayKeyNow() ? P.packN || 0 : 0, left = PACK.perDay - d;
-  let h = `<div class="slotbox" style="border-style:solid"><strong style="font-family:var(--font-display);font-size:18px">${esc(tx("dust.have", { n: P.dust || 0 }))}</strong><p class="muted">${esc(tx("dust.desc", { c: CRAFT_COST }))}</p></div>`;
+  let h = `<div class="slotbox" style="border-style:solid"><strong style="font-family:var(--font-display);font-size:18px">${esc(tx("dust.have", { n: P.dust || 0 }))}</strong><p class="muted">${esc(tx("dust.desc", { c: craftCost() }))}</p></div>`;
   h += `<div class="slotbox" style="border-style:solid"><strong style="font-family:var(--font-display);font-size:18px">${esc(tx("pack.title"))}</strong><p class="muted">${esc(left > 0 ? tx("pack.desc", { m: PACK.perDay, n: left }) : tx("pack.none"))}</p>
     <div class="rc-btns"><button class="btn" type="button" data-pack="1" ${left <= 0 || P.coins < PACK.price ? "disabled" : ""}>${esc(tx("pack.btn", { c: PACK.price }))}</button></div></div>`;
   if (lastPack) h += `<h3 class="cat-title">${esc(tx("pack.got"))}</h3><div class="rcards">${lastPack.map((c) => cardHtml(c.id, c.g, { foot: cantNote(c.id) })).join("")}</div>`;
@@ -3564,8 +3566,8 @@ function onCardsClick(e) {
   }
   if (t.dataset.craft) {
     const id = t.dataset.craft; if (!CARDS[id] || CARDS[id].boss || CARDS[id].story) return;
-    if ((P.dust || 0) < CRAFT_COST) { EV.toast(tx("dust.poor")); EV.sfx("deny"); return; }
-    P.dust -= CRAFT_COST; giveCard(id, 0);
+    if ((P.dust || 0) < craftCost()) { EV.toast(tx("dust.poor")); EV.sfx("deny"); return; }
+    P.dust -= craftCost(); giveCard(id, 0);
     EV.toast(tx("grim.crafted", { card: cardName(id) })); EV.sfx("grow"); EV.save(); EV.checkAch(); renderCards(); return;
   }
   if (t.dataset.pack) {

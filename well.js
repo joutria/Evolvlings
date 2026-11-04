@@ -29,6 +29,7 @@ const TX = {
     "f.back": "Todo lo limitado vuelve: cada destacada vuelve más adelante y se puede conseguir en la Tienda del Polvo.", "f.story": "Las 3 estrellas de cada zona se consiguen con las cartas que da el propio juego.",
     "shop": "Tienda del Polvo", "shop.have": "Tienes {n} ∴ de Polvo de estrella.", "shop.note": "1 Nota · {c} ∴", "shop.noteLeft": "Te quedan {n} este mes.",
     "shop.past": "Las destacadas de temporadas pasadas aparecerán aquí dos temporadas después.", "shop.got": "+1 Nota del Canto", "shop.poor": "Te falta Polvo de estrella.", "shop.max": "Ya cambiaste 5 Notas este mes.",
+    "free": "Tirada gratis de la semana", "bonus": "Obras del Pozo: +{n} puntos de Rara o mejor en cada tirada.",
     "got": "Del Pozo: {card}", "ach.well1": ["Primer eco", "Tira por primera vez en el Pozo de los Ecos."], "ach.legend1": ["Luz de raíz", "Consigue una carta Legendaria."],
   },
   en: {
@@ -49,6 +50,7 @@ const TX = {
     "f.back": "Everything limited comes back: each featured card returns later and can be had at the Stardust Shop.", "f.story": "Every zone's 3 stars can be earned with the cards the game itself gives you.",
     "shop": "Stardust Shop", "shop.have": "You have {n} ∴ Stardust.", "shop.note": "1 Note · {c} ∴", "shop.noteLeft": "{n} left this month.",
     "shop.past": "Featured cards from past seasons will show up here two seasons later.", "shop.got": "+1 Song Note", "shop.poor": "Not enough Stardust.", "shop.max": "You've already traded 5 Notes this month.",
+    "free": "This week's free pull", "bonus": "Well builds: +{n} points of Rare or better on every pull.",
     "got": "From the Well: {card}", "ach.well1": ["First echo", "Pull at the Well of Echoes for the first time."], "ach.legend1": ["Root-light", "Get a Legendary card."],
   },
 };
@@ -77,9 +79,24 @@ const legChance = (n) => (n >= HARD ? 100 : n >= SOFT ? ODDS[LEG] + 6 * (n - SOF
 function rollGrade(w) {
   if (Math.random() * 100 < legChance(w.pity)) return LEG;
   if (w.floor >= FLOOR) return Math.random() * (ODDS[4] + ODDS[3]) < ODDS[4] ? 4 : 3;
-  let r = Math.random() * (100 - ODDS[LEG]);
-  for (let g = 4; g > 0; g--) { if (r < ODDS[g]) return g; r -= ODDS[g]; }
-  return 0;
+  let r = Math.random() * (100 - ODDS[LEG]), out = 0;
+  for (let g = 4; g > 0; g--) { if (r < ODDS[g]) { out = g; break; } r -= ODDS[g]; }
+  // the Well build (build.js): +2 points of Rare or better per level, at most +10, taken from Common and Uncommon
+  const bonus = EV.BUILD ? EV.BUILD.wellBonus() : 0;
+  if (out < 2 && bonus && Math.random() * (ODDS[0] + ODDS[1]) < bonus) out = 2;
+  return out;
+}
+// one free pull every week (Monday to Sunday)
+const weekNow = () => (EV.DAILY ? EV.DAILY.weekKey() : String(Math.floor((Date.now() / 864e5 + 3) / 7)));
+const freeLeft = () => W().freeWk !== weekNow();
+function pullFree() {
+  if (!freeLeft()) return;
+  const w = W(); w.freeWk = weekNow();
+  const got = [pullOne(w.banner)];
+  last = { got, best: got[0].g, key: Date.now() };
+  EV.sfx(got[0].g >= EPIC ? "grow" : "card");
+  EV.toast(tx("got", { card: RPG.cardName(got[0].id) }), RPG.GRADES[got[0].g][L()]);
+  EV.save(); EV.checkAch();
 }
 function pullOne(banner) {
   const w = W(), B = BANNERS[banner];
@@ -140,7 +157,9 @@ function html() {
     h += `<p class="muted">${esc(tx("boost", { list: B.boost.map(RPG.cardName).join(", ") }))}</p>`;
   }
   h += `<ul class="well-count"><li>${esc(tx("pity", { n: HARD - w.pity }))}</li><li>${esc(tx("floor", { n: FLOOR - w.floor }))}</li>${B.featured ? `<li>${esc(tx(w.promise ? "promiseOn" : "promiseOff"))}</li>` : ""}</ul>`;
-  h += `<div class="rc-btns"><button class="btn" type="button" data-wpull="1" ${(P.notes || 0) < 1 ? "disabled" : ""}>${esc(tx("pull1"))}</button><button class="btn" type="button" data-wpull="10" ${(P.notes || 0) < 10 ? "disabled" : ""}>${esc(tx("pull10"))}</button></div></div>`;
+  const wb = EV.BUILD ? EV.BUILD.wellBonus() : 0;
+  if (wb) h += `<p class="well-bonus">${esc(tx("bonus", { n: wb }))}</p>`;
+  h += `<div class="rc-btns">${freeLeft() ? `<button class="btn" type="button" data-wfree="1">${esc(tx("free"))}</button>` : ""}<button class="btn" type="button" data-wpull="1" ${(P.notes || 0) < 1 ? "disabled" : ""}>${esc(tx("pull1"))}</button><button class="btn" type="button" data-wpull="10" ${(P.notes || 0) < 10 ? "disabled" : ""}>${esc(tx("pull10"))}</button></div></div>`;
   if (B.featured) h += `<div class="rcards well-feat">${RPG.cardHtml(B.featured, LEG)}</div>`;
   h += `</div>`;
   if (last) {
@@ -162,6 +181,7 @@ function html() {
 function click(t) {
   const w = W();
   if (t.dataset.wban) { w.banner = t.dataset.wban; last = null; EV.sfx("tap"); EV.save(); RPG.renderCards(); return true; }
+  if (t.dataset.wfree) { pullFree(); RPG.renderCards(); const el = document.querySelector(".well-last"); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); return true; }
   if (t.dataset.wpull) { pull(+t.dataset.wpull); RPG.renderCards(); const el = document.querySelector(".well-last"); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); return true; }
   if (t.dataset.wnote) { tradeNote(); RPG.renderCards(); return true; }
   return false;
@@ -173,6 +193,7 @@ const css = `
 .well-ban h3 { margin: 0 0 4px; } .well-ban p { margin: 4px 0; font-size: 14px; }
 .well-count { list-style: none; padding: 0; margin: 8px 0; display: flex; flex-direction: column; gap: 3px; font: 600 13px var(--font-mono); }
 .well-feat { grid-template-columns: 1fr !important; }
+.well-bonus { font: 600 13px var(--font-mono); color: var(--moss, #3c7a2c); }
 .well-last { position: relative; margin-top: 12px; }
 .well-rings { position: relative; height: 90px; display: grid; place-items: center; overflow: hidden; }
 .well-rings i { position: absolute; width: 20px; height: 20px; border: 3px solid var(--m0); border-radius: 50% !important; opacity: 0; animation: ring .9s steps(6) forwards; animation-delay: calc(var(--i) * .12s); }
@@ -194,5 +215,5 @@ const st = document.createElement("style"); st.textContent = css; document.head.
 EV.ACH.push(["well1", 15, (p) => (p.c.wellPulls || 0) >= 1], ["legend1", 100, (p) => (p.cards || []).some((c) => c.g >= LEG)]);
 for (const lg of ["es", "en"]) for (const id of ["well1", "legend1"]) EV.STR[lg].ach[id] = TX[lg]["ach." + id];
 
-EV.WELL = { html, click, pullOne, legChance, tab: () => tx("tab"), title: () => tx("title"), ODDS, BANNERS };
+EV.WELL = { html, click, pullOne, pullFree, freeLeft, rollGrade, legChance, tab: () => tx("tab"), title: () => tx("title"), ODDS, BANNERS };
 })(typeof window !== "undefined" ? window : globalThis);
