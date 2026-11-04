@@ -3265,6 +3265,7 @@ function recharge() {
   if (S.stats.energy >= 90) { EV.toast(tx("recharge.full")); return; }
   if (!EV.spendCoins(RECHARGE.price)) { EV.toast(EV.t("toast.poor")); EV.sfx("deny"); return; }
   S.stats.energy = Math.min(100, S.stats.energy + RECHARGE.amount);
+  if (EV.WORLD) EV.WORLD.gainFromEnergy(RECHARGE.amount);
   EV.sfx("heal"); EV.buzz(20); EV.toast(tx("recharge.done"), "+" + RECHARGE.amount);
   EV.save(); EV.renderStats(); refreshHome();
 }
