@@ -885,6 +885,9 @@ const TX = {
     "foe.hollow": "{name} apagado", "boss.farol": "El Gran Farol", "boss.forja": "La Forja Despierta", "boss.seto": "El Seto Hambriento", "boss.trono": "El Trono Vacío", "boss.mira": "La Que Mira desde Abajo", "boss.grava": "Grava", "boss.veleta": "La Veleta Mayor", "boss.micelio": "La Madre Micelio", "boss.raiz": "La Raíz Doliente",
     "zones.lockEnv": "Calma a un guardián del Cráter o del Bosque para cruzar el Vado hacia el Envés.",
     "zones.lockHigh": "Calma a un guardián del Envés para abrir este camino.", "zones.lockHeart": "Calma a los ocho guardianes para llegar al Corazón.",
+    "key.raft": "Balsa", "key.rope": "Cuerda", "key.got.raft": "Los leñadores del bosque te regalan una balsa vieja pero firme. Con ella ya puedes ir {to}.", "key.got.rope": "Los mineros te dan una cuerda larga y bien trenzada. Con ella ya puedes subir {to}.",
+    "key.need.raft": "Necesitas una balsa. Los leñadores {from} te darán una cuando calmes a su guardián.", "key.need.rope": "Necesitas una cuerda. Los mineros {from} te darán una cuando calmes a su guardián.",
+    "pmap.aria": "Mapa de pergamino del valle", "pmap.hint": "Toca un lugar del pergamino o elige en la lista.", "pmap.keys": "Objetos clave: {list}.", "pmap.nokeys": "Objetos clave: ninguno todavía.", "pmap.vado": "El Vado", "pmap.locked": "Todavía no se puede ir.",
     "r.guard": "El guardián te deja una de sus cartas", "grim.story": "Solo la da Unísona.", "end.unisona": "Unísona se queda contigo. Desde ahora puede acompañarte en cualquier expedición, y sus cartas Estrella valen para todas las criaturas.", "end.unisonaUp": "Unísona canta contigo otra vez y te da otra copia de una de sus cartas. Fusiónalas para que suba de rareza.",
     "log.strip": "{name} pierde {st}.", "log.cdup": "La carta de {name} tardará {n} más en estar lista.",
     "ach.guard8": ["El Canto casi entero", "Calma a los ocho guardianes del valle."],
@@ -970,6 +973,9 @@ const TX = {
     "foe.hollow": "Dimmed {name}", "boss.farol": "The Great Lantern", "boss.forja": "The Wakeful Forge", "boss.seto": "The Hungry Hedge", "boss.trono": "The Empty Throne", "boss.mira": "She Who Watches from Below", "boss.grava": "Grava", "boss.veleta": "The Great Weathervane", "boss.micelio": "Mother Mycelium", "boss.raiz": "The Aching Root",
     "zones.lockEnv": "Calm a guardian of the Crater or the Wood to cross the Ford to the Underside.",
     "zones.lockHigh": "Calm a guardian of the Underside to open this path.", "zones.lockHeart": "Calm all eight guardians to reach the Heart.",
+    "key.raft": "Raft", "key.rope": "Rope", "key.got.raft": "The loggers of the wood give you an old but sturdy raft. With it you can now go {to}.", "key.got.rope": "The miners give you a long, well-braided rope. With it you can now climb {to}.",
+    "key.need.raft": "You need a raft. The loggers {from} will give you one once you calm their guardian.", "key.need.rope": "You need a rope. The miners {from} will give you one once you calm their guardian.",
+    "pmap.aria": "Parchment map of the valley", "pmap.hint": "Tap a place on the parchment or pick one from the list.", "pmap.keys": "Key items: {list}.", "pmap.nokeys": "Key items: none yet.", "pmap.vado": "El Vado", "pmap.locked": "You can't go there yet.",
     "r.guard": "The guardian leaves you one of its cards", "grim.story": "Only Unísona gives it.", "end.unisona": "Unísona stays with you. From now on it can join you on any expedition, and its Star cards work for every creature.", "end.unisonaUp": "Unísona sings with you again and gives you another copy of one of its cards. Fuse them to raise its grade.",
     "log.strip": "{name} loses {st}.", "log.cdup": "{name}'s card will take {n} longer to be ready.",
     "ach.guard8": ["The Song almost whole", "Calm all eight guardians of the valley."],
@@ -1555,6 +1561,10 @@ const css = `
 .tcg-gem .tyi { width: 18px; height: 18px; vertical-align: middle; }
 .rumor { margin: 0 0 10px; font-style: italic; color: var(--muted); border-left: 3px solid var(--line); padding-left: 10px; }
 .hilos { margin: 6px 0 0; padding-left: 18px; font-family: Georgia, serif; font-size: 14px; line-height: 1.5; } .hilos li { margin: 4px 0; }
+.pmap-wrap { border: 3px solid var(--line, #3b1d4a); line-height: 0; margin: 4px 0 2px; background: #e9d8b4; }
+#pmap { width: 100%; height: auto; image-rendering: pixelated; display: block; cursor: pointer; }
+.pmap-note { margin: 2px 0 8px; }
+.key-ic { width: 32px; height: 32px; image-rendering: pixelated; vertical-align: middle; }
 .escritos { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; margin-top: 8px; }
 .esc { border: 2px solid var(--line); padding: 8px 10px; background: color-mix(in srgb, #e9d8b4 35%, var(--surface)); display: flex; flex-direction: column; gap: 4px; }
 .esc summary { cursor: pointer; } .esc p { margin: 6px 0 0; font-size: 14px; line-height: 1.5; font-family: Georgia, serif; }
@@ -1899,7 +1909,13 @@ function startExpedition() {
   X = { zone: null, offer: [], chosen: [], party: [], section: 0, nodes: [], loot: { xp: 0, coins: 0, cards: [] }, nextFoeBuff: 0, wins: 0 };
   show("zones");
 }
-const zoneOpen = (id) => { const u = ZONES[id].unlock; if (!u) return true; const ok = (z) => ((EV.P.cleared || {})[z] || 0) > 0; return ZONES[id].unlockAll ? u.every(ok) : [].concat(u).some(ok); };
+/* ---------- Key items: some zones need something you get from the story ---------- */
+// the raft comes from the loggers of the wood, the rope from the miners of the caves (given on their first calm guardian)
+const KEYS = { raft: { from: "forest", opens: "lake" }, rope: { from: "caves", opens: "heights" } };
+const KEY_OF = { lake: "raft", heights: "rope" };
+const hasKey = (k) => !!(((EV.P.keys || {})[k]) || ((EV.P.cleared || {})[KEYS[k].from] || 0) > 0);
+const keyLock = (id) => { const k = KEY_OF[id]; return k && !hasKey(k) ? tx("key.need." + k, { from: zt("from", null, KEYS[k].from) }) : null; };
+const zoneOpen = (id) => { if (KEY_OF[id] && !hasKey(KEY_OF[id])) return false; const u = ZONES[id].unlock; if (!u) return true; const ok = (z) => ((EV.P.cleared || {})[z] || 0) > 0; return ZONES[id].unlockAll ? u.every(ok) : [].concat(u).some(ok); };
 function pickZone(id, mode) {
   mode = mode || {};
   if (!ZONES[id] || !zoneOpen(id) || (mode.savia && ((EV.P.stars || {})[id] || 0) < 3)) { EV.sfx("deny"); return; }
@@ -2015,6 +2031,86 @@ function extraZonesHtml() {
   if (sav.length) h += `<div class="nodes zones">${sav.map((id) => `<button type="button" class="node zone savia" data-zone="${id}" data-savia="1"><span class="ic" aria-hidden="true">${tyIcon(ZONES[id].type)}</span><strong>${esc(zt("name", null, id))}</strong><small>${esc(tx("zones.lvl", { n: ZONES[id].min + 2 }))}</small><small class="ok">${starStr(sS[id] || 0)}</small></button>`).join("")}</div>`;
   return h;
 }
+/* ---------- The parchment map of the valley ---------- */
+// Dayside above the stream, the Underside below it; the Ford (home) sits on the stream. Coordinates in a 240 x 152 sheet.
+const PMAP = { heights: [120, 17], crater: [50, 44], aurora: [120, 42], forest: [190, 44], heart: [120, 68], vado: [120, 88], hollow: [52, 108], lake: [120, 114], caves: [188, 108], deep: [120, 138] };
+const PEDGES = [["vado", "aurora"], ["aurora", "crater"], ["aurora", "forest"], ["vado", "heart"], ["crater", "heights", "rope"], ["forest", "heights", "rope"], ["vado", "hollow"], ["vado", "lake", "raft"], ["vado", "caves"], ["lake", "deep"]];
+let pm = null; // { from, to, t0 } while the token walks
+function pmapHtml() {
+  const have = Object.keys(KEYS).filter(hasKey).map((k) => tx("key." + k));
+  return `<div class="pmap-wrap"><canvas id="pmap" width="480" height="304" role="img" aria-label="${esc(tx("pmap.aria"))}"></canvas></div><p class="muted pmap-note">${esc(tx("pmap.hint"))} ${esc(have.length ? tx("pmap.keys", { list: have.join(", ") }) : tx("pmap.nokeys"))}</p>`;
+}
+// the raft and the rope, drawn small (8x8 at scale s)
+function drawKeyIcon(g, k, cx, cy, have) {
+  const ink = "#241030", col = (a) => (have ? a : "#a8977a");
+  g.save(); g.imageSmoothingEnabled = false;
+  const r = (x, y, w, h, c) => { g.fillStyle = c; g.fillRect(Math.round(cx + x), Math.round(cy + y), w, h); };
+  if (k === "raft") { r(-6, -2, 12, 5, ink); for (let i = 0; i < 4; i++) r(-5 + i * 3, -1, 2, 3, col("#a07a55")); r(-1, -7, 1, 5, ink); r(0, -7, 4, 3, col("#fbf6ef")); }
+  else { g.strokeStyle = ink; g.lineWidth = 3; g.beginPath(); g.arc(cx, cy, 4.5, 0, Math.PI * 2); g.stroke(); g.strokeStyle = col("#d9b26a"); g.lineWidth = 1.5; g.beginPath(); g.arc(cx, cy, 4.5, 0, Math.PI * 2); g.stroke(); r(3, 3, 2, 4, ink); }
+  g.restore();
+}
+function pmapDraw(now) {
+  const cv = $("pmap"); if (!cv) return false;
+  const g = cv.getContext("2d"), P = EV.P;
+  g.setTransform(2, 0, 0, 2, 0, 0); g.imageSmoothingEnabled = false;
+  // parchment with darker, uneven edges
+  g.fillStyle = "#e9d8b4"; g.fillRect(0, 0, 240, 152);
+  g.fillStyle = "#d8c193"; for (let i = 0; i < 240; i += 2) { const a = 2 + ((i * 7) % 5), b = 2 + ((i * 11) % 4); g.fillRect(i, 0, 2, a); g.fillRect(i, 152 - b, 2, b); }
+  for (let j = 0; j < 152; j += 2) { const a = 2 + ((j * 5) % 4), b = 2 + ((j * 13) % 5); g.fillRect(0, j, a, 2); g.fillRect(240 - b, j, b, 2); }
+  g.fillStyle = "#c9b07e"; for (let i = 0; i < 70; i++) g.fillRect((i * 97) % 236 + 2, (i * 53) % 148 + 2, 1, 1);
+  // the stream between the two halves of the valley
+  g.strokeStyle = "#7cc8e3"; g.lineWidth = 3; g.beginPath(); g.moveTo(4, 92);
+  for (let x = 4; x <= 236; x += 4) g.lineTo(x, 89 + Math.sin(x / 14) * 3);
+  g.stroke(); g.fillStyle = "#a8834e"; g.fillRect(114, 84, 12, 9); // the ford's stepping stones
+  g.fillStyle = "#3b1d4a"; g.font = '600 6px "EvNum", "Pixelify Sans", monospace'; g.textAlign = "left"; g.textBaseline = "alphabetic";
+  // paths
+  const open = (id) => id === "vado" || zoneOpen(id);
+  for (const [a, b, key] of PEDGES) {
+    const [x1, y1] = PMAP[a], [x2, y2] = PMAP[b], on = open(a) && open(b);
+    g.strokeStyle = on ? "#6b4a3a" : "#bba57a"; g.lineWidth = 1; g.setLineDash([3, 2]);
+    g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke(); g.setLineDash([]);
+    // the raft waits on the stream by the ford; the rope hangs on the mountain paths
+    if (key === "raft") drawKeyIcon(g, key, 100, 98, hasKey(key));
+    else if (key) drawKeyIcon(g, key, (x1 + x2) / 2, (y1 + y2) / 2, hasKey(key));
+  }
+  // places
+  const cl = P.cleared || {}, st = P.stars || {};
+  g.textAlign = "center";
+  for (const id in PMAP) {
+    const [x, y] = PMAP[id];
+    if (id === "vado") { g.fillStyle = "#6b4a3a"; g.fillRect(x - 4, y - 9, 8, 5); g.fillStyle = "#d9542c"; g.fillRect(x - 5, y - 11, 10, 2); g.fillStyle = "#3b1d4a"; g.textAlign = "right"; g.fillText(tx("pmap.vado"), x - 8, y - 4); g.textAlign = "center"; continue; }
+    const z = ZONES[id], o = zoneOpen(id);
+    g.fillStyle = "#241030"; g.beginPath(); g.arc(x, y, 7.5, 0, Math.PI * 2); g.fill();
+    g.fillStyle = o ? z.sky[1] : "#cdb98c"; g.beginPath(); g.arc(x, y, 6, 0, Math.PI * 2); g.fill();
+    if (!o) { g.fillStyle = "#6b4a3a"; g.fillText("?", x, y + 2.5); }
+    else if (cl[id]) { // a gold stamp per star
+      const n = st[id] || 0; g.fillStyle = "#e2ae2e"; for (let i = 0; i < n; i++) g.fillRect(x - 5 + i * 4, y + 9, 3, 3);
+    }
+    g.fillStyle = o ? "#241030" : "#a8977a"; g.fillText(zt("name", null, id), x, y - 10);
+  }
+  // your creature as a little token, walking along the path you picked
+  const S = EV.S, at = P.mapAt && PMAP[P.mapAt] ? P.mapAt : "vado";
+  let [tx2, ty2] = PMAP[at], walking = false;
+  if (pm) { const k = Math.min(1, (now - pm.t0) / 700), [ax, ay] = PMAP[pm.from], [bx, by] = PMAP[pm.to]; tx2 = ax + (bx - ax) * k; ty2 = ay + (by - ay) * k - Math.abs(Math.sin(k * Math.PI * 4)) * 2; walking = k < 1; if (!walking) { const id = pm.to; pm = null; P.mapAt = id; EV.saveProfile(); pickZone(id); return false; } }
+  if (S && typeof EVS !== "undefined" && EVS.KINDS.includes(S.species)) {
+    try { const sp = EVS.sprite(S.species, 12, Math.max(0, Math.min(2, S.stage || 0)), walking ? Math.floor(now / 140) % 2 : 0, "happy"); g.drawImage(sp, Math.round(tx2 - sp.width / 2 + 9), Math.round(ty2 - sp.height + 4)); } catch (e) {}
+  }
+  return walking;
+}
+function pmapMount() { const loop = (now) => { if (pmapDraw(now)) requestAnimationFrame(loop); }; requestAnimationFrame(loop); }
+function pmapTap(e) {
+  if (pm) return;
+  const cv = e.target, r = cv.getBoundingClientRect();
+  const x = ((e.clientX - r.left) / r.width) * 240, y = ((e.clientY - r.top) / r.height) * 152;
+  let best = null, bd = 14;
+  for (const id in PMAP) { if (id === "vado") continue; const d = Math.hypot(PMAP[id][0] - x, PMAP[id][1] - y); if (d < bd) { bd = d; best = id; } }
+  if (!best) return;
+  if (!zoneOpen(best)) { EV.sfx("deny"); EV.toast(keyLock(best) || tx("pmap.locked")); return; }
+  EV.sfx("tap");
+  const at = EV.P.mapAt && PMAP[EV.P.mapAt] ? EV.P.mapAt : "vado";
+  if (at === best) { pickZone(best); return; }
+  pm = { from: at, to: best, t0: performance.now() }; pmapMount();
+}
 function zonesHtml() {
   const cl = EV.P.cleared || {};
   return `<div class="nodes zones">${Object.keys(ZONES).map((id) => {
@@ -2022,7 +2118,7 @@ function zonesHtml() {
     const done = cl[id] || 0;
     return `<button type="button" class="node zone" data-zone="${id}" ${open ? "" : "disabled"}><span class="ic" aria-hidden="true">${tyIcon(z.type)}</span>
       <strong>${esc(zt("name", null, id))}</strong><small>${esc(zt("sub", null, id))}</small>
-      <small>${open ? esc(tx("zones.lvl", { n: z.min })) : "🔒 " + esc(tx(z.unlockAll ? "zones.lockHeart" : Array.isArray(z.unlock) ? (z.unlock.includes("hollow") ? "zones.lockHigh" : "zones.lockEnv") : "zones.lock"))}</small>
+      <small>${open ? esc(tx("zones.lvl", { n: z.min })) : "🔒 " + esc(keyLock(id) || tx(z.unlockAll ? "zones.lockHeart" : Array.isArray(z.unlock) ? (z.unlock.includes("hollow") ? "zones.lockHigh" : "zones.lockEnv") : "zones.lock"))}</small>
       ${done ? `<small class="ok">✓ ${esc(tx("zones.done", { n: done }))} · ${starStr((EV.P.stars || {})[id] || 0)}<br>${esc(tx("zones.verse", { v: zt("verse", null, id) }))}</small>` : ""}</button>`;
   }).join("")}</div>`;
 }
@@ -2129,7 +2225,7 @@ function render() {
   let body = "";
   if (view === "zones") {
     const rumor = LORE ? LORE.loadingLine(EV.P, L()) : "";
-    body = `<div class="panel">${rumor ? `<p class="rumor">${esc(tx("rumor"))} ${esc(rumor)}</p>` : ""}${zonesHtml()}${extraZonesHtml()}<div class="bctl"><button class="btn ghost" type="button" data-x="cancel">${esc(tx("exp.cancel"))}</button></div></div>`;
+    body = `<div class="panel">${rumor ? `<p class="rumor">${esc(tx("rumor"))} ${esc(rumor)}</p>` : ""}${pmapHtml()}${zonesHtml()}${extraZonesHtml()}<div class="bctl"><button class="btn ghost" type="button" data-x="cancel">${esc(tx("exp.cancel"))}</button></div></div>`;
   } else if (view === "pick") {
     body = `<div class="panel"><p class="lead">${esc(zt("desc"))}</p>
       <h3>${esc(tx("exp.pick"))}</h3><p class="muted" style="margin:0">${esc(tx("exp.pickSub"))}</p>
@@ -2159,6 +2255,8 @@ function render() {
   el.innerHTML = head + body;
   if (view === "pick") el.querySelectorAll("canvas[data-mon]").forEach(paintMon);
   if (view === "battle") battleMount();
+  if (view === "zones") pmapMount();
+  el.querySelectorAll("canvas[data-key]").forEach((c) => drawKeyIcon(c.getContext("2d"), c.dataset.key, 8, 8, true));
 }
 // small pixel portrait of a creature on a 96x80 canvas with data-mon
 function paintMon(cv) {
@@ -3010,6 +3108,8 @@ function finish(res) {
     while (R.xp >= xpNeed(R.lvl)) { R.xp -= xpNeed(R.lvl); R.lvl++; for (const k of ["p", "s"]) if (SLOT_LVL[k] === R.lvl) unlocked.push(k); }
   }
   if (coins > 0) EV.addCoins(coins, true);
+  X.keyGot = null;
+  if (res === "win" && !X.deep && !X.echo && !((P.cleared || {})[X.zone])) for (const k in KEYS) if (KEYS[k].from === X.zone && !(P.keys || {})[k]) { P.keys = P.keys || {}; P.keys[k] = 1; X.keyGot = k; }
   if (res === "win" && !X.deep) { P.c.guard = (P.c.guard || 0) + 1; P.cleared = P.cleared || {}; if (!X.echo) P.cleared[X.zone] = (P.cleared[X.zone] || 0) + 1; }
   X.deepRew = X.deep && res === "win" ? deepWin(X.deep, X.stars || 1) : null;
   // the Guardian's Echo: Stardust and Chispas instead of zone stars
@@ -3080,6 +3180,7 @@ function endHtml() {
     for (const c of r.chests) html += `<p class="evt-out">🎁 ${esc(tx("deep.chest", { n: c.need, what: c.what }))}${c.esct ? "<br>📜 " + esc(tx("deep.esc", { t: c.esct })) : ""}</p>`;
   }
   if (X.unisona) html += `<p class="evt-out">✦ ${esc(tx(X.unisona === "first" ? "end.unisona" : "end.unisonaUp"))}</p>`;
+  if (X.keyGot) html += `<p class="evt-out key-got"><canvas class="key-ic" width="16" height="16" data-key="${X.keyGot}" aria-hidden="true"></canvas> <b>${esc(tx("key." + X.keyGot))}</b> · ${esc(tx("key.got." + X.keyGot, { to: zt("to", null, KEYS[X.keyGot].opens) }))}</p>`;
   if (X.echoRew) html += `<p class="evt-out">∴ ${esc(tx("end.echo", X.echoRew))}</p>`;
   else if (X.echo && EV.P.echo) html += `<p class="evt-out">${esc(tx("end.echoLose", { n: Math.max(0, ECHO_TRIES - EV.P.echo.tries) }))}</p>`;
   if (X.starInfo) html += `<p class="evt-out end-stars"><b>${esc(tx("end.stars", { s: starStr(X.starInfo.n) }))}</b>${X.starInfo.best ? " · " + esc(tx("end.starsNew")) : ""}${X.starInfo.bonus ? "<br>♪ " + esc(tx("end.star3")) : ""}<br><small>${esc(tx("end.starsWhy"))}</small></p>`;
@@ -3101,6 +3202,7 @@ function goHome() {
 
 /* ---------- Event wiring ---------- */
 function onExpClick(e) {
+  if (e.target.id === "pmap") { pmapTap(e); return; }
   const t = e.target.closest("button"); if (!t || !X) return;
   const d = t.dataset;
   if (d.zone) { EV.sfx("tap"); pickZone(d.zone, { savia: !!d.savia }); return; }
@@ -3355,5 +3457,5 @@ function pickUsable(n, minGrade) {
   return ids.map((id) => ({ id, g: Math.max(minGrade, rollGrade(minGrade)) }));
 }
 function takeCard(id, g) { rpgState(); const c = giveCard(id, g); EV.save(); return c; }
-EV.RPG = Object.defineProperties(Object.assign(api, { renderCards, startExpedition, cardHtml, cardName, pickUsable, takeCard, starStr, paintMon, monName, typeChip, rpgState, MON_DESC, deepState, deepTotal, deepZone, deepOpen, deepNo, deepRule, deepWin, DEEP_CHESTS }), { X: { get: () => X }, battle: { get: () => battle } });
+EV.RPG = Object.defineProperties(Object.assign(api, { renderCards, startExpedition, finish, cardHtml, cardName, pickUsable, takeCard, starStr, paintMon, monName, typeChip, rpgState, MON_DESC, deepState, deepTotal, deepZone, deepOpen, deepNo, deepRule, deepWin, DEEP_CHESTS }), { X: { get: () => X }, battle: { get: () => battle } });
 })(typeof window !== "undefined" ? window : null);
