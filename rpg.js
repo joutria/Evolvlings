@@ -329,11 +329,12 @@ function makeUnit(o) {
   const careF = (k) => (o.care ? 0.75 + 0.5 * (o.care[k] || 0) / 100 : 1);
   const stageF = o.stage === 2 ? (o.form === "bright" ? 1.15 : 1.1) : 1;
   const hollowF = o.hollow ? 0.8 : 1;
+  const bondF = 1 + 0.015 * (o.bond || 0); // Refuge companions: +1.5 % per Bond level
   const base = {
-    hp: m.st.hp * 3 * sc * careF("health") * stageF * hollowF,
-    str: m.st.str * sc * careF("full") * stageF * hollowF,
-    def: m.st.def * sc * careF("clean") * stageF * hollowF,
-    spd: m.st.spd * sc * careF("energy") * stageF,
+    hp: m.st.hp * 3 * sc * careF("health") * stageF * hollowF * bondF,
+    str: m.st.str * sc * careF("full") * stageF * hollowF * bondF,
+    def: m.st.def * sc * careF("clean") * stageF * hollowF * bondF,
+    spd: m.st.spd * sc * careF("energy") * stageF * bondF,
     cr: m.st.cr * careF("fun"),
   };
   const types = m.types.slice();
@@ -344,7 +345,7 @@ function makeUnit(o) {
     uid: Math.random().toString(36).slice(2, 9), kind: o.kind, name: o.name, side: o.side, own: !!o.own, wild: !!o.wild, hollow: !!o.hollow, boss: !!o.boss,
     lvl: o.lvl, types, stage: o.stage == null ? 1 : o.stage, form: o.form || "bright",
     base, maxHp, hp: Math.max(1, Math.round(maxHp * (o.hpPct == null ? 1 : o.hpPct))),
-    crit: Math.min(40, base.cr / 4) + (pm.crit || 0) + (o.lowFun && pm.lowFun ? pm.lowFun : 0),
+    crit: Math.min(40, base.cr / 4) + (o.bond || 0) + (pm.crit || 0) + (o.lowFun && pm.lowFun ? pm.lowFun : 0),
     dodge: Math.max(0, base.spd / 20 + (pm.dodge || 0)),
     mods: pm, cards: o.cards || {}, cd: 0, st: {}, shield: 0, shieldT: 0, hitOnce: false, skip: 0, sUsed: false, sCount: 0, hitsTaken: 0,
   };
@@ -812,7 +813,7 @@ const TX = {
     "exp.need.energy": "Le falta energía (necesita 30).", "exp.cost": "Cuesta 25 de energía",
     "exp.title": "Prado Aurora", "exp.zoneSub": "Ladera del Día · zona de Luz",
     "exp.zoneDesc": "Hierba dorada y faroles que no se apagan nunca. Últimamente algunos parpadean, y por las raíces sube una savia oscura. Aquí la Luz pega un 10 % más fuerte y la Sombra un 10 % menos.",
-    "exp.pick": "Elige dos compañeros salvajes para el viaje", "exp.pickSub": "Te acompañan solo en esta expedición. Mira sus tipos: la Luz pierde contra el Fuego, y el Fuego contra el Agua.",
+    "exp.pick": "Elige dos compañeros para el viaje", "exp.pickSub": "Los salvajes te acompañan solo en esta expedición; los del Refugio suben de nivel y de Vínculo contigo. Mira sus tipos: la Luz pierde contra el Fuego, y el Fuego contra el Agua.",
     "load.title": "Tu mazo para el viaje", "load.sub": "Llevas como máximo 3 cartas, una por hueco. Elige cuál va en cada uno: el mismo efecto cambia según el hueco. Durante la expedición no se puede cambiar.", "load.lock": "Se desbloquea en el nivel {n}",
     "exp.go": "Partir", "exp.cancel": "Volver a casa", "exp.party": "Tu equipo",
     "exp.section": "Tramo {n} de {m}", "exp.choose": "¿Por dónde sigues?", "exp.bossNext": "Al final del camino te espera el guardián. El equipo toma aire antes de acercarse (+30 % de vida).",
@@ -882,7 +883,7 @@ const TX = {
     "exp.need.energy": "Not enough energy (needs 30).", "exp.cost": "Costs 25 energy",
     "exp.title": "Aurora Meadow", "exp.zoneSub": "Dayside slope · Light zone",
     "exp.zoneDesc": "Golden grass and lanterns that never go out. Lately a few of them flicker, and a dark sap is creeping up through the roots. Here Light hits 10% harder and Shadow 10% softer.",
-    "exp.pick": "Pick two wild companions for the trip", "exp.pickSub": "They only travel with you on this expedition. Check their types: Light loses to Fire, and Fire loses to Water.",
+    "exp.pick": "Pick two companions for the trip", "exp.pickSub": "Wild ones only travel with you on this expedition; Refuge companions level up and grow their Bond with you. Check their types: Light loses to Fire, and Fire loses to Water.",
     "load.title": "Your deck for the trip", "load.sub": "You carry up to 3 cards, one per slot. Choose which goes where: the same card does something different in each slot. It can't be changed during the expedition.", "load.lock": "Unlocks at level {n}",
     "exp.go": "Set out", "exp.cancel": "Back home", "exp.party": "Your team",
     "exp.section": "Leg {n} of {m}", "exp.choose": "Which way now?", "exp.bossNext": "The guardian waits at the end of the path. The team catches its breath before going closer (+30% health).",
@@ -1498,6 +1499,7 @@ const css = `
 .rstats { font: 500 12px var(--font-mono); color: var(--muted); margin: 0; }
 .mstats { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 10px; margin-top: 6px; width: 100%; font-size: 12px; text-align: left; }
 @media (max-width: 520px) { .mstats { grid-template-columns: 1fr; } }
+.mref { display: block; margin-top: 4px; font: 700 11px var(--font-mono); color: var(--rose, #c25e9a); }
 .mstats span { display: flex; justify-content: space-between; gap: 4px; } .mstats i { font-style: normal; color: var(--muted); } .mstats b { font-variant-numeric: tabular-nums; white-space: nowrap; }
 .sheet { display: flex; flex-direction: column; gap: 6px; }
 .fstat { display: grid; grid-template-columns: 76px minmax(0, 1fr) 44px 112px; gap: 8px; align-items: center; font-size: 14px; }
@@ -1834,7 +1836,8 @@ function pickZone(id) {
   if (!ZONES[id] || !zoneOpen(id)) { EV.sfx("deny"); return; }
   const S = EV.S, z = ZONES[id];
   X.zone = id;
-  X.offer = pickN(z.allies.filter((k) => k !== S.species), 3);
+  const home = EV.EGGS ? EV.EGGS.offer(S.species) : [];
+  X.offer = home.concat(pickN(z.allies.filter((k) => k !== S.species && !home.includes(k)), 3));
   // Unísona: brought by Tila and Nim to the Heart; after the Heart is calm it can join any trip
   if (id === "heart" || (EV.P.flags || {}).unisona) X.offer.unshift("unisona");
   X.chosen = [];
@@ -1855,7 +1858,7 @@ function setOut() {
   const S = EV.S;
   S.stats.energy = Math.max(0, S.stats.energy - 25);
   const R = rpgState();
-  X.party = [{ own: true, kind: S.species, hp: 1 }].concat(X.chosen.map((k) => ({ own: false, kind: k, hp: 1, lvl: R.lvl })));
+  X.party = [{ own: true, kind: S.species, hp: 1 }].concat(X.chosen.map((k) => { const r = refOf(k); return { own: false, kind: k, hp: 1, lvl: r ? r.lvl : R.lvl, bond: r ? r.bond : 0, roster: !!r }; }));
   EV.addLog(tx("log.expGo", { name: S.name, to: zt("to") }));
   EV.save();
   nextSection();
@@ -1872,15 +1875,19 @@ function nextSection() {
   X.nodes = n.slice(0, 3);
   show("map");
 }
+// a creature from your Refuge: { lvl, bond, grade } or null
+const refOf = (k) => (EV.EGGS ? EV.EGGS.unitOf(k) : null);
 function partyUnits() {
   return X.party.map((m) => {
     if (m.own) return makeUnit(ownUnitOpts(m.hp));
     // Unísona uses your best copy of each of its cards, so it grows as you fuse them
-    const gr = (id) => (m.kind === "unisona" ? Math.max(0, ...EV.P.cards.filter((c) => c.id === id).map((c) => c.g)) : 0);
+    // Refuge companions' cards grow with Bond
+    const rg = m.roster && refOf(m.kind) ? refOf(m.kind).grade : 0;
+    const gr = (id) => (m.kind === "unisona" ? Math.max(0, ...EV.P.cards.filter((c) => c.id === id).map((c) => c.g)) : rg);
     const mc = MONS[m.kind].cards;
     const cards = { a: scaled(mc[0], gr(mc[0])), p: scaled(mc[1], gr(mc[1])) };
     if (m.lvl >= SLOT_LVL.s || m.kind === "unisona") cards.s = scaled(mc[2], gr(mc[2]));
-    return makeUnit({ kind: m.kind, lvl: m.lvl, side: "ally", name: monName(m.kind), wild: true, cards, hpPct: m.hp, stage: 1, form: "bright" });
+    return makeUnit({ kind: m.kind, lvl: m.lvl, side: "ally", name: monName(m.kind), wild: true, cards, hpPct: m.hp, stage: 1, form: "bright", bond: m.bond || 0 });
   });
 }
 function foeUnits(boss) {
@@ -1906,7 +1913,8 @@ function foeUnits(boss) {
 /* ---------- Views ---------- */
 function show(v) { view = v; render(); const el = $("scrExp"); if (el && !el.hidden) el.scrollIntoView({ behavior: "smooth", block: "start" }); }
 function pickStats(k) {
-  const u = makeUnit({ kind: k, lvl: rpgState().lvl, side: "ally", wild: true, stage: 1 });
+  const r = refOf(k);
+  const u = makeUnit({ kind: k, lvl: r ? r.lvl : rpgState().lvl, side: "ally", wild: true, stage: 1, bond: r ? r.bond : 0 });
   const v = { hp: u.maxHp, str: Math.round(u.base.str), def: Math.round(u.base.def), spd: Math.round(u.base.spd), cr: Math.round(u.crit) + " %" };
   return `<span class="mstats">${Object.keys(v).map((k) => `<span><i>${esc(tx("sh." + k))}</i><b>${v[k]}</b></span>`).join("")}</span>`;
 }
@@ -1933,7 +1941,7 @@ function render() {
   } else if (view === "pick") {
     body = `<div class="panel"><p class="lead">${esc(zt("desc"))}</p>
       <h3>${esc(tx("exp.pick"))}</h3><p class="muted" style="margin:0">${esc(tx("exp.pickSub"))}</p>
-      <div class="mons">${X.offer.map((k) => `<button type="button" class="mon" data-pick="${k}" aria-pressed="${X.chosen.includes(k)}"><canvas width="96" height="80" data-mon="${k}"></canvas><strong>${esc(monName(k))}</strong>${typeChip(MONS[k].types[0])}<small>${esc(MON_DESC[L()][k])}</small>${pickStats(k)}</button>`).join("")}</div>
+      <div class="mons">${X.offer.map((k) => `<button type="button" class="mon" data-pick="${k}" aria-pressed="${X.chosen.includes(k)}"><canvas width="96" height="80" data-mon="${k}"></canvas><strong>${esc(monName(k))}</strong>${typeChip(MONS[k].types[0])}<small>${esc(MON_DESC[L()][k])}</small>${refOf(k) ? `<span class="mref">${esc(EV.EGGS.badge(k))}</span>` : ""}${pickStats(k)}</button>`).join("")}</div>
       </div>${loadoutHtml()}<div class="panel">
       <div class="bctl"><button class="btn" type="button" data-x="go" ${X.chosen.length === 2 ? "" : "disabled"}>${esc(tx("exp.go"))} · ${esc(tx("exp.cost"))}</button><button class="btn ghost" type="button" data-x="cancel">${esc(tx("exp.cancel"))}</button></div></div>`;
   } else if (view === "map") {
@@ -1957,14 +1965,16 @@ function render() {
     body = endHtml();
   }
   el.innerHTML = head + body;
-  if (view === "pick") el.querySelectorAll("canvas[data-mon]").forEach((cv) => {
-    const out = EV.setupCanvas(cv, 96, 80);
-    if (typeof PX === "undefined") { out.translate(48, 44); out.scale(0.62, 0.62); drawMon(out, cv.dataset.mon, { t: 0.5, stage: 1, form: "bright", hp: 1 }); return; }
-    const L = PX.layer(32, 27), c = L.g; c.scale(1 / 3, 1 / 3); c.translate(48, 44); c.scale(0.62, 0.62);
-    drawMon(c, cv.dataset.mon, { t: 0.5, stage: 1, form: "bright", hp: 1 });
-    c.setTransform(1, 0, 0, 1, 0, 0); PX.quantize(c, 32, 27, false); PX.blit(out, L, 96, 81);
-  });
+  if (view === "pick") el.querySelectorAll("canvas[data-mon]").forEach(paintMon);
   if (view === "battle") battleMount();
+}
+// small pixel portrait of a creature on a 96x80 canvas with data-mon
+function paintMon(cv) {
+  const out = EV.setupCanvas(cv, 96, 80);
+  if (typeof PX === "undefined") { out.translate(48, 44); out.scale(0.62, 0.62); drawMon(out, cv.dataset.mon, { t: 0.5, stage: 1, form: "bright", hp: 1 }); return; }
+  const L = PX.layer(32, 27), c = L.g; c.scale(1 / 3, 1 / 3); c.translate(48, 44); c.scale(0.62, 0.62);
+  drawMon(c, cv.dataset.mon, { t: 0.5, stage: 1, form: "bright", hp: 1 });
+  c.setTransform(1, 0, 0, 1, 0, 0); PX.quantize(c, 32, 27, false); PX.blit(out, L, 96, 81);
 }
 // pre-trip loadout: up to 3 cards, one per slot, chosen before setting out
 function loadoutHtml() {
@@ -2650,7 +2660,8 @@ function finish(res) {
   // a card for every two levels gained
   let lvlPick = null;
   if (R) for (let lv = before + 1; lv <= R.lvl; lv++) if (lv % 2 === 0) { lvlPick = offerCards(3, 0); break; }
-  X.end = { res, xp, coins, before, after: R ? R.lvl : 1, unlocked, lvlPick, cards: l.cards.slice() };
+  const bondNews = EV.EGGS ? EV.EGGS.afterTrip(res, xp, X.party, R ? R.lvl : 1) : [];
+  X.end = { res, xp, coins, before, after: R ? R.lvl : 1, unlocked, lvlPick, cards: l.cards.slice(), bondNews };
   EV.save(); EV.checkAch();
   show("end");
 }
@@ -2673,6 +2684,7 @@ function endHtml() {
   if (X.starInfo) html += `<p class="evt-out end-stars"><b>${esc(tx("end.stars", { s: starStr(X.starInfo.n) }))}</b>${X.starInfo.best ? " · " + esc(tx("end.starsNew")) : ""}${X.starInfo.bonus ? "<br>♪ " + esc(tx("end.star3")) : ""}<br><small>${esc(tx("end.starsWhy"))}</small></p>`;
   if (e.after > e.before) html += `<p class="evt-out">${esc(tx("end.lvl", { name: nm, n: e.after }))}</p>`;
   for (const k of e.unlocked) html += `<p class="evt-out">${esc(tx("end.slot", { slot: tx("slot." + k) }))}</p>`;
+  for (const line of e.bondNews || []) html += `<p class="evt-out">♥ ${esc(line)}</p>`;
   if (e.cards.length) html += `<div class="rcards">${e.cards.map((c) => cardHtml(c.id, c.g)).join("")}</div>`;
   if (e.lvlPick) {
     html += `<h3>${esc(tx("end.lvlPick"))}</h3><div class="rcards">${e.lvlPick.map((o, i) => cardHtml(o.id, o.g, { foot: `<div class="rc-btns"><button class="btn" type="button" data-lvlpick="${i}">${esc(tx("r.pick"))}</button></div>` })).join("")}</div>`;
@@ -2933,5 +2945,5 @@ function pickUsable(n, minGrade) {
   return ids.map((id) => ({ id, g: Math.max(minGrade, rollGrade(minGrade)) }));
 }
 function takeCard(id, g) { rpgState(); const c = giveCard(id, g); EV.save(); return c; }
-EV.RPG = Object.defineProperties(Object.assign(api, { renderCards, startExpedition, cardHtml, cardName, pickUsable, takeCard, starStr }), { X: { get: () => X }, battle: { get: () => battle } });
+EV.RPG = Object.defineProperties(Object.assign(api, { renderCards, startExpedition, cardHtml, cardName, pickUsable, takeCard, starStr, paintMon, monName, typeChip, rpgState, MON_DESC }), { X: { get: () => X }, battle: { get: () => battle } });
 })(typeof window !== "undefined" ? window : null);

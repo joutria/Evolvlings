@@ -201,6 +201,7 @@ function sprite(kind, n, st = 0, sq = 0, emo = "normal", dull = false) {
 }
 
 /* ================= Eggs ================= */
+// kind: a species (lumo, pebb, fizz) or any RAMP name for Refuge eggs
 const EGG = { lumo: "gold", pebb: "stone", fizz: "sky" };
 function egg(kind, n, crack = 0) {
   const lvl = crack > 0.65 ? 2 : crack > 0.3 ? 1 : 0;
@@ -208,8 +209,8 @@ function egg(kind, n, crack = 0) {
   if (CACHE.has(key)) return CACHE.get(key);
   const W = Math.round(n * 0.8) + 2, H = n + 2, cx = W / 2;
   const parts = [
-    { cx, cy: H * 0.56, rx: n * 0.38, ry: n * 0.42, ramp: RAMP[EGG[kind]], group: "e", z: 0 },
-    { cx, cy: H * 0.38, rx: n * 0.3, ry: n * 0.32, ramp: RAMP[EGG[kind]], group: "e", z: 0 },
+    { cx, cy: H * 0.56, rx: n * 0.38, ry: n * 0.42, ramp: RAMP[EGG[kind] || kind] || RAMP.stone, group: "e", z: 0 },
+    { cx, cy: H * 0.38, rx: n * 0.3, ry: n * 0.32, ramp: RAMP[EGG[kind] || kind] || RAMP.stone, group: "e", z: 0 },
   ];
   const c = raster(W, H, parts, (out, W, H, id) => {
     const inside = (x, y) => { x = Math.round(x); y = Math.round(y); return id[y * W + x] >= 0 && out[y * W + x] !== P.ink; };
