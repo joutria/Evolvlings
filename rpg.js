@@ -807,7 +807,7 @@ const esc = EV.escapeHtml;
 /* ---------- Text ---------- */
 const TX = {
   es: {
-    "nav.cards": "Cartas", "act.exp": "🗺️ Expedición",
+    "nav.cards": "Cartas", "nav.teams": "Equipos", "act.exp": "🗺️ Expedición",
     "exp.need.stage": "Tu criatura podrá salir de expedición cuando sea joven.",
     "exp.need.sleep": "Está dormida. Despiértala para salir.", "exp.need.sick": "Está pachucha. Cúrala antes de salir.",
     "exp.need.energy": "Le falta energía (necesita 30).", "exp.cost": "Cuesta 25 de energía",
@@ -815,6 +815,7 @@ const TX = {
     "exp.zoneDesc": "Hierba dorada y faroles que no se apagan nunca. Últimamente algunos parpadean, y por las raíces sube una savia oscura. Aquí la Luz pega un 10 % más fuerte y la Sombra un 10 % menos.",
     "exp.pick": "Elige dos compañeros para el viaje", "exp.pickSub": "Los salvajes te acompañan solo en esta expedición; los del Refugio suben de nivel y de Vínculo contigo. Mira sus tipos: la Luz pierde contra el Fuego, y el Fuego contra el Agua.",
     "cload.title": "Cartas de {name}", "cload.sub": "{name} vive en tu Refugio, así que puedes cambiarle las cartas. Usa las de su círculo ({types}) y las suyas propias. Un hueco vacío lleva su carta de siempre.", "cload.def": "Su carta de siempre", "cload.wild": "Los acompañantes que aún no tienes llevan sus cartas de siempre. Abre su huevo en la incubadora para poder equiparlos.",
+    "load.change": "Cambiar", "load.close": "Cerrar", "load.pickTitle": "Elegir carta: {s}", "load.equipped": "Equipada", "load.inSlot": "Ahora en {s}", "load.emptyFx": "Sin carta en este hueco.", "team.title": "Equipos", "team.sub": "Tu criatura y dos acompañantes del Refugio, con sus cartas. Guarda hasta 5 sets y cárgalos aquí o antes de una expedición.", "team.now": "Equipo actual", "team.comps": "Acompañantes", "team.noRefuge": "Aún no tienes criaturas en el Refugio.", "team.sets": "Sets guardados", "team.setN": "Set {n}", "team.save": "Guardar aquí", "team.overwrite": "Sobrescribir", "team.load": "Cargar", "team.rename": "Renombrar", "team.del": "Borrar", "team.ok": "Listo", "team.emptySet": "Vacío", "team.alone": "sin acompañantes", "team.setSum": "{comp} · {n} cartas", "team.saved": "Set guardado: {n}", "team.loaded": "Set cargado: {n}.", "team.missMon": "No están: {list}.", "team.missCards": "Faltan {n} cartas; esos huecos llevan su carta de siempre o quedan vacíos.",
     "load.title": "Tu mazo para el viaje", "load.sub": "Llevas como máximo 3 cartas, una por hueco. Elige cuál va en cada uno: el mismo efecto cambia según el hueco. Durante la expedición no se puede cambiar.", "load.lock": "Se desbloquea en el nivel {n}",
     "exp.go": "Partir", "exp.cancel": "Volver a casa", "exp.party": "Tu equipo",
     "exp.section": "Tramo {n} de {m}", "exp.choose": "¿Por dónde sigues?", "exp.bossNext": "Al final del camino te espera el guardián. El equipo toma aire antes de acercarse (+30 % de vida).",
@@ -895,7 +896,7 @@ const TX = {
     "ach.guard6": ["El Envés en calma", "Calma a los tres guardianes del Envés."],
   },
   en: {
-    "nav.cards": "Cards", "act.exp": "🗺️ Expedition",
+    "nav.cards": "Cards", "nav.teams": "Teams", "act.exp": "🗺️ Expedition",
     "exp.need.stage": "Your creature can go on expeditions once it's a kid.",
     "exp.need.sleep": "It's asleep. Wake it up to set out.", "exp.need.sick": "It's unwell. Heal it before setting out.",
     "exp.need.energy": "Not enough energy (needs 30).", "exp.cost": "Costs 25 energy",
@@ -903,6 +904,7 @@ const TX = {
     "exp.zoneDesc": "Golden grass and lanterns that never go out. Lately a few of them flicker, and a dark sap is creeping up through the roots. Here Light hits 10% harder and Shadow 10% softer.",
     "exp.pick": "Pick two companions for the trip", "exp.pickSub": "Wild ones only travel with you on this expedition; Refuge companions level up and grow their Bond with you. Check their types: Light loses to Fire, and Fire loses to Water.",
     "cload.title": "{name}'s cards", "cload.sub": "{name} lives in your Refuge, so you can change its cards. It uses cards of its circle ({types}) and its own. An empty slot carries its usual card.", "cload.def": "Its usual card", "cload.wild": "Companions you don't own yet carry their usual cards. Hatch their egg in the incubator to equip them.",
+    "load.change": "Change", "load.close": "Close", "load.pickTitle": "Choose a card: {s}", "load.equipped": "Equipped", "load.inSlot": "Now in {s}", "load.emptyFx": "No card in this slot.", "team.title": "Teams", "team.sub": "Your creature and two Refuge companions, with their cards. Save up to 5 sets and load them here or before an expedition.", "team.now": "Current team", "team.comps": "Companions", "team.noRefuge": "No creatures in your Refuge yet.", "team.sets": "Saved sets", "team.setN": "Set {n}", "team.save": "Save here", "team.overwrite": "Overwrite", "team.load": "Load", "team.rename": "Rename", "team.del": "Delete", "team.ok": "Done", "team.emptySet": "Empty", "team.alone": "no companions", "team.setSum": "{comp} · {n} cards", "team.saved": "Set saved: {n}", "team.loaded": "Set loaded: {n}.", "team.missMon": "Not here: {list}.", "team.missCards": "{n} cards are missing; those slots carry the usual card or stay empty.",
     "load.title": "Your deck for the trip", "load.sub": "You carry up to 3 cards, one per slot. Choose which goes where: the same card does something different in each slot. It can't be changed during the expedition.", "load.lock": "Unlocks at level {n}",
     "exp.go": "Set out", "exp.cancel": "Back home", "exp.party": "Your team",
     "exp.section": "Leg {n} of {m}", "exp.choose": "Which way now?", "exp.bossNext": "The guardian waits at the end of the path. The team catches its breath before going closer (+30% health).",
@@ -1354,6 +1356,15 @@ function paintCardArt(root) {
     c.globalAlpha = 0.8; c.fillRect(0, 60, 120, 12); c.globalAlpha = 1;
     c.fillStyle = "#ffffff"; for (const [x, y] of [[12, 9], [104, 15], [84, 6], [26, 27]]) c.fillRect(x, y, 3, 3);
     const cid = cv.dataset.card;
+    // lore-scene art (scenes.js): the 4:3 scene cropped to the 5:3 box; unknown cards show it darkened
+    const scn = cid && typeof EVSCENE !== "undefined" ? EVSCENE.art(cid) : null;
+    if (scn) {
+      out.setTransform(out.getTransform().a, 0, 0, out.getTransform().d, 0, 0);
+      out.imageSmoothingEnabled = false;
+      const sh = Math.round(scn.width * 72 / 120); out.drawImage(scn, 0, Math.round((scn.height - sh) / 2), scn.width, sh, 0, 0, 120, 72);
+      if (cv.dataset.sil) { out.fillStyle = "rgba(29,22,38,.84)"; out.fillRect(0, 0, 120, 72); }
+      return;
+    }
     if (hasPX && HAS_EVS && cid && EVS.CARD[cid]) {
       // pixel art: the creature that carries the card on the left, the skill's own art on the right
       c.setTransform(1, 0, 0, 1, 0, 0); PX.quantize(c, 40, 24, false);
@@ -1376,7 +1387,18 @@ function paintCardArt(root) {
     if (hasPX) { c.setTransform(1, 0, 0, 1, 0, 0); PX.quantize(c, 40, 24, false); PX.blit(out, Lr, 120, 72); }
   });
 }
-new MutationObserver(() => paintCardArt()).observe(document.body, { childList: true, subtree: true });
+// small 64x48 thumbnails of a card's scene (loadout rows, pickers, collection grid)
+function paintThumbs(root) {
+  (root || document).querySelectorAll("canvas.rc-thumb:not([data-done])").forEach((cv) => {
+    cv.dataset.done = "1";
+    const g = cv.getContext("2d"), id = cv.dataset.thumb; g.imageSmoothingEnabled = false;
+    const scn = typeof EVSCENE !== "undefined" ? EVSCENE.art(id) : null;
+    if (scn) g.drawImage(scn, 0, 0, 64, 48);
+    else if (HAS_EVS && EVS.CARD[id]) { g.fillStyle = TCOL[CARDS[id].type] || "#888"; g.fillRect(0, 0, 64, 48); g.drawImage(EVS.cardArt(id), 16, 8, 32, 32); }
+    if (cv.dataset.sil) { g.fillStyle = "rgba(29,22,38,.84)"; g.fillRect(0, 0, 64, 48); }
+  });
+}
+new MutationObserver(() => { paintCardArt(); paintThumbs(); }).observe(document.body, { childList: true, subtree: true });
 
 /* ---------- Saved data ---------- */
 function rpgState() {
@@ -1616,6 +1638,7 @@ EV.ACH.push(["exp1", 15, (p) => (p.c.expWins || 0) >= 1], ["guard1", 40, (p) => 
 for (const lg of ["es", "en"]) {
   for (const id of ["exp1", "guard1", "guard3", "guard6", "guard8", "cards10", "fuse1", "grimSol", "grimSky", "grimLake", "grimFrost", "grimAll", "dust1", "heart1"]) EV.STR[lg].ach[id] = TX[lg]["ach." + id];
   EV.STR[lg]["nav.cards"] = TX[lg]["nav.cards"];
+  EV.STR[lg]["nav.teams"] = TX[lg]["nav.teams"];
 }
 EV.applyStatic();
 
@@ -1925,7 +1948,8 @@ function pickZone(id, mode) {
   X.offer = home.concat(pickN(z.allies.filter((k) => k !== S.species && !home.includes(k)), 3));
   // Unísona: brought by Tila and Nim to the Heart; after the Heart is calm it can join any trip
   if (id === "heart" || (EV.P.flags || {}).unisona) X.offer.unshift("unisona");
-  X.chosen = [];
+  // your saved team comes along when its companions are on offer
+  X.chosen = teamState().comp.filter((k) => X.offer.includes(k)).slice(0, 2);
   show("pick");
 }
 /* Savia Mode (a harder version of a 3-star zone) and the weekly Guardian's Echo */
@@ -2228,7 +2252,7 @@ function render() {
     body = `<div class="panel">${rumor ? `<p class="rumor">${esc(tx("rumor"))} ${esc(rumor)}</p>` : ""}${pmapHtml()}${zonesHtml()}${extraZonesHtml()}<div class="bctl"><button class="btn ghost" type="button" data-x="cancel">${esc(tx("exp.cancel"))}</button></div></div>`;
   } else if (view === "pick") {
     body = `<div class="panel"><p class="lead">${esc(zt("desc"))}</p>
-      <h3>${esc(tx("exp.pick"))}</h3><p class="muted" style="margin:0">${esc(tx("exp.pickSub"))}</p>
+      ${setBarHtml()}<h3>${esc(tx("exp.pick"))}</h3><p class="muted" style="margin:0">${esc(tx("exp.pickSub"))}</p>
       <div class="mons">${X.offer.map((k) => `<button type="button" class="mon" data-pick="${k}" aria-pressed="${X.chosen.includes(k)}"><canvas width="96" height="80" data-mon="${k}"></canvas><strong>${esc(monName(k))}</strong>${typeChip(MONS[k].types[0])}<small>${esc(MON_DESC[L()][k])}</small>${refOf(k) ? `<span class="mref">${esc(EV.EGGS.badge(k))}</span>` : ""}${pickStats(k)}</button>`).join("")}</div>
       </div>${loadoutHtml()}${X.chosen.filter((k) => refOf(k)).map(compLoadHtml).join("")}${X.chosen.some((k) => !refOf(k) && k !== "unisona") ? `<p class="muted cload-wild">${esc(tx("cload.wild"))}</p>` : ""}<div class="panel">
       <div class="bctl"><button class="btn" type="button" data-x="go" ${X.chosen.length === 2 ? "" : "disabled"}>${esc(tx("exp.go"))} · ${esc(tx("exp.cost"))}</button><button class="btn ghost" type="button" data-x="cancel">${esc(tx("exp.cancel"))}</button></div></div>`;
@@ -2267,27 +2291,31 @@ function paintMon(cv) {
   drawMon(c, cv.dataset.mon, { t: 0.5, stage: 1, form: "bright", hp: 1 });
   c.setTransform(1, 0, 0, 1, 0, 0); PX.quantize(c, 32, 27, false); PX.blit(out, L, 96, 81);
 }
-// pre-trip loadout: up to 3 cards, one per slot, chosen before setting out
+// pre-trip loadout: up to 3 cards, one per slot. Each slot is a row: thumbnail, name and effect, and a Change button
+const thumbHtml = (id, g, sil) => `<canvas class="rc-thumb" width="64" height="48" data-thumb="${id}"${sil ? ' data-sil="1"' : ""} style="--g:${g == null ? "#9d93ad" : GRADES[g].col}"></canvas>`;
+function cardRowInner(id, g, slot, tag) {
+  const C = CARDS[id];
+  return `${thumbHtml(id, g)}<div class="lr-txt"><span class="lr-top"><span class="lr-slot">${esc(tx("slot." + slot))}</span>${tag ? `<span class="lr-tag">${esc(tag)}</span>` : ""}</span><strong>${esc(cardName(id))}</strong><span class="lr-meta">${typeChip(C.type)} ${gradeChip(g)}</span><span class="lr-fx">${esc(slotText(scaled(id, g), slot))}</span></div>`;
+}
+// who: "own" or a Refuge creature kind
+function slotRowsHtml(who) {
+  const own = who === "own", R = rpgState(), r = own ? null : rosterOf(who); if (own ? !R : !r) return "";
+  const lvl = own ? R.lvl : r.lvl;
+  return `<div class="lrows">${["a", "p", "s"].map((k) => {
+    if (lvl < SLOT_LVL[k]) return `<div class="lrow locked"><div class="lr-empty">🔒</div><div class="lr-txt"><span class="lr-slot">${esc(tx("slot." + k))}</span><span class="lr-fx">${esc(tx("load.lock", { n: SLOT_LVL[k] }))}</span></div></div>`;
+    let inner;
+    if (own) { const c = R.eq[k] && cardByUid(R.eq[k]); inner = c ? cardRowInner(c.id, c.g, k) : `<div class="lr-empty">＋</div><div class="lr-txt"><span class="lr-slot">${esc(tx("slot." + k))}</span><strong>${esc(tx("cards.empty"))}</strong><span class="lr-fx">${esc(tx("load.emptyFx"))}</span></div>`; }
+    else { const c = compCard(who, k), def = MONS[who].cards[{ a: 0, p: 1, s: 2 }[k]], ref = refOf(who); inner = c ? cardRowInner(c.id, c.g, k) : cardRowInner(def, ref ? ref.grade : 0, k, tx("cload.def")); }
+    return `<div class="lrow">${inner}<button class="btn ghost lr-chg" type="button" data-chg="${who}:${k}">${esc(tx("load.change"))}</button></div>`;
+  }).join("")}</div>`;
+}
+function setBarHtml() {
+  const sets = teamState().sets.map((st, i) => (st ? `<button class="chip-btn" type="button" data-xset="${i}">${esc(st.n)}</button>` : "")).filter(Boolean);
+  return sets.length ? `<div class="setbar"><span class="sub">${esc(tx("team.sets"))}</span>${sets.join("")}</div>` : "";
+}
 function loadoutHtml() {
-  const R = rpgState(), P = EV.P; if (!R) return "";
-  const eqIds = {};
-  for (const k of ["a", "p", "s"]) { const c = R.eq[k] && cardByUid(R.eq[k]); if (c) eqIds[k] = c.id; }
-  // one option per distinct card (best grade first)
-  const best = {}, lent = compUids();
-  for (const c of P.cards) if (usable(c.id) && !lent.has(c.uid) && (!best[c.id] || c.g > best[c.id].g)) best[c.id] = c;
-  const opts = Object.values(best).sort((a, b) => b.g - a.g || cardName(a.id).localeCompare(cardName(b.id)));
-  const slots = ["a", "p", "s"].map((k) => {
-    const locked = R.lvl < SLOT_LVL[k];
-    const cur = R.eq[k] && cardByUid(R.eq[k]);
-    const sel = `<select data-load="${k}" ${locked ? "disabled" : ""} aria-label="${esc(tx("slot." + k))}"><option value="">${esc(tx("cards.empty"))}</option>${opts.map((c) => {
-      const other = Object.keys(eqIds).find((s) => s !== k && eqIds[s] === c.id);
-      const uid = cur && cur.id === c.id ? cur.uid : c.uid;
-      return `<option value="${uid}" ${cur && cur.id === c.id ? "selected" : ""}>${esc(cardName(c.id))} · ${esc(GRADES[c.g][L()])} · ${TYPES[CARDS[c.id].type].icon}${other ? " (" + esc(tx("slot." + other)) + ")" : ""}</option>`;
-    }).join("")}</select>`;
-    const fx = cur && !locked ? `<p class="muted">${esc(slotText(scaled(cur.id, cur.g), k))}</p>` : locked ? `<p class="muted">🔒 ${esc(tx("load.lock", { n: SLOT_LVL[k] }))}</p>` : "";
-    return `<div class="slotbox"><p class="sub">${esc(tx("slot." + k))}</p>${sel}${fx}</div>`;
-  }).join("");
-  return `<div class="panel"><h3>${esc(tx("load.title"))}</h3><p class="muted" style="margin:0">${esc(tx("load.sub"))} ${esc(canTypesText())}</p><div class="slots">${slots}</div></div>`;
+  const R = rpgState(); if (!R) return "";
+  return `<div class="panel"><h3>${esc(tx("load.title"))}</h3><p class="muted" style="margin:0">${esc(tx("load.sub"))} ${esc(canTypesText())}</p>${slotRowsHtml("own")}</div>`;
 }
 function setLoad(slot, uid) {
   const R = rpgState(); if (!R) return;
@@ -2325,19 +2353,7 @@ function compLoadHtml(kind) {
   const r = rosterOf(kind); if (!r) return "";
   r.eq = r.eq || {};
   const nm = monName(kind), circleTypes = Object.keys(CIRCLE).filter((t) => CIRCLE[t] === CIRCLE[MONS[kind].types[0]]).map((t) => TYPES[t][L()]).join(", ");
-  const slots = ["a", "p", "s"].map((k) => {
-    const locked = r.lvl < SLOT_LVL[k], cur = compCard(kind, k), used = usedUids(kind, k);
-    // one free copy per card id, best grade first
-    const best = {};
-    for (const c of EV.P.cards) if (compFits(kind, c.id) && (!used.has(c.uid) || (cur && cur.uid === c.uid)) && (!best[c.id] || c.g > best[c.id].g || (cur && cur.uid === c.uid))) best[c.id] = c;
-    if (cur) best[cur.id] = cur;
-    const opts = Object.values(best).sort((a, b) => b.g - a.g || cardName(a.id).localeCompare(cardName(b.id)));
-    const def = MONS[kind].cards[{ a: 0, p: 1, s: 2 }[k]];
-    const sel = `<select data-cload="${kind}:${k}" ${locked ? "disabled" : ""} aria-label="${esc(tx("slot." + k))}"><option value="">${esc(tx("cload.def"))} · ${esc(cardName(def))}</option>${opts.map((c) => `<option value="${c.uid}" ${cur && cur.uid === c.uid ? "selected" : ""}>${esc(cardName(c.id))} · ${esc(GRADES[c.g][L()])} · ${TYPES[CARDS[c.id].type].icon}</option>`).join("")}</select>`;
-    const fx = locked ? `<p class="muted">🔒 ${esc(tx("load.lock", { n: SLOT_LVL[k] }))}</p>` : cur ? `<p class="muted">${esc(slotText(scaled(cur.id, cur.g), k))}</p>` : "";
-    return `<div class="slotbox"><p class="sub">${esc(tx("slot." + k))}</p>${sel}${fx}</div>`;
-  }).join("");
-  return `<div class="panel"><h3>${esc(tx("cload.title", { name: nm }))}</h3><p class="muted" style="margin:0">${esc(tx("cload.sub", { name: nm, types: circleTypes }))}</p><div class="slots">${slots}</div></div>`;
+  return `<div class="panel"><h3>${esc(tx("cload.title", { name: nm }))}</h3><p class="muted" style="margin:0">${esc(tx("cload.sub", { name: nm, types: circleTypes }))}</p>${slotRowsHtml(kind)}</div>`;
 }
 function setCompLoad(kind, slot, uid) {
   const r = rosterOf(kind); if (!r) return;
@@ -2349,6 +2365,153 @@ function setCompLoad(kind, slot, uid) {
   r.eq[slot] = c ? c.uid : null;
   if (c) EV.P.c.equips = (EV.P.c.equips || 0) + 1;
   EV.sfx("card"); EV.save(); render();
+}
+/* ---------- Card picker: every card that fits the slot, each with its effect in that slot ---------- */
+let CPICK = null; // { who, slot }
+function pickRows(who, slot) {
+  const P = EV.P, R = rpgState(), rows = [];
+  if (who === "own") {
+    const lent = compUids(), best = {};
+    for (const c of P.cards) if (usable(c.id) && !lent.has(c.uid) && (!best[c.id] || c.g > best[c.id].g)) best[c.id] = c;
+    const cur = R.eq[slot] && cardByUid(R.eq[slot]);
+    if (cur) best[cur.id] = cur;
+    rows.push({ uid: "", empty: true, on: !cur });
+    for (const c of Object.values(best).sort((a, b) => b.g - a.g || cardName(a.id).localeCompare(cardName(b.id)))) {
+      const other = ["a", "p", "s"].find((k) => k !== slot && R.eq[k] && (cardByUid(R.eq[k]) || {}).id === c.id);
+      rows.push({ uid: c.uid, id: c.id, g: c.g, on: !!(cur && cur.uid === c.uid), tag: other ? tx("load.inSlot", { s: tx("slot." + other) }) : "" });
+    }
+  } else {
+    const cur = compCard(who, slot), used = usedUids(who, slot), best = {}, ref = refOf(who);
+    for (const c of P.cards) if (compFits(who, c.id) && (!used.has(c.uid) || (cur && cur.uid === c.uid)) && (!best[c.id] || c.g > best[c.id].g)) best[c.id] = c;
+    if (cur) best[cur.id] = cur;
+    rows.push({ uid: "", id: MONS[who].cards[{ a: 0, p: 1, s: 2 }[slot]], g: ref ? ref.grade : 0, on: !cur, tag: tx("cload.def") });
+    for (const c of Object.values(best).sort((a, b) => b.g - a.g || cardName(a.id).localeCompare(cardName(b.id)))) {
+      const other = ["a", "p", "s"].find((k) => k !== slot && (compCard(who, k) || {}).id === c.id);
+      rows.push({ uid: c.uid, id: c.id, g: c.g, on: !!(cur && cur.uid === c.uid), tag: other ? tx("load.inSlot", { s: tx("slot." + other) }) : "" });
+    }
+  }
+  return rows;
+}
+function openPick(who, slot) {
+  CPICK = { who, slot };
+  let el = $("cpick");
+  if (!el) {
+    el = document.createElement("div"); el.id = "cpick"; el.className = "cpick-wrap"; document.body.appendChild(el);
+    el.addEventListener("click", onPickClick);
+  }
+  const nm = who === "own" ? EV.S.name : monName(who);
+  el.innerHTML = `<div class="cpick-back" data-cp="close"></div><div class="cpick" role="dialog" aria-modal="true"><div class="cp-head"><div><span class="sub">${esc(nm)}</span><h3>${esc(tx("load.pickTitle", { s: tx("slot." + slot) }))}</h3></div><button class="sheet-x" type="button" data-cp="close" aria-label="${esc(tx("load.close"))}">✕</button></div>` +
+    `<div class="cp-list">${pickRows(who, slot).map((r) => `<button type="button" class="lrow pickrow${r.on ? " on" : ""}" data-cpu="${r.uid}">${r.empty ? `<div class="lr-empty">∅</div><div class="lr-txt"><span class="lr-slot">${esc(tx("slot." + slot))}</span><strong>${esc(tx("cards.empty"))}</strong><span class="lr-fx">${esc(tx("load.emptyFx"))}</span></div>` : cardRowInner(r.id, r.g, slot, r.on ? tx("load.equipped") : r.tag)}</button>`).join("")}</div></div>`;
+  el.hidden = false;
+}
+function closePick() { CPICK = null; const el = $("cpick"); if (el) el.hidden = true; }
+function onPickClick(e) {
+  const t = e.target.closest("[data-cp],[data-cpu]"); if (!t || !CPICK) return;
+  if (t.dataset.cp === "close") { EV.sfx("tap"); closePick(); return; }
+  const { who, slot } = CPICK; closePick();
+  if (who === "own") setLoad(slot, t.dataset.cpu); else setCompLoad(who, slot, t.dataset.cpu);
+  refreshLoadViews();
+}
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && CPICK) { e.stopImmediatePropagation(); closePick(); } }, true);
+function refreshLoadViews() {
+  if ($("cardsPanel") && !$("cardsPanel").hidden) renderCards();
+  if ($("teamsPanel") && !$("teamsPanel").hidden) renderTeams();
+}
+/* ---------- Teams: your creature and two Refuge companions, with up to 5 saved sets ---------- */
+const SETS_N = 5;
+function teamState() {
+  const P = EV.P;
+  if (!P.team) P.team = { comp: [], sets: [] };
+  const ro = (P.eg && P.eg.roster) || {};
+  P.team.comp = (P.team.comp || []).filter((k) => ro[k]).slice(0, 2);
+  while (P.team.sets.length < SETS_N) P.team.sets.push(null);
+  return P.team;
+}
+let teamEdit = -1;
+function setSummary(st) {
+  const names = st.comp.map(monName).join(", ");
+  const nC = ["a", "p", "s"].filter((k) => st.own[k]).length + st.comp.reduce((n, k) => n + ["a", "p", "s"].filter((s) => (st.ce[k] || {})[s]).length, 0);
+  return tx("team.setSum", { comp: names || tx("team.alone"), n: nC });
+}
+function renderTeams() {
+  const el = $("teamsPanel"); if (!el) return;
+  const R = rpgState(), T = teamState(), S = EV.S, ro = (EV.P.eg && EV.P.eg.roster) || {};
+  let html = `<div class="panel-head"><h2>${esc(tx("team.title"))}</h2></div><p class="muted" style="margin:0">${esc(tx("team.sub"))}</p>`;
+  if (!R) { el.innerHTML = html + `<p class="muted">${esc(tx("cards.noCreature"))}</p>`; return; }
+  html += `<h3 class="cat-title">${esc(tx("team.now"))}</h3>`;
+  html += `<div class="tm-block"><div class="tm-head"><strong>${esc(S.name)}</strong><span class="progress">${esc(tx("cards.lvl", { n: R.lvl }))}</span></div>${slotRowsHtml("own")}</div>`;
+  const kinds = Object.keys(ro);
+  html += `<div class="tm-block"><div class="tm-head"><strong>${esc(tx("team.comps"))}</strong><span class="progress">${T.comp.length}/2</span></div>` +
+    (kinds.length ? `<div class="tm-comps">${kinds.map((k) => `<button type="button" class="tm-comp" data-tcomp="${k}" aria-pressed="${T.comp.includes(k)}"><canvas width="96" height="80" data-mon="${k}"></canvas><span>${esc(monName(k))}</span><small>${esc(tx("cards.lvl", { n: ro[k].lvl }))}</small></button>`).join("")}</div>` : `<p class="muted">${esc(tx("team.noRefuge"))}</p>`) + `</div>`;
+  for (const k of T.comp) html += `<div class="tm-block"><div class="tm-head"><strong>${esc(monName(k))}</strong><span class="progress">${esc(tx("cards.lvl", { n: ro[k].lvl }))}</span></div>${slotRowsHtml(k)}</div>`;
+  html += `<h3 class="cat-title">${esc(tx("team.sets"))}</h3><div class="tm-sets">${T.sets.map((st, i) => {
+    const name = st ? st.n : tx("team.setN", { n: i + 1 });
+    const title = teamEdit === i ? `<input class="textin tm-name" maxlength="18" value="${esc(name)}" data-tname="${i}" aria-label="${esc(tx("team.rename"))}">` : `<strong>${esc(name)}</strong>`;
+    const btns = teamEdit === i ? `<button class="btn" type="button" data-tset="ok:${i}">${esc(tx("team.ok"))}</button>` :
+      (st ? `<button class="btn" type="button" data-tset="load:${i}">${esc(tx("team.load"))}</button>` : "") + `<button class="btn ghost" type="button" data-tset="save:${i}">${esc(tx(st ? "team.overwrite" : "team.save"))}</button>` +
+      (st ? `<button class="btn ghost" type="button" data-tset="ren:${i}">${esc(tx("team.rename"))}</button><button class="btn ghost" type="button" data-tset="del:${i}">${esc(tx("team.del"))}</button>` : "");
+    return `<div class="tm-set${st ? "" : " empty"}"><div class="tm-set-t">${title}<span class="muted">${esc(st ? setSummary(st) : tx("team.emptySet"))}</span></div><div class="rc-btns">${btns}</div></div>`;
+  }).join("")}</div>`;
+  el.innerHTML = html;
+  el.querySelectorAll("canvas[data-mon]").forEach(paintMon);
+  const inp = el.querySelector("input[data-tname]"); if (inp) { inp.focus(); inp.select(); }
+}
+function saveSet(i) {
+  const R = rpgState(), T = teamState(); if (!R) return;
+  const ids = (eq) => { const o = {}; for (const k of ["a", "p", "s"]) { const c = eq[k] && cardByUid(eq[k]); if (c) o[k] = c.id; } return o; };
+  const ce = {}; for (const k of T.comp) ce[k] = ids((rosterOf(k) || {}).eq || {});
+  const old = T.sets[i];
+  T.sets[i] = { n: old ? old.n : tx("team.setN", { n: i + 1 }), comp: T.comp.slice(), own: ids(R.eq), ce };
+  EV.toast(tx("team.saved", { n: T.sets[i].n })); EV.sfx("card"); EV.save();
+}
+// load a set: move the cards where the set says; missing copies fall back to the empty slot or the usual card
+function loadSet(i, offer) {
+  const R = rpgState(), T = teamState(), st = T.sets[i]; if (!R || !st) return;
+  const ro = (EV.P.eg && EV.P.eg.roster) || {}, miss = [];
+  let comp = st.comp.filter((k) => ro[k]);
+  st.comp.filter((k) => !ro[k]).forEach((k) => miss.push(monName(k)));
+  if (offer) { comp.filter((k) => !offer.includes(k)).forEach((k) => miss.push(monName(k))); comp = comp.filter((k) => offer.includes(k)); }
+  const who = ["own"].concat(comp);
+  // free the cards of everyone in the set first, then hand out copies, best grade first
+  R.eq = { a: null, p: null, s: null };
+  for (const k of comp) ro[k].eq = {};
+  const used = usedUids();
+  let lost = 0;
+  for (const w of who) {
+    const want = w === "own" ? st.own : (st.ce[w] || {}), lvl = w === "own" ? R.lvl : ro[w].lvl;
+    for (const sl of ["a", "p", "s"]) {
+      const id = want[sl]; if (!id) continue;
+      const fits = w === "own" ? usable(id) : compFits(w, id);
+      const c = fits && lvl >= SLOT_LVL[sl] ? EV.P.cards.filter((x) => x.id === id && !used.has(x.uid)).sort((a, b) => b.g - a.g)[0] : null;
+      if (!c) { lost++; continue; }
+      used.add(c.uid);
+      if (w === "own") R.eq[sl] = c.uid; else ro[w].eq[sl] = c.uid;
+    }
+  }
+  T.comp = comp.slice(0, 2);
+  if (X && view === "pick") X.chosen = T.comp.filter((k) => X.offer.includes(k));
+  EV.save(); EV.sfx("card");
+  const parts = []; if (miss.length) parts.push(tx("team.missMon", { list: miss.join(", ") })); if (lost) parts.push(tx("team.missCards", { n: lost }));
+  EV.toast(tx("team.loaded", { n: st.n }) + (parts.length ? " " + parts.join(" ") : ""));
+}
+function onTeamsClick(e) {
+  const t = e.target.closest("button"); if (!t || t.disabled) return;
+  const T = teamState();
+  if (t.dataset.chg) { EV.sfx("tap"); const [w, sl] = t.dataset.chg.split(":"); openPick(w, sl); return; }
+  if (t.dataset.tcomp) {
+    const k = t.dataset.tcomp, i = T.comp.indexOf(k);
+    if (i >= 0) T.comp.splice(i, 1); else { if (T.comp.length >= 2) T.comp.shift(); T.comp.push(k); }
+    EV.sfx("tap"); EV.save(); renderTeams(); return;
+  }
+  if (t.dataset.tset) {
+    const [a, n] = t.dataset.tset.split(":"), i = +n;
+    if (a === "save") saveSet(i);
+    else if (a === "load") loadSet(i);
+    else if (a === "del") { T.sets[i] = null; EV.sfx("tap"); EV.save(); }
+    else if (a === "ren") teamEdit = i;
+    else if (a === "ok") { const inp = $("teamsPanel").querySelector("input[data-tname]"), v = inp && inp.value.trim(); if (v && T.sets[i]) T.sets[i].n = v.slice(0, 18); teamEdit = -1; EV.save(); }
+    renderTeams();
+  }
 }
 function lootHtml() {
   const l = X.loot;
@@ -3211,6 +3374,7 @@ function onExpClick(e) {
   if (d.pick) {
     const k = d.pick, i = X.chosen.indexOf(k);
     if (i >= 0) X.chosen.splice(i, 1); else { if (X.chosen.length >= 2) X.chosen.shift(); X.chosen.push(k); }
+    { const T = teamState(); T.comp = X.chosen.filter((c) => rosterOf(c)); }
     EV.sfx("tap"); render(); return;
   }
   if (d.node) {
@@ -3284,6 +3448,7 @@ function workshopHtml() {
   if (lastPack) h += `<h3 class="cat-title">${esc(tx("pack.got"))}</h3><div class="rcards">${lastPack.map((c) => cardHtml(c.id, c.g, { foot: cantNote(c.id) })).join("")}</div>`;
   return h;
 }
+let colCard = null;
 function renderCards() {
   const el = $("cardsPanel"); if (!el) return;
   const R = rpgState(), P = EV.P, S = EV.S;
@@ -3298,12 +3463,8 @@ function renderCards() {
     const u = makeUnit(ownUnitOpts(1));
     const need = xpNeed(R.lvl);
     html += `<div class="slotbox" style="border-style:solid"><div class="panel-head"><strong style="font-family:var(--font-display);font-size:18px">${esc(S.name)} · ${esc(tx("cards.lvl", { n: R.lvl }))}</strong><span>${u.types.map(typeChip).join(" ")}</span></div>
-      <div class="bar xpbar"><i style="width:${Math.round(100 * R.xp / need)}%"></i></div><p class="rstats">${esc(tx("cards.xp", { x: R.xp, y: need }))}</p>${ownSheetHtml()}</div>`;
-    html += `<div class="slots">${["a", "p", "s"].map((k) => {
-      const locked = R.lvl < SLOT_LVL[k];
-      const c = R.eq[k] && cardByUid(R.eq[k]);
-      return `<div class="slotbox"><p class="sub">${esc(tx("slot." + k))}${locked ? " · 🔒 " + esc(tx("slot.lock", { n: SLOT_LVL[k] })) : ""}</p>${c ? cardHtml(c.id, c.g, { slot: k, foot: `<div class="rc-btns"><button class="btn ghost" type="button" data-unequip="${k}">${esc(tx("cards.unequip"))}</button></div>` }) : `<p class="muted">${esc(tx("cards.empty"))}</p>`}</div>`;
-    }).join("")}</div>`;
+      <div class="bar xpbar"><i style="width:${Math.round(100 * R.xp / need)}%"></i></div><p class="rstats">${esc(tx("cards.xp", { x: R.xp, y: need }))}</p><details class="fold"><summary><h3>${esc(tx("sh.title"))}</h3></summary>${ownSheetHtml()}</details></div>`;
+    html += slotRowsHtml("own");
   } else html += `<p class="muted">${esc(tx("cards.noCreature"))}</p>`;
   if (R) html += `<p class="muted">${esc(canTypesText())}</p>`;
   // collection: one entry per card (shown at its best grade), with the copies of each grade underneath
@@ -3313,7 +3474,7 @@ function renderCards() {
   const ids = Object.keys(groups).sort((a, b) => (usable(b) - usable(a)) || bestG(b) - bestG(a) || cardName(a).localeCompare(cardName(b)));
   const eqSet = new Set([...(R ? Object.values(R.eq).filter(Boolean) : []), ...compUids()]);
   html = html.replace(esc(tx("cards.owned", { n: P.cards.length })), esc(tx("cards.owned", { n: ids.length })));
-  html += `<div class="rcards">${ids.map((id) => {
+  colCard = (id) => {
     const list = groups[id], g = bestG(id);
     const best = list.filter((c) => c.g === g);
     const ok = usable(id);
@@ -3329,11 +3490,27 @@ function renderCards() {
     if (list.length > 1 && spare.length) btns.push(`<button class="btn ghost" type="button" data-dust="${spare[0].uid}">${esc(tx("dust.btn", { n: DUST_OF(spare[0].g) }))}</button>`);
     for (const gi of gs.slice().reverse()) if (counts[gi] >= UPGRADE_N && gi < GRADES.length - 1) btns.push(`<button class="btn" type="button" data-fuse="${id}:${gi}">${esc(tx("cards.fuse", { n: UPGRADE_N, a: GRADES[gi][L()], g: GRADES[gi + 1][L()] }))}</button>`);
     return cardHtml(id, g, { count: list.length, foot: `${copies}${cantNote(id)}${btns.length ? `<div class="rc-btns">${btns.join("")}</div>` : ""}` });
+  };
+  // the collection is a grid of thumbnails; tapping one opens the whole card with its buttons
+  html += `<div class="ctiles">${ids.map((id) => {
+    const g = bestG(id), n = groups[id].length, inUse = groups[id].some((c) => eqSet.has(c.uid));
+    return `<button type="button" class="ctile${usable(id) ? "" : " cant"}" data-cview="${id}" aria-label="${esc(cardName(id))}">${thumbHtml(id, g)}<span class="ct-name">${esc(cardName(id))}</span><span class="ct-meta">${gradeChip(g)}${n > 1 ? ` <b>×${n}</b>` : ""}${inUse ? ` <i>${esc(tx("cards.inUse"))}</i>` : ""}</span></button>`;
   }).join("")}</div>`;
   el.innerHTML = html;
 }
+function openCardView(id) {
+  if (!colCard) return;
+  let el = $("cview");
+  if (!el) { el = document.createElement("div"); el.id = "cview"; el.className = "cpick-wrap"; document.body.appendChild(el); el.addEventListener("click", (e) => { if (e.target.closest("[data-cp]")) { closeCardView(); return; } const b = e.target.closest("button"); if (b && !b.disabled) { closeCardView(); onCardsClick(e); } }); }
+  el.innerHTML = `<div class="cpick-back" data-cp="close"></div><div class="cpick cview" role="dialog" aria-modal="true"><div class="cp-head"><h3>${esc(cardName(id))}</h3><button class="sheet-x" type="button" data-cp="close" aria-label="${esc(tx("load.close"))}">✕</button></div><div class="cp-list">${colCard(id)}</div></div>`;
+  el.hidden = false;
+}
+function closeCardView() { const el = $("cview"); if (el) el.hidden = true; }
+document.addEventListener("keydown", (e) => { const el = $("cview"); if (e.key === "Escape" && el && !el.hidden) { e.stopImmediatePropagation(); closeCardView(); } }, true);
 function onCardsClick(e) {
   const t = e.target.closest("button"); if (!t || t.disabled) return;
+  if (t.dataset.cview) { EV.sfx("tap"); openCardView(t.dataset.cview); return; }
+  if (t.dataset.chg) { EV.sfx("tap"); const [w, sl] = t.dataset.chg.split(":"); openPick(w, sl); return; }
   const R = rpgState(); const P = EV.P;
   if (t.dataset.ctab) { cTab = t.dataset.ctab; EV.sfx("tap"); renderCards(); return; }
   if (EV.WELL && EV.WELL.click(t)) return;
@@ -3390,6 +3567,7 @@ function refreshHome() {
   const S = EV.S, btn = $("aExp"), chip = $("btnCards");
   const alive = S && S.phase === "alive";
   chip.hidden = !(alive && S.stage >= 1) && !(EV.P.cards && EV.P.cards.length);
+  if ($("btnTeams")) $("btnTeams").hidden = !(alive && S.stage >= 1);
   homeSheet(alive);
   if (!alive) { btn.hidden = true; return; }
   btn.hidden = false;
@@ -3446,10 +3624,15 @@ EV.HOOKS.renderCards = renderCards;
 $("aExp").addEventListener("click", () => { EV.sfx("tap"); startExpedition(); EV.showScreen(); });
 $("btnCards").addEventListener("click", () => { EV.sfx("tap"); EV.togglePanel("cards"); });
 $("scrExp").addEventListener("click", onExpClick);
-$("scrExp").addEventListener("change", (e) => {
-  const s = e.target.closest("select[data-load]"); if (s && X && view === "pick") setLoad(s.dataset.load, s.value);
-  const c = e.target.closest("select[data-cload]"); if (c && X && view === "pick") { const [kind, slot] = c.dataset.cload.split(":"); setCompLoad(kind, slot, c.value); }
+$("scrExp").addEventListener("click", (e) => {
+  const t = e.target.closest("button"); if (!t || !X || view !== "pick") return;
+  if (t.dataset.chg) { EV.sfx("tap"); const [w, sl] = t.dataset.chg.split(":"); openPick(w, sl); }
+  if (t.dataset.xset) { loadSet(+t.dataset.xset, X.offer); render(); }
 });
+$("teamsPanel").addEventListener("click", onTeamsClick);
+$("teamsPanel").addEventListener("keydown", (e) => { if (e.key === "Enter" && e.target.dataset.tname) { const b = $("teamsPanel").querySelector('button[data-tset^="ok:"]'); if (b) b.click(); } });
+$("btnTeams").addEventListener("click", () => { EV.sfx("tap"); EV.togglePanel("teams"); });
+EV.HOOKS.renderTeams = renderTeams;
 $("cardsPanel").addEventListener("click", onCardsClick);
 setInterval(refreshHome, 1000);
 rpgState(); EV.showScreen();
