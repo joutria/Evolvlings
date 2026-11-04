@@ -111,3 +111,9 @@ Six more places in the Builds menu, each improved on its own:
 - **Refuge nests**: companions who stay home get 10% to 50% of the trip's experience. At level 5, petting gives +2 Bond.
 - **Guild workshop**: crafting a card in the Grimoire costs 9, then 8, then 7 Stardust instead of 10.
 - Upgraded places on the map show a small row of gold marks, one per level above 1.
+
+## Builds, delivery 3: jobs and requests
+
+- **Refuge jobs**: in the Builds menu, send a hatched companion to work at the Garden (food, Wood), the Guild workshop (Stardust), the Pantry (Chispas) or the Foraging nook (items) for 2, 4 or 8 hours (a sixth of that while builds are in fast mode). A companion whose type fits the place earns 1.5×, and each level of the place adds 10%. Up to 2 jobs at once, 3 with Refuge nests at level 3. Working companions can't go on expeditions. Collecting gives +1 Bond.
+- **El Vado requests**: a new board on the El Vado map (also listed in the Builds menu). Every day two neighbours (Ruda the baker, Bruno the boatman, Esporina the mushroom forager, Mirlo the postman) ask for food, Wood or Stardust and pay in Chispas and Wood, with a 15% chance of a Note. Mirlo also passes on a rumour.
+- **Storage**: the Garden only holds so much food (4 to 12 by level) and 6 Wood, and finished jobs wait until you collect them. The Builds button shows a dot when something is ready.

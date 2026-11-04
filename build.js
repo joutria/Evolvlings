@@ -38,6 +38,19 @@ const TX = {
     "harvested": "Cosechas: {what}.", "full": "El huerto está lleno: cosecha para que siga creciendo.",
     "tripWood": "🪵 +{n} Madera del viaje", "tripCut": "La obra avanza 1 h.",
     "welcome": "La comida gratis ahora crece en el Huerto, junto al comedero. Te dejo {n} bayas para empezar.",
+    "jobs": "Trabajos del Refugio", "jobs.sub": "Manda a un compañero a trabajar en un lugar. Rinde más si su tipo encaja y si el lugar está mejorado. Mientras trabaja no puede ir de expedición. Hasta {n} a la vez.",
+    "jobs.none": "Todavía no hay nadie en el Refugio.", "job.idle": "Descansando en el Refugio", "job.send": "Mandar a trabajar", "job.cancel": "Cancelar",
+    "job.full": "Ya hay {n} compañeros trabajando.", "job.sent": "{n} se va a trabajar a: {p}", "job.at": "Trabajando en: {p}", "job.will": "Traerá: {what}",
+    "job.done": "Terminó en: {p}", "job.collect": "Recoger", "job.got": "{n} vuelve del trabajo con: {what}. +1 Vínculo", "job.fit": "Su tipo encaja: rinde más",
+    "r.food": "🍓 ×{n}", "r.items": "🎒 ×{n}", "r.wood": "{n} de Madera",
+    "ord": "Encargos del Vado", "ord.sub": "Cada día dos vecinos piden algo. Pagan en Chispas y Madera, y a veces dejan una Nota.",
+    "ord.need": "Piden {what} (tienes {have})", "ord.pay": "Pagan ✦ {c} y 🪵 {w}", "ord.give": "Entregar", "ord.giveTo": "Entregar a {n}", "ord.done": "Entregado. Vuelve mañana.",
+    "ord.miss": "Te falta: {what}.", "ord.got": "(+{c} ✦, +{w} 🪵)", "ord.note": "Te deja también ♪ 1 Nota.", "ord.rumour": "Y añade: «{r}»",
+    "ord.allDone": "Hoy ya no queda ningún encargo en el tablón. Mañana habrá más.", "p.orders": "Tablón de encargos", "p.orders.d": "Lo que piden los vecinos",
+    "n.ruda": "Ruda", "n.ruda.role": "panadera", "n.ruda.ask": "«Me faltan {what} para el pan de los críos del muelle. No pienso pagarte de más, que conste.»", "n.ruda.thanks": "«Toma. Y no se lo cuentes a nadie, que luego todos quieren pan gratis.»",
+    "n.bruno": "Bruno", "n.bruno.role": "barquero", "n.bruno.ask": "«La barca hace agua otra vez. Antes la arreglaba con cosas que no preguntaba de dónde salían. Ahora prefiero pagar: {what}.»", "n.bruno.thanks": "«Lo honrado sale más caro, pero se duerme mejor.»",
+    "n.esporina": "Esporina", "n.esporina.role": "recolectora de setas", "n.esporina.ask": "«¿Tienes {what}? Las setas crecen mejor donde la Savia es oscura, digan lo que digan. Necesito esto para demostrarlo.»", "n.esporina.thanks": "«Ya verás. Algún día me darán la razón.»",
+    "n.mirlo": "Mirlo", "n.mirlo.role": "cartero", "n.mirlo.ask": "«Relampín se queda con los recados rápidos. Si me traes {what}, te cuento lo que dice el correo de esta semana.»", "n.mirlo.thanks": "«Yo leo las cartas enteras. Por eso llego tarde.»",
     "h": "{n} h", "m": "{n} min", "hm": "{h} h {m} min",
   },
   en: {
@@ -66,6 +79,19 @@ const TX = {
     "harvested": "You harvest: {what}.", "full": "The garden is full: harvest so it keeps growing.",
     "tripWood": "🪵 +{n} Wood from the trip", "tripCut": "The build moves 1 h closer.",
     "welcome": "Free food now grows in the Garden, next to the bowl. Here are {n} berries to start.",
+    "jobs": "Refuge jobs", "jobs.sub": "Send a companion to work at a place. It earns more when its type fits and when the place is upgraded. While it works it can't go on expeditions. Up to {n} at a time.",
+    "jobs.none": "Nobody lives in the Refuge yet.", "job.idle": "Resting in the Refuge", "job.send": "Send to work", "job.cancel": "Cancel",
+    "job.full": "{n} companions are already working.", "job.sent": "{n} goes off to work at: {p}", "job.at": "Working at: {p}", "job.will": "Will bring: {what}",
+    "job.done": "Finished at: {p}", "job.collect": "Collect", "job.got": "{n} comes back from work with: {what}. +1 Bond", "job.fit": "Its type fits: earns more",
+    "r.food": "🍓 ×{n}", "r.items": "🎒 ×{n}", "r.wood": "{n} Wood",
+    "ord": "El Vado requests", "ord.sub": "Every day two neighbours ask for something. They pay in Chispas and Wood, and sometimes leave a Note.",
+    "ord.need": "They ask for {what} (you have {have})", "ord.pay": "They pay ✦ {c} and 🪵 {w}", "ord.give": "Hand over", "ord.giveTo": "Give to {n}", "ord.done": "Delivered. Come back tomorrow.",
+    "ord.miss": "You're missing: {what}.", "ord.got": "(+{c} ✦, +{w} 🪵)", "ord.note": "They also leave you ♪ 1 Note.", "ord.rumour": "And adds: “{r}”",
+    "ord.allDone": "No requests left on the board today. There'll be more tomorrow.", "p.orders": "Request board", "p.orders.d": "What the neighbours need",
+    "n.ruda": "Ruda", "n.ruda.role": "baker", "n.ruda.ask": "“I'm short {what} for the dock kids' bread. And I'm not paying you extra, mind.”", "n.ruda.thanks": "“Here. And don't tell anyone, or they'll all want free bread.”",
+    "n.bruno": "Bruno", "n.bruno.role": "boatman", "n.bruno.ask": "“The boat's leaking again. I used to fix it with things I didn't ask where they came from. Now I'd rather pay: {what}.”", "n.bruno.thanks": "“Honest costs more, but you sleep better.”",
+    "n.esporina": "Esporina", "n.esporina.role": "mushroom forager", "n.esporina.ask": "“Got {what}? Mushrooms grow best where the Sap is dark, whatever they say. I need this to prove it.”", "n.esporina.thanks": "“You'll see. One day they'll admit I was right.”",
+    "n.mirlo": "Mirlo", "n.mirlo.role": "postman", "n.mirlo.ask": "“Relampín takes all the quick errands. Bring me {what} and I'll tell you what the post says this week.”", "n.mirlo.thanks": "“I read the letters all the way through. That's why I'm late.”",
     "h": "{n} h", "m": "{n} min", "hm": "{h} h {m} min",
   },
 };
@@ -204,22 +230,156 @@ function render() {
     else x += `<button class="btn" type="button" data-bup="${id}" ${busy || miss.length ? "disabled" : ""}>${esc(tx("up", { c: c.c, w: c.w, t: fmt(hoursOf(c) * HOUR) }))}</button>${busy && !here ? `<small class="muted">${esc(tx("busy"))}</small>` : miss.length ? `<small class="poor">${esc(tx("poor", { what: miss.join(" · ") }))}</small>` : ""}`;
     return x + "</div>";
   }).join("")}</div>`;
+  h += jobsHtml() + ordersHtml();
   el.innerHTML = h;
+  el.querySelectorAll("canvas[data-mon]").forEach((cv) => { try { EV.RPG.paintMon(cv); } catch (e) { /* art is decoration */ } });
 }
 function onClick(e) {
   const t = e.target.closest("button"); if (!t || t.disabled) return;
   if (t.dataset.bup) { start(t.dataset.bup); return; }
-  if (t.dataset.bharv) { const r = harvest(); EV.toast(r.text, "🌱"); render(); }
+  if (t.dataset.bharv) { const r = harvest(); EV.toast(r.text, "🌱"); render(); return; }
+  if (t.dataset.jpick) { pickJob = { k: t.dataset.jpick, place: null }; EV.sfx("tap"); render(); return; }
+  if (t.dataset.jplace) { const [k, p] = t.dataset.jplace.split(":"); pickJob = { k, place: p }; EV.sfx("tap"); render(); return; }
+  if (t.dataset.jgo) { const [k, p, hh] = t.dataset.jgo.split(":"); sendJob(k, p, +hh); return; }
+  if (t.dataset.jcancel) { pickJob = null; render(); return; }
+  if (t.dataset.jget) { collect(t.dataset.jget); return; }
+  if (t.dataset.ord) { const r = deliver(+t.dataset.ord); if (r) EV.toast(r.text, r.ok ? "✉" : "✕"); render(); }
 }
 function refreshBtn() {
   const btn = $("btnBuild"); if (!btn) return;
   const S = EV.S; btn.hidden = !(S && S.phase === "alive" && S.stage >= 1);
   $("buildLbl").textContent = tx("nav");
   const s = btn.hidden ? null : gardenStock();
-  const dot = $("buildDot"); if (dot) dot.hidden = !(s && (s.full || (s.f >= 2)));
+  const dot = $("buildDot"); if (dot) dot.hidden = !(s && (s.full || s.f >= 2 || jobsReady() > 0));
 }
 
+/* ---------- Refuge jobs (delivery 3) ----------
+   A Refuge companion works at a place for 2, 4 or 8 hours (shorter while FAST is on). It earns more when its type
+   fits the place and when the place has been upgraded. While it works it can't join expeditions. What it makes waits
+   at the place until you collect it, so nothing is lost if you're away. */
+const JOB_H = [2, 4, 8];
+const jobMs = (h) => (FAST ? h / 6 : h) * HOUR;
+const JOBS = {
+  garden: { fit: ["plant", "water", "mush"], per: { food: 0.6, wood: 0.4 } },
+  craft: { fit: ["fire", "stone", "ice"], per: { dust: 2 } },
+  pantry: { fit: ["light", "music", "bolt"], per: { coins: 6 } },
+  nook: { fit: ["air", "shadow", "dream"], per: { items: 0.4 } },
+};
+const NOOK_ITEMS = ["tea", "soap", "melon", "tonic"];
+const typeOf = (k) => { const m = EV.RPG && EV.RPG.MONS[k]; return m ? m.types[0] : null; };
+const roster = () => (EV.EGGS ? EV.EGGS.G().roster : {});
+const jobsMax = () => (lvl("nest") >= 3 ? 3 : 2);
+function J() { const b = B(); if (!b.jobs) b.jobs = {}; return b.jobs; }
+const working = (k) => !!J()[k];
+function jobYield(k, place, h) {
+  const fit = JOBS[place].fit.includes(typeOf(k)), mult = (fit ? 1.5 : 1) * (1 + 0.1 * (lvl(place === "craft" ? "craft" : place) - 1));
+  const out = {};
+  for (const [r, v] of Object.entries(JOBS[place].per)) out[r] = Math.max(1, Math.round(v * h * mult));
+  return { out, fit };
+}
+function sendJob(k, place, h) {
+  const R = roster(); if (!R[k] || working(k) || !JOBS[place]) return;
+  if (Object.keys(J()).length >= jobsMax()) { EV.toast(tx("job.full", { n: jobsMax() })); EV.sfx("deny"); return; }
+  const y = jobYield(k, place, h);
+  J()[k] = { place, h, start: Date.now(), end: Date.now() + jobMs(h), out: y.out, fit: y.fit };
+  EV.P.c.jobs = (EV.P.c.jobs || 0) + 1;
+  save(); EV.sfx("tap");
+  EV.toast(tx("job.sent", { n: EV.RPG.monName(k), p: tx("p." + place) }), "🧺");
+  pickJob = null; render();
+}
+function outText(out) {
+  const parts = [];
+  if (out.food) parts.push(tx("r.food", { n: out.food })); if (out.wood) parts.push("🪵 " + out.wood);
+  if (out.dust) parts.push("∴ " + out.dust); if (out.coins) parts.push("✦ " + out.coins); if (out.items) parts.push(tx("r.items", { n: out.items }));
+  return parts.join(" · ");
+}
+function collect(k) {
+  const j = J()[k]; if (!j || Date.now() < j.end) return;
+  const P = EV.P, b = B(), o = j.out, got = [];
+  if (o.food) for (let i = 0; i < o.food; i++) { const f = GARDEN[lvl("garden")].pool[Math.floor(Math.random() * GARDEN[lvl("garden")].pool.length)]; P.inv[f] = (P.inv[f] || 0) + 1; }
+  if (o.wood) b.wood += o.wood;
+  if (o.dust) P.dust = (P.dust || 0) + o.dust;
+  if (o.coins) EV.addCoins(o.coins, true);
+  if (o.items) for (let i = 0; i < o.items; i++) { const it = NOOK_ITEMS[Math.floor(Math.random() * NOOK_ITEMS.length)]; P.inv[it] = (P.inv[it] || 0) + 1; }
+  const r = roster()[k]; if (r) r.bxp += 1; // working side by side builds Bond
+  delete J()[k];
+  save(); EV.sfx("chirp");
+  EV.toast(tx("job.got", { n: EV.RPG.monName(k), what: outText(o) }), "🧺");
+  render();
+}
+const jobsReady = () => Object.values(J()).filter((j) => Date.now() >= j.end).length;
+let pickJob = null; // { k, place }
+function jobsHtml() {
+  const R = roster(), ks = Object.keys(R).filter((k) => !EV.RPG.MONS || EV.RPG.MONS[k]);
+  let h = `<h3 class="cat-title">${esc(tx("jobs"))}</h3><p class="muted" style="margin:0">${esc(tx("jobs.sub", { n: jobsMax() }))}</p>`;
+  if (!ks.length) return h + `<p class="muted">${esc(tx("jobs.none"))}</p>`;
+  h += `<div class="bd-jobs">${ks.map((k) => {
+    const j = J()[k], ty = typeOf(k);
+    let x = `<div class="bd-jobrow"><canvas width="96" height="80" data-mon="${k}"></canvas><div class="bd-jtxt"><strong>${esc(EV.RPG.monName(k))}</strong>${ty ? EV.RPG.typeChip(ty) : ""}`;
+    if (j) {
+      const left = j.end - Date.now();
+      if (left > 0) x += `<small>${esc(tx("job.at", { p: tx("p." + j.place) }))} · ${esc(tx("jobLeft", { t: fmt(left) }))}</small><div class="bar"><i style="width:${Math.round(100 * (1 - left / (j.end - j.start)))}%"></i></div><small class="muted">${esc(tx("job.will", { what: outText(j.out) }))}</small>`;
+      else x += `<small class="ok">${esc(tx("job.done", { p: tx("p." + j.place) }))}</small><small>${esc(outText(j.out))}</small><button class="btn" type="button" data-jget="${k}">${esc(tx("job.collect"))}</button>`;
+    } else if (pickJob && pickJob.k === k) {
+      x += `<div class="bd-places">${Object.keys(JOBS).map((p) => `<button type="button" class="wchip${pickJob.place === p ? " on" : ""}" data-jplace="${k}:${p}"><strong>${esc(tx("p." + p))}</strong><small class="${JOBS[p].fit.includes(ty) ? "ok" : ""}">${esc(JOBS[p].fit.includes(ty) ? tx("job.fit") : outText(JOBS[p].per).replace(/ ?×?[\d.]+/g, ""))}</small></button>`).join("")}</div>`;
+      if (pickJob.place) x += `<div class="rc-btns">${JOB_H.map((hh) => `<button class="btn ghost" type="button" data-jgo="${k}:${pickJob.place}:${hh}">${esc(fmt(jobMs(hh)))} · ${esc(outText(jobYield(k, pickJob.place, hh).out))}</button>`).join("")}</div>`;
+      x += `<button class="btn ghost" type="button" data-jcancel="1">${esc(tx("job.cancel"))}</button>`;
+    } else x += `<small class="muted">${esc(tx("job.idle"))}</small><button class="btn ghost" type="button" data-jpick="${k}" ${Object.keys(J()).length >= jobsMax() ? "disabled" : ""}>${esc(tx("job.send"))}</button>`;
+    return x + "</div></div>";
+  }).join("")}</div>`;
+  return h;
+}
+
+/* ---------- Requests from El Vado (delivery 3) ----------
+   Every day two neighbours ask for something. Each has their own reasons; nobody is a saint (Jose's character rule). */
+const NEIGH = {
+  ruda: { asks: [["berry", 3], ["bun", 2], ["wood", 4]], c: 30, w: 2 },
+  bruno: { asks: [["wood", 5], ["soap", 1], ["tea", 1]], c: 35, w: 1 },
+  esporina: { asks: [["melon", 1], ["dust", 10], ["tea", 1]], c: 25, w: 3 },
+  mirlo: { asks: [["cookie", 1], ["stew", 1], ["wood", 3]], c: 30, w: 2, rumour: true },
+};
+const dayKey = () => (EV.DAILY ? EV.DAILY.dayKey() : new Date().toISOString().slice(0, 10));
+function hashStr(s) { let h = 2166136261; for (const ch of s) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+function orders() {
+  const b = B(), d = dayKey();
+  if (!b.ord || b.ord.day !== d) {
+    const names = Object.keys(NEIGH), h = hashStr(d), a = h % names.length, c = (a + 1 + ((h >> 4) % (names.length - 1))) % names.length;
+    b.ord = { day: d, list: [a, c].map((i, n) => { const who = names[i], N = NEIGH[who], ask = N.asks[(h >> (8 + n * 3)) % N.asks.length]; return { who, need: ask[0], n: ask[1], done: false }; }) };
+    save();
+  }
+  return b.ord.list;
+}
+const haveOf = (need) => (need === "wood" ? B().wood : need === "dust" ? EV.P.dust || 0 : EV.P.inv[need] || 0);
+const needName = (o) => (o.need === "wood" ? tx("r.wood", { n: o.n }) : o.need === "dust" ? "∴ " + o.n : o.n + " × " + EV.itemName(o.need));
+function deliver(i) {
+  const o = orders()[i]; if (!o || o.done) return null;
+  if (haveOf(o.need) < o.n) { EV.sfx("deny"); return { ok: false, text: tx("ord.miss", { what: needName(o) }) }; }
+  const P = EV.P, b = B(), N = NEIGH[o.who];
+  if (o.need === "wood") b.wood -= o.n; else if (o.need === "dust") P.dust -= o.n; else P.inv[o.need] -= o.n;
+  o.done = true;
+  EV.addCoins(N.c, true); b.wood += N.w;
+  let extra = "";
+  if (Math.random() < 0.15) { P.notes = (P.notes || 0) + 1; extra = " " + tx("ord.note"); }
+  if (N.rumour && window.EvoLore) { const r = window.EvoLore.loadingLine(P, L()); if (r) extra += " " + tx("ord.rumour", { r }); }
+  P.c.orders = (P.c.orders || 0) + 1;
+  save(); EV.sfx("coin");
+  return { ok: true, who: o.who, text: tx("n." + o.who + ".thanks") + " " + tx("ord.got", { c: N.c, w: N.w }) + extra };
+}
+function ordersHtml() {
+  const list = orders();
+  return `<h3 class="cat-title">${esc(tx("ord"))}</h3><p class="muted" style="margin:0">${esc(tx("ord.sub"))}</p><div class="bd-list">${list.map((o, i) => `<div class="bd-card${o.done ? " done" : ""}"><div class="bd-top"><strong>${esc(tx("n." + o.who))}</strong><small class="muted">${esc(tx("n." + o.who + ".role"))}</small></div><p class="bd-quote">${esc(tx("n." + o.who + ".ask", { what: needName(o) }))}</p>${o.done ? `<p class="bd-eff next">✓ ${esc(tx("ord.done"))}</p>` : `<p class="bd-eff">${esc(tx("ord.need", { what: needName(o), have: haveOf(o.need) }))} · ${esc(tx("ord.pay", { c: NEIGH[o.who].c, w: NEIGH[o.who].w }))}</p><button class="btn" type="button" data-ord="${i}" ${haveOf(o.need) < o.n ? "disabled" : ""}>${esc(tx("ord.give"))}</button>`}</div>`).join("")}</div>`;
+}
+// for the dialogue at the board in El Vado (world.js)
+function ordersDialog() {
+  const list = orders(), open = list.map((o, i) => [o, i]).filter(([o]) => !o.done);
+  const text = open.length ? open.map(([o]) => tx("n." + o.who) + ": " + tx("n." + o.who + ".ask", { what: needName(o) })).join(" ") : tx("ord.allDone");
+  return { text, opts: open.map(([, i]) => "ord." + i) };
+}
+const ordLabel = (i) => { const o = orders()[i]; return tx("ord.giveTo", { n: tx("n." + o.who) }); };
+
 /* ---------- Hooks into the rest of the game ---------- */
+// companions at work can't go on expeditions
+if (EV.EGGS && EV.EGGS.offer) { const prevOffer = EV.EGGS.offer; EV.EGGS.offer = function () { return prevOffer.apply(this, arguments).filter((k) => !working(k)); }; }
 // basic food (price 0) now comes from the Garden and is counted in the bag
 EV.HOOKS.gardenOn = () => true;
 // expeditions bring wood and move the build forward
@@ -247,6 +407,14 @@ const css = `
 .bd-pips { color: #d9a520; letter-spacing: 1px; } .bd-pips i { color: var(--muted); font-style: normal; opacity: .6; }
 .bd-eff { margin: 0; font-size: 13.5px; line-height: 1.4; } .bd-eff.next { color: var(--moss, #3c7a2c); }
 .bd-store { margin: 0; font-size: 13.5px; font-weight: 600; }
+.bd-jobs { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; margin-top: 8px; }
+.bd-jobrow { display: flex; gap: 8px; border: 2px solid var(--line); background: var(--bg); padding: 8px; align-items: flex-start; }
+.bd-jobrow canvas { width: 72px; height: 60px; image-rendering: pixelated; flex: none; }
+.bd-jtxt { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; min-width: 0; flex: 1; } .bd-jtxt .bar { width: 100%; height: 7px; }
+.bd-jtxt small.ok { color: var(--moss, #3c7a2c); font-weight: 600; }
+.bd-places { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; width: 100%; } .bd-places .wchip.on { outline: 2px solid #d9a520; }
+.bd-quote { margin: 0; font-family: Georgia, serif; font-size: 14px; line-height: 1.45; }
+.bd-card.done { opacity: .7; }
 .bd-max { margin: 0; font-weight: 600; color: #b8860b; }
 .bd-card .poor, .bd-store .poor { color: #b8364b; font-size: 12px; }
 `;
@@ -257,7 +425,7 @@ const prevShow = EV.HOOKS.showScreen;
 EV.HOOKS.showScreen = function () { if (prevShow) prevShow.apply(this, arguments); refreshBtn(); };
 $("buildPanel").addEventListener("click", onClick);
 $("btnBuild").addEventListener("click", () => { EV.sfx("tap"); EV.togglePanel("build"); });
-setInterval(() => { tick(); refreshBtn(); const el = $("buildPanel"); if (el && !el.hidden && B().job) render(); }, 5000);
+setInterval(() => { tick(); refreshBtn(); const el = $("buildPanel"); if (el && !el.hidden && (B().job || Object.keys(J()).length) && !pickJob) render(); }, 5000);
 
 // first time: basic food moves to the Garden; leave a few berries so nobody goes hungry
 function hello() {
@@ -272,5 +440,6 @@ hello(); tick(); refreshBtn();
 EV.BUILD = { B, lvl, harvest, gardenStock, grow, start, tick, jobLeft, render, COST, GARDEN, INC_CUT, MAX, PLACES,
   incCut: () => INC_CUT[lvl("inc")] || 0, incExtra: () => (lvl("inc") >= MAX ? 1 : 0), tx, EFF, eff,
   pantryBonus: () => eff("pantry"), wellBonus: () => eff("well"), pathBonus: () => eff("path"), nookN: () => eff("nook"),
+  sendJob, collect, jobsReady, working, J, JOBS, orders, deliver, ordersDialog, ordLabel, NEIGH,
   nestShare: () => eff("nest") / 100, nestPet: () => (lvl("nest") >= MAX ? 2 : 1), craftCost: () => eff("craft") };
 })(window);

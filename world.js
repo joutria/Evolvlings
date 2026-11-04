@@ -25,7 +25,7 @@ const TX = {
     "p.lawn": "Claro abierto", "p.lawn.d": "Jugar a cazar estrellas", "p.root": "Raíz del Claro", "p.root.d": "Escuchar la Raíz", "p.board": "Tablón", "p.board.d": "Ver las tareas",
     "p.toVado": "Camino al Vado", "p.toVado.d": "Cruzar el arroyo", "p.toHome": "Camino a casa", "p.toHome.d": "Volver a tu rincón",
     "p.well": "Pozo de los Ecos", "p.well.d": "Tirar cartas", "p.pantry": "Despensa", "p.pantry.d": "Tirada del día", "p.shop": "Tienda", "p.shop.d": "Comprar comida y cosas",
-    "p.garden": "Huerto", "p.garden.d": "Cosechar comida y Madera", "garden.hi": "{name} husmea entre las matas del Huerto.", "build.open": "Ver obras",
+    "p.garden": "Huerto", "p.garden.d": "Cosechar comida y Madera", "garden.hi": "{name} husmea entre las matas del Huerto.", "build.open": "Ver obras", "p.orders": "Tablón de encargos", "p.orders.d": "Lo que piden los vecinos", "ordersName": "Tablón del Vado",
     "p.nest": "Incubadora", "p.nest.d": "Ver el Refugio y los huevos", "p.tila": "Tila", "p.tila.d": "Hablar", "p.trail": "Sendero de las expediciones", "p.trail.d": "Salir de expedición",
     "food.pick": "¿Qué le pones en el comedero?", "food.none": "Cerrar",
     "d.close": "Adiós", "d.more": "Seguir escuchando",
@@ -57,7 +57,7 @@ const TX = {
     "p.lawn": "Open lawn", "p.lawn.d": "Play star catch", "p.root": "Glade Root", "p.root.d": "Listen to the Root", "p.board": "Notice board", "p.board.d": "See the tasks",
     "p.toVado": "Path to El Vado", "p.toVado.d": "Cross the stream", "p.toHome": "Path home", "p.toHome.d": "Back to your corner",
     "p.well": "Well of Echoes", "p.well.d": "Pull cards", "p.pantry": "Pantry", "p.pantry.d": "Pull of the day", "p.shop": "Shop", "p.shop.d": "Buy food and things",
-    "p.garden": "Garden", "p.garden.d": "Harvest food and Wood", "garden.hi": "{name} sniffs around the Garden beds.", "build.open": "See builds",
+    "p.garden": "Garden", "p.garden.d": "Harvest food and Wood", "garden.hi": "{name} sniffs around the Garden beds.", "build.open": "See builds", "p.orders": "Request board", "p.orders.d": "What the neighbours need", "ordersName": "Vado board",
     "p.nest": "Incubator", "p.nest.d": "See the Refuge and eggs", "p.tila": "Tila", "p.tila.d": "Talk", "p.trail": "Expedition trail", "p.trail.d": "Set out on an expedition",
     "food.pick": "What goes in the bowl?", "food.none": "Close",
     "d.close": "Goodbye", "d.more": "Keep listening",
@@ -159,6 +159,7 @@ const MAPS = {
       { id: "nest", x: 11, y: 7, solid: [[11, 7]], stand: [10, 7], obj: "nest" },
       { id: "tila", x: 10, y: 9, solid: [[10, 9]], stand: [9, 9], obj: "tila" },
       { id: "trail", x: 14, y: 4, stand: [14, 4], obj: "sign" },
+      { id: "orders", x: 9, y: 1, solid: [[9, 1]], stand: [9, 2], obj: "board", when: () => !!EV.BUILD },
     ],
     start: [7, 1], deco: [["tree", 1, 1], ["tree", 13, 5], ["tree", 1, 9], ["lamp", 6, 6], ["lamp", 8, 3], ["flower", 13, 9]],
   },
@@ -626,6 +627,7 @@ function act(p) {
     case "tila": dialog = { who: "tila", emo: "happy", pet: "happy", text: tx("tila.hi", { name: S.name }), opts: ["tila.q1", "tila.q2", "tila.q3"] }; break;
     case "patch": forage(); break;
     case "garden": { const r = EV.BUILD.harvest(); dialog = { who: "pet", emo: r.n ? "happy" : "normal", text: tx("garden.hi", { name: S.name }) + " " + r.text, opts: ["build.open"] }; break; }
+    case "orders": { const r = EV.BUILD.ordersDialog(); dialog = { who: "orders", text: r.text, opts: r.opts.concat(["build.open"]) }; break; }
     case "bottle": openBottle(); break;
     case "trail": dialog = { who: "trail", text: tx("trailAsk"), opts: ["trail.go", "trail.stay"] }; break;
   }
@@ -643,6 +645,11 @@ function answer(k) {
   if (k === "close") { dialog = null; render(); return; }
   if (k === "root.more") { rootTalk(); render(); return; }
   if (k === "build.open") { dialog = null; render(); EV.togglePanel("build", true); return; }
+  if (k.startsWith("ord.")) {
+    const r = EV.BUILD.deliver(+k.slice(4)), nx = EV.BUILD.ordersDialog();
+    dialog = { who: "orders", pet: r && r.ok ? "happy" : "normal", text: r ? r.text : nx.text, opts: nx.opts.concat(["build.open"]) };
+    render(); return;
+  }
   if (k === "bed.sleep") { dialog = null; if (!S.sleeping) EV.toggleSleep(); render(); return; }
   if (k === "tila.q1") { const r = rumour(); dialog = { who: "tila", emo: "normal", pet: r ? "surprised" : "normal", text: r ? tx("tila.a1") + " " + quote(r) : tx("tila.a1none"), opts: ["tila.q2", "tila.q3"] }; }
   else if (k === "tila.q2") { const lit = !!(EV.P.cosm && EV.P.cosm.mem && EV.P.cosm.mem.tila); dialog = { who: "tila", emo: lit ? "happy" : "worried", pet: lit ? "happy" : "sad", text: tx(lit ? "tila.a2lit" : "tila.a2dark"), opts: ["tila.q1", "tila.q3"] }; }
@@ -690,14 +697,14 @@ function portrait(who, emo) {
   if (who === "root") drawObj(g, "root", 20, 34, performance.now());
   else if (who === "tila") tilaBust(g, emo);
   else if (who === "pet") petPortrait(g, emo);
-  else { g.scale(2, 2); drawObj(g, who === "bed" ? "bed" : who === "bottle" ? "bottle" : "sign", 10, who === "bed" ? 21 : 19, 0); }
+  else { g.scale(2, 2); drawObj(g, who === "bed" ? "bed" : who === "bottle" ? "bottle" : who === "orders" ? "board" : "sign", 10, who === "bed" ? 21 : 19, 0); }
   g.restore();
   return c.toDataURL();
 }
 function dlgHtml(alive) {
   if (dialog) {
-    const nm = dialog.who === "tila" ? "Tila" : dialog.who === "root" ? tx("root.name") : dialog.who === "bed" ? tx("bedName") : dialog.who === "bottle" ? tx("bottleName") : dialog.who === "pet" ? EV.S.name : tx("trailName");
-    const lbl = (k) => (k === "trail.go" ? tx("go", { n: STEPS.trail }) : k === "trail.stay" ? tx("stay") : k === "root.more" ? tx("d.more") : tx(k));
+    const nm = dialog.who === "tila" ? "Tila" : dialog.who === "root" ? tx("root.name") : dialog.who === "bed" ? tx("bedName") : dialog.who === "bottle" ? tx("bottleName") : dialog.who === "pet" ? EV.S.name : dialog.who === "orders" ? tx("ordersName") : tx("trailName");
+    const lbl = (k) => (k.startsWith("ord.") ? EV.BUILD.ordLabel(+k.slice(4)) : k === "trail.go" ? tx("go", { n: STEPS.trail }) : k === "trail.stay" ? tx("stay") : k === "root.more" ? tx("d.more") : tx(k));
     const main = (k) => k === "trail.go" || k === "bed.sleep";
     const react = dialog.pet && dialog.who !== "pet" ? `<img class="wdlg-pet" alt="" src="${portrait("pet", dialog.pet)}">` : "";
     return `<div class="wdlg"><div class="wdlg-faces"><img class="wdlg-face" alt="" src="${portrait(dialog.who, dialog.emo)}">${react}</div><div class="wdlg-body"><b>${esc(nm)}</b><p>${esc(dialog.text)}</p><div class="wdlg-opts">${dialog.opts.map((k) => `<button class="btn${main(k) ? "" : " ghost"}" type="button" data-wans="${k}">${esc(lbl(k))}</button>`).join("")}<button class="btn ghost" type="button" data-wans="close">${esc(tx(dialog.close || "d.close"))}</button></div></div></div>`;
