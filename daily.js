@@ -373,7 +373,7 @@ $("btnDaily").addEventListener("click", () => { EV.sfx("tap"); EV.togglePanel("d
 // refresh the chip now and then (tasks complete in the background as you play)
 const prevShow = EV.HOOKS.showScreen;
 EV.HOOKS.showScreen = function () { if (prevShow) prevShow.apply(this, arguments); refreshChip(); };
-setInterval(() => { refreshChip(); }, 4000);
+EV.every(4000, refreshChip);
 tick(); EV.save(); refreshChip();
 EV.DAILY = { tick, D, dayKey, weekKey, DAILY, WEEKLY, CHESTS, hasNews, render, calReward, totalStars };
 })(typeof window !== "undefined" ? window : globalThis);

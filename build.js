@@ -425,7 +425,7 @@ const prevShow = EV.HOOKS.showScreen;
 EV.HOOKS.showScreen = function () { if (prevShow) prevShow.apply(this, arguments); refreshBtn(); };
 $("buildPanel").addEventListener("click", onClick);
 $("btnBuild").addEventListener("click", () => { EV.sfx("tap"); EV.togglePanel("build"); });
-setInterval(() => { tick(); refreshBtn(); const el = $("buildPanel"); if (el && !el.hidden && (B().job || Object.keys(J()).length) && !pickJob) render(); }, 5000);
+EV.every(5000, () => { tick(); refreshBtn(); const el = $("buildPanel"); if (el && !el.hidden && (B().job || Object.keys(J()).length) && !pickJob) render(); });
 
 // first time: basic food moves to the Garden; leave a few berries so nobody goes hungry
 function hello() {

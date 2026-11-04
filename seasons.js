@@ -307,7 +307,7 @@ $("seasonPanel").addEventListener("click", onClick);
 $("btnSeason").addEventListener("click", () => { EV.sfx("tap"); EV.togglePanel("season"); });
 const prevShow = EV.HOOKS.showScreen;
 EV.HOOKS.showScreen = function () { if (prevShow) prevShow.apply(this, arguments); refreshChip(); };
-setInterval(refreshChip, 5000);
+EV.every(5000, refreshChip);
 SS(); refreshChip();
 EV.SEASON = { now, SS, passXP, passLvl, reward, wax, lampCost, SHOP, SEASONS, LVLS, PER, render, hasNews, applyCosm };
 })(typeof window !== "undefined" ? window : globalThis);
