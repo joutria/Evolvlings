@@ -34,6 +34,9 @@ const TX = {
     "tila.a2lit": "¡Encendida entera! Desde la Noche de Faroles los vecinos se paran a mirarla. Gracias por ayudarme.", "tila.a2dark": "Media calle a oscuras todavía. Cuando llegue la Noche de Faroles, ¿me echas una mano?",
     "tila.a3": "¿Esto? El aceite de Albor mancha que da gusto. En mi barrio decimos que si no te manchas, no has encendido nada.",
     trailName: "Sendero", trailAsk: "El sendero sale del Vado hacia las zonas del valle. Cuesta 3 pasos y la energía de siempre.", go: "Salir ({n} pasos)", stay: "Ahora no",
+    bedName: "Antes de dormir", "bed.sum": "Así ha ido el día de {name}:", "bed.none": "Ha sido un día tranquilo, sin mucho que contar.", "bed.board": "En el tablón hay algo nuevo esperando.",
+    "bed.steps": "Le quedan {n} pasos y mañana se recargan 10.", "bed.sleep": "Dormir", "bed.later": "Todavía no",
+    "s.fed": "Comidas", "s.cuddles": "Mimos", "s.plays": "Partidas", "s.messes": "Manchas limpias", "s.expDone": "Expediciones", "s.dailyDone": "Tareas",
   },
   en: {
     nav: "Map", title: "The Glade and El Vado", steps: "{n} steps", stepsT: "Steps today: {n}. 10 come back at midnight (up to 20 saved). Tea, stew and the energy recharge give extra steps, up to 12 a day.",
@@ -55,6 +58,9 @@ const TX = {
     "tila.a2lit": "Fully lit! Since the Night of Lanterns the neighbours stop to look at it. Thanks for helping me.", "tila.a2dark": "Half the street is still dark. When the Night of Lanterns comes, will you give me a hand?",
     "tila.a3": "These? Albor oil stains like nothing else. In my quarter we say if you don't get stained, you haven't lit anything.",
     trailName: "Trail", trailAsk: "The trail leaves El Vado for the valley's zones. It costs 3 steps and the usual energy.", go: "Set out ({n} steps)", stay: "Not now",
+    bedName: "Before bed", "bed.sum": "Here's how {name}'s day went:", "bed.none": "It was a quiet day, not much to tell.", "bed.board": "Something new is waiting on the notice board.",
+    "bed.steps": "It has {n} steps left, and 10 come back tomorrow.", "bed.sleep": "Sleep", "bed.later": "Not yet",
+    "s.fed": "Meals", "s.cuddles": "Cuddles", "s.plays": "Games", "s.messes": "Messes cleaned", "s.expDone": "Expeditions", "s.dailyDone": "Tasks",
   },
 };
 const tx = (k, v) => { let s = (TX[L()] || TX.en)[k]; if (s == null) s = TX.en[k]; if (s == null) return k; if (v) s = s.replace(/\{(\w+)\}/g, (m, n) => (v[n] != null ? v[n] : m)); return s; };
@@ -195,6 +201,11 @@ function drawGround(id) {
 // things with height, drawn from the front; (bx, by) is the bottom-centre of their base tile
 function drawObj(c, kind, bx, by, t) {
   const sh = (w) => { c.fillStyle = C.shadow; c.beginPath(); c.ellipse(bx + 1, by - 1, w, 2.5, 0, 0, Math.PI * 2); c.fill(); };
+  if (kind === "board" && boardNew()) {
+    // something new on the board: a soft gold glow and a pin
+    const a = 0.25 + 0.2 * Math.sin(t / 300); c.fillStyle = `rgba(226,174,46,${a.toFixed(2)})`; c.fillRect(bx - 9, by - 20, 18, 15);
+    rect(c, bx - 1, by - 26, 2, 4, C.gold); rect(c, bx - 1, by - 21, 2, 1, C.gold);
+  }
   if (kind === "tree") {
     sh(8); rect(c, bx - 2, by - 10, 4, 10, C.trunk);
     c.fillStyle = C.leaf; c.beginPath(); c.arc(bx, by - 18, 10, 0, Math.PI * 2); c.fill();
@@ -235,71 +246,247 @@ function drawObj(c, kind, bx, by, t) {
     const on = !isDay(); rect(c, bx - 2, by - 23, 4, 3, on ? C.gold : C.cream);
   } else if (kind === "flower") {
     rect(c, bx - 1, by - 5, 1, 5, C.leaf); rect(c, bx - 2, by - 7, 3, 3, "#cf5f9f"); rect(c, bx + 2, by - 4, 1, 4, C.leaf); rect(c, bx + 1, by - 6, 3, 3, C.gold);
+  } else if (kind === "nestOld") {
+    // an empty nest with a cracked shell: one for every companion hatched in the Refuge
+    sh(6); rect(c, bx - 6, by - 4, 12, 4, C.wood2); rect(c, bx - 6, by - 4, 12, 1, C.wood); rect(c, bx - 4, by - 2, 2, 1, C.wood);
+    c.fillStyle = C.cream; c.beginPath(); c.ellipse(bx - 1, by - 5, 3, 2.5, 0, Math.PI, 0); c.fill(); rect(c, bx + 2, by - 6, 2, 2, C.cream);
+  } else if (kind === "scrolls" || kind === "scrolls2" || kind === "lectern") {
+    // the writings you've found pile up by the board: a roll, then a stack, then a reading stand
+    if (kind === "lectern") { sh(6); rect(c, bx - 1, by - 9, 2, 9, C.wood); rect(c, bx - 6, by - 14, 12, 5, C.wood2); rect(c, bx - 5, by - 14, 10, 3, C.cream); rect(c, bx, by - 14, 1, 3, C.wood); }
+    else { sh(5); rect(c, bx - 5, by - 3, 10, 3, C.cream); rect(c, bx - 5, by - 3, 1, 3, "#c9b48a"); rect(c, bx + 4, by - 3, 1, 3, "#c9b48a"); rect(c, bx - 1, by - 3, 2, 3, C.red);
+      if (kind === "scrolls2") { rect(c, bx - 3, by - 6, 8, 3, "#efe3c6"); rect(c, bx - 3, by - 6, 1, 3, "#c9b48a"); rect(c, bx + 4, by - 6, 1, 3, "#c9b48a"); } }
   } else if (kind === "tila") {
     sh(5); rect(c, bx - 4, by - 10, 8, 10, "#5b4b8e"); rect(c, bx - 3, by - 16, 6, 6, "#f0c8a0"); rect(c, bx - 4, by - 17, 8, 3, "#3b2a4a");
     rect(c, bx + 4, by - 12, 1, 6, C.ink); rect(c, bx + 3, by - 7, 4, 4, C.gold); rect(c, bx - 2, by - 14, 1, 1, C.ink); rect(c, bx + 1, by - 14, 1, 1, C.ink);
   }
 }
+const boardNew = () => { const d = $("dailyDot"); return !!(d && !d.hidden); };
 const isDay = () => { const h = new Date().getHours(); return h >= 7 && h < 19; };
 
-/* ---------- State and loop ---------- */
-let W0 = null; // { map, x, y, px, py, path, face, then, walking }
+/* ---------- State ---------- */
+let W0 = null; // { map, x, y, px, py, path, face, dir, then, cb }
 let cv = null, ctx = null, raf = 0, dialog = null, foodPick = false;
 function ws() {
   const P = EV.P;
   if (!P.world || !MAPS[P.world.map]) P.world = { map: "home", x: MAPS.home.start[0], y: MAPS.home.start[1] };
-  if (!W0) W0 = { map: P.world.map, x: P.world.x, y: P.world.y, px: P.world.x * TW, py: P.world.y * TW, path: [], face: 1, dir: "front", then: null };
+  if (!W0) W0 = { map: P.world.map, x: P.world.x, y: P.world.y, px: P.world.x * TW, py: P.world.y * TW, path: [], face: 1, dir: "front", then: null, cb: null };
   return W0;
 }
 const curMap = () => MAPS[ws().map];
 const quiet = () => (EV.quietOn ? EV.quietOn() : false);
 const placesNow = () => curMap().places.filter((p) => !(p.hideQuiet && quiet()));
+const panelOpen = () => { const el = $("mapPanel"); return !!(el && !el.hidden); };
+// the home is drawn from above unless the player picked the side view; the star catch game always uses the side view
+function topOn() {
+  const S = EV.S, g = $("scrGame");
+  return !!(S && S.phase === "alive" && EV.P.view !== "side" && !(EV.miniOn && EV.miniOn()) && g && !g.hidden);
+}
 
+// things that show up at home as the story moves on: a nest for each hatched companion, the writings you've found, Tila's lantern
+function homeExtras() {
+  const P = EV.P, out = [];
+  const roster = Object.keys((P.eg && P.eg.roster) || {});
+  [[11, 9], [12, 9], [9, 9], [12, 8]].slice(0, roster.length).forEach(([x, y]) => out.push(["nestOld", x, y]));
+  const n = Object.keys(P.escritos || {}).length;
+  if (n) out.push([n >= 15 ? "lectern" : n >= 5 ? "scrolls2" : "scrolls", 12, 5]);
+  if (P.cosm && P.cosm.mem && P.cosm.mem.tila) out.push(["lamp", 6, 9]);
+  return out;
+}
+
+function mood() { const s = EV.S.stats; return (s.full + s.fun + s.energy + s.clean) / 4; }
 function petSprite(dir, sq) {
   const S = EV.S; if (!S) return null;
   if (typeof EVS !== "undefined" && EVS.KINDS && EVS.KINDS.includes(S.species)) {
-    const n = S.stage >= 2 ? 24 : 16;
-    try { return EVS.sprite(S.species, n, Math.min(2, S.stage || 1), sq || 0, S.sleeping ? "sleep" : "normal", false, dir || "front"); } catch (e) { return null; }
+    const st = Math.max(0, Math.min(2, S.stage || 0)), n = [14, 18, 24][st];
+    const fx = EV.FX || {}, m = mood();
+    const emo = S.sleeping ? "sleep" : fx.foodAnim ? "surprised" : S.sick || m < 35 ? "sad" : m > 70 ? "happy" : "normal";
+    try { return EVS.sprite(S.species, n, st, sq || 0, emo, S.form === "scruffy", dir || "front"); } catch (e) { return null; }
   }
   return null;
 }
-function frame(now) {
-  raf = 0;
-  const el = $("mapPanel"); if (!el || el.hidden || !ctx) return;
-  const w = ws(), m = curMap();
-  // walking: 5 tiles a second, one tile at a time
+
+/* ---------- Walking: one update a frame, shared by the map panel and the home ---------- */
+let lastT = 0;
+function stepWalk(now) {
+  if (now === lastT) return;
+  const dt = lastT ? Math.min(0.05, (now - lastT) / 1000) : 0; lastT = now;
+  const w = ws();
   if (w.path.length) {
-    const [tx2, ty2] = w.path[0], gx = tx2 * TW, gy = ty2 * TW, sp = 80 / 60;
+    // 5 tiles a second, one tile at a time
+    const [tx2, ty2] = w.path[0], gx = tx2 * TW, gy = ty2 * TW, sp = 80 * dt;
     const dx = gx - w.px, dy = gy - w.py, d = Math.hypot(dx, dy);
     // 4 directions: side when moving across (mirrored for left), back when walking up, front when walking down
     if (dx) { w.face = Math.sign(dx); w.dir = "side"; } else if (dy) w.dir = dy < 0 ? "back" : "front";
     if (d <= sp) { w.px = gx; w.py = gy; w.x = tx2; w.y = ty2; w.path.shift(); if (!w.path.length) { w.dir = "front"; arrived(); } }
     else { w.px += (dx / d) * sp; w.py += (dy / d) * sp; }
+  } else wander(dt);
+}
+// at home and with nothing to do, the creature potters about on its own
+function wander(dt) {
+  const S = EV.S, w = ws();
+  if (!topOn() || panelOpen() || w.map !== "home" || S.sleeping || dialog || EV.FX.foodAnim || Math.random() > dt * 0.22) return;
+  const m = curMap(), opts = [];
+  for (let y = w.y - 3; y <= w.y + 3; y++) for (let x = w.x - 3; x <= w.x + 3; x++) if (!blocked(m, x, y) && (x !== w.x || y !== w.y) && m.rows[y][x] !== "=") opts.push([x, y]);
+  if (!opts.length) return;
+  const r = path(m, [w.x, w.y], opts[Math.floor(Math.random() * opts.length)]);
+  if (r && r.length && r.length <= 5) { w.path = r; w.then = null; w.cb = null; }
+}
+// route from where the creature is now; if it is mid-step, finish that tile first
+function routeTo(stand) {
+  const w = ws(), m = curMap();
+  if (!w.path.length) return w.x === stand[0] && w.y === stand[1] ? [] : path(m, [w.x, w.y], stand);
+  const nxt = w.path[0];
+  if (nxt[0] === stand[0] && nxt[1] === stand[1]) return [nxt];
+  const r = path(m, nxt, stand); return r ? [nxt].concat(r) : null;
+}
+
+/* ---------- Drawing one frame of the map onto a 240 x 176 context ---------- */
+function messTile(m) { const k = Math.round(m.x); return [2 + Math.round(((k - 30) / 300) * 10), 6 + (k % 3)]; }
+function drawWorld(g, now) {
+  const w = ws(), m = curMap(), S = EV.S;
+  g.imageSmoothingEnabled = false;
+  g.drawImage(drawGround(w.map), 0, 0);
+  if (w.map === "home" && S && S.messes) for (const ms of S.messes) {
+    const [mx, my] = messTile(ms), x = mx * TW + 8, y = my * TW + 10;
+    rect(g, x - 4, y - 2, 8, 4, "#7a5a3a"); rect(g, x - 2, y - 4, 4, 2, "#8f6c46"); rect(g, x + 3, y - 3, 2, 2, "#7a5a3a");
   }
-  ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(drawGround(w.map), 0, 0);
   // sorted by base Y so the creature walks in front of or behind things
   const items = [];
-  for (const [k, x, y] of m.deco) items.push({ y: y * TW + TW, draw: () => drawObj(ctx, k, x * TW + 8, y * TW + TW - 1, now) });
-  for (const p of placesNow()) if (p.obj) items.push({ y: p.y * TW + TW, draw: () => drawObj(ctx, p.obj, p.x * TW + 8, p.y * TW + TW - 1, now) });
-  // two-frame step while walking
-  const img = petSprite(w.dir, w.path.length ? Math.floor(now / 160) % 2 : 0);
-  items.push({ y: w.py + TW + 0.5, draw: () => {
-    const bob = w.path.length ? Math.abs(Math.sin(now / 90)) * 2 : Math.sin(now / 400) * 0.6;
-    const bx = Math.round(w.px + 8), by = Math.round(w.py + TW - 1);
-    ctx.fillStyle = C.shadow; ctx.beginPath(); ctx.ellipse(bx, by - 1, 6, 2.5, 0, 0, Math.PI * 2); ctx.fill();
+  const deco = w.map === "home" ? m.deco.concat(homeExtras()) : m.deco;
+  for (const [k, x, y] of deco) items.push({ y: y * TW + TW, draw: () => drawObj(g, k, x * TW + 8, y * TW + TW - 1, now) });
+  for (const p of placesNow()) if (p.obj) items.push({ y: p.y * TW + TW, draw: () => drawObj(g, p.obj, p.x * TW + 8, p.y * TW + TW - 1, now) });
+  const walking = w.path.length > 0;
+  // asleep at home: curled up on the moss bed
+  const bed = MAPS.home.places.find((p) => p.id === "bed");
+  const inBed = S && S.sleeping && w.map === "home" && !walking;
+  const img = petSprite(inBed ? "front" : w.dir, walking ? Math.floor(now / 160) % 2 : 0);
+  const fx = EV.FX || {};
+  const pos = { x: 0, y: 0, h: img ? img.height : 14 };
+  items.push({ y: (inBed ? bed.y * TW + 1 : w.py) + TW + 0.5, draw: () => {
+    const hop = fx.foodAnim ? Math.abs(Math.sin(now / 120)) * 2 : 0;
+    const bob = walking ? Math.abs(Math.sin(now / 90)) * 2 : S && S.sleeping ? 0 : Math.sin(now / 400) * 0.6 + hop;
+    const bx = inBed ? bed.x * TW + 8 : Math.round(w.px + 8), by = inBed ? bed.y * TW + TW - 5 : Math.round(w.py + TW - 1);
+    pos.x = bx; pos.y = by - Math.round(bob);
+    if (!inBed) { g.fillStyle = C.shadow; g.beginPath(); g.ellipse(bx, by - 1, 6, 2.5, 0, 0, Math.PI * 2); g.fill(); }
     if (img) {
-      ctx.save(); ctx.translate(bx, by - Math.round(bob)); if (w.dir === "side" && w.face < 0) ctx.scale(-1, 1);
-      ctx.drawImage(img, -Math.round(img.width / 2), -img.height); ctx.restore();
-    } else { ctx.fillStyle = C.gold; ctx.beginPath(); ctx.arc(bx, by - 7 - bob, 6, 0, Math.PI * 2); ctx.fill(); }
+      g.save(); g.translate(bx, by - Math.round(bob)); if (!inBed && w.dir === "side" && w.face < 0) g.scale(-1, 1);
+      g.drawImage(img, -Math.round(img.width / 2), -img.height); g.restore();
+    } else { g.fillStyle = C.gold; g.beginPath(); g.arc(bx, by - 7 - bob, 6, 0, Math.PI * 2); g.fill(); }
   } });
   items.sort((a, b) => a.y - b.y).forEach((it) => it.draw());
-  // canopies over the top row of trees
-  if (!isDay()) { ctx.fillStyle = "rgba(31,47,92,.32)"; ctx.fillRect(0, 0, W, H); }
-  if (EV.S && EV.S.sleeping) { ctx.fillStyle = "rgba(14,8,20,.35)"; ctx.fillRect(0, 0, W, H); }
+  if (!isDay()) { g.fillStyle = "rgba(31,47,92,.32)"; g.fillRect(0, 0, W, H); }
+  if (S && S.sleeping) { g.fillStyle = "rgba(14,8,20,.35)"; g.fillRect(0, 0, W, H); }
+  return pos;
+}
+
+/* ---------- The map panel ---------- */
+function frame(now) {
+  raf = 0;
+  if (!panelOpen() || !ctx) return;
+  stepWalk(now);
+  drawWorld(ctx, now);
   raf = requestAnimationFrame(frame);
 }
 function kick() { if (!raf) raf = requestAnimationFrame(frame); }
+
+/* ---------- The home, drawn from above at 3x into the habitat box ---------- */
+const HS = 3, HOY = 16; // scale, and the top margin that fills the 360:280 box
+let off = null, offG = null, topG = null;
+function bubbleHi(c, x, y, text) {
+  c.font = '600 26px "EvNum", "Pixelify Sans", monospace';
+  const w = Math.round(Math.max(70, c.measureText(text).width + 34)), h = 46;
+  const bx = Math.max(10, Math.min(720 - w - 10, Math.round(x - w / 2))), by = Math.max(6, Math.round(y - h - 14));
+  c.fillStyle = "#fbf6ef"; c.strokeStyle = "#1d1626"; c.lineWidth = 3;
+  c.fillRect(bx, by, w, h); c.strokeRect(bx + 1.5, by + 1.5, w - 3, h - 3);
+  const tx2 = Math.max(bx + 14, Math.min(bx + w - 14, x));
+  c.fillStyle = "#1d1626"; c.fillRect(tx2 - 6, by + h - 2, 12, 6); c.fillStyle = "#fbf6ef"; c.fillRect(tx2 - 3, by + h - 3, 6, 4);
+  c.fillStyle = "#1d1626"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(text, bx + w / 2, by + h / 2 + 1);
+}
+function homeFrame(now) {
+  requestAnimationFrame(homeFrame);
+  const tc = $("topScene"); if (!tc) return;
+  const on = topOn();
+  if (tc.hidden === on) { tc.hidden = !on; renderHomeDlg(); }
+  if (!on) return;
+  if (!off) { off = document.createElement("canvas"); off.width = W; off.height = H; offG = off.getContext("2d"); topG = tc.getContext("2d"); }
+  stepWalk(now);
+  const pos = drawWorld(offG, now), S = EV.S, fx = EV.FX || {}, c = topG;
+  c.imageSmoothingEnabled = false;
+  c.fillStyle = C.grassN; c.fillRect(0, 0, 720, 560);
+  c.drawImage(off, 0, HOY, W * HS, H * HS);
+  // the strips above and below the map get the same night and sleep tint
+  for (const [on2, col] of [[!isDay(), "rgba(31,47,92,.32)"], [S.sleeping, "rgba(14,8,20,.35)"]]) if (on2) { c.fillStyle = col; c.fillRect(0, 0, 720, HOY); c.fillRect(0, HOY + H * HS, 720, 560 - HOY - H * HS); }
+  // the side scene's hearts, sparkles and bubbles, drawn around the creature
+  const hx = pos.x * HS, hy = HOY + (pos.y - pos.h / 2) * HS, top = HOY + (pos.y - pos.h) * HS;
+  for (const e of fx.effects || []) {
+    const x = hx + (e.x - fx.petX) * 0.9, y = hy + (e.y - 190) * 0.9;
+    c.save(); c.globalAlpha = Math.max(0, Math.min(1, e.life));
+    if (e.type === "heart") { c.fillStyle = "#ef6f9a"; c.translate(x, y); c.scale(e.r / 6, e.r / 6); c.beginPath(); c.moveTo(0, 6); c.bezierCurveTo(-10, -2, -6, -10, 0, -5); c.bezierCurveTo(6, -10, 10, -2, 0, 6); c.fill(); }
+    else if (e.type === "bubble") { c.strokeStyle = "#ffffff"; c.lineWidth = 2; c.beginPath(); c.arc(x, y, e.r * 1.4, 0, Math.PI * 2); c.stroke(); c.fillStyle = "rgba(255,255,255,.25)"; c.fill(); }
+    else if (e.type === "petal" || e.type === "spark") { c.fillStyle = e.hue || "#ffe27a"; c.fillRect(Math.round(x / 3) * 3, Math.round(y / 3) * 3, 6, 6); }
+    else if (e.type === "txt" && EV.pixelText) EV.pixelText(c, e.text + " ✦", Math.round(hx + (e.x - fx.petX) * 0.6), Math.round(top - 10 - (220 - e.y) * 0.2), 24, "#ffd57a");
+    c.restore();
+  }
+  if (S.sick && !S.sleeping) { const x = hx + 30, y = top - 8; c.fillStyle = "#241030"; c.fillRect(x, y, 22, 22); c.fillStyle = "#fbf6ef"; c.fillRect(x + 2, y + 2, 18, 18); c.fillStyle = "#d9542c"; c.fillRect(x + 8, y + 4, 6, 14); c.fillRect(x + 4, y + 8, 14, 6); }
+  if (S.sleeping && EV.pixelText) {
+    const t = now / 1000;
+    for (let i = 0; i < 3; i++) { const p = (t * 0.5 + i / 3) % 1; c.globalAlpha = 1 - p; EV.pixelText(c, "z", Math.round(hx + 24 + p * 30), Math.round(top - p * 50 - i * 2), 22 + i * 3, "#c8eef5"); }
+    c.globalAlpha = 1;
+  }
+  if (fx.bubble && now < fx.bubble.until) bubbleHi(c, hx, top, fx.bubble.text);
+}
+function topPoint(ev) {
+  const r = $("topScene").getBoundingClientRect();
+  const x = ((ev.clientX - r.left) / r.width) * 720 / HS, y = (((ev.clientY - r.top) / r.height) * 560 - HOY) / HS;
+  return { x, y, tx: Math.floor(x / TW), ty: Math.floor(y / TW) };
+}
+// tapping at home: the creature gets a pat; a place does what its care button does
+function onTopTap(ev) {
+  const S = EV.S; if (!S || S.phase !== "alive") return;
+  const p = topPoint(ev), w = ws();
+  const bed = MAPS.home.places.find((q) => q.id === "bed");
+  const cx = S.sleeping && w.map === "home" && !w.path.length ? bed.x * TW + 8 : w.px + 8, cy = S.sleeping && w.map === "home" && !w.path.length ? bed.y * TW + 6 : w.py + 6;
+  if (Math.abs(p.x - cx) < 13 && Math.abs(p.y - cy) < 14) { if (!S.sleeping && EV.cuddle) EV.cuddle(); return; }
+  const q = placesNow().find((o) => (o.x === p.tx && o.y === p.ty) || (o.solid && o.solid.some(([a, b]) => a === p.tx && b === p.ty)) || (o.stand[0] === p.tx && o.stand[1] === p.ty));
+  if (!q) return;
+  const btn = { bowl: "aFeed", bed: "aSleep", pond: "aClean", lawn: "aPlay" }[q.id];
+  if (btn && w.map === "home") { const b = $(btn); if (b && !b.disabled) b.click(); return; }
+  choose(q.id);
+}
+
+/* ---------- Care from the home buttons (called from index.html) ---------- */
+function careWalk(id, fn) {
+  if (!topOn()) return false;
+  const w = ws(); if (w.map !== "home") return false;
+  const p = MAPS.home.places.find((q) => q.id === id); if (!p) return false;
+  const r = routeTo(p.stand); if (!r || !r.length) return false;
+  dialog = null; foodPick = false;
+  w.path = r; w.then = null; w.cb = fn;
+  renderHomeDlg();
+  return true;
+}
+// the day's summary, shown at the moss bed before going to sleep
+const SNAP = ["fed", "cuddles", "plays", "messes", "expDone", "dailyDone"];
+function dayBase() {
+  const P = EV.P, d = today();
+  if (!P.dayLog || P.dayLog.day !== d) { P.dayLog = { day: d, c: {} }; for (const k of SNAP) P.dayLog.c[k] = P.c[k] || 0; EV.saveProfile(); }
+  return P.dayLog;
+}
+function summary() {
+  const S = EV.S, P = EV.P, b = dayBase().c, s = steps();
+  const parts = SNAP.map((k) => [k, (P.c[k] || 0) - (b[k] || 0)]).filter(([, n]) => n > 0).map(([k, n]) => tx("s." + k) + ": " + n);
+  let text = parts.length ? tx("bed.sum", { name: S.name }) + " " + parts.join(" · ") + "." : tx("bed.none");
+  if (boardNew()) text += " " + tx("bed.board");
+  if (s) text += " " + tx("bed.steps", { n: s.n });
+  dialog = { who: "bed", text, opts: ["bed.sleep"], close: "bed.later" };
+}
+function bedtime() {
+  if (!topOn()) return false;
+  const w = ws();
+  const go = () => { summary(); render(); };
+  if (w.map === "home") { const bed = MAPS.home.places.find((q) => q.id === "bed"); if (careWalk("bed", go)) return true; if (w.x !== bed.stand[0] || w.y !== bed.stand[1]) return false; }
+  go(); return true;
+}
 
 /* ---------- Choosing a place ---------- */
 function costOf(p) { return p.go ? STEPS.move : p.id === "trail" ? STEPS.trail : 0; }
@@ -307,31 +494,30 @@ function choose(id) {
   const S = EV.S;
   if (!S || S.phase !== "alive") { EV.toast(tx("needAlive")); return; }
   const w = ws(), p = placesNow().find((x) => x.id === id); if (!p) return;
-  if (w.path.length) return;
   dialog = null; foodPick = false;
   if (S.sleeping && id !== "bed") { EV.toast(tx("asleep", { name: S.name })); EV.sfx("deny"); render(); return; }
   const cost = costOf(p);
   if (cost && p.go && (steps() || {}).n < cost) { EV.toast(tx("noSteps", { name: S.name })); EV.sfx("deny"); return; }
-  const route = w.x === p.stand[0] && w.y === p.stand[1] ? [] : path(curMap(), [w.x, w.y], p.stand);
+  const route = routeTo(p.stand);
   if (!route) return;
   EV.sfx("tap");
-  w.path = route; w.then = p.id;
+  w.path = route; w.then = p.id; w.cb = null;
   if (!route.length) arrived();
   render(); kick();
 }
 function arrived() {
-  const w = ws(), id = w.then; w.then = null;
+  const w = ws(), id = w.then, cb = w.cb; w.then = null; w.cb = null;
   const P = EV.P; P.world = { map: w.map, x: w.x, y: w.y };
-  const p = curMap().places.find((x) => x.id === id);
-  if (p) act(p);
-  EV.saveProfile(); render();
+  if (cb) cb();
+  else { const p = id && curMap().places.find((x) => x.id === id); if (p) act(p); }
+  EV.saveProfile(); if (id || cb) render();
 }
 function goMap(to) {
   if (!spendSteps(STEPS.move)) { EV.toast(tx("noSteps", { name: EV.S.name })); return; }
   const w = ws(), back = MAPS[to].places.find((p) => p.go === w.map);
   w.map = to; w.x = back.stand[0]; w.y = back.stand[1]; w.px = w.x * TW; w.py = w.y * TW;
   // step inside the map so you aren't standing on the way back
-  const inside = MAPS[to].start; const r = path(MAPS[to], [w.x, w.y], inside); w.path = r || []; w.then = null;
+  const inside = MAPS[to].start; const r = path(MAPS[to], [w.x, w.y], inside); w.path = r || []; w.then = null; w.cb = null;
   EV.P.world = { map: w.map, x: inside[0], y: inside[1] };
   EV.sfx("chirp");
 }
@@ -340,9 +526,9 @@ function act(p) {
   if (p.go) { goMap(p.go); return; }
   switch (p.id) {
     case "bowl": foodPick = true; break;
-    case "bed": EV.toggleSleep(); break;
+    case "bed": if (!S.sleeping && S.stats.energy <= 85) summary(); else EV.toggleSleep(); break;
     case "pond": EV.cleanUp(); break;
-    case "lawn": EV.togglePanel("map"); EV.startPlay(); break;
+    case "lawn": if (panelOpen()) EV.togglePanel("map"); EV.startPlay(); break;
     case "board": EV.togglePanel("daily", true); break;
     case "root": rootTalk(); break;
     case "well": if (EV.HOOKS.openWell) EV.HOOKS.openWell(); else EV.togglePanel("cards", true); break;
@@ -365,6 +551,7 @@ function answer(k) {
   EV.sfx("tap");
   if (k === "close") { dialog = null; render(); return; }
   if (k === "root.more") { rootTalk(); render(); return; }
+  if (k === "bed.sleep") { dialog = null; if (!S.sleeping) EV.toggleSleep(); render(); return; }
   if (k === "tila.q1") { const r = rumour(); dialog = { who: "tila", text: r ? tx("tila.a1") + " " + quote(r) : tx("tila.a1none"), opts: ["tila.q2", "tila.q3"] }; }
   else if (k === "tila.q2") { const lit = !!(EV.P.cosm && EV.P.cosm.mem && EV.P.cosm.mem.tila); dialog = { who: "tila", text: tx(lit ? "tila.a2lit" : "tila.a2dark"), opts: ["tila.q1", "tila.q3"] }; }
   else if (k === "tila.q3") dialog = { who: "tila", text: tx("tila.a3"), opts: ["tila.q1", "tila.q2"] };
@@ -390,28 +577,45 @@ function portrait(who) {
   g.fillStyle = "#e9d8b4"; g.fillRect(0, 0, 40, 40);
   g.save();
   if (who === "root") drawObj(g, "root", 20, 34, performance.now());
-  else { g.scale(2, 2); drawObj(g, who === "tila" ? "tila" : "sign", 10, 19, 0); }
+  else { g.scale(2, 2); drawObj(g, who === "tila" ? "tila" : who === "bed" ? "bed" : "sign", 10, who === "bed" ? 21 : 19, 0); }
   g.restore();
   return c.toDataURL();
 }
+function dlgHtml(alive) {
+  if (dialog) {
+    const nm = dialog.who === "tila" ? "Tila" : dialog.who === "root" ? tx("root.name") : dialog.who === "bed" ? tx("bedName") : tx("trailName");
+    const lbl = (k) => (k === "trail.go" ? tx("go", { n: STEPS.trail }) : k === "trail.stay" ? tx("stay") : k === "root.more" ? tx("d.more") : tx(k));
+    const main = (k) => k === "trail.go" || k === "bed.sleep";
+    return `<div class="wdlg"><img class="wdlg-face" alt="" src="${portrait(dialog.who)}"><div class="wdlg-body"><b>${esc(nm)}</b><p>${esc(dialog.text)}</p><div class="wdlg-opts">${dialog.opts.map((k) => `<button class="btn${main(k) ? "" : " ghost"}" type="button" data-wans="${k}">${esc(lbl(k))}</button>`).join("")}<button class="btn ghost" type="button" data-wans="close">${esc(tx(dialog.close || "d.close"))}</button></div></div></div>`;
+  }
+  if (foodPick && alive) {
+    const foods = Object.keys(EV.ITEMS).filter((k) => EV.ITEMS[k].cat === "food" && (EV.ITEMS[k].price === 0 || (EV.P.inv[k] || 0) > 0));
+    return `<div class="wdlg"><div class="wdlg-body"><b>${esc(tx("food.pick"))}</b><div class="wdlg-opts">${foods.map((k) => `<button class="btn ghost" type="button" data-wfood="${k}">${esc(EV.itemName(k))}${EV.ITEMS[k].price ? " ×" + EV.P.inv[k] : ""}</button>`).join("")}<button class="btn ghost" type="button" data-wfood="">${esc(tx("food.none"))}</button></div></div></div>`;
+  }
+  return "";
+}
+// dialogues show in the map panel when it is open, otherwise under the home seen from above
+function renderHomeDlg() {
+  const el = $("topDlg"); if (!el) return;
+  const S = EV.S, h = !panelOpen() && topOn() ? dlgHtml(S && S.phase === "alive") : "";
+  if (el.innerHTML === h) return;
+  el.innerHTML = h;
+  // on a phone the care buttons sit far below the home: bring a new dialogue into view
+  if (h) { const r = el.getBoundingClientRect(); if (r.top < 0 || r.bottom > window.innerHeight) el.scrollIntoView({ behavior: "smooth", block: "nearest" }); }
+}
 function render() {
+  renderHomeDlg();
   const el = $("mapPanel"); if (!el || el.hidden) return;
   const S = EV.S, w = ws(), s = steps();
-  const alive = S && S.phase === "alive";
+  const alive = S && S.phase === "alive", going = w.path.length && (w.then || w.cb);
   let h = `<div class="panel-head"><div><div class="sub">${esc(tx(w.map + ".sub"))}</div><h2>${esc(tx("map." + w.map))}</h2></div><span class="progress steps" title="${esc(tx("stepsT", { n: s ? s.n : 0 }))}">👣 ${esc(tx("steps", { n: s ? s.n : 0 }))}</span></div>`;
   h += `<div class="wmap-wrap"><canvas id="wCanvas" width="${W}" height="${H}" role="img" aria-label="${esc(tx("map." + w.map))}"></canvas></div>`;
   if (!alive) h += `<p class="muted">${esc(tx("needAlive"))}</p>`;
-  else if (w.path.length) h += `<p class="muted wmap-walk">${esc(tx("walking", { name: S.name }))}</p>`;
-  if (dialog) {
-    const nm = dialog.who === "tila" ? "Tila" : dialog.who === "root" ? tx("root.name") : tx("trailName");
-    h += `<div class="wdlg"><img class="wdlg-face" alt="" src="${portrait(dialog.who)}"><div class="wdlg-body"><b>${esc(nm)}</b><p>${esc(dialog.text)}</p><div class="wdlg-opts">${dialog.opts.map((k) => `<button class="btn${k === "trail.go" ? "" : " ghost"}" type="button" data-wans="${k}">${esc(k === "trail.go" ? tx("go", { n: STEPS.trail }) : k === "trail.stay" ? tx("stay") : k === "root.more" ? tx("d.more") : tx(k))}</button>`).join("")}<button class="btn ghost" type="button" data-wans="close">${esc(tx("d.close"))}</button></div></div></div>`;
-  } else if (foodPick && alive) {
-    const foods = Object.keys(EV.ITEMS).filter((k) => EV.ITEMS[k].cat === "food" && (EV.ITEMS[k].price === 0 || (EV.P.inv[k] || 0) > 0));
-    h += `<div class="wdlg"><div class="wdlg-body"><b>${esc(tx("food.pick"))}</b><div class="wdlg-opts">${foods.map((k) => `<button class="btn ghost" type="button" data-wfood="${k}">${esc(EV.itemName(k))}${EV.ITEMS[k].price ? " ×" + EV.P.inv[k] : ""}</button>`).join("")}<button class="btn ghost" type="button" data-wfood="">${esc(tx("food.none"))}</button></div></div></div>`;
-  }
+  else if (going) h += `<p class="muted wmap-walk">${esc(tx("walking", { name: S.name }))}</p>`;
+  h += dlgHtml(alive);
   h += `<h3 class="cat-title">${esc(tx("where"))}</h3><div class="wplaces">${placesNow().map((p) => {
     const c = costOf(p), poor = c && s && s.n < c;
-    return `<button type="button" class="wplace" data-wgo="${p.id}" ${alive && !w.path.length ? "" : "disabled"}><strong>${esc(tx("p." + p.id))}</strong><small>${esc(tx("p." + p.id + ".d"))}</small><small class="${poor ? "poor" : "ok"}">${esc(c ? (c === 1 ? tx("cost1") : tx("costN", { n: c })) : tx("free"))}</small></button>`;
+    return `<button type="button" class="wplace" data-wgo="${p.id}" ${alive ? "" : "disabled"}><strong>${esc(tx("p." + p.id))}</strong><small>${esc(tx("p." + p.id + ".d"))}</small><small class="${poor ? "poor" : "ok"}">${esc(c ? (c === 1 ? tx("cost1") : tx("costN", { n: c })) : tx("free"))}</small></button>`;
   }).join("")}</div>`;
   el.innerHTML = h;
   cv = $("wCanvas"); ctx = cv.getContext("2d");
@@ -456,16 +660,20 @@ const css = `
 .wdlg-opts { display: flex; flex-wrap: wrap; gap: 6px; }
 .steps { white-space: nowrap; }
 .wmap-walk { margin: 0; font-style: italic; }
+#topDlg .wdlg { margin: 8px 0 0; }
 @media (max-width: 480px) { .wdlg-face { width: 56px; height: 56px; } }
 `;
 const st = document.createElement("style"); st.textContent = css; document.head.appendChild(st);
 
 EV.HOOKS.renderMap = () => { foodPick = false; setTimeout(render, 0); };
 const prevShow = EV.HOOKS.showScreen;
-EV.HOOKS.showScreen = function () { if (prevShow) prevShow.apply(this, arguments); refreshChip(); };
+EV.HOOKS.showScreen = function () { if (prevShow) prevShow.apply(this, arguments); refreshChip(); renderHomeDlg(); };
 $("mapPanel").addEventListener("click", onClick);
+if ($("topDlg")) $("topDlg").addEventListener("click", onClick);
+if ($("topScene")) $("topScene").addEventListener("pointerdown", onTopTap);
+requestAnimationFrame(homeFrame);
 $("btnMap").addEventListener("click", () => { EV.sfx("tap"); EV.togglePanel("map"); });
-setInterval(refreshChip, 5000);
-refreshChip();
-EV.WORLD = { MAPS, STEPS, steps, spendSteps, gainFromEnergy, path, choose, render, refreshChip, get state() { return ws(); } };
+setInterval(() => { refreshChip(); if (EV.S && EV.S.phase === "alive") dayBase(); }, 5000);
+refreshChip(); if (EV.S && EV.S.phase === "alive") dayBase();
+EV.WORLD = { MAPS, STEPS, steps, spendSteps, gainFromEnergy, path, choose, render, refreshChip, careWalk, bedtime, topOn, homeExtras, get state() { return ws(); }, get dialog() { return dialog; } };
 })();

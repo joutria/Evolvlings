@@ -271,6 +271,11 @@ h1, h2, h3, .brand, .idline .nm, .btn, .act, .chip-btn, .seg button, .submenu bu
         <label data-i18n="set.quiet">Quiet mode</label>
         <div class="seg" id="quietSeg"><button type="button" data-v="1" data-i18n="on">On</button><button type="button" data-v="0" data-i18n="off">Off</button></div>
       </div>
+      <div class="row">
+        <label data-i18n="set.view">Home view</label>
+        <div class="seg" id="viewSeg"><button type="button" data-v="top" data-i18n="view.top">From above</button><button type="button" data-v="side" data-i18n="view.side">Side</button></div>
+      </div>
+      <p class="muted" data-i18n="set.viewNote">From above, your creature walks to the bowl, the pond or its bed when you care for it. The star catch game is always played in the side view.</p>
       <p class="muted" data-i18n="set.quietNote">Hides the Wells of Echoes for anyone who only wants to look after their creature. Song Notes you earn while it is on turn into Stardust by themselves (1 Note = 25 Stardust). The Notes you already have are kept.</p>
       <div class="row">
         <label for="speedSel" data-i18n="set.speed">Time speed</label>
@@ -345,8 +350,9 @@ h1, h2, h3, .brand, .idline .nm, .btn, .act, .chip-btn, .seg button, .submenu bu
         <div><div class="nm" id="petName">—</div><div class="sp" id="petSpecies">—</div></div>
         <div class="age" id="petAge">—</div>
       </div>
-      <div class="stage"><canvas id="scene" data-i18n-aria="g.sceneAria"></canvas></div>
+      <div class="stage"><canvas id="scene" data-i18n-aria="g.sceneAria"></canvas><canvas id="topScene" width="720" height="560" data-i18n-aria="g.topAria" hidden></canvas></div>
       <div class="hint" id="hint" aria-live="polite"></div>
+      <div id="topDlg"></div>
     </div>
     <div class="side">
       <div class="panel">
@@ -416,7 +422,7 @@ const STR = {
     "nav.coins": "Chispas: open the shop", "nav.ach": "Achievements", "nav.journal": "Journal", "nav.settings": "Settings",
     "nav.mute": "Mute sound", "nav.unmute": "Turn sound on",
     on: "On", off: "Off",
-    "set.title": "Settings", "set.lang": "Language", "set.sound": "Sound", "set.haptics": "Vibration", "set.quiet": "Quiet mode",
+    "set.title": "Settings", "set.lang": "Language", "set.sound": "Sound", "set.haptics": "Vibration", "set.quiet": "Quiet mode", "set.view": "Home view", "view.top": "From above", "view.side": "Side", "set.viewNote": "From above, your creature walks to the bowl, the pond or its bed when you care for it. The star catch game is always played in the side view.",
     "set.quietNote": "Hides the Wells of Echoes for anyone who only wants to look after their creature. Song Notes you earn while it is on turn into Stardust by themselves (1 Note = 25 Stardust). The Notes you already have are kept.", "toast.quiet": "Quiet mode: {n} ♪ became Stardust", "set.speed": "Time speed",
     "set.speed1": "Normal (real time)", "set.speed10": "Fast (10×)", "set.speed60": "Turbo (60×)",
     "set.speedNote": "Normal time means a creature grows up over a few hours and gets hungry while you're away. Fast and Turbo are handy for trying the whole life cycle quickly.",
@@ -429,7 +435,7 @@ const STR = {
     "ch.lead": "Each kind hatches into a different creature with its own habits. Care for it well and it grows into a bright, healthy adult.",
     "egg.warming": "Warming the {egg}…", "egg.hatched": "It hatched!", "egg.tap": "Tap the egg to keep it warm. It will hatch on its own in a little while too.",
     "egg.hello": "Say hello to a little {baby}. What will you call it?", "egg.placeholder": "Name your creature", "egg.welcome": "Welcome home", "egg.aria": "Your egg. Tap to warm it.",
-    "g.sceneAria": "Your creature's habitat", "g.status": "How it's doing", "g.care": "Care", "g.diary": "Diary",
+    "g.sceneAria": "Your creature's habitat", "g.topAria": "Your corner of the Glade seen from above", "g.status": "How it's doing", "g.care": "Care", "g.diary": "Diary",
     "stat.full": "Belly", "stat.fun": "Fun", "stat.energy": "Energy", "stat.clean": "Tidy", "stat.health": "Health",
     "stage.0": "Baby", "stage.1": "Kid", "stage.2": "Grown-up",
     "age.age": "Age {d}", "age.grows": "grows in {d}", "age.grown": "fully grown", "age.speed": "{n}× time",
@@ -514,7 +520,7 @@ const STR = {
     "nav.coins": "Chispas: abrir la tienda", "nav.ach": "Logros", "nav.journal": "Recuerdos", "nav.settings": "Ajustes",
     "nav.mute": "Silenciar", "nav.unmute": "Activar sonido",
     on: "Sí", off: "No",
-    "set.title": "Ajustes", "set.lang": "Idioma", "set.sound": "Sonido", "set.haptics": "Vibración", "set.quiet": "Modo tranquilo",
+    "set.title": "Ajustes", "set.lang": "Idioma", "set.sound": "Sonido", "set.haptics": "Vibración", "set.quiet": "Modo tranquilo", "set.view": "Vista del hogar", "view.top": "Desde arriba", "view.side": "Lateral", "set.viewNote": "Desde arriba, tu criatura camina hasta el comedero, la charca o la cama cuando la cuidas. El juego de cazar estrellas se juega siempre en la vista lateral.",
     "set.quietNote": "Oculta los Pozos de los Ecos para quien solo quiere cuidar a su criatura. Las Notas del Canto que ganes mientras esté activo se convierten solas en Polvo de Estrella (1 Nota = 25 de Polvo). Las Notas que ya tienes se guardan.", "toast.quiet": "Modo tranquilo: {n} ♪ se convierten en Polvo", "set.speed": "Velocidad",
     "set.speed1": "Normal (tiempo real)", "set.speed10": "Rápida (10×)", "set.speed60": "Turbo (60×)",
     "set.speedNote": "En velocidad normal la criatura crece a lo largo de unas horas y le entra hambre mientras no estás. Rápida y Turbo sirven para ver el ciclo de vida completo en poco tiempo.",
@@ -527,7 +533,7 @@ const STR = {
     "ch.lead": "De cada tipo nace una criatura distinta con sus propias costumbres. Si la cuidas bien, crecerá sana y brillante.",
     "egg.warming": "Calentando el {egg}…", "egg.hatched": "¡Ha eclosionado!", "egg.tap": "Toca el huevo para darle calor. También eclosionará solo dentro de un rato.",
     "egg.hello": "Saluda a tu pequeño {baby}. ¿Cómo lo vas a llamar?", "egg.placeholder": "Ponle nombre", "egg.welcome": "Bienvenido a casa", "egg.aria": "Tu huevo. Tócalo para darle calor.",
-    "g.sceneAria": "El hogar de tu criatura", "g.status": "Cómo está", "g.care": "Cuidados", "g.diary": "Diario",
+    "g.sceneAria": "El hogar de tu criatura", "g.topAria": "Tu rincón del Claro visto desde arriba", "g.status": "Cómo está", "g.care": "Cuidados", "g.diary": "Diario",
     "stat.full": "Barriga", "stat.fun": "Diversión", "stat.energy": "Energía", "stat.clean": "Limpieza", "stat.health": "Salud",
     "stage.0": "Cría", "stage.1": "Joven", "stage.2": "Mayor",
     "age.age": "Edad {d}", "age.grows": "crece en {d}", "age.grown": "ya ha crecido", "age.speed": "tiempo {n}×",
@@ -1554,6 +1560,7 @@ function renderJournal() {
 }
 function renderSettings() {
   for (const [seg, on] of [["soundSeg", P.sound], ["hapticSeg", P.haptics], ["quietSeg", quietOn()]]) document.querySelectorAll(`#${seg} button`).forEach((b) => b.setAttribute("aria-pressed", String((b.dataset.v === "1") === !!on)));
+  document.querySelectorAll("#viewSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === (P.view === "side" ? "side" : "top"))));
   $("muteWave").toggleAttribute("hidden", !P.sound); $("muteX").toggleAttribute("hidden", !!P.sound);
   $("btnMute").setAttribute("aria-pressed", String(!P.sound));
   $("btnMute").setAttribute("aria-label", P.sound ? t("nav.mute") : t("nav.unmute"));
@@ -1580,14 +1587,20 @@ function togglePanel(name, forceOpen) {
 
 /* ---------- Events ---------- */
 $("aFeed").addEventListener("click", () => { sfx("tap"); $("itemMenu").hidden = true; renderFeedMenu(); $("feedMenu").hidden = !$("feedMenu").hidden; });
-$("feedMenu").addEventListener("click", (e) => { const b = e.target.closest("button[data-food]"); if (!b) return; if (b.dataset.food === "no") { closeMenus(); return; } feed(b.dataset.food); });
+// with the home seen from above (world.js), care walks the creature to its place first; refusals still happen on the spot
+function viaPlace(place, ok, fn) {
+  if (EV.WORLD && EV.WORLD.careWalk && ok() && EV.WORLD.careWalk(place, fn)) { closeMenus(); return; }
+  fn();
+}
+$("feedMenu").addEventListener("click", (e) => { const b = e.target.closest("button[data-food]"); if (!b) return; if (b.dataset.food === "no") { closeMenus(); return; } const id = b.dataset.food; viaPlace("bowl", () => S.stats.full <= 94 || (ITEMS[id].eff.full || 0) < 8, () => feed(id)); });
 $("aItems").addEventListener("click", () => { sfx("tap"); $("feedMenu").hidden = true; renderItemMenu(); $("itemMenu").hidden = !$("itemMenu").hidden; });
 $("itemMenu").addEventListener("click", (e) => { const b = e.target.closest("button[data-item]"); if (!b) return; if (b.dataset.item === "no") { closeMenus(); return; } useItem(b.dataset.item); });
 $("aShop").addEventListener("click", () => { sfx("tap"); togglePanel("shop", true); });
 $("shopList").addEventListener("click", (e) => { const b = e.target.closest("button[data-buy]"); if (b) buy(b.dataset.buy); });
-$("aPlay").addEventListener("click", startPlay);
-$("aClean").addEventListener("click", cleanUp);
-$("aSleep").addEventListener("click", toggleSleep);
+$("aPlay").addEventListener("click", () => viaPlace("lawn", () => S.stats.energy >= 15, startPlay));
+$("aClean").addEventListener("click", () => viaPlace("pond", () => true, cleanUp));
+// going to bed from above shows the day's summary first (world.js)
+$("aSleep").addEventListener("click", () => { if (!S.sleeping && S.stats.energy <= 85 && EV.WORLD && EV.WORLD.bedtime && EV.WORLD.bedtime()) { closeMenus(); return; } toggleSleep(); });
 $("aHeal").addEventListener("click", heal);
 $("aPet").addEventListener("click", cuddle);
 function canvasPoint(cv, ev) { const r = cv.getBoundingClientRect(); return { x: ((ev.clientX - r.left) / r.width) * W, y: ((ev.clientY - r.top) / r.height) * H }; }
@@ -1638,6 +1651,7 @@ function quietTick() {
 }
 setInterval(quietTick, 1500);
 $("quietSeg").addEventListener("click", (e) => { const b = e.target.closest("button[data-v]"); if (!b) return; setQuiet(b.dataset.v === "1"); sfx("tap"); });
+$("viewSeg").addEventListener("click", (e) => { const b = e.target.closest("button[data-v]"); if (!b) return; P.view = b.dataset.v; saveProfile(); renderSettings(); sfx("tap"); });
 $("hapticSeg").addEventListener("click", (e) => { const b = e.target.closest("button[data-v]"); if (!b) return; P.haptics = b.dataset.v === "1"; saveProfile(); renderSettings(); buzz(20); });
 $("speedSel").addEventListener("change", (e) => { catchUp(); S.speed = Number(e.target.value) || 1; save(); renderStats(); });
 $("btnRelease").addEventListener("click", () => { $("releaseAsk").innerHTML = t("set.releaseAsk", { name: escapeHtml(S.name || t("set.theEgg")) }); $("releaseConfirm").hidden = false; $("releaseRow").hidden = true; });
@@ -1664,7 +1678,9 @@ if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
 const HOOKS = {};
 window.EV = {
   get S() { return S; }, get P() { return P; }, get LANG() { return LANG; },
-  feed, cleanUp, toggleSleep, startPlay, ITEMS, itemName, quietOn, STR, ACH, ACH_META, SPECIES, SFX, HOOKS, $, clamp, rand, pick, t, tone, sfx, buzz, save, saveProfile, addCoins, spendCoins, toast, addLog,
+  feed, cleanUp, toggleSleep, startPlay, cuddle, ITEMS,
+  // what the side scene is showing right now, so the view from above can draw the same hearts, bubbles and speech
+  get FX() { return { effects, bubble, petX, foodAnim, mini }; }, miniOn: () => !!mini, itemName, quietOn, STR, ACH, ACH_META, SPECIES, SFX, HOOKS, $, clamp, rand, pick, t, tone, sfx, buzz, save, saveProfile, addCoins, spendCoins, toast, addLog,
   renderAll, renderStats, showScreen, applyStatic, escapeHtml, drawCreature, setupCanvas, ell, drawStar, checkAch, togglePanel, stageName, careNow, pixelText,
 };
 
