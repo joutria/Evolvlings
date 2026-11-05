@@ -211,3 +211,11 @@ Progress toward upgrades (design rule 7) is shown as bars: a build's next level 
 ## Birth traits
 
 Every Refuge companion is born with one small trait of its own (the second MiniTroopers idea), so two creatures of the same kind feel like different individuals. The ten traits live in `BIRTH` in `rpg/data-talents.js`: most add a little to one stat (Brave +4 % strength, Shy +3 dodge, Early riser +5 % speed by day, Night owl +5 % at night, Sleepyhead +9 % life but −3 % speed); Cuddly gives +1 extra Bond when petted and Curious +20 % trip experience. A new hatch rolls one (`roster[kind].bt`); companions hatched before this get a fixed one from their kind and birth time. When a repeat hatch gives a star, the sibling has its own trait and you choose which one your companion keeps, so a bad roll is never final. The trait shows on each Refuge card (🥚) and `companionTal` adds it to the companion's talents in battle.
+
+## Duels: ghost teams
+
+`rpg/ui-duels.js` adds the third MiniTroopers idea, a **Duels** tab on the expedition screen (once a guardian is calm). Duels are free: no energy, no wounds, no experience, and losing costs nothing. Only the first win against each team gives a reward.
+
+- **El Vado's ladder**: every week four neighbours bring a team built around one type circle: Ruda (Sun), Bruno (Lake), Esporina (Frost) and Mirlo (Sky). Their teams are seeded by the week, so they stay the same until Monday, and they are your level −1, +0, +1 and +2. Beat one to unlock the next. First wins pay ✦ 15 / 20 / 25 / 30, a little Stardust, and Mirlo also gives a Song Note.
+- **Friends' codes**: "Your team code" turns your creature and your saved team's companions (cards, talents, birth traits, stars, Bond) into a `EVO1-…` text code. Pasting a friend's code saves their team (up to 6) to fight against, played by the AI. The first win against each code gives ✦ 20 and ∴ 5, at most 3 times a week, so made-up codes can't be farmed. Pasted codes are fully validated (known creatures and cards, level and grade ranges, a short plain-text name).
+- Saved in `P.duel` (`EV.slice("duel")`). The duel reuses the expedition pick screen and battle (`X.duel`), with no zone bonus.

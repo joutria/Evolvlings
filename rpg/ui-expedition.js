@@ -30,7 +30,7 @@ function pickZone(id, mode) {
   mode = mode || {};
   if (!ZONES[id] || !zoneOpen(id) || (mode.savia && ((EV.P.stars || {})[id] || 0) < 3)) { EV.sfx("deny"); return; }
   const S = EV.S, z = ZONES[id];
-  X.zone = id; X.savia = !!mode.savia; X.echo = mode.echo || null; X.deep = mode.deep || 0; X.deepRule = X.deep ? deepRule() : null;
+  X.zone = id; X.savia = !!mode.savia; X.echo = mode.echo || null; X.deep = mode.deep || 0; X.duel = mode.duel || null; X.deepRule = X.deep ? deepRule() : null;
   const home = EV.EGGS ? EV.EGGS.offer(S.species) : [];
   X.offer = home.concat(pickN(z.allies.filter((k) => k !== S.species && !home.includes(k)), 3));
   // Unísona: brought by Tila and Nim to the Heart; after the Heart is calm it can join any trip
@@ -131,10 +131,10 @@ function deepHtml() {
 // the expedition screen: the parchment map on top, then tabs for the zones, the Deep Root and the Guardian's Echo
 let ztab = "zones";
 function zoneTabsHtml() {
-  const tabs = [["zones", tx("ztab.zones")], ["deep", tx("ztab.deep")]];
+  const tabs = [["zones", tx("ztab.zones")], ["deep", tx("ztab.deep")], ["duel", tx("ztab.duel")]];
   if (echoInfo()) tabs.push(["echo", tx("ztab.echo")]);
   if (!tabs.some((t) => t[0] === ztab)) ztab = "zones";
-  const body = ztab === "deep" ? deepHtml() : ztab === "echo" ? echoHtml() : zonesHtml() + saviaHtml();
+  const body = ztab === "deep" ? deepHtml() : ztab === "duel" ? duelHtml() : ztab === "echo" ? echoHtml() : zonesHtml() + saviaHtml();
   return `<div class="xtabs" role="tablist">${tabs.map(([k, l]) => `<button type="button" role="tab" data-ztab="${k}" aria-selected="${k === ztab}">${esc(l)}</button>`).join("")}</div><div class="xtab-body">${body}</div>`;
 }
 function echoHtml() {
@@ -247,7 +247,7 @@ function zonesHtml() {
 }
 function setOut() {
   const S = EV.S;
-  S.stats.energy = Math.max(0, S.stats.energy - (X.deep ? DEEP_COST : 25));
+  if (!X.duel) S.stats.energy = Math.max(0, S.stats.energy - (X.deep ? DEEP_COST : 25));
   const R = rpgState();
   X.party = [{ own: true, kind: S.species, hp: 1 }].concat(X.chosen.map((k) => { const r = refOf(k); return { own: false, kind: k, hp: 1, lvl: r ? r.lvl : R.lvl, bond: r ? r.bond : 0, star: r ? r.star : 0, roster: !!r }; }));
   if (X.echo) { echoInfo(); EV.P.echo.tries++; if (X.echo === "tired") for (const m of X.party) m.hp = 0.8; }
@@ -262,6 +262,7 @@ function setOut() {
 function nextSection() {
   const z = ZONES[X.zone];
   X.section++;
+  if (X.duel) { X.section = z.sections + 1; startBattle(true); return; }
   if (X.echo) { X.section = z.sections + 1; X.nodes = ["boss"]; show("map"); return; }
   if (X.deep) { X.section = z.sections + 1; X.nodes = [deepBoss(X.deep) ? "boss" : "fight"]; show("map"); return; }
   if (X.section > z.sections) { X.nodes = ["boss"]; healParty(0.3); show("map"); return; }
@@ -300,6 +301,7 @@ function zoneLvl(z, lvl) { const extra = Math.max(0, lvl - z.min); return z.min 
 function foeUnits(boss) {
   const z = ZONES[X.zone], R = rpgState();
   if (X.deep) return deepFoes(boss);
+  if (X.duel) return duelFoes();
   if (boss) {
     const lvl = X.savia || X.echo ? Math.max(z.min, R.lvl) : zoneLvl(z, R.lvl);
     const m = MONS[z.boss];
@@ -352,17 +354,17 @@ function render() {
   const el = $("scrExp"); if (!el) return;
   if (!X) { el.innerHTML = ""; return; }
   const z = ZONES[X.zone];
-  const head = `<div class="panel"><div class="panel-head"><div><div class="sub">${esc(view === "zones" ? tx("zones.sub") : zt("sub"))}</div><h2>${esc(view === "zones" ? tx("zones.title") : zt("name") + (X.savia ? " · " + tx("sav.tag") : X.echo ? " · " + tx("echo.tag") : X.deep ? " · " + tx("deep.tag", { n: X.deep }) : ""))}</h2></div>${view !== "pick" && view !== "zones" && view !== "end" && view !== "battle" && !(view === "reward" && X.shot) ? `<button class="btn ghost" type="button" data-x="quit">${esc(tx("quit"))}</button>` : ""}</div>${view !== "pick" && view !== "zones" ? trailHtml() : ""}</div>`;
+  const head = `<div class="panel"><div class="panel-head"><div><div class="sub">${esc(view === "zones" ? tx("zones.sub") : X.duel ? tx("duel.title") : zt("sub"))}</div><h2>${esc(view === "zones" ? tx("zones.title") : (X.duel ? tx("duel.vs", { n: duelFoe(X.duel) ? duelFoe(X.duel).n : "" }) : zt("name")) + (X.savia ? " · " + tx("sav.tag") : X.echo ? " · " + tx("echo.tag") : X.deep ? " · " + tx("deep.tag", { n: X.deep }) : ""))}</h2></div>${view !== "pick" && view !== "zones" && view !== "end" && view !== "battle" && !(view === "reward" && X.shot) ? `<button class="btn ghost" type="button" data-x="quit">${esc(tx("quit"))}</button>` : ""}</div>${view !== "pick" && view !== "zones" && !X.duel ? trailHtml() : ""}</div>`;
   let body = "";
   if (view === "zones") {
     const rumor = LORE ? LORE.loadingLine(EV.P, L()) : "";
     body = `<div class="panel">${rumor ? `<p class="rumor">${esc(tx("rumor"))} ${esc(rumor)}</p>` : ""}${pmapHtml()}${zoneTabsHtml()}<div class="bctl"><button class="btn ghost" type="button" data-x="cancel">${esc(tx("exp.cancel"))}</button></div></div>`;
   } else if (view === "pick") {
-    body = `<div class="panel"><p class="lead">${esc(zt("desc"))}</p>
+    body = `<div class="panel"><p class="lead">${esc(X.duel ? tx("duel.desc") : zt("desc"))}</p>
       ${setBarHtml()}<h3>${esc(tx("exp.pick"))}</h3><p class="muted" style="margin:0">${esc(tx("exp.pickSub"))}</p>
       <div class="mons">${X.offer.map((k) => `<button type="button" class="mon" data-pick="${k}" aria-pressed="${X.chosen.includes(k)}"><canvas width="96" height="80" data-mon="${k}"></canvas><strong>${esc(monName(k))}</strong>${typeChip(MONS[k].types[0])}<small>${esc(MON_DESC[L()][k])}</small>${refOf(k) ? `<span class="mref">${esc(EV.EGGS.badge(k))}</span>` : ""}${pickStats(k)}</button>`).join("")}</div>
       </div>${loadoutHtml()}${X.chosen.filter((k) => refOf(k)).map(compLoadHtml).join("")}${X.chosen.some((k) => !refOf(k) && k !== "unisona") ? `<p class="muted cload-wild">${esc(tx("cload.wild"))}</p>` : ""}<div class="panel">
-      <div class="bctl"><button class="btn" type="button" data-x="go" ${X.chosen.length === 2 ? "" : "disabled"}>${esc(tx("exp.go"))} · ${esc(tx("exp.cost"))}</button><button class="btn ghost" type="button" data-x="cancel">${esc(tx("exp.cancel"))}</button></div></div>`;
+      <div class="bctl"><button class="btn" type="button" data-x="go" ${X.chosen.length === 2 ? "" : "disabled"}>${esc(X.duel ? tx("duel.go") : tx("exp.go") + " · " + tx("exp.cost"))}</button><button class="btn ghost" type="button" data-x="cancel">${esc(tx("exp.cancel"))}</button></div></div>`;
   } else if (view === "map") {
     const icons = { fight: "⚔️", event: "❓", chest: "🎁", rest: "🔥", boss: "🏮" };
     body = `<div class="panel"><div class="sub">${esc(X.nodes[0] === "boss" ? tx("node.boss") : tx("exp.section", { n: X.section, m: z.sections }))}</div>
