@@ -8,7 +8,8 @@
 function makeUnit(o) {
   const m = MONS[o.kind];
   const sc = lvlScale(o.lvl);
-  const careF = (k) => (o.care ? 0.75 + 0.5 * (o.care[k] || 0) / 100 : 1);
+  // care only adds: 0 to +25 % (Jose's design rule: looking after your creature is a bonus, never a penalty)
+  const careF = (k) => (o.care ? 1 + 0.25 * (o.care[k] || 0) / 100 : 1);
   const stageF = o.stage === 2 ? (o.form === "bright" ? 1.15 : 1.1) : 1;
   const hollowF = o.hollow ? 0.8 : 1;
   const bondF = (1 + 0.015 * (o.bond || 0)) * (1 + 0.04 * (o.star || 0)); // Refuge companions: +1.5 % per Bond level, +4 % per star

@@ -334,7 +334,7 @@ function sheetHtml(u, care) {
   const row = (key, val, pct, mod, unit) => `<div class="fstat"><label>${esc(tx("sh." + key))}</label><div class="bar"><i style="width:${Math.max(3, Math.min(100, Math.round(pct)))}%"></i></div><output>${val}${unit || ""}</output><small>${mod}</small></div>`;
   const modTxt = (ck) => {
     if (!care) return "";
-    const d = Math.round(50 * (care[ck] || 0) / 100 - 25);
+    const d = Math.round(25 * (care[ck] || 0) / 100);
     return `<span class="${d > 0 ? "up" : d < 0 ? "down" : ""}">${d > 0 ? "+" : ""}${d} %</span> ${esc(tx("sh.by", { c: EV.t("stat." + ck).toLowerCase() }))}`;
   };
   let h = SHEET.map(([k, ck, ref]) => {

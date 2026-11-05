@@ -42,7 +42,7 @@ const RPG_EN = {
     "cards.cant": "{name} can't use {type} cards", "cards.canTypes": "{name} can use cards of: {types}, plus its own.", "cards.copies": "Copies",
     "cards.desc": "Each card carries three effects; only the one for the slot you put it in works. If the card's type matches your creature's, it resonates (+15%).",
     "cards.noCreature": "Raise a creature to kid stage to use cards.", "cards.stats": "Health {hp} · Strength {str} · Defence {def} · Speed {spd} · Crit {cr}%",
-    "sh.title": "Battle stats", "sh.lvl": "Level {n}", "sh.sub": "Level {n}. Today's care raises or lowers each value.", "sh.hp": "Health", "sh.str": "Strength", "sh.def": "Defence", "sh.spd": "Speed", "sh.cr": "Crit", "sh.dodge": "Dodge", "sh.by": "from {c}", "sh.need": "Shows up once your creature is a kid.",
+    "sh.title": "Battle stats", "sh.lvl": "Level {n}", "sh.sub": "Level {n}. Today's care adds up to 25% to each value.", "sh.hp": "Health", "sh.str": "Strength", "sh.def": "Defence", "sh.spd": "Speed", "sh.cr": "Crit", "sh.dodge": "Dodge", "sh.by": "from {c}", "sh.need": "Shows up once your creature is a kid.",
     "cards.unequip": "Remove", "cards.inUse": "In use", "cards.mode": "Battle mode",
     "log.expGo": "{name} set out {to}.", "log.expWin": "{name} came back {from} with the guardian at peace.",
     "log.expLose": "{name} came back {from} a bit bruised.",

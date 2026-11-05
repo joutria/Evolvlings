@@ -431,6 +431,17 @@ body.sheet-on { overflow: hidden; }
         <button class="btn" id="btnInstall" type="button" data-i18n="set.install">Install app</button>
       </div>
       <p class="muted" id="iosHint" data-i18n="set.installIos" hidden>On iPhone or iPad: tap Share, then Add to Home Screen.</p>
+      <div class="row">
+        <label data-i18n="set.hard">Hard mode</label>
+        <div class="seg" id="hardSeg"><button type="button" data-v="1" data-i18n="on">On</button><button type="button" data-v="0" data-i18n="off">Off</button></div>
+      </div>
+      <p class="muted" data-i18n="set.hardNote">Off: your creature never leaves. While you're away its needs never drop below a quarter, and if its health runs out it rests at the Refuge and comes back with its level and cards. On: the old rules, where a creature whose health reaches zero leaves for good.</p>
+      <div class="row">
+        <label data-i18n="set.backup">Backup</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn ghost" id="btnExport" data-i18n="set.export">Save a copy</button><button type="button" class="btn ghost" id="btnImport" data-i18n="set.import">Load a copy</button></div>
+        <input type="file" id="importFile" accept=".json,application/json" hidden>
+      </div>
+      <p class="muted" id="backupNote"></p>
       <div class="row" id="releaseRow">
         <button class="btn ghost" id="btnRelease" type="button" data-i18n="set.release">Release creature and start over</button>
       </div>
@@ -569,6 +580,13 @@ const STR = {
     "set.install": "Install app", "set.installIos": "On iPhone or iPad: tap Share, then Add to Home Screen to install the game.",
     "set.release": "Release creature and start over", "set.releaseAsk": "Release <b>{name}</b> back into the glade? This can't be undone.",
     "set.releaseYes": "Release", "set.releaseNo": "Keep", "set.theEgg": "the egg",
+    "set.hard": "Hard mode", "set.hardNote": "Off: your creature never leaves. While you're away its needs never drop below a quarter, and if its health runs out it rests at the Refuge and comes back with its level and cards. On: the old rules, where a creature whose health reaches zero leaves for good.",
+    "set.backup": "Backup", "set.export": "Save a copy", "set.import": "Load a copy",
+    "bk.never": "Your game lives only in this browser. Save a copy now and then, so clearing the browser or changing phones doesn't lose it.", "bk.last": "Last copy: {d}.",
+    "bk.done": "Copy saved", "bk.bad": "That file isn't an Evolvlings copy.", "bk.ask": "Load this copy from {d}? It replaces the game you have now.", "bk.loaded": "Copy loaded",
+    "bk.remind": "It's been a week: you can save a copy of your game in Settings.",
+    "rest.log": "{name} ran out of strength. Tila carried it to the Refuge to rest, and it's back now with its level and its cards. It needs a bit more care.",
+    "rest.toast": "{name} rested at the Refuge",
     "jr.title": "Glade journal", "jr.desc": "Every creature you've raised, newest first.", "jr.empty": "No entries yet. Creatures appear here after they leave your care.",
     "end.released": "released", "end.gone": "wandered off",
     "ch.title": "Three eggs were found in the moss. Pick one to warm up.",
@@ -603,7 +621,7 @@ const STR = {
     "log.hatched": "{name} hatched from a {egg}. Welcome to the glade!", "log.bought": "Bought {item}.", "log.ach": "Achievement unlocked: {name}.",
     "gone.title": "{name} wandered off", "gone.released": "{name} hopped back into the tall grass. It's happy out there, and it'll remember you.",
     "gone.sad": "{name} wasn't feeling cared for and went to look for a cozier glade. Creatures need food, play, rest and a tidy home every few hours. It's fine, there are more eggs in the moss.",
-    "gone.btn": "Find a new egg", footer: "Evolvlings is a working name. Progress saves in this browser only.",
+    "gone.btn": "Find a new egg", footer: "Evolvlings is a working name. Progress saves in this browser only; you can save a copy in Settings.",
     "shop.title": "Shop", "shop.desc": "Spend Chispas on treats, medicine and toys. You earn Chispas by caring well, playing and growing up.",
     "shop.wallet": "You have {n} Chispas", "shop.buy": "Buy", "shop.owned": "Owned", "shop.have": "In bag: {n}",
     "cat.food": "Food", "cat.med": "Medicine & care", "cat.toy": "Toys (permanent)",
@@ -668,6 +686,13 @@ const STR = {
     "set.install": "Instalar app", "set.installIos": "En iPhone o iPad: pulsa Compartir y luego «Añadir a pantalla de inicio» para instalar el juego.",
     "set.release": "Liberar a la criatura y empezar de nuevo", "set.releaseAsk": "¿Devolver a <b>{name}</b> al claro? No se puede deshacer.",
     "set.releaseYes": "Liberar", "set.releaseNo": "Quedármela", "set.theEgg": "el huevo",
+    "set.hard": "Modo difícil", "set.hardNote": "Desactivado: tu criatura nunca se marcha. Mientras no estás, sus necesidades nunca bajan de una cuarta parte, y si se queda sin salud descansa en el Refugio y vuelve con su nivel y sus cartas. Activado: las reglas antiguas, en las que una criatura sin salud se marcha para siempre.",
+    "set.backup": "Copia de seguridad", "set.export": "Guardar copia", "set.import": "Cargar copia",
+    "bk.never": "Tu partida vive solo en este navegador. Guarda una copia de vez en cuando, por si borras el navegador o cambias de móvil.", "bk.last": "Última copia: {d}.",
+    "bk.done": "Copia guardada", "bk.bad": "Ese archivo no es una copia de Evolvlings.", "bk.ask": "¿Cargar esta copia del {d}? Sustituye la partida que tienes ahora.", "bk.loaded": "Copia cargada",
+    "bk.remind": "Ya ha pasado una semana: puedes guardar una copia de tu partida en Ajustes.",
+    "rest.log": "{name} se quedó sin fuerzas. Tila lo llevó a descansar al Refugio y ya está de vuelta, con su nivel y sus cartas. Necesita que lo cuides un poco más.",
+    "rest.toast": "{name} descansó en el Refugio",
     "jr.title": "Recuerdos del claro", "jr.desc": "Todas las criaturas que has criado, de la más reciente a la más antigua.", "jr.empty": "Aún no hay nada. Las criaturas aparecen aquí cuando dejan de estar a tu cuidado.",
     "end.released": "en libertad", "end.gone": "se marchó",
     "ch.title": "Hay tres huevos entre el musgo. Elige uno para darle calor.",
@@ -702,7 +727,7 @@ const STR = {
     "log.hatched": "{name} salió de un {egg}. ¡Bienvenido al claro!", "log.bought": "Compraste {item}.", "log.ach": "Logro conseguido: {name}.",
     "gone.title": "{name} se ha marchado", "gone.released": "{name} volvió saltando a la hierba alta. Allí es feliz, y se acordará de ti.",
     "gone.sad": "{name} no se sentía bien cuidado y se fue a buscar un claro más acogedor. Las criaturas necesitan comida, juego, descanso y un hogar limpio cada pocas horas. No pasa nada, hay más huevos entre el musgo.",
-    "gone.btn": "Buscar otro huevo", footer: "Evolvlings es un nombre provisional. La partida se guarda solo en este navegador.",
+    "gone.btn": "Buscar otro huevo", footer: "Evolvlings es un nombre provisional. La partida se guarda solo en este navegador; puedes guardar una copia en Ajustes.",
     "shop.title": "Tienda", "shop.desc": "Gasta Chispas en caprichos, medicinas y juguetes. Las Chispas se ganan cuidando bien, jugando y creciendo.",
     "shop.wallet": "Tienes {n} Chispas", "shop.buy": "Comprar", "shop.owned": "Ya es tuyo", "shop.have": "En la mochila: {n}",
     "cat.food": "Comida", "cat.med": "Medicinas y cuidado", "cat.toy": "Juguetes (para siempre)",
@@ -883,7 +908,7 @@ function loadProfile() {
   return base;
 }
 let P = loadProfile();
-function saveProfile() { try { localStorage.setItem(PROFILE_KEY, JSON.stringify(P)); } catch (e) {} }
+function saveProfile() { if (typeof importing !== "undefined" && importing) return; try { localStorage.setItem(PROFILE_KEY, JSON.stringify(P)); } catch (e) {} }
 
 /* ---------- State ---------- */
 let S = null;
@@ -894,7 +919,7 @@ function load() {
   try { const raw = localStorage.getItem(SAVE_KEY); if (raw) { const o = JSON.parse(raw); if (o && o.v === 1) return o; } } catch (e) {}
   return null;
 }
-function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} saveProfile(); }
+function save() { if (importing) return; try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} saveProfile(); }
 function loadJournal() { try { return JSON.parse(localStorage.getItem(JOURNAL_KEY) || "[]"); } catch (e) { return []; } }
 function saveJournal(j) { try { localStorage.setItem(JOURNAL_KEY, JSON.stringify(j.slice(0, 40))); } catch (e) {} }
 
@@ -982,9 +1007,10 @@ function checkAch() {
 const PER_MIN = { full: 14 / 60, fun: 12 / 60, energy: 9 / 60, clean: 5 / 60 };
 function careNow() { const s = S.stats; return (s.full + s.fun + s.energy + s.clean + s.health) / 5; }
 
-function step(dt, offline) {
+function step(dt, offline, away) {
   if (S.phase !== "alive") return;
   const s = S.stats, r = SPECIES[S.species].rates, sl = S.sleeping;
+  const before = away && !P.hard ? { full: s.full, fun: s.fun, energy: s.energy, clean: s.clean, health: s.health } : null;
   s.full = clamp(s.full - PER_MIN.full * r.full * dt * (sl ? 0.5 : 1));
   s.fun = clamp(s.fun - PER_MIN.fun * r.fun * dt * (sl ? 0.3 : 1) * (S.sick ? 1.5 : 1));
   s.clean = clamp(s.clean - (PER_MIN.clean * r.clean + S.messes.length * 0.12) * dt);
@@ -1027,7 +1053,23 @@ function step(dt, offline) {
   if (S.stage === 0 && S.age >= TEEN_AT) grow(offline);
   else if (S.stage === 1 && S.age >= ADULT_AT) grow(offline);
 
-  if (s.health <= 0) runAway();
+  // away from the game nothing drops below a quarter (health below 30), unless it was already lower when you left
+  if (before) {
+    for (const k of ["full", "fun", "energy", "clean"]) s[k] = Math.max(s[k], Math.min(before[k], OFF_FLOOR));
+    s.health = Math.max(s.health, Math.min(before.health, OFF_HEALTH));
+  }
+  if (s.health <= 0) { if (P.hard) runAway(); else restAtRefuge(away); }
+}
+// nobody leaves for good unless hard mode is on: an exhausted creature rests at the Refuge and comes back as it was
+const OFF_FLOOR = 25, OFF_HEALTH = 30;
+function restAtRefuge(offline) {
+  const s = S.stats;
+  Object.assign(s, { full: Math.max(s.full, 60), fun: Math.max(s.fun, 50), energy: Math.max(s.energy, 70), clean: Math.max(s.clean, 70), health: 60 });
+  S.sick = false; S.messes = []; S.pendingMess = []; S.sleeping = false;
+  P.c.rests = (P.c.rests || 0) + 1;
+  addLog(t("rest.log", { name: S.name }));
+  if (!offline) { toast(t("rest.toast", { name: S.name }), "🛏"); sfx("chirp"); }
+  save();
 }
 
 function grow(offline) {
@@ -1058,12 +1100,13 @@ function runAway() {
 function catchUp() {
   const now = Date.now();
   let mins = ((now - S.lastReal) / 60000) * S.speed;
+  const awayReal = now - S.lastReal > 120000; // the game was closed or hidden, not just the one-second tick
   S.lastReal = now;
   if (S.phase === "egg") { S.egg = clamp(S.egg + mins * 60 * 4); return; }
   if (S.phase !== "alive" || mins <= 0) return;
   mins = Math.min(mins, 60 * 24 * 2);
   const away = mins, coinsBefore = P.coins;
-  while (mins > 0 && S.phase === "alive") { const d = Math.min(1, mins); step(d, true); mins -= d; }
+  while (mins > 0 && S.phase === "alive") { const d = Math.min(1, mins); step(d, true, awayReal); mins -= d; }
   if (away > 30 && S.phase === "alive") {
     const n = P.coins - coinsBefore;
     addLog(n > 0 ? t("log.awayCoins", { d: fmtDur(away), name: S.name, n }) : t("log.away", { d: fmtDur(away) }));
@@ -1771,11 +1814,12 @@ function renderJournal() {
   $("journalList").innerHTML = j.length ? j.map((e) => `<li><span><b>${escapeHtml(e.name)}</b>, ${escapeHtml(e.kind)} (${e.end === "released" ? t("end.released") : t("end.gone")})</span><span>${fmtDur(e.age)}</span></li>`).join("") : `<li><span>${t("jr.empty")}</span><span></span></li>`;
 }
 function renderSettings() {
-  for (const [seg, on] of [["soundSeg", P.sound], ["hapticSeg", P.haptics], ["quietSeg", quietOn()]]) document.querySelectorAll(`#${seg} button`).forEach((b) => b.setAttribute("aria-pressed", String((b.dataset.v === "1") === !!on)));
+  for (const [seg, on] of [["soundSeg", P.sound], ["hapticSeg", P.haptics], ["quietSeg", quietOn()], ["hardSeg", P.hard]]) document.querySelectorAll(`#${seg} button`).forEach((b) => b.setAttribute("aria-pressed", String((b.dataset.v === "1") === !!on)));
   document.querySelectorAll("#viewSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === (P.view === "side" ? "side" : "top"))));
   $("muteWave").toggleAttribute("hidden", !P.sound); $("muteX").toggleAttribute("hidden", !!P.sound);
   $("btnMute").setAttribute("aria-pressed", String(!P.sound));
   $("btnMute").setAttribute("aria-label", P.sound ? t("nav.mute") : t("nav.unmute"));
+  if ($("backupNote")) $("backupNote").textContent = P.bkAt ? t("bk.last", { d: fmtDay(P.bkAt) }) : t("bk.never");
 }
 
 /* ---------- Panels (one open at a time) ---------- */
@@ -1898,6 +1942,45 @@ every(1500, quietTick);
 $("quietSeg").addEventListener("click", (e) => { const b = e.target.closest("button[data-v]"); if (!b) return; setQuiet(b.dataset.v === "1"); sfx("tap"); });
 $("viewSeg").addEventListener("click", (e) => { const b = e.target.closest("button[data-v]"); if (!b) return; P.view = b.dataset.v; saveProfile(); renderSettings(); sfx("tap"); });
 $("hapticSeg").addEventListener("click", (e) => { const b = e.target.closest("button[data-v]"); if (!b) return; P.haptics = b.dataset.v === "1"; saveProfile(); renderSettings(); buzz(20); });
+$("hardSeg").addEventListener("click", (e) => { const b = e.target.closest("button[data-v]"); if (!b) return; P.hard = b.dataset.v === "1"; saveProfile(); renderSettings(); sfx("tap"); });
+/* ---------- Backup: the whole game as one file ---------- */
+let importing = false;
+const fmtDay = (ms) => new Date(ms).toLocaleDateString(LANG === "es" ? "es-ES" : "en-GB", { day: "numeric", month: "long", year: "numeric" });
+function exportGame() {
+  if (S && S.phase === "alive") catchUp();
+  P.bkAt = Date.now(); save();
+  const data = { game: "evolvlings", v: 1, at: new Date().toISOString(), save: S, profile: P, journal: loadJournal() };
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(data)], { type: "application/json" }));
+  a.download = "evolvlings-" + new Date().toISOString().slice(0, 10) + ".json";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  toast(t("bk.done"), "💾"); renderSettings();
+}
+function importGame(text) {
+  let d = null; try { d = JSON.parse(text); } catch (e) {}
+  if (!d || d.game !== "evolvlings" || !d.profile || d.profile.v !== 1 || !d.save || d.save.v !== 1) { toast(t("bk.bad")); sfx("deny"); return; }
+  if (!confirm(t("bk.ask", { d: fmtDay(Date.parse(d.at) || Date.now()) }))) return;
+  importing = true; // stop the clock from saving the old game over the copy before the reload
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify(d.save));
+    localStorage.setItem(PROFILE_KEY, JSON.stringify(Object.assign(d.profile, { bkAt: Date.now() })));
+    localStorage.setItem(JOURNAL_KEY, JSON.stringify(Array.isArray(d.journal) ? d.journal : []));
+  } catch (e) { importing = false; toast(t("bk.bad")); return; }
+  toast(t("bk.loaded"), "💾");
+  setTimeout(() => location.reload(), 400);
+}
+$("btnExport").addEventListener("click", () => { sfx("tap"); exportGame(); });
+$("btnImport").addEventListener("click", () => { sfx("tap"); $("importFile").click(); });
+$("importFile").addEventListener("change", (e) => { const f = e.target.files && e.target.files[0]; if (!f) return; f.text().then(importGame); e.target.value = ""; });
+// a gentle reminder once a week, only for games with some progress
+function backupNudge() {
+  const now = Date.now(), WEEK = 7 * 864e5;
+  if (!P.bkNag) { P.bkNag = now; saveProfile(); return; }
+  if ((P.c.fed || 0) < 5 || now - Math.max(P.bkNag, P.bkAt || 0) < WEEK) return;
+  P.bkNag = now; saveProfile();
+  toast(t("bk.remind"), "💾");
+}
 $("speedSel").addEventListener("change", (e) => { catchUp(); S.speed = Number(e.target.value) || 1; save(); renderStats(); });
 $("btnRelease").addEventListener("click", () => { $("releaseAsk").innerHTML = t("set.releaseAsk", { name: escapeHtml(S.name || t("set.theEgg")) }); $("releaseConfirm").hidden = false; $("releaseRow").hidden = true; });
 $("btnReleaseNo").addEventListener("click", () => { $("releaseConfirm").hidden = true; $("releaseRow").hidden = false; });
@@ -1936,7 +2019,7 @@ S = load() || freshState();
 if (S.phase === "gone" && !S.goneName) S = freshState();
 if (S.phase === "alive") { P.seen.species[S.species] = 1; if (S.stage === 2 && S.form) P.seen.forms[S.species + ":" + S.form] = 1; }
 $("speedSel").value = String(S.speed || 1);
-catchUp(); save(); showScreen(); renderCoins(); checkAch();
+catchUp(); save(); showScreen(); renderCoins(); checkAch(); backupNudge();
 every(1000, () => {
   if (!S) return;
   if (S.phase === "egg" && S.egg < 100) { catchUp(); renderEggScreen(); if (S.egg >= 100) { sfx("hatch"); renderEggScreen(); $("nameIn").focus(); } save(); return; }
