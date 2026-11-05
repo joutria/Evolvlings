@@ -192,6 +192,7 @@ function woundsOf() {
   return own ? Math.max(0, Math.min(1, 1 - own.hp)) : 0;
 }
 function endHtml() {
+  if (X.end.duel) return duelEndHtml();
   const e = X.end, S = EV.S;
   const nm = S && S.name ? S.name : "";
   const title = e.res === "win" ? (X.deep ? tx("deep.win", { n: X.deep }) : zt("win")) : e.res === "quit" ? tx("end.quit") : tx("end.lose");
@@ -233,6 +234,7 @@ function onExpClick(e) {
   if (e.target.id === "pmap") { pmapTap(e); return; }
   const t = e.target.closest("button"); if (!t || !X) return;
   const d = t.dataset;
+  if (duelClick(t)) return;
   if (d.zone) { EV.sfx("tap"); pickZone(d.zone, { savia: !!d.savia }); return; }
   if (d.deep) { const f = +d.deep; if (!deepOpen() || !deepFloorOpen(f)) { EV.sfx("deny"); return; } EV.sfx("tap"); pickZone(deepZone(f), { deep: f }); return; }
   if (d.echo) { const e = echoInfo(); if (!e || !e.lvlOk || e.left <= 0) { EV.sfx("deny"); return; } EV.sfx("tap"); pickZone(e.zone, { echo: e.rule }); return; }

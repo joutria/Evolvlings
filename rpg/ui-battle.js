@@ -10,7 +10,7 @@ function startBattle(boss) {
   const allies = partyUnits().filter((u) => u.hp > 0);
   const foes = foeUnits(boss);
   X.nextFoeBuff = 0;
-  const b = new Battle(allies, foes, { zone: ZONES[X.zone], day: isDayNow() });
+  const b = new Battle(allies, foes, { zone: X.duel ? null : ZONES[X.zone], day: isDayNow() });
   const all = b.units;
   const anim = {};
   ["ally", "foe"].forEach((side) => all.filter((u) => u.side === side).forEach((u, i) => { anim[u.uid] = { x: POS[side][i][0], y: POS[side][i][1], lunge: 0, flash: 0, shownHp: u.hp }; }));
@@ -129,6 +129,7 @@ function endBattle(res) {
   if (battle.raf) cancelAnimationFrame(battle.raf);
   battle = null;
   for (const m of X.party) if (m.own && m.hp <= 0) X.ownFalls = (X.ownFalls || 0) + 1;
+  if (X.duel) { duelFinish(res); return; }
   if (res !== "win") { finish("lose"); return; }
   if (allies.length >= 2 && allies.filter((u) => u.hp > 0).length === 1) EV.P.c.lastOne = (EV.P.c.lastOne || 0) + 1;
   if (boss || X.deep) {

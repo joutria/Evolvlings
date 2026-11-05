@@ -23,7 +23,7 @@ const TIPS = {
     ach: ["Logros", "Cada logro da Chispas una sola vez. No hace falta perseguirlos: la mayoría llegan solos jugando."],
     journal: ["Recuerdos", "Aquí quedan las criaturas que criaste y lo que les pasó. Es solo para recordar."],
     talents: ["Talentos", "Cada 3 niveles tu criatura y cada compañero eligen un talento entre dos: uno ofensivo y otro defensivo, del tipo de la criatura. Nada es definitivo: puedes cambiarlos cuando quieras con ∴ Polvo de Estrella."],
-    exp: ["Expediciones", "Elige una zona, dos compañeros y tus cartas. Si superas el nivel de una zona, sus enemigos suben poco, así que puedes volver más fuerte a por las 3 ★. Perder solo acorta el viaje: no pierdes cartas ni niveles."],
+    exp: ["Expediciones", "Elige una zona, dos compañeros y tus cartas. Si superas el nivel de una zona, sus enemigos suben poco, así que puedes volver más fuerte a por las 3 ★. Perder solo acorta el viaje: no pierdes cartas ni niveles. En la pestaña Duelos puedes retar gratis a los vecinos del Vado o al equipo de un amigo."],
   },
   en: {
     map: ["The Glade", "Tap a spot and your creature walks there: bowl, bed, pond, notice board... Caring for it, going to another map and setting out are all free; 👣 Steps are only spent at the foraging nook."],
@@ -37,7 +37,7 @@ const TIPS = {
     ach: ["Achievements", "Each achievement gives Chispas once. No need to chase them: most come on their own as you play."],
     journal: ["Memories", "The creatures you raised and what became of them. It's only for remembering."],
     talents: ["Talents", "Every 3 levels your creature and each companion choose one of two talents: one offensive, one defensive, from the creature's type. Nothing is final: change them any time with ∴ Stardust."],
-    exp: ["Expeditions", "Pick a zone, two companions and your cards. Above a zone's level its foes grow only a little, so you can come back stronger for 3 ★. Losing only cuts the trip short: you keep your cards and levels."],
+    exp: ["Expeditions", "Pick a zone, two companions and your cards. Above a zone's level its foes grow only a little, so you can come back stronger for 3 ★. Losing only cuts the trip short: you keep your cards and levels. The Duels tab lets you challenge El Vado's neighbours or a friend's team for free."],
   },
 };
 // every currency in the game: [icon, name, how you get it, what it's for]

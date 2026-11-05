@@ -379,6 +379,19 @@ body.sheet-on { overflow: hidden; }
 .bd-need .bar, .rc-up .bar { flex: 1; height: 10px; }
 .rc-up { margin: 4px 0; }
 .rc-up small { display: block; font-size: 12px; }
+.duel-h { margin: 14px 0 6px; font: 600 14px var(--font-body); }
+.duel-list { display: flex; flex-direction: column; gap: 6px; }
+.duel-row { width: 100%; grid-template-columns: minmax(0, 1fr) auto; }
+.duel-row.done { opacity: .8; }
+.duel-row .ok { margin-left: auto; white-space: nowrap; align-self: center; }
+.duel-team { display: flex; gap: 6px; margin-top: 4px; }
+.duel-team span { display: inline-flex; align-items: center; gap: 2px; font-size: 12px; }
+.duel-friend { display: flex; gap: 6px; align-items: stretch; }
+.duel-friend .lrow { flex: 1; min-width: 0; }
+.duel-x { flex: none; width: 44px; padding: 0; }
+.duel-lbl { display: block; margin: 12px 0 4px; font: 600 13px var(--font-body); }
+.duel-io { display: flex; gap: 6px; }
+.duel-io input { flex: 1; min-width: 0; font: 13px var(--font-mono, monospace); padding: 8px; border: 2px solid var(--line); background: var(--surface, #fff); color: var(--ink); }
 .tal { margin-top: 8px; display: flex; flex-direction: column; gap: 4px; }
 .tal-h { font-family: var(--font-display); font-size: 14px; }
 .tal.compact .tal-h { font-size: 12px; }
@@ -2140,6 +2153,7 @@ requestAnimationFrame(frame);
 <script src="rpg/ui-events.js"></script>
 <script src="rpg/ui-cards.js"></script>
 <script src="rpg/ui-talents.js"></script>
+<script src="rpg/ui-duels.js"></script>
 <script src="rpg/ui-hooks.js"></script>
 <script src="rpg/registry.js"></script>
 <script src="daily.js"></script>
