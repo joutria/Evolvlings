@@ -2001,8 +2001,8 @@ EVSC.agalla = () => { const b = new Pic(EW, EH); forestBack(b, { seed: 9, shafts
   forestFloor(b, 84, { seed: 12 });
   return plate(b, (g) => { HD.creature(g, "remolin", 104, 90, { s: 1.4, dir: -1, emo: "o" }); }); };
 
-EVNOTE.liquen = { scene: "Entre las raíces del Roble Sentado, donde se reúne el consejo, Abuelo Liquen pela una manzana con su capucha verde.", hidden: "En el asiento de raíz más alto, el de Liquen, hay grabada una bellota pequeñita y una fecha muy antigua." };
-EVSC.liquen = () => { const b = new Pic(EW, EH); forestBack(b, { seed: 31, shafts: [[50, 22]] });
+EVNOTE.liquenes = { scene: "Entre las raíces del Roble Sentado, donde se reúne el consejo, Abuelo Liquen pela una manzana con su capucha verde.", hidden: "En el asiento de raíz más alto, el de Liquen, hay grabada una bellota pequeñita y una fecha muy antigua." };
+EVSC.liquenes = () => { const b = new Pic(EW, EH); forestBack(b, { seed: 31, shafts: [[50, 22]] });
   bigTrunk(b, 40, 48, 0, 74);
   b.layer((t) => { [[20, 78, 22, 8], [86, 76, 26, 8], [56, 82, 16, 6]].forEach(([x, y, w, h]) => { t.e(x + w / 2, y, w / 2, h / 2, P.soil1); t.e(x + w / 2, y - 1, w / 2 - 2, h / 2 - 2, P.soil2); }); }, P.ink);
   b.layer((t) => { t.r(58, 62, 12, 10, P.soil1); t.r(58, 62, 12, 1, P.soil2); }, P.ink); b.e(64, 66, 1.4, 1.6, P.soil3);
@@ -2055,6 +2055,129 @@ EVSC.espinas = () => { const b = new Pic(EW, EH); forestBack(b, { seed: 81 });
   b.poly([[40, 96], [56, 82], [72, 82], [90, 96]], mix(P.soil2, P.moss2, .4));
   return plate(b, (g) => { HD.creature(g, "remolin", 66, 56, { s: 1.6, emo: "o" });
     for (let k = 0; k < 3; k++) HD.stroke(g, (q) => { q.moveTo(56, 44 + k * 6); q.bezierCurveTo(62, 48 + k * 4, 70, 46 + k * 5, 78, 50 + k * 4); }, P.moss0, .9); }); };
+/* ================= Event scenes: Hondonada Umbría ================= */
+// a sunken valley in violet fog: far roofs fade into flat mist bands
+function hollowBack(b, o = {}) {
+  OL = P.ink;
+  const clear = o.clear || 0;
+  band(b, 0, 0, EW, 70, mix(P.plum1, P.ink, .3), mix(P.plum2, P.mist, .25 + clear * .3), 7, mix(P.plum3, P.fog, .3 + clear * .3));
+  // valley rims
+  b.poly([[0, 40], [0, 16], [20, 22], [34, 30], [50, 40]], mix(P.plum1, P.plum2, .35)); b.poly([[78, 40], [96, 26], [112, 18], [128, 14], [128, 40]], mix(P.plum1, P.plum2, .35));
+  haze(b, 20, 50, mix(P.plum3, P.mist, .5), .45);
+  // far roofs of the Court, nearly lost in fog
+  const r = rng(o.seed || 7);
+  for (let i = 0; i < 9; i++) { const x = Math.floor(r() * EW), w = 8 + Math.floor(r() * 8), y = 40 + Math.floor(r() * 8);
+    b.r(x, y, w, 70 - y, mix(P.plum2, P.mist, .35)); b.poly([[x - 1, y], [x + w / 2, y - 5], [x + w + 1, y]], mix(P.plum2, P.mist, .3)); }
+  haze(b, 36, 66, mix(P.mist, P.fog, .3), .5 - clear * .2);
+}
+function hollowGround(b, y0, o = {}) { band(b, 0, y0, EW, EH - y0, mix(P.plum2, P.plum1, .4), P.plum1, 4);
+  const r = rng(o.seed || 31); for (let i = 0; i < 26; i++) { const x = Math.floor(r() * EW), y = y0 + 2 + Math.floor(r() * (EH - y0 - 2)); b.r(x, y, 3, 1, mix(P.plum2, P.plum3, .5)); if (i % 4 === 0) b.p(x + 1, y - 1, mix(P.moss1, P.plum2, .5)); } }
+// a stone house of the Court: flat dark walls, a round moon window
+function courtH(b, x, y, w, h, o = {}) {
+  b.layer((t) => { t.r(x, y, w, h, o.wall || mix(P.plum2, P.ink, .25)); t.poly([[x - 3, y], [x + w / 2, y - (o.roofH || 12)], [x + w + 3, y]], o.roof || P.plum1);
+    t.r(x, y, w, 1, P.plum3);
+    if (o.moon !== false) { t.e(x + w / 2, y + 7, 3, 3, P.ink); t.e(x + w / 2 + .6, y + 6.6, 2, 2, o.lit ? P.ember3 : mix(P.plum3, P.mist, .4)); }
+    if (o.door) { t.r(x + o.door, y + h - 14, 8, 14, P.ink); t.r(x + o.door + 1, y + h - 13, 6, 13, o.doorC || P.soil0); } }, OL);
+}
+// a black lantern: an iron post whose glass holds a coiled root and casts a pool of shadow
+function blackLamp(b, x, gy, h, o = {}) {
+  for (let yy = gy - 3; yy < gy + 4; yy++) for (let xx = x - 14; xx < x + 15; xx++) { const d = ((xx - x) / 14) ** 2 + ((yy - gy) / 3.5) ** 2; if (d < 1) { const c = b.g(xx, yy); if (c) b.p(xx, yy, mix(c, P.ink, .45)); } }
+  b.layer((t) => { t.r(x - 1, gy - h, 2, h, P.ink); t.r(x - 3, gy - 2, 6, 2, P.ink); t.r(x - 4, gy - h - 8, 8, 8, P.ink); t.r(x - 3, gy - h - 7, 6, 6, o.broken ? mix(P.plum2, P.ink, .4) : mix(P.plum1, P.ink, .3));
+    t.poly([[x - 5, gy - h - 8], [x, gy - h - 12], [x + 5, gy - h - 8]], P.ink); }, OL);
+  if (!o.broken) { b.l(x - 1, gy - h - 3, x + 1, gy - h - 6, SAP.sheen); b.p(x, gy - h - 2, mix(SAP.sheen, P.ember3, .5)); }
+  else { b.l(x - 2, gy - h - 6, x + 1, gy - h - 3, P.mist); }
+  if (o.drip) { b.p(x + 2, gy - h, SAP.sheen); b.p(x + 2, gy - h + 3, mix(SAP.sheen, P.ink, .3)); b.e(x + 3, gy, 2, .8, mix(SAP.sheen, P.plum1, .4)); }
+}
+// the empty Throne of Mist
+function throneEv(b, x, gy) {
+  b.layer((t) => { t.r(x - 18, gy - 4, 36, 4, P.plum2); t.r(x - 14, gy - 8, 28, 4, P.plum2); t.r(x - 18, gy - 4, 36, 1, P.plum3); t.r(x - 14, gy - 8, 28, 1, P.plum3);
+    t.r(x - 9, gy - 40, 18, 32, mix(P.plum2, P.plum3, .3)); t.poly([[x - 11, gy - 40], [x, gy - 50], [x + 11, gy - 40]], mix(P.plum2, P.plum3, .3));
+    t.r(x - 12, gy - 22, 4, 14, P.plum2); t.r(x + 8, gy - 22, 4, 14, P.plum2); t.r(x - 6, gy - 22, 12, 3, P.plum1); t.r(x - 6, gy - 36, 12, 14, mix(P.plum1, P.ink, .2));
+    t.e(x, gy - 44, 3, 3, P.mist); t.e(x + 1, gy - 44.6, 2.4, 2.4, mix(P.plum2, P.plum3, .3)); }, OL);
+}
+const spear = (q, x, y) => { HD.stroke(q, (z) => { z.moveTo(x - .4, y + 9); z.lineTo(x + .4, y - 12); }, P.ink, .8); HD.stroke(q, (z) => { z.moveTo(x - .4, y + 9); z.lineTo(x + .4, y - 12); }, P.plum3, .4);
+  HD.shape(q, (z) => HD.poly(z, [[x - .6, y - 12], [x + .4, y - 16], [x + 1.2, y - 12]]), { fill: P.mist, lw: .3 }); };
+
+EVNOTE.guarda = { scene: "El Trono de Bruma, vacío en el centro de la Hondonada. A su lado, Cierzo sigue de pie con la lanza en alto y la capa empapada de rocío.", hidden: "Sobre el brazo del trono hay medio pan, duro como una piedra. No es el primero." };
+EVSC.guarda = () => { const b = new Pic(EW, EH); hollowBack(b, { seed: 3 });
+  hollowGround(b, 72); throneEv(b, 58, 80);
+  b.layer((t) => { t.r(44, 57, 6, 2, P.soil2); t.r(45, 56, 4, 1, P.soil3); }, OL);
+  light(b, 58, 50, 40, 30, mix(P.mist, P.fog, .5), .18, 4);
+  return plate(b, (g) => { F(g, 92, 92, CAST.night, { s: 1.85, dir: -1, cloth: [P.plum1, P.ink, P.plum2], front: [86, 70], back: [98, 74], emo: "closed", hold: spear }); }); };
+
+EVNOTE.faroles = { scene: "El paseo de los faroles negros: farolas de hierro que echan charcos de sombra en vez de luz. Uno gotea una savia que brilla por dentro.", hidden: "En el pie del farol más cercano hay una placa con el farol de la Casa Albor." };
+EVSC.faroles = () => { const b = new Pic(EW, EH); hollowBack(b, { seed: 9 });
+  hollowGround(b, 70, { seed: 5 });
+  blackLamp(b, 22, 76, 30, { broken: true }); blackLamp(b, 56, 72, 26); blackLamp(b, 98, 84, 40, { drip: true }); blackLamp(b, 124, 74, 28, { broken: true });
+  b.r(94, 80, 8, 3, P.butter); b.r(95, 81, 6, 1, P.ember2);
+  return plate(b, (g) => { HD.creature(g, "lumo", 72, 90, { s: 1.6, emo: "o" }); }); };
+
+EVNOTE.velo = { scene: "En el borde de la Hondonada, Calina tira de un hilo de niebla como quien deshace un jersey. El hilo se vuelve a enredar solo.", hidden: "Lleva cosido al pecho un trozo de tela gris: es un retal del Velo, el libro de los reyes." };
+EVSC.velo = () => { const b = new Pic(EW, EH); hollowBack(b, { seed: 12 });
+  // mist wall on the right, with a thread pulled out
+  for (let y = 10; y < 80; y++) { const w = 46 + Math.round(Math.sin(y * .2) * 4); b.r(EW - w, y, w, 1, mix(P.mist, P.fog, .25 + ((y >> 3) % 2) * .08)); }
+  for (let y = 14; y < 80; y += 9) b.r(EW - 40, y, 30, 1, mix(P.fog, P.cream, .3));
+  hollowGround(b, 78, { seed: 8 });
+  for (let i = 0; i <= 30; i++) { const x = 52 + i, y = 58 + Math.sin(i * .5) * 2; b.p(Math.round(x), Math.round(y), mix(P.fog, P.cream, .4)); }
+  return plate(b, (g) => { F(g, 44, 94, CAST.nightBare, { s: 1.8, hairStyle: "bun", hair: P.ink, cloth: [P.plum2, P.plum1, P.plum3], front: [52, 58], back: [50, 62], emo: "open" }); }); };
+
+EVNOTE.cartas = { scene: "Una casa vacía de la Hondonada convertida en estafeta: cientos de cartas sin sello en casilleros de madera. Tordo las clasifica sin prisa.", hidden: "El casillero de abajo, el de las cartas con el nombre verdadero, tiene la madera gastada de tanto tocarla." };
+EVSC.cartas = () => { const b = new Pic(EW, EH); OL = P.ink;
+  b.r(0, 0, EW, 70, mix(P.plum1, P.soil0, .3));
+  b.layer((t) => { t.r(8, 8, 70, 60, P.soil1); for (let y = 10; y < 66; y += 11) for (let x = 10; x < 76; x += 11) { t.r(x, y, 9, 9, P.soil0);
+    const n = (x * 7 + y * 3) % 4; for (let k = 0; k < n; k++) t.r(x + 1 + k * 2, y + 3 - (k % 2), 2, 6, k % 2 ? P.cream : P.fog); } }, OL);
+  b.layer((t) => { t.r(92, 16, 22, 20, P.ink); t.e(103, 26, 6, 6, mix(P.plum3, P.mist, .4)); t.r(102, 16, 2, 20, P.ink); t.r(92, 25, 22, 2, P.ink); }, OL);
+  light(b, 103, 30, 30, 30, P.mist, .2, 4);
+  b.r(0, 70, EW, 26, P.soil0); for (let x = 0; x < EW; x += 10) b.r(x, 70, 1, 26, mix(P.soil0, P.ink, .4)); b.r(0, 70, EW, 1, P.ink);
+  b.layer((t) => { t.r(70, 72, 40, 4, P.soil2); t.r(74, 76, 2, 14, P.soil1); t.r(104, 76, 2, 14, P.soil1); t.r(78, 70, 10, 2, P.cream); t.r(90, 69, 8, 3, P.fog); }, OL);
+  return plate(b, (g) => { F(g, 56, 92, CAST.night, { s: 1.7, hat: null, hairStyle: "short", hair: P.fog, beard: P.fog, front: [62, 62], back: [48, 64], emo: "closed",
+    hold: (q, x, y) => HD.shape(q, (z) => z.rect(x - .4, y - 1.4, 3, 2.2), { fill: P.cream, shade: P.fog, lw: .3 }) }); }); };
+
+EVNOTE.cuna = { scene: "Orvallo sale de una casa abandonada de la Hondonada con una cuna de madera enorme a la espalda.", hidden: "En la madera de la cuna hay lunas talladas, una por cada hijo que ha dormido en ella." };
+EVSC.cuna = () => { const b = new Pic(EW, EH); hollowBack(b, { seed: 17 });
+  courtH(b, 70, 30, 46, 40, { door: 18, doorC: P.ink }); b.l(88, 56, 96, 70, mix(P.plum2, P.ink, .2));
+  hollowGround(b, 70, { seed: 11 });
+  return plate(b, (g) => {
+    HD.shape(g, (q) => { q.rect(20, 50, 22, 12); }, { fill: P.soil2, shade: P.soil1, light: P.soil3, lw: .4 });
+    [[24, 54], [31, 54], [38, 54]].forEach(([x, y]) => HD.shape(g, (q) => HD.E(q, x, y, 1.6, 1.6), { fill: P.cream, lw: .25 }));
+    HD.stroke(g, (q) => { q.moveTo(20, 62); q.lineTo(18, 66); q.moveTo(42, 62); q.lineTo(44, 66); }, P.soil0, .7);
+    F(g, 34, 92, CAST.nightBare, { s: 1.85, hairStyle: "short", hair: P.ink, beard: P.plum1, cloth: [P.plum2, P.plum1, P.plum3], front: [38, 64], back: [28, 64], emo: "closed" }); }); };
+
+EVNOTE.juego = { scene: "Una plaza vacía de la Hondonada con un juego de casillas pintado en el suelo. Unos Ecolitos saltan sobre ellas cantando con voces de niño.", hidden: "Junto a la última casilla alguien dibujó con tiza una fila de muñecos. Uno está borrado." };
+EVSC.juego = () => { const b = new Pic(EW, EH); hollowBack(b, { seed: 21 });
+  courtH(b, -6, 34, 34, 34, { lit: true }); courtH(b, 100, 36, 34, 32, {});
+  band(b, 0, 66, EW, 30, mix(P.plum2, P.mist, .2), P.plum1, 4);
+  const ch = mix(P.fog, P.cream, .4);
+  [[50, 88], [58, 88], [54, 82], [50, 76], [58, 76], [54, 70]].forEach(([x, y]) => { b.r(x - 4, y - 3, 8, 1, ch); b.r(x - 4, y + 2, 8, 1, ch); b.r(x - 4, y - 3, 1, 6, ch); b.r(x + 3, y - 3, 1, 6, ch); });
+  for (let i = 0; i < 4; i++) { const x = 80 + i * 6; b.e(x, 70, 1.4, 1.4, ch); b.r(x, 72, 1, 3, ch); }
+  b.r(98, 70, 4, 5, mix(P.plum2, P.mist, .2));
+  return plate(b, (g) => { HD.creature(g, "ecolito", 40, 90, { s: 1.5, emo: "happy" }); HD.creature(g, "ecolito", 60, 80, { s: 1.2, emo: "o", dir: -1 }); HD.creature(g, "ecolito", 92, 92, { s: 1.4, emo: "happy", dir: -1 }); }); };
+
+EVNOTE.noctua = { scene: "La casa de Noctua, la sanadora. Su puerta sigue cubierta de flores secas de sombra, con un ramo blanco y fresco del Prado encima.", hidden: "Dentro, sobre la mesa, se ven dos tazas. Una nunca se la bebió nadie." };
+EVSC.noctua = () => { const b = new Pic(EW, EH); hollowBack(b, { seed: 27 });
+  courtH(b, 26, 22, 76, 50, { door: 34, doorC: mix(P.soil0, P.plum1, .3), roofH: 16 });
+  b.layer((t) => { t.r(36, 34, 12, 10, P.ink); t.r(37, 35, 10, 8, mix(P.plum1, P.ember0, .3)); t.r(41, 35, 1, 8, P.ink); t.r(37, 39, 10, 1, P.ink); }, OL);
+  const r = rng(4); for (let i = 0; i < 40; i++) { const x = 58 + Math.floor(r() * 12), y = 54 + Math.floor(r() * 18); b.p(x, y, i % 3 ? mix(P.soil2, P.plum2, .5) : P.plum3); }
+  [[61, 52], [64, 51], [67, 52], [63, 53]].forEach(([x, y]) => { b.e(x, y, 1.4, 1.4, P.cream); b.p(x, y, P.butter); });
+  b.l(64, 54, 64, 58, P.moss2);
+  hollowGround(b, 72, { seed: 3 });
+  return plate(b, (g) => { HD.creature(g, "nim", 100, 90, { s: 1.4, emo: "sad", dir: -1 }); }); };
+
+EVNOTE.acta = { scene: "Al pie del Trono de Bruma asoma entre dos losas la esquina de una caja de escribano. El guarda, de espaldas, aparta la niebla con la lanza.", hidden: "La caja lleva dos sellos: la luna de la Corte y el farol de Albor." };
+EVSC.acta = () => { const b = new Pic(EW, EH); hollowBack(b, { seed: 3 });
+  hollowGround(b, 72); throneEv(b, 46, 80);
+  b.layer((t) => { t.r(58, 74, 10, 6, P.soil1); t.r(58, 74, 10, 1, P.soil3); t.e(63, 77, 1.4, 1.4, P.ember3); }, OL);
+  light(b, 63, 77, 10, 6, P.ember3, .25, 3);
+  return plate(b, (g) => { F(g, 100, 92, CAST.night, { s: 1.75, dir: 1, cloth: [P.plum1, P.ink, P.plum2], front: [108, 70], back: [96, 74], emo: "closed", hold: spear }); }); };
+
+EVNOTE.regreso = { scene: "La niebla de la Hondonada se ha aclarado. Penumbra baja por el camino con las manos envueltas en trapos y mira cada casa.", hidden: "Una de las puertas, la que no tiene flores, tiene una muesca corta grabada: el signo de la Hondura para «aquí sigue alguien»." };
+EVSC.regreso = () => { const b = new Pic(EW, EH); hollowBack(b, { seed: 31, clear: 1 });
+  courtH(b, 6, 30, 40, 40, { door: 14 }); courtH(b, 84, 32, 44, 38, { door: 20 });
+  b.r(107, 58, 1, 4, P.fog);
+  band(b, 0, 70, EW, 26, mix(P.plum2, P.mist, .25), P.plum1, 4);
+  b.poly([[50, 70], [78, 70], [96, 96], [32, 96]], mix(P.plum3, P.mist, .3));
+  return plate(b, (g) => { F(g, 62, 92, CAST.nightBare, { s: 1.85, hairStyle: "long", hair: P.ink, cloth: [P.plum2, P.plum1, P.plum3], front: [70, 74], back: [56, 74], emo: "sad",
+    hold: (q, x, y) => HD.shape(q, (z) => HD.E(z, x, y, 1.6, 1.3), { fill: P.fog, shade: P.mist, lw: .3 }) }); }); };
 const ART = {};
 function art(id) { if (!SCENE[id]) return null; return ART[id] || (ART[id] = SCENE[id]()); }
 

@@ -222,7 +222,7 @@ Every Refuge companion is born with one small trait of its own (the second MiniT
 
 ## Illustrated path conversations
 
-The path events now include illustrated conversations, in the style of Life in Adventure. They were written in the thread "Crear eventos ilustrados por etapa", and Jose approved them. There are 12 in the Prado Aurora and 9 in the Cráter.
+The path events now include illustrated conversations, in the style of Life in Adventure. They were written in the thread "Crear eventos ilustrados por etapa", and Jose approved them. There are 12 in the Prado Aurora, 9 in the Cráter and 9 in the Bosque.
 
 - **Data:** `rpg/events-<zone>.js` holds `window.EVEVENTS[zone][id]` with the Spanish text and effects. `rpg/events-<zone>.en.js` holds the English text in the same order.
 - **Shape:** each event is a small conversation:
@@ -233,4 +233,5 @@ The path events now include illustrated conversations, in the style of Life in A
   - `need` gates when an event can appear, by lore layer and flags.
 - **Scenes:** each event has a 128 × 96 pixel-art scene, `EVSCENE.event(id)` in `scenes.js`, drawn above the conversation.
 - **The deck:** `rpg/ui-talk.js` keeps a shuffled bag for each zone (`P.evDeck`). It holds the zone's old short events plus the conversations that are open now. Draws never repeat until the bag is empty, and the same event never comes twice in a row. Lore events from `lore.js` keep their 45 % chance first.
+- **Common events:** events under the zone key `common` (campfires, treasures...) can come up anywhere. Each time a zone reshuffles its bag, up to 3 of them join it (`COMMON_SHARE`); an optional `zones: [...]` limits one to some zones.
 - **Checks:** `node tools/check.js` validates every conversation file. That covers where options lead, speakers, matching English line and option counts, effect keys, known foes, and ids that clash with short events.

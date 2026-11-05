@@ -56,11 +56,12 @@ function sims(n) {
   let n = 0;
   const fxOk = (where, f) => { for (const k in f || {}) if (!FX.has(k)) err(`${where}: unknown effect "${k}"`); for (const k of (f && f.foes) || []) if (!R.MONS[k]) err(`${where}: unknown foe "${k}"`); };
   for (const zone in w.EVEVENTS) {
-    if (!R.ZONES[zone]) err(`events: unknown zone "${zone}"`);
+    if (!R.ZONES[zone] && zone !== "common") err(`events: unknown zone "${zone}"`);
     for (const id in w.EVEVENTS[zone]) {
       n++;
       const ev = w.EVEVENTS[zone][id], en = (w.EVEVENTS_EN[zone] || {})[id], at = `event ${zone}/${id}`;
-      if (R.ZONES[zone] && R.ZONES[zone].events.includes(id)) err(`${at}: id also used by a short event`);
+      if (Object.values(R.ZONES).some((z) => z.events.includes(id))) err(`${at}: id also used by a short event`);
+      for (const z2 in w.EVEVENTS) if (z2 !== zone && w.EVEVENTS[z2][id]) err(`${at}: id also used in ${z2}`);
       if (!ev.nodes[ev.start]) err(`${at}: start node "${ev.start}" missing`);
       if (!en) err(`${at}: no English text`);
       let ends = 0;

@@ -8,19 +8,26 @@
    reshuffled when empty, never the same event twice in a row. Lore events (lore.js) keep their own chance first. */
 "use strict";
 const TALK = window.EVEVENTS || {}, TALK_EN = window.EVEVENTS_EN || {};
-const talkEv = (id, zone) => { const z = TALK[zone || (X && X.zone)]; return (z && z[id]) || null; };
+// "common" events (campfires, treasures...) can come up in any zone; a few of them join each zone's bag
+const COMMON_SHARE = 3;
+const talkZone = (id, zone) => { const z = zone || (X && X.zone); return TALK[z] && TALK[z][id] ? z : TALK.common && TALK.common[id] ? "common" : null; };
+const talkEv = (id, zone) => { const z = talkZone(id, zone); return z ? TALK[z][id] : null; };
 const deckSlice = EV.slice("evDeck", () => ({}));
 // the events a zone can draw right now
 function deckPool(zone) {
-  const conv = Object.keys(TALK[zone] || {}).filter((id) => !LORE || LORE.needOk(TALK[zone][id].need, EV.P));
-  return ZONES[zone].events.concat(conv);
+  const open = (z) => Object.keys(TALK[z] || {}).filter((id) => (!LORE || LORE.needOk(TALK[z][id].need, EV.P)) && (!TALK[z][id].zones || TALK[z][id].zones.includes(zone)));
+  return ZONES[zone].events.concat(open(zone), open("common"));
 }
 function drawDeck(zone) {
   const D = deckSlice(), d = D[zone] = D[zone] || { bag: [], last: null };
   const pool = deckPool(zone), ok = (id) => pool.includes(id);
   let pick = d.bag.find(ok);
   if (!pick) {
-    const all = pool.filter((id) => id !== d.last), a = all.length ? all : pool.slice();
+    // the zone's own events, plus a few common ones picked at random for this round
+    const own = pool.filter((id) => talkZone(id, zone) !== "common"), com = pool.filter((id) => talkZone(id, zone) === "common");
+    for (let i = com.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [com[i], com[j]] = [com[j], com[i]]; }
+    const round = own.concat(com.slice(0, COMMON_SHARE));
+    const all = round.filter((id) => id !== d.last), a = all.length ? all : round.slice();
     for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
     d.bag = a; pick = d.bag[0];
   }
@@ -29,7 +36,7 @@ function drawDeck(zone) {
 }
 /* ---------- the conversation ---------- */
 function talkText(id) {
-  const ev = talkEv(id), en = L() === "en" && TALK_EN[X.zone] && TALK_EN[X.zone][id];
+  const ev = talkEv(id), z = talkZone(id), en = L() === "en" && TALK_EN[z] && TALK_EN[z][id];
   return {
     who: (k) => (en && en.who && en.who[k]) || ev.who[k] || k,
     say: (n, i) => (en && en.nodes[n] && en.nodes[n].say[i]) || ev.nodes[n].say[i][1],
