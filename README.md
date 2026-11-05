@@ -153,3 +153,11 @@ The old `rpg.js` is now split into `rpg/`. They are still plain scripts, loaded 
 | `ui-hooks.js` | hooks into the main game and the `EV.RPG` export |
 
 To add a script, add its `<script src>` tag to `index.html` and its path to `CORE` in `sw.js`. `python3 tools/build-single.py out.html` inlines every script into one file.
+
+## Player-first rules (from the player-review study)
+
+Jose approved eight rules to keep in every feature. These are the first three:
+
+- **Nobody leaves because you were away.** While the game is closed or hidden for more than two minutes, food, fun, energy and cleanliness never drop below 25 and health never drops below 30 (unless they were already lower). If health still reaches zero, the creature rests at the Refuge: it comes back with 60 health, cured and clean, keeping its level, cards and companions. **Hard mode** in Settings brings back the old rule where it leaves for good.
+- **Care only adds.** In battle each care value now gives 0 % to +25 % to its stat (it used to be −25 % to +25 %).
+- **Backups.** Settings → Backup saves the whole game (creature, profile and journal) as a `.json` file and loads it back. A gentle reminder appears once a week for games with some progress.
