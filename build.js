@@ -123,13 +123,11 @@ const WOOD_CAP = 6;
 const INC_CUT = [0, 0, 0.06, 0.12, 0.18, 0.25]; // share of hatch time saved by level
 
 /* ---------- State ---------- */
+const bdSlice = EV.slice("bd", () => ({ lv: { garden: 1, inc: 1 }, wood: 0, job: null, gar: { t: Date.now(), f: 2, w: 0 }, hello: false }));
 function B() {
-  const P = EV.P;
-  if (!P.bd) {
-    P.bd = { lv: { garden: 1, inc: 1 }, wood: 0, job: null, gar: { t: Date.now(), f: 2, w: 0 }, hello: false };
-  }
-  for (const k of PLACES) if (!P.bd.lv[k]) P.bd.lv[k] = 1;
-  return P.bd;
+  const b = bdSlice();
+  for (const k of PLACES) if (!b.lv[k]) b.lv[k] = 1;
+  return b;
 }
 const lvl = (k) => B().lv[k] || 1;
 const save = () => { EV.saveProfile(); };

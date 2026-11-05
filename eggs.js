@@ -181,12 +181,12 @@ const today = () => (EV.DAILY ? EV.DAILY.dayKey() : new Date().toISOString().sli
 const monName = (k) => RPG.monName(k);
 
 /* ---------- State ---------- */
+const egSlice = EV.slice("eg", () => ({ pity: 0, floor: 0, banner: "new", nb: 0, hist: [], bag: [], inc: [], roster: {}, cl: 1, wel: {}, seq: 1 }));
 function G() {
-  const P = EV.P;
-  if (!P.eg) P.eg = { pity: 0, floor: 0, banner: "new", nb: 0, hist: [], bag: [], inc: [], roster: {}, cl: 1, wel: {}, seq: 1 };
+  const P = EV.P, g = egSlice();
   if (P.notes == null) P.notes = 0;
   if (P.dust == null) P.dust = 0;
-  return P.eg;
+  return g;
 }
 const bondLvl = (bxp) => BOND_AT.filter((n) => bxp >= n).length;
 const gradeOf = (bond) => (bond >= 10 ? 2 : bond >= 5 ? 1 : 0);

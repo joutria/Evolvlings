@@ -93,13 +93,14 @@ function reward(l, def) {
   return out;
 }
 const cnt = (k) => EV.P.c[k] || 0;
+const cosmSlice = EV.slice("cosm", () => ({ frames: {}, titles: {}, mem: {}, frame: null, title: null }));
 function SS() {
   const P = EV.P, n = now();
   if (!P.ss || P.ss.idx !== n.idx) {
     // a new season: start counting from here, and make sure the event state is fresh
     P.ss = { idx: n.idx, base: { dailyDone: cnt("dailyDone"), weeklyDone: cnt("weeklyDone"), expDone: cnt("expDone"), expWins: cnt("expWins") }, xp: 0, got: {}, wax: 0, spent: 0, lit: 0, help: null, bought: {}, pick: null, ended: false };
   }
-  if (!P.cosm) P.cosm = { frames: {}, titles: {}, mem: {}, frame: null, title: null };
+  cosmSlice();
   return P.ss;
 }
 const delta = (k) => cnt(k) - (SS().base[k] || 0);

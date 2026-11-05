@@ -583,7 +583,7 @@ const STR = {
     "set.hard": "Hard mode", "set.hardNote": "Off: your creature never leaves. While you're away its needs never drop below a quarter, and if its health runs out it rests at the Refuge and comes back with its level and cards. On: the old rules, where a creature whose health reaches zero leaves for good.",
     "set.backup": "Backup", "set.export": "Save a copy", "set.import": "Load a copy",
     "bk.never": "Your game lives only in this browser. Save a copy now and then, so clearing the browser or changing phones doesn't lose it.", "bk.last": "Last copy: {d}.",
-    "bk.done": "Copy saved", "bk.bad": "That file isn't an Evolvlings copy.", "bk.ask": "Load this copy from {d}? It replaces the game you have now.", "bk.loaded": "Copy loaded",
+    "bk.done": "Copy saved", "bk.bad": "That file isn't an Evolvlings copy.", "bk.ask": "Load this copy from {d}? It replaces the game you have now.", "bk.loaded": "Copy loaded", "save.other": "Your game was opened in another tab. Reload this one to keep saving here.", "save.newer": "This game was saved by a newer version. Reload to update; nothing is saved until then.",
     "bk.remind": "It's been a week: you can save a copy of your game in Settings.",
     "rest.log": "{name} ran out of strength. Tila carried it to the Refuge to rest, and it's back now with its level and its cards. It needs a bit more care.",
     "rest.toast": "{name} rested at the Refuge",
@@ -689,7 +689,7 @@ const STR = {
     "set.hard": "Modo difícil", "set.hardNote": "Desactivado: tu criatura nunca se marcha. Mientras no estás, sus necesidades nunca bajan de una cuarta parte, y si se queda sin salud descansa en el Refugio y vuelve con su nivel y sus cartas. Activado: las reglas antiguas, en las que una criatura sin salud se marcha para siempre.",
     "set.backup": "Copia de seguridad", "set.export": "Guardar copia", "set.import": "Cargar copia",
     "bk.never": "Tu partida vive solo en este navegador. Guarda una copia de vez en cuando, por si borras el navegador o cambias de móvil.", "bk.last": "Última copia: {d}.",
-    "bk.done": "Copia guardada", "bk.bad": "Ese archivo no es una copia de Evolvlings.", "bk.ask": "¿Cargar esta copia del {d}? Sustituye la partida que tienes ahora.", "bk.loaded": "Copia cargada",
+    "bk.done": "Copia guardada", "bk.bad": "Ese archivo no es una copia de Evolvlings.", "bk.ask": "¿Cargar esta copia del {d}? Sustituye la partida que tienes ahora.", "bk.loaded": "Copia cargada", "save.other": "Tu partida se abrió en otra pestaña. Recarga esta para seguir guardando aquí.", "save.newer": "Esta partida es de una versión más nueva del juego. Recarga para actualizar; hasta entonces no se guarda nada.",
     "bk.remind": "Ya ha pasado una semana: puedes guardar una copia de tu partida en Ajustes.",
     "rest.log": "{name} se quedó sin fuerzas. Tila lo llevó a descansar al Refugio y ya está de vuelta, con su nivel y sus cartas. Necesita que lo cuides un poco más.",
     "rest.toast": "{name} descansó en el Refugio",
@@ -899,27 +899,73 @@ function freshProfile() {
     c: { hatched: 0, fed: 0, messes: 0, plays: 0, bestRound: 0, stars: 0, kids: 0, adults: 0, cures: 0, cuddles: 0, bought: 0, spent: 0, nightPlay: 0 },
     seen: { species: {}, forms: {}, foods: {} } };
 }
+/* ---------- Saving ----------
+   Two saved blobs: the creature (S) and the profile (P), plus the journal. Each has a version; MIGRATE[blob][v] turns a
+   version-v blob into v+1, so an old save is brought up to date when it loads (or is imported). A save from a newer
+   version of the game is read but never written over, so an old cached copy of the game can't damage it.
+   save() and saveProfile() only mark the game as changed; it is written at most every 5 s, and at once when the tab
+   is hidden or closed. If another tab (or an imported backup) wrote the save meanwhile, this tab stops writing. */
+const SAVE_V = 1, PROFILE_V = 1;
+const MIGRATE = { save: {}, profile: {} };   // e.g. MIGRATE.profile[1] = (o) => { o.newThing = {}; }  (then PROFILE_V = 2)
+let importing = false, readOnly = false, dirty = false, lastFlush = 0;
+const written = {};   // what this tab last read or wrote under each key
+function readBlob(key, kind, cur) {
+  let raw = null; try { raw = localStorage.getItem(key); } catch (e) {}
+  written[key] = raw;
+  let o = null; try { o = JSON.parse(raw || "null"); } catch (e) {}
+  return o && typeof o === "object" ? upgrade(o, kind, cur) : null;
+}
+function upgrade(o, kind, cur) {
+  if (!(o.v >= 1)) return null;
+  if (o.v > cur) { readOnly = true; return o; }
+  while (o.v < cur) { const f = MIGRATE[kind][o.v]; if (f) f(o); o.v++; }
+  return o;
+}
+function writeBlob(key, text) {
+  if (written[key] === text) return;
+  let now = null; try { now = localStorage.getItem(key); } catch (e) {}
+  if (now !== written[key]) { readOnly = true; if (typeof toast === "function") toast(t("save.other"), "💾"); return; }
+  try { localStorage.setItem(key, text); written[key] = text; } catch (e) {}
+}
+function flush() {
+  if (!dirty || importing || readOnly) return;
+  dirty = false; lastFlush = Date.now();
+  if (S) writeBlob(SAVE_KEY, JSON.stringify(S));
+  writeBlob(PROFILE_KEY, JSON.stringify(P));
+}
+function markDirty() { dirty = true; if (Date.now() - lastFlush >= 5000) flush(); }
+addEventListener("pagehide", flush);
+document.addEventListener("visibilitychange", () => { if (document.hidden) flush(); });
+setInterval(flush, 5000);
+
+/* Profile slices: each module keeps its own part of P (P.d, P.eg, P.bd...). EV.slice(key, fresh) returns a getter that
+   creates the part from fresh() the first time, and fills in any field a newer version added. */
+const SLICES = {};
+function slice(key, fresh) {
+  SLICES[key] = fresh;
+  let filled = null;
+  return () => {
+    let o = P[key];
+    if (!o) { o = P[key] = fresh(); filled = o; }
+    else if (filled !== o) { const d = fresh(); for (const k in d) if (o[k] === undefined) o[k] = d[k]; filled = o; }
+    return o;
+  };
+}
 function loadProfile() {
-  const base = freshProfile();
-  try {
-    const o = JSON.parse(localStorage.getItem(PROFILE_KEY) || "null");
-    if (o && o.v === 1) return Object.assign(base, o, { c: Object.assign(base.c, o.c), seen: Object.assign(base.seen, o.seen) });
-  } catch (e) {}
+  const base = freshProfile(), o = readBlob(PROFILE_KEY, "profile", PROFILE_V);
+  if (o) return Object.assign(base, o, { c: Object.assign(base.c, o.c), seen: Object.assign(base.seen, o.seen) });
   return base;
 }
 let P = loadProfile();
-function saveProfile() { if (typeof importing !== "undefined" && importing) return; try { localStorage.setItem(PROFILE_KEY, JSON.stringify(P)); } catch (e) {} }
+function saveProfile() { markDirty(); }
 
 /* ---------- State ---------- */
 let S = null;
 function freshState() {
   return { v: 1, phase: "choose", speed: S ? S.speed : 1, lastReal: Date.now(), log: [] };
 }
-function load() {
-  try { const raw = localStorage.getItem(SAVE_KEY); if (raw) { const o = JSON.parse(raw); if (o && o.v === 1) return o; } } catch (e) {}
-  return null;
-}
-function save() { if (importing) return; try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} saveProfile(); }
+function load() { return readBlob(SAVE_KEY, "save", SAVE_V); }
+function save() { markDirty(); }
 function loadJournal() { try { return JSON.parse(localStorage.getItem(JOURNAL_KEY) || "[]"); } catch (e) { return []; } }
 function saveJournal(j) { try { localStorage.setItem(JOURNAL_KEY, JSON.stringify(j.slice(0, 40))); } catch (e) {} }
 
@@ -1944,7 +1990,6 @@ $("viewSeg").addEventListener("click", (e) => { const b = e.target.closest("butt
 $("hapticSeg").addEventListener("click", (e) => { const b = e.target.closest("button[data-v]"); if (!b) return; P.haptics = b.dataset.v === "1"; saveProfile(); renderSettings(); buzz(20); });
 $("hardSeg").addEventListener("click", (e) => { const b = e.target.closest("button[data-v]"); if (!b) return; P.hard = b.dataset.v === "1"; saveProfile(); renderSettings(); sfx("tap"); });
 /* ---------- Backup: the whole game as one file ---------- */
-let importing = false;
 const fmtDay = (ms) => new Date(ms).toLocaleDateString(LANG === "es" ? "es-ES" : "en-GB", { day: "numeric", month: "long", year: "numeric" });
 function exportGame() {
   if (S && S.phase === "alive") catchUp();
@@ -1959,7 +2004,8 @@ function exportGame() {
 }
 function importGame(text) {
   let d = null; try { d = JSON.parse(text); } catch (e) {}
-  if (!d || d.game !== "evolvlings" || !d.profile || d.profile.v !== 1 || !d.save || d.save.v !== 1) { toast(t("bk.bad")); sfx("deny"); return; }
+  const ok = (o, cur) => o && typeof o === "object" && o.v >= 1 && o.v <= cur;
+  if (!d || d.game !== "evolvlings" || !ok(d.profile, PROFILE_V) || !ok(d.save, SAVE_V)) { toast(t("bk.bad")); sfx("deny"); return; }
   if (!confirm(t("bk.ask", { d: fmtDay(Date.parse(d.at) || Date.now()) }))) return;
   importing = true; // stop the clock from saving the old game over the copy before the reload
   try {
@@ -2008,7 +2054,7 @@ window.EV = {
   get S() { return S; }, get P() { return P; }, get LANG() { return LANG; },
   feed, cleanUp, toggleSleep, startPlay, cuddle, ITEMS,
   // what the side scene is showing right now, so the view from above can draw the same hearts, bubbles and speech
-  get FX() { return { effects, bubble, petX, foodAnim, mini }; }, miniOn: () => !!mini, itemName, quietOn, STR, ACH, ACH_META, SPECIES, SFX, HOOKS, $, clamp, rand, pick, t, tone, sfx, buzz, save, saveProfile, addCoins, spendCoins, toast, addLog,
+  get FX() { return { effects, bubble, petX, foodAnim, mini }; }, miniOn: () => !!mini, itemName, quietOn, STR, ACH, ACH_META, SPECIES, SFX, HOOKS, $, clamp, rand, pick, t, tone, sfx, buzz, save, saveProfile, flush, slice, SLICES, SAVE_INFO: { SAVE_V, PROFILE_V, MIGRATE, upgrade }, get saveReadOnly() { return readOnly; }, addCoins, spendCoins, toast, addLog,
   renderAll, renderStats, showScreen, stocked, every, applyStatic, escapeHtml, drawCreature, setupCanvas, ell, drawStar, checkAch, togglePanel, closeSheets, stageName, careNow, pixelText,
 };
 
@@ -2020,6 +2066,7 @@ if (S.phase === "gone" && !S.goneName) S = freshState();
 if (S.phase === "alive") { P.seen.species[S.species] = 1; if (S.stage === 2 && S.form) P.seen.forms[S.species + ":" + S.form] = 1; }
 $("speedSel").value = String(S.speed || 1);
 catchUp(); save(); showScreen(); renderCoins(); checkAch(); backupNudge();
+if (readOnly) toast(t("save.newer"), "💾");
 every(1000, () => {
   if (!S) return;
   if (S.phase === "egg" && S.egg < 100) { catchUp(); renderEggScreen(); if (S.egg >= 100) { sfx("hatch"); renderEggScreen(); $("nameIn").focus(); } save(); return; }

@@ -178,3 +178,12 @@ A zone, creature or card still lives in a few tables (rules, texts in both langu
 
 The launch content stays in the data files; these calls are for new content and tests. A new creature without a sprite in `sprites.js` is drawn with the plain fallback shape.
 
+## Saving
+
+The game keeps three things in the browser: the creature, the profile (everything that outlives a creature) and the journal.
+
+- **When it saves.** `save()` and `saveProfile()` only mark the game as changed. It is written at most every 5 seconds, and straight away when the tab is hidden or closed, instead of every second as before.
+- **Other tabs.** If another tab (or a loaded backup) writes the game in the meantime, this tab stops saving and asks you to reload it, so two open tabs can't overwrite each other.
+- **Versions.** The creature and the profile each carry a version (`SAVE_V`, `PROFILE_V` in `index.html`). To change their shape, raise the version and add `MIGRATE.save[old]` or `MIGRATE.profile[old]`, a function that updates an old save; saves and backups from any older version are brought up to date when they load. A save from a newer version of the game is played but never written over, so an old cached copy of the game can't damage it.
+- **Module parts.** Each module keeps its part of the profile (`P.d`, `P.eg`, `P.bd`, `P.well`, `P.cosm`, `P.team`) through `EV.slice(key, fresh)`. The first time, the part is made from `fresh()`; later, any field that a newer version added to `fresh()` is filled in for older saves.
+

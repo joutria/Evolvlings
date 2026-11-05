@@ -68,11 +68,11 @@ const POOL = () => RPG.DROP_POOL;
 const pick = (a) => a[Math.floor(Math.random() * a.length)];
 const SPECIES = { lumo: "Lumo", fizz: "Fizz", pebb: "Pebb" };
 
+const wellSlice = EV.slice("well", () => ({ pity: 0, floor: 0, promise: false, banner: "s1", hist: [], dn: { month: null, n: 0 } }));
 function W() {
-  const P = EV.P;
-  if (!P.well) P.well = { pity: 0, floor: 0, promise: false, banner: "s1", hist: [], dn: { month: null, n: 0 } };
+  const P = EV.P, w = wellSlice();
   if (P.notes == null) P.notes = 0;
-  return P.well;
+  return w;
 }
 // chance of a Legendary on the n-th pull since the last one
 const legChance = (n) => (n >= HARD ? 100 : n >= SOFT ? ODDS[LEG] + 6 * (n - SOFT + 1) : ODDS[LEG]);
