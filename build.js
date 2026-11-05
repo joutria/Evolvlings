@@ -34,6 +34,7 @@ const TX = {
     "e.pantry": "+{n} puntos de premio especial en la tirada gratis", "e.well": "+{n} puntos de Rara o mejor en cada tirada",
     "e.path": "+{n} pasos al día", "e.nook": "{n} búsquedas al día", "e.nest": "Los que se quedan ganan el {n} % de la experiencia del viaje{pet}", "e.nest.pet": " · acariciar da +2 de Vínculo",
     "e.craft": "Fabricar cuesta {n} ∴", "e.none": "Sin mejora todavía",
+    "trade": "Cambia ✦ {c} por ∴ {d} de Polvo. Quedan {n} cambios hoy.", "trade.btn": "Cambiar ✦ {c} → ∴ {d}", "trade.done": "Tienes ∴ {d} de Polvo más.", "toast.poorC": "No tienes Chispas suficientes.",
     "store": "En el huerto: {f} comidas · 🪵 {w}", "harvest": "Cosechar", "harvestNone": "Todavía no hay nada que cosechar.",
     "harvested": "Cosechas: {what}.", "full": "El huerto está lleno: cosecha para que siga creciendo.",
     "tripWood": "🪵 +{n} Madera del viaje", "tripCut": "La obra avanza 1 h.",
@@ -75,6 +76,7 @@ const TX = {
     "e.pantry": "+{n} points of special prize on the free pull", "e.well": "+{n} points of Rare or better on every pull",
     "e.path": "+{n} steps a day", "e.nook": "{n} searches a day", "e.nest": "Those who stay get {n}% of the trip's experience{pet}", "e.nest.pet": " · petting gives +2 Bond",
     "e.craft": "Crafting costs {n} ∴", "e.none": "No bonus yet",
+    "trade": "Trade ✦ {c} for ∴ {d} Stardust. {n} trades left today.", "trade.btn": "Trade ✦ {c} → ∴ {d}", "trade.done": "You got ∴ {d} more Stardust.", "toast.poorC": "Not enough Chispas.",
     "store": "In the garden: {f} meals · 🪵 {w}", "harvest": "Harvest", "harvestNone": "Nothing to harvest yet.",
     "harvested": "You harvest: {what}.", "full": "The garden is full: harvest so it keeps growing.",
     "tripWood": "🪵 +{n} Wood from the trip", "tripCut": "The build moves 1 h closer.",
@@ -102,7 +104,7 @@ const MAX = 5;
 // cost and build time to reach level 2, 3, 4, 5
 // h = build hours in the final game (2 h to 24 h). While the game is in development Jose asked for faster builds:
 // FAST = true uses the short times below (15 min to 4 h). Set it to false to go back to the long ones.
-const FAST = true;
+const FAST = false;
 const COST = { 2: { c: 60, w: 5, h: 2, fh: 0.25 }, 3: { c: 150, w: 12, h: 6, fh: 0.75 }, 4: { c: 300, w: 25, h: 12, fh: 2 }, 5: { c: 600, w: 45, h: 24, fh: 4 } };
 const hoursOf = (c) => (FAST ? c.fh : c.h);
 const PLACES = ["garden", "inc", "pantry", "well", "path", "nook", "nest", "craft"];
@@ -114,12 +116,22 @@ const EFF = {
 const eff = (id) => EFF[id][lvl(id)];
 // Garden by level: meals a day, how many it holds, wood a day, what grows
 const GARDEN = [null,
-  { f: 3, cap: 4, w: 1, pool: ["berry", "berry", "bun"] },
-  { f: 4, cap: 6, w: 1, pool: ["berry", "berry", "bun"] },
-  { f: 5, cap: 8, w: 1.5, pool: ["berry", "berry", "bun", "melon"] },
-  { f: 6, cap: 10, w: 1.5, pool: ["berry", "berry", "bun", "melon"] },
-  { f: 8, cap: 12, w: 2, pool: ["berry", "berry", "bun", "melon", "stew"] }];
-const WOOD_CAP = 6;
+  { f: 3, cap: 4, w: 2, pool: ["berry", "berry", "bun"] },
+  { f: 4, cap: 6, w: 2, pool: ["berry", "berry", "bun"] },
+  { f: 5, cap: 8, w: 2.5, pool: ["berry", "berry", "bun", "melon"] },
+  { f: 6, cap: 10, w: 2.5, pool: ["berry", "berry", "bun", "melon"] },
+  { f: 8, cap: 12, w: 3, pool: ["berry", "berry", "bun", "melon", "stew"] }];
+// the garden keeps up to 3 days of wood (design rule 4)
+const WOOD_CAP = 9;
+// the Guild workshop trades spare Chispas for Stardust, a few times a day (design rule 8: a sink for late Chispas)
+const TRADE = { c: 50, d: 5, max: 3 };
+function tradeLeft() { const b = B(), d = dayKey(); if (!b.trade || b.trade.day !== d) b.trade = { day: d, n: 0 }; return TRADE.max - b.trade.n; }
+function trade() {
+  if (tradeLeft() <= 0) return;
+  if (!EV.spendCoins(TRADE.c)) { EV.toast(tx("toast.poorC")); EV.sfx("deny"); return; }
+  const P = EV.P; P.dust = (P.dust || 0) + TRADE.d; B().trade.n++;
+  save(); EV.sfx("coin"); EV.toast(tx("trade.done", { d: TRADE.d }), "∴"); render();
+}
 const INC_CUT = [0, 0, 0.06, 0.12, 0.18, 0.25]; // share of hatch time saved by level
 
 /* ---------- State ---------- */
@@ -229,6 +241,7 @@ function render() {
     x += `<p class="bd-eff"><b>${esc(tx("now"))}:</b> ${esc(effText(id, n))}</p>`;
     if (c) x += `<p class="bd-eff next"><b>${esc(tx("next", { n: to }))}:</b> ${esc(effText(id, to))}</p>`;
     if (id === "garden") { const s = gardenStock(); x += `<p class="bd-store">${esc(tx("store", { f: s.f, w: s.w }))}${s.full ? ` <span class="poor">${esc(tx("full"))}</span>` : ""}</p><button class="btn ghost" type="button" data-bharv="1" ${s.f || s.w ? "" : "disabled"}>${esc(tx("harvest"))}</button>`; }
+    if (id === "craft") { const left = tradeLeft(); x += `<p class="bd-store">${esc(tx("trade", { c: TRADE.c, d: TRADE.d, n: left }))}</p><button class="btn ghost" type="button" data-btrade="1" ${left > 0 && P.coins >= TRADE.c ? "" : "disabled"}>${esc(tx("trade.btn", { c: TRADE.c, d: TRADE.d }))}</button>`; }
     if (!c) x += `<p class="bd-max">${esc(tx("max"))}</p>`;
     else x += `<button class="btn" type="button" data-bup="${id}" ${busy || miss.length ? "disabled" : ""}>${esc(tx("up", { c: c.c, w: c.w, t: fmt(hoursOf(c) * HOUR) }))}</button>${busy && !here ? `<small class="muted">${esc(tx("busy"))}</small>` : miss.length ? `<small class="poor">${esc(tx("poor", { what: miss.join(" · ") }))}</small>${needBars(c)}` : ""}`;
     return x + "</div>";
@@ -240,6 +253,7 @@ function render() {
 function onClick(e) {
   const t = e.target.closest("button"); if (!t || t.disabled) return;
   if (t.dataset.bup) { start(t.dataset.bup); return; }
+  if (t.dataset.btrade) { trade(); return; }
   if (t.dataset.bharv) { const r = harvest(); EV.toast(r.text, "🌱"); render(); return; }
   if (t.dataset.jpick) { pickJob = { k: t.dataset.jpick, place: null }; EV.sfx("tap"); render(); return; }
   if (t.dataset.jplace) { const [k, p] = t.dataset.jplace.split(":"); pickJob = { k, place: p }; EV.sfx("tap"); render(); return; }
@@ -394,7 +408,7 @@ if (EV.EGGS && EV.EGGS.afterTrip) {
   EV.EGGS.afterTrip = function (res) {
     const out = prev.apply(this, arguments) || [];
     if (res === "win" || res === "lose") {
-      const b = B(), n = res === "win" ? 2 + (Math.random() < 0.5 ? 1 : 0) : 1;
+      const b = B(), n = res === "win" ? 3 + (Math.random() < 0.5 ? 1 : 0) : 1;
       b.wood += n; out.push(tx("tripWood", { n }));
       if (b.job) { b.job.cut = (b.job.cut || 0) + HOUR; out.push(tx("tripCut")); }
       save(); setTimeout(tick, 0);
