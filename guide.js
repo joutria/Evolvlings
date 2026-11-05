@@ -47,7 +47,7 @@ const GLOSS = {
     ["♪", "Notas del Canto", "Tareas diarias y semanales, 3 ★ en una zona, la temporada y el Refugio. También se cambian Chispas por Notas (con límite semanal).", "Huevos del Refugio y el Pozo de los Ecos. Nunca caducan."],
     ["∴", "Polvo de Estrella", "Deshaciendo cartas repetidas, huevos repetidos y el Rincón de búsqueda.", "Crear cartas en el Grimorio (Cartas → Grimorio) y cambiar talentos."],
     ["🪵", "Madera", "Al terminar expediciones y con trabajos de tus compañeros.", "Obras del Claro."],
-    ["👣", "Pasos", "10 cada día; se guardan hasta 20 y se pueden comprar unos pocos.", "Buscar en el Rincón de búsqueda. Pasear y salir de expedición son gratis."],
+    ["👣", "Pasos", "10 cada día; se guardan hasta 30 y se pueden comprar unos pocos.", "Buscar en el Rincón de búsqueda. Pasear y salir de expedición son gratis."],
     ["🕯", "Cera", "Solo durante el evento: tareas, expediciones y ayudar a Tila.", "Encender los faroles del evento."],
   ],
   en: [
@@ -55,7 +55,7 @@ const GLOSS = {
     ["♪", "Song Notes", "Daily and weekly tasks, 3 ★ in a zone, the season and the Refuge. Chispas can also be traded for Notes (weekly limit).", "Refuge eggs and the Well of Echoes. They never expire."],
     ["∴", "Stardust", "Breaking down duplicate cards, duplicate eggs and the foraging nook.", "Crafting cards in the Grimoire (Cards → Grimoire) and changing talents."],
     ["🪵", "Wood", "Finishing expeditions and your companions' jobs.", "Glade builds."],
-    ["👣", "Steps", "10 a day; up to 20 keep and a few can be bought.", "Searching the foraging nook. Walking around and setting out are free."],
+    ["👣", "Steps", "10 a day; up to 30 keep and a few can be bought.", "Searching the foraging nook. Walking around and setting out are free."],
     ["🕯", "Wax", "Only during the event: tasks, expeditions and helping Tila.", "Lighting the event's lanterns."],
   ],
 };

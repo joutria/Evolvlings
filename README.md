@@ -222,7 +222,7 @@ Every Refuge companion is born with one small trait of its own (the second MiniT
 
 ## Illustrated path conversations
 
-The path events now include illustrated conversations, in the style of Life in Adventure. They were written in the thread "Crear eventos ilustrados por etapa", and Jose approved them. There are 12 in the Prado Aurora, 9 in the Cráter and 9 in the Bosque.
+The path events now include illustrated conversations, in the style of Life in Adventure. They were written in the thread "Crear eventos ilustrados por etapa", and Jose approved them. There are 12 in the Prado Aurora and 9 in each of the Cráter, Bosque, Hondonada, Lago and Cuevas, plus 10 common ones (campfires, springs, chests...) that can come up anywhere.
 
 - **Data:** `rpg/events-<zone>.js` holds `window.EVEVENTS[zone][id]` with the Spanish text and effects. `rpg/events-<zone>.en.js` holds the English text in the same order.
 - **Shape:** each event is a small conversation:
@@ -235,3 +235,18 @@ The path events now include illustrated conversations, in the style of Life in A
 - **The deck:** `rpg/ui-talk.js` keeps a shuffled bag for each zone (`P.evDeck`). It holds the zone's old short events plus the conversations that are open now. Draws never repeat until the bag is empty, and the same event never comes twice in a row. Lore events from `lore.js` keep their 45 % chance first.
 - **Common events:** events under the zone key `common` (campfires, treasures...) can come up anywhere. Each time a zone reshuffles its bag, up to 3 of them join it (`COMMON_SHARE`); an optional `zones: [...]` limits one to some zones.
 - **Checks:** `node tools/check.js` validates every conversation file. That covers where options lead, speakers, matching English line and option counts, effect keys, known foes, and ids that clash with short events.
+
+## Nothing daily expires (design rule 4)
+
+Daily things now pile up for up to 3 days instead of being lost when you skip a day. `EV.DAILY.charge(o, per, cap)` in `daily.js` tops up a `{ day, left }` counter by `per` for each day that passed, up to `cap`. It never takes away what is already there.
+
+| What | Before | Now |
+| --- | --- | --- |
+| Pantry free pull | 1 a day, lost if unused | up to 3 saved |
+| Petting each Refuge companion | once a day | up to 3 pats saved (`roster[k].pc`) |
+| Foraging nook | once a day (more with the Nook build) | up to 3 days of searches saved |
+| El Vado requests | replaced every day | unfinished ones stay up to 3 days (6 at most on the board) |
+| Season event help | once a day | up to 3 helps saved |
+| Steps | up to 20 saved | up to 30 saved |
+
+Daily and weekly tasks already kept 2 unfinished days, and the 28-day calendar only moves when you claim it, so neither of them changed.

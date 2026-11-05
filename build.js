@@ -43,7 +43,7 @@ const TX = {
     "job.full": "Ya hay {n} compañeros trabajando.", "job.sent": "{n} se va a trabajar a: {p}", "job.at": "Trabajando en: {p}", "job.will": "Traerá: {what}",
     "job.done": "Terminó en: {p}", "job.collect": "Recoger", "job.got": "{n} vuelve del trabajo con: {what}. +1 Vínculo", "job.fit": "Su tipo encaja: rinde más",
     "r.food": "🍓 ×{n}", "r.items": "🎒 ×{n}", "r.wood": "{n} de Madera",
-    "ord": "Encargos del Vado", "ord.sub": "Cada día dos vecinos piden algo. Pagan en Chispas y Madera, y a veces dejan una Nota.",
+    "ord": "Encargos del Vado", "ord.sub": "Cada día dos vecinos piden algo, y los encargos sin hacer esperan hasta 3 días. Pagan en Chispas y Madera, y a veces dejan una Nota.",
     "ord.need": "Piden {what} (tienes {have})", "ord.pay": "Pagan ✦ {c} y 🪵 {w}", "ord.give": "Entregar", "ord.giveTo": "Entregar a {n}", "ord.done": "Entregado. Vuelve mañana.",
     "ord.miss": "Te falta: {what}.", "ord.got": "(+{c} ✦, +{w} 🪵)", "ord.note": "Te deja también ♪ 1 Nota.", "ord.rumour": "Y añade: «{r}»",
     "ord.allDone": "Hoy ya no queda ningún encargo en el tablón. Mañana habrá más.", "p.orders": "Tablón de encargos", "p.orders.d": "Lo que piden los vecinos",
@@ -84,7 +84,7 @@ const TX = {
     "job.full": "{n} companions are already working.", "job.sent": "{n} goes off to work at: {p}", "job.at": "Working at: {p}", "job.will": "Will bring: {what}",
     "job.done": "Finished at: {p}", "job.collect": "Collect", "job.got": "{n} comes back from work with: {what}. +1 Bond", "job.fit": "Its type fits: earns more",
     "r.food": "🍓 ×{n}", "r.items": "🎒 ×{n}", "r.wood": "{n} Wood",
-    "ord": "El Vado requests", "ord.sub": "Every day two neighbours ask for something. They pay in Chispas and Wood, and sometimes leave a Note.",
+    "ord": "El Vado requests", "ord.sub": "Every day two neighbours ask for something, and unfinished requests wait up to 3 days. They pay in Chispas and Wood, and sometimes leave a Note.",
     "ord.need": "They ask for {what} (you have {have})", "ord.pay": "They pay ✦ {c} and 🪵 {w}", "ord.give": "Hand over", "ord.giveTo": "Give to {n}", "ord.done": "Delivered. Come back tomorrow.",
     "ord.miss": "You're missing: {what}.", "ord.got": "(+{c} ✦, +{w} 🪵)", "ord.note": "They also leave you ♪ 1 Note.", "ord.rumour": "And adds: “{r}”",
     "ord.allDone": "No requests left on the board today. There'll be more tomorrow.", "p.orders": "Request board", "p.orders.d": "What the neighbours need",
@@ -347,7 +347,10 @@ function orders() {
   const b = B(), d = dayKey();
   if (!b.ord || b.ord.day !== d) {
     const names = Object.keys(NEIGH), h = hashStr(d), a = h % names.length, c = (a + 1 + ((h >> 4) % (names.length - 1))) % names.length;
-    b.ord = { day: d, list: [a, c].map((i, n) => { const who = names[i], N = NEIGH[who], ask = N.asks[(h >> (8 + n * 3)) % N.asks.length]; return { who, need: ask[0], n: ask[1], done: false }; }) };
+    // unfinished requests from the last days stay on the board (design rule 4: up to 3 days, never more than 6)
+    const dn = EV.DAILY && EV.DAILY.dayNum, keep = b.ord && dn ? b.ord.list.filter((o) => !o.done && dn(d) - dn(o.day || b.ord.day) < 3) : [];
+    const fresh = [a, c].map((i, n) => { const who = names[i], N = NEIGH[who], ask = N.asks[(h >> (8 + n * 3)) % N.asks.length]; return { who, need: ask[0], n: ask[1], done: false, day: d }; });
+    b.ord = { day: d, list: fresh.concat(keep.map((o) => Object.assign({ day: b.ord.day }, o))).slice(0, 6) };
     save();
   }
   return b.ord.list;

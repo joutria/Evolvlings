@@ -2059,7 +2059,7 @@ EVSC.espinas = () => { const b = new Pic(EW, EH); forestBack(b, { seed: 81 });
 // a sunken valley in violet fog: far roofs fade into flat mist bands
 function hollowBack(b, o = {}) {
   OL = P.ink;
-  const clear = o.clear || 0;
+  const clear = o.clear || 0; b.r(0, 60, EW, EH - 60, mix(P.plum2, P.plum1, .4));
   band(b, 0, 0, EW, 70, mix(P.plum1, P.ink, .3), mix(P.plum2, P.mist, .25 + clear * .3), 7, mix(P.plum3, P.fog, .3 + clear * .3));
   // valley rims
   b.poly([[0, 40], [0, 16], [20, 22], [34, 30], [50, 40]], mix(P.plum1, P.plum2, .35)); b.poly([[78, 40], [96, 26], [112, 18], [128, 14], [128, 40]], mix(P.plum1, P.plum2, .35));
@@ -2178,6 +2178,352 @@ EVSC.regreso = () => { const b = new Pic(EW, EH); hollowBack(b, { seed: 31, clea
   b.poly([[50, 70], [78, 70], [96, 96], [32, 96]], mix(P.plum3, P.mist, .3));
   return plate(b, (g) => { F(g, 62, 92, CAST.nightBare, { s: 1.85, hairStyle: "long", hair: P.ink, cloth: [P.plum2, P.plum1, P.plum3], front: [70, 74], back: [56, 74], emo: "sad",
     hold: (q, x, y) => HD.shape(q, (z) => HD.E(z, x, y, 1.6, 1.3), { fill: P.fog, shade: P.mist, lw: .3 }) }); }); };
+/* ================= Event scenes: Lago Espejo ================= */
+// a pale sky, far shore hills and a lake so still it mirrors them in flat bands
+function lakeBack(b, o = {}) {
+  OL = P.sea0;
+  const n = o.night;
+  b.r(0, 0, EW, EH, n ? P.sea0 : P.sea2);
+  band(b, 0, 0, EW, 44, n ? P.ink : mix(P.sea3, P.cream, .3), n ? mix(P.sea0, P.plum1, .4) : P.sea4, 7, n ? P.sea1 : mix(P.cream, P.butter, .3));
+  const hill = n ? mix(P.sea0, P.plum1, .5) : mix(P.sea2, P.moss2, .35), hill2 = n ? P.sea0 : mix(P.sea1, P.moss1, .4);
+  b.poly([[0, 44], [0, 34], [24, 28], [46, 34], [70, 30], [96, 36], [128, 30], [128, 44]], hill);
+  b.poly([[0, 44], [0, 40], [36, 38], [80, 41], [128, 38], [128, 44]], hill2);
+  if (n) b.stars(0, 0, EW, 30, 26, 8);
+  const wy = o.water || 44, wb = o.waterEnd || 80;
+  // mirrored sky and hills: a flipped copy, slightly darkened, cut by thin flat ripple lines
+  for (let y = wy; y < wb; y++) { const sy = wy - 1 - (y - wy); for (let x = 0; x < EW; x++) { const c = sy >= 0 ? b.g(x, sy) : null; b.p(x, y, mix(c || P.sea2, n ? P.sea0 : P.sea1, .28)); } }
+  for (let y = wy + 3; y < wb; y += 5) b.r(((y * 13) % 40), y, 18 + (y % 3) * 6, 1, mix(n ? P.sea1 : P.sea3, P.cream, .3));
+  b.r(0, wy, EW, 1, mix(P.cream, P.sea3, .4));
+}
+function mudBank(b, y0, o = {}) { band(b, 0, y0, EW, EH - y0, mix(P.soil1, P.sea1, .25), P.soil0, 4);
+  const r = rng(o.seed || 41); for (let i = 0; i < 30; i++) { const x = Math.floor(r() * EW), y = y0 + 2 + Math.floor(r() * (EH - y0 - 2)); b.r(x, y, 4, 1, i % 3 ? mix(P.soil1, P.soil2, .4) : mix(P.sea1, P.soil1, .5)); if (i % 6 === 0) { b.l(x, y, x - 1, y - 4, P.moss2); b.l(x + 1, y, x + 2, y - 5, P.moss1); } } }
+// a houseboat: a hull, a cabin with a little roof, a rope of the family's colour
+function houseBoat(b, x, y, w, o = {}) {
+  b.layer((t) => { t.poly([[x, y - 6], [x + w, y - 6], [x + w - 4, y], [x + 4, y]], o.hull || P.soil1); t.r(x + 1, y - 6, w - 2, 1, P.soil3);
+    t.r(x + 6, y - 16, w - 14, 10, o.cabin || mix(P.sea3, P.cream, .3)); t.poly([[x + 4, y - 16], [x + w / 2 - 1, y - 22], [x + w - 6, y - 16]], o.roof || P.sea1);
+    t.r(x + 10, y - 13, 4, 4, P.sea0); if (o.door) t.r(x + w - 14, y - 14, 4, 8, P.soil0);
+    if (o.hole) t.e(x + w * .6, y - 3, 2, 2, P.ink); }, OL);
+  if (o.rope) b.l(x + w - 2, y - 5, x + w + (o.ropeLen || 8), y - 3, o.rope);
+}
+function sanctuary(b, x, y, w) { // a wooden platform on stilts with a little roof
+  b.layer((t) => { for (let i = 0; i < 4; i++) t.r(x + 3 + i * (w - 8) / 3, y, 2, 14, P.soil0); t.r(x, y - 3, w, 4, P.soil2); t.r(x, y - 3, w, 1, P.soil3);
+    t.r(x + 4, y - 26, 2, 23, P.soil1); t.r(x + w - 6, y - 26, 2, 23, P.soil1); t.poly([[x - 3, y - 26], [x + w / 2, y - 34], [x + w + 3, y - 26]], P.sea1);
+    t.e(x + w / 2, y - 28, 2, 2, P.cream); }, OL);
+}
+const bucket = (q, x, y) => HD.shape(q, (z) => HD.poly(z, [[x - 1.2, y - 1], [x + 1.2, y - 1], [x + .9, y + 1.4], [x - .9, y + 1.4]]), { fill: P.soil2, shade: P.soil1, lw: .3 });
+
+EVNOTE.bajada = { scene: "De noche, en el campamento del Arroyo, las Mareas rezan en corro alrededor de un charco, lo único que queda del arroyo. Sargazo mueve las manos sobre el agua.", hidden: "En el borde del charco hay una raya de barro seco más alta que el agua: hasta ahí llegó la noche que creció." };
+EVSC.bajada = () => { const b = new Pic(EW, EH); lakeBack(b, { night: true, water: 44, waterEnd: 44 });
+  houseBoat(b, -6, 60, 40, { cabin: mix(P.sea1, P.plum1, .3), roof: P.sea0 }); houseBoat(b, 96, 58, 40, { cabin: mix(P.sea1, P.plum1, .3), roof: P.sea0, rope: P.ember2, ropeLen: -10 });
+  mudBank(b, 56, { seed: 3 });
+  b.e(64, 80, 22, 6, mix(P.soil1, P.soil2, .3)); b.e(64, 80, 18, 4.4, P.sea1); b.e(60, 79, 8, 1.4, P.sea3); b.e(64, 80, 18, 4.4, P.sea1);
+  for (let x = 47; x < 82; x++) if (b.g(x, 78)) b.p(x, 77, mix(P.soil2, P.soil3, .5));
+  light(b, 64, 80, 30, 10, P.sea3, .25, 4);
+  return plate(b, (g) => {
+    [[34, 78, 1], [44, 76, 1], [86, 76, -1], [96, 78, -1]].forEach(([x, y, d]) => F(g, x, y, CAST.water, { s: 1.15, pose: "sit", dir: d, emo: "closed", hair: P.ink }));
+    F(g, 62, 92, CAST.water, { s: 1.75, pose: "kneel", hairStyle: "none", beard: P.fog, cloth: [P.sea1, P.sea0, P.sea2], front: [70, 80], back: [56, 80], emo: "closed" }); }); };
+
+EVNOTE.barcas = { scene: "Las barcas-casa del campamento, varadas en el barro y atadas unas a otras con cuerdas de colores. Anea salta de cubierta en cubierta revisando nudos.", hidden: "Una barca está un poco apartada y no tiene ninguna cuerda: la de la familia de Junco." };
+EVSC.barcas = () => { const b = new Pic(EW, EH); lakeBack(b, { water: 44, waterEnd: 54 });
+  mudBank(b, 54, { seed: 7 });
+  houseBoat(b, 4, 72, 40, { rope: P.moss3, ropeLen: 10 }); houseBoat(b, 54, 74, 38, { cabin: mix(P.rose2, P.cream, .4), roof: P.rose0, rope: P.ember3, ropeLen: 10, hole: true, door: true });
+  houseBoat(b, 102, 62, 32, { cabin: mix(P.fog, P.sea3, .3), roof: P.plum2 });
+  b.l(44, 67, 54, 69, P.moss3); b.l(92, 69, 100, 66, P.ember3);
+  return plate(b, (g) => { F(g, 70, 58, kid(CAST.water), { s: 1.55, hairStyle: "bun", hair: P.ink, cloth: [P.sea2, P.sea1, P.sea3], front: [74, 48], back: [64, 48], emo: "open" }); }); };
+
+EVNOTE.espejismo = { scene: "La orilla del Lago Espejo. En el agua quieta se refleja una casa del Vado con la puerta abierta. En la orilla de verdad solo hay unas Vidrielas de cristal.", hidden: "En el reflejo, junto a la puerta, hay un cuenco de comida en el suelo." };
+EVSC.espejismo = () => { const b = new Pic(EW, EH); lakeBack(b, { water: 42, waterEnd: 96 });
+  // the false reflection: an upside-down cottage with a lit door
+  b.layer((t) => { t.r(70, 50, 26, 16, mix(P.cream, P.sea3, .4)); t.poly([[66, 66], [83, 76], [100, 66]], mix(P.ember1, P.sea1, .4)); t.r(80, 50, 6, 9, mix(P.ember3, P.sea3, .3)); t.r(74, 56, 4, 4, mix(P.sea0, P.sea1, .3)); t.r(88, 56, 4, 4, mix(P.sea0, P.sea1, .3)); t.r(82, 49, 3, 1, P.cream); }, mix(P.sea0, P.sea1, .4));
+  for (let y = 52; y < 76; y += 4) b.r(64, y, 40, 1, mix(P.sea3, P.cream, .25));
+  band(b, 0, 80, EW, 16, mix(P.soil2, P.sea2, .3), P.soil1, 3);
+  return plate(b, (g) => { HD.creature(g, "vidriela", 28, 90, { s: 1.5, emo: "o" }); HD.creature(g, "vidriela", 46, 92, { s: 1.2, emo: "o", dir: -1 }); }); };
+
+EVNOTE.santuario = { scene: "El Santuario del Espejo, una plataforma de madera en medio del Lago. Madre Marejada está sentada de espaldas al agua, la única que no mira los reflejos.", hidden: "Bajo la plataforma, en el reflejo, se ve una capucha azul pequeña que no es de nadie." };
+EVSC.santuario = () => { const b = new Pic(EW, EH); lakeBack(b, { water: 44, waterEnd: 96 });
+  sanctuary(b, 34, 70, 64);
+  b.layer((t) => { t.e(70, 86, 3, 3, P.sea1); t.poly([[67, 86], [70, 81], [73, 86]], P.sea1); }, mix(P.sea0, P.sea1, .4));
+  return plate(b, (g) => { F(g, 56, 67, CAST.marejada, { s: 1.6, pose: "sit", dir: -1, emo: "closed" }); }); };
+
+EVNOTE.pez = { scene: "En el barro de la orilla boquea un pez enorme y plateado. Berro le da vueltas con un palo mientras la Abuela Nasa grita desde una barca.", hidden: "En el ojo del pez, muy pequeño, se refleja un farol con raíces." };
+EVSC.pez = () => { const b = new Pic(EW, EH); lakeBack(b, { water: 44, waterEnd: 62 });
+  houseBoat(b, 84, 60, 44, { cabin: mix(P.fog, P.sea3, .3), roof: P.sea1 });
+  mudBank(b, 62, { seed: 13 });
+  b.layer((t) => { t.e(56, 82, 20, 6, P.fog); t.e(56, 81, 20, 4, P.cream); t.e(56, 84, 18, 2, P.mist); t.poly([[74, 82], [84, 76], [82, 82], [84, 88]], P.fog); t.e(41, 81, 2, 2, P.ink); t.p(40, 80, P.cream);
+    for (let x = 48; x < 70; x += 4) t.l(x, 79, x + 2, 82, P.mist); t.l(38, 84, 42, 83, P.plum2); }, P.sea0);
+  return plate(b, (g) => { F(g, 26, 92, kid(CAST.water), { s: 1.55, hair: P.ink, front: [36, 80], back: [22, 80], emo: "happy",
+      hold: (q, x, y) => HD.stroke(q, (z) => { z.moveTo(x, y); z.lineTo(x + 6, y + 6); }, P.soil1, .5) });
+    F(g, 87, 54, CAST.water, { s: 1.3, dir: -1, hairStyle: "bun", hair: P.fog, hat: { k: "scarf", c: [P.sea1, P.sea0] }, front: [81, 42], emo: "open" }); }); };
+
+EVNOTE.aguador = { scene: "Cardo, un aguador del Prado, sube al campamento con un carro de barriles que dicen «AGUA LIMPIA». Detrás le sigue una fila de gente de las Mareas con cubos vacíos.", hidden: "Los barriles llevan marcado a fuego el sello del Gremio del Cráter." };
+EVSC.aguador = () => { const b = new Pic(EW, EH); lakeBack(b, { water: 44, waterEnd: 52 });
+  band(b, 0, 52, EW, 44, mix(P.soil2, P.moss2, .2), P.soil1, 4);
+  b.poly([[0, 70], [128, 62], [128, 76], [0, 86]], mix(P.soil2, P.soil3, .4));
+  b.layer((t) => { t.r(64, 60, 34, 14, P.soil1); t.r(64, 60, 34, 1, P.soil3); [[68, 50], [80, 50], [92, 52]].forEach(([x, y]) => { t.r(x - 4, y, 9, 10, P.soil2); t.r(x - 4, y + 2, 9, 1, P.soil0); t.r(x - 4, y + 7, 9, 1, P.soil0); });
+    t.e(70, 76, 5, 5, P.soil0); t.e(70, 76, 3, 3, P.soil2); t.e(94, 74, 5, 5, P.soil0); t.e(94, 74, 3, 3, P.soil2); t.r(64, 64, -12, 1, P.soil1); }, OL);
+  b.r(68, 54, 22, 2, P.cream); for (let x = 69; x < 89; x += 2) b.p(x, 54, P.ink);
+  return plate(b, (g) => {
+    F(g, 40, 84, CAST.poor, { s: 1.7, dir: 1, hairStyle: "short", front: [52, 66], back: [50, 68], emo: "open" });
+    [[108, 84], [118, 80], [126, 78]].forEach(([x, y], i) => F(g, x, y, CAST.water, { s: 1.2 - i * .05, dir: -1, emo: "closed", hair: P.ink, front: [x - 4, y - 8], hold: bucket })); }); };
+
+EVNOTE.diario = { scene: "Bajo la plataforma del Santuario, con el agua por las rodillas, Orilla lee un cuaderno envuelto en hule, manchado de barro.", hidden: "Junto a un pilar hay una piedra plana fuera de su sitio y un hueco en el fango." };
+EVSC.diario = () => { const b = new Pic(EW, EH); lakeBack(b, { water: 60, waterEnd: 96 });
+  b.layer((t) => { t.r(0, 0, EW, 14, P.soil1); t.r(0, 14, EW, 3, P.soil0); for (let x = 0; x < EW; x += 12) t.r(x, 0, 1, 14, P.soil0);
+    [8, 46, 84, 118].forEach((x) => { t.r(x, 17, 5, 79, P.soil0); t.r(x, 17, 1, 79, P.soil2); }); }, OL);
+  for (let y = 0; y < 60; y++) for (let x = 0; x < EW; x++) { const c = b.g(x, y); if (c) b.p(x, y, mix(c, P.sea0, .3)); }
+  for (let x = 0; x < EW; x += 3) if ((x * 7) % 5 < 3) b.p(x, 16, mix(P.sea3, P.cream, .4));
+  b.layer((t) => { t.e(100, 74, 6, 2, P.plum2); t.r(94, 68, 10, 3, P.plum3); }, OL);
+  light(b, 60, 40, 60, 30, P.sea3, .2, 4);
+  return plate(b, (g) => { F(g, 62, 82, CAST.orilla, { s: 1.8, front: [66, 66], back: [56, 66], emo: "sad",
+    hold: (q, x, y) => HD.shape(q, (z) => z.rect(x - 1, y - 1.6, 3.6, 2.8), { fill: P.soil1, shade: P.soil0, lw: .3 }) });
+    for (let i = 0; i < 3; i++) HD.stroke(g, (z) => { z.moveTo(52 + i * 7, 82 - i % 2); z.lineTo(56 + i * 7, 82 - i % 2); }, P.cream, .4); }); };
+
+EVNOTE.cara = { scene: "Un brazo quieto del Lago. En el agua se refleja una muchacha con un pañuelo rojo que te llama. En la orilla no hay nadie.", hidden: "El reflejo tiene las manos rojas de calor, como las de alguien que trabaja en una forja." };
+EVSC.cara = () => { const b = new Pic(EW, EH); lakeBack(b, { water: 40, waterEnd: 96 });
+  b.poly([[0, 40], [0, 22], [10, 18], [22, 26], [28, 40]], mix(P.moss1, P.sea1, .4)); b.poly([[100, 40], [110, 24], [128, 20], [128, 40]], mix(P.moss1, P.sea1, .4));
+  for (let y = 40; y < 62; y++) for (let x = 0; x < EW; x++) { if ((x < 28 && y < 40 + (28 - x) * .7) || (x > 100 && y < 40 + (x - 100) * .8)) b.p(x, y, mix(P.moss0, P.sea1, .5)); }
+  return plate(b, (g) => {
+    g.save(); g.translate(0, 2 * 42); g.scale(1, -1); F(g, 64, 42, CAST.ola, { s: 1.8, emo: "happy", front: [72, 34] }); g.restore();
+    HD.creature(g, "lumo", 22, 92, { s: 1.3, emo: "o" }); }); };
+
+EVNOTE.flotan = { scene: "El agua ha vuelto al campamento del Arroyo. Las barcas-casa flotan, torcidas, con sus cuerdas de colores, y las Mareas lo celebran en el agua. Marejada mira el Lago desde la punta de una barca.", hidden: "Muy al fondo, bajo el agua oscura, se adivina algo enorme y pálido con los ojos cerrados." };
+EVSC.flotan = () => { const b = new Pic(EW, EH); lakeBack(b, { water: 46, waterEnd: 96 });
+  b.e(66, 88, 26, 5, mix(P.sea0, P.fog, .18)); b.e(64, 88, 6, 1, P.sea1); b.e(72, 88, 4, 1, P.sea1);
+  houseBoat(b, 4, 66, 40, { rope: P.moss3, ropeLen: 12 }); houseBoat(b, 56, 62, 36, { cabin: mix(P.rose2, P.cream, .4), roof: P.rose0, rope: P.ember3, ropeLen: 10 }); houseBoat(b, 98, 68, 30, { cabin: mix(P.fog, P.sea3, .3), roof: P.plum2 });
+  [[30, 78], [48, 82], [90, 80]].forEach(([x, y]) => { b.e(x, y, 5, 1.2, P.cream); });
+  return plate(b, (g) => {
+    F(g, 120, 62, CAST.marejada, { s: 1.25, dir: -1, emo: "closed" });
+    [[30, 78], [48, 82], [90, 80]].forEach(([x, y], i) => F(g, x, y, i === 1 ? kid(CAST.water) : CAST.water, { s: 1.1, pose: "kneel", dir: i % 2 ? -1 : 1, emo: "happy", hair: P.ink, front: [x + 4, y - 14], back: [x - 4, y - 14] })); }); };
+/* ================= Event scenes: Cuevas del Eco ================= */
+// a cave: flat rock bands, a far arch of lighter stone, the floor in three tones
+function caveBack(b, o = {}) {
+  OL = P.ink;
+  b.r(0, 0, EW, EH, mix(P.soil0, P.ink, .3));
+  band(b, 0, 0, EW, 74, mix(P.soil0, P.ink, .45), mix(P.soil1, P.plum1, .3), 6, mix(P.soil1, P.soil2, .3));
+  // far arch
+  const ax = o.arch == null ? 64 : o.arch;
+  if (ax !== false) { b.e(ax, 54, 26, 30, mix(P.soil0, P.ink, .2)); b.e(ax, 54, 20, 25, mix(P.soil1, P.plum2, .35)); b.r(ax - 26, 54, 52, 22, mix(P.soil0, P.ink, .2)); b.r(ax - 20, 54, 40, 22, mix(P.soil1, P.plum2, .35)); haze(b, 38, 72, mix(P.plum2, P.soil2, .4), .35); }
+  // ceiling teeth
+  const r = rng(o.seed || 51); for (let x = 0; x < EW; x += 7 + Math.floor(r() * 5)) { const h = 4 + Math.floor(r() * 9); b.poly([[x, 0], [x + 5, 0], [x + 2, h]], mix(P.soil0, P.ink, .5)); }
+  // side walls
+  b.poly([[0, 0], [22, 0], [16, 30], [20, 60], [10, 80], [0, 80]], mix(P.soil0, P.ink, .35)); b.poly([[128, 0], [104, 0], [112, 28], [106, 58], [118, 80], [128, 80]], mix(P.soil0, P.ink, .35));
+  for (let y = 8; y < 76; y += 9) { b.r(2, y, 10, 1, mix(P.soil1, P.soil0, .5)); b.r(114, y + 4, 12, 1, mix(P.soil1, P.soil0, .5)); }
+}
+function caveFloor(b, y0, o = {}) { band(b, 0, y0, EW, EH - y0, mix(P.soil1, P.plum2, .25), P.soil0, 4);
+  const r = rng(o.seed || 61); for (let i = 0; i < 22; i++) { const x = Math.floor(r() * EW), y = y0 + 2 + Math.floor(r() * (EH - y0 - 3)); b.r(x, y, 3 + (i % 3) * 2, 1, mix(P.soil1, P.soil2, .5)); if (i % 4 === 0) b.r(x + 1, y + 1, 3, 1, mix(P.soil0, P.ink, .3)); } }
+// a carved wall: rows of short verse marks, a new crack through them
+function verses(b, x0, y0, x1, y1, o = {}) { const r = rng(o.seed || 3);
+  for (let y = y0; y < y1; y += 4) { let x = x0 + Math.floor(r() * 4); while (x < x1 - 3) { const w = 2 + Math.floor(r() * 5); b.r(x, y, Math.min(w, x1 - x), 1, o.col || mix(P.soil2, P.fog, .3)); x += w + 2; } }
+  if (o.crack) { let x = o.crack, y = y0 - 4; while (y < y1 + 6) { const nx = x + Math.floor(r() * 5) - 2; b.l(x, y, nx, y + 4, P.ink); x = nx; y += 4; } }
+}
+function wallLamp(b, x, y, lit = true) { b.layer((t) => { t.r(x - 1, y, 3, 2, P.soil0); t.r(x - 2, y - 4, 5, 4, P.plum2); t.r(x - 1, y - 3, 3, 2, lit ? P.ember3 : P.soil1); }, OL); if (lit) light(b, x, y - 2, 16, 14, P.ember3, .35, 4); }
+const pick = (q, x, y) => { HD.stroke(q, (z) => { z.moveTo(x, y + 4); z.lineTo(x + 1, y - 6); }, P.soil1, .6); HD.stroke(q, (z) => { z.moveTo(x - 3, y - 5); z.quadraticCurveTo(x + 1, y - 8, x + 5, y - 5); }, P.mist, .7); };
+
+EVNOTE.sala = { scene: "La Sala de los Ecos: paredes cubiertas de versos grabados en todas las letras del valle y una grieta nueva que las cruza de arriba abajo. Sordina, una peregrina del Cielo, copia versos en un rollo.", hidden: "Junto a la grieta, uno de los versos se ha desprendido entero y está roto en el suelo." };
+EVSC.sala = () => { const b = new Pic(EW, EH); caveBack(b, { arch: false, seed: 4 });
+  b.layer((t) => { t.e(64, 40, 56, 44, mix(P.soil1, P.plum2, .3)); }, OL);
+  verses(b, 18, 10, 110, 64, { crack: 78, seed: 9 });
+  light(b, 64, 30, 40, 26, mix(P.fog, P.sea3, .5), .2, 4);
+  caveFloor(b, 70, { seed: 3 });
+  b.layer((t) => { t.r(84, 82, 8, 3, P.soil2); t.r(93, 84, 5, 2, P.soil2); }, OL);
+  return plate(b, (g) => { F(g, 46, 92, CAST.heights, { s: 1.8, pose: "kneel", front: [56, 80], back: [52, 82], emo: "open",
+    hold: (q, x, y) => HD.shape(q, (z) => z.rect(x - .4, y - .6, 8, 3), { fill: P.cream, shade: P.fog, lw: .3 }) }); }); };
+
+EVNOTE.tercero = { scene: "Un túnel viejo de las Cuevas del Eco, ancho y liso, con una curva perfecta. Un Ecolito espera en una repisa a ver qué dices.", hidden: "En la curva hay una raya corta grabada a la altura de la mano: «aquí sigue alguien»." };
+EVSC.tercero = () => { const b = new Pic(EW, EH); OL = P.ink;
+  b.r(0, 0, EW, EH, mix(P.soil0, P.ink, .4));
+  for (let i = 0; i < 6; i++) { const k = i / 5; b.e(70 + k * 10, 50, 64 - k * 50, 50 - k * 38, mix(mix(P.soil1, P.plum2, .3), P.ink, .55 - k * .45)); }
+  b.e(80, 50, 10, 10, mix(P.plum3, P.fog, .3));
+  caveFloor(b, 76, { seed: 8 });
+  b.layer((t) => { t.r(16, 52, 22, 3, P.soil2); t.r(16, 52, 22, 1, P.soil3); }, OL);
+  b.r(100, 58, 1, 4, P.fog);
+  return plate(b, (g) => { HD.creature(g, "ecolito", 27, 52, { s: 1.3, emo: "o" }); HD.creature(g, "lumo", 60, 90, { s: 1.4, emo: "happy" }); }); };
+
+EVNOTE.ramo = { scene: "La puerta tallada de la casa de la Guardiana. Basalto deja un ramo de flores secas en el suelo, junto a los de otras semanas.", hidden: "La tarjeta del ramo dice, con letra grande y torpe: «Para Grava, que no está»." };
+EVSC.ramo = () => { const b = new Pic(EW, EH); caveBack(b, { arch: false, seed: 13 });
+  b.layer((t) => { t.r(46, 22, 40, 52, mix(P.soil1, P.plum2, .3)); t.e(66, 24, 20, 12, mix(P.soil1, P.plum2, .3)); t.r(54, 30, 24, 44, P.ink); t.e(66, 32, 12, 8, P.ink); t.r(56, 32, 20, 42, mix(P.plum1, P.soil0, .4));
+    for (let y = 36; y < 72; y += 8) t.r(58, y, 16, 1, mix(P.plum2, P.soil1, .3)); }, OL);
+  verses(b, 48, 18, 84, 24, { col: mix(P.soil2, P.cream, .3), seed: 2 });
+  caveFloor(b, 74, { seed: 5 });
+  [[48, 78], [56, 79], [76, 79], [84, 78], [66, 80]].forEach(([x, y], i) => { b.l(x, y, x - 2, y - 5, P.moss1); b.l(x, y, x + 2, y - 5, P.moss1); b.e(x - 2, y - 6, 1.6, 1.4, i === 4 ? P.rose2 : mix(P.rose1, P.soil2, .5)); b.e(x + 2, y - 6, 1.6, 1.4, i === 4 ? P.butter : mix(P.butter, P.soil2, .5)); });
+  wallLamp(b, 36, 40); wallLamp(b, 96, 40);
+  return plate(b, (g) => { F(g, 100, 92, CAST.basalto, { s: 1.9, dir: -1, pose: "kneel", front: [88, 80], back: [104, 80], emo: "sad" }); }); };
+
+EVNOTE.tunel = { scene: "Un túnel nuevo, estrecho y mal apuntalado, corta una cueva vieja. Pirita pica la roca a la luz de un farol con el sello de Albor. Del techo cae arena.", hidden: "En la pared, detrás de la última viga, una grieta deja ver algo que se mueve." };
+EVSC.tunel = () => { const b = new Pic(EW, EH); OL = P.ink;
+  b.r(0, 0, EW, EH, mix(P.soil0, P.ink, .5));
+  b.poly([[20, 96], [30, 20], [98, 20], [108, 96]], mix(P.soil1, P.soil0, .3)); b.poly([[40, 80], [48, 34], [80, 34], [88, 80]], mix(P.soil0, P.ink, .2));
+  [[30, 22, 98], [44, 36, 84]].forEach(([y0, y, x1]) => 0);
+  b.layer((t) => { [[30, 96, 22], [100, 96, 22], [46, 82, 34], [82, 82, 34]].forEach(([x, y1, y0]) => t.r(x - 2, y0, 4, y1 - y0, P.soil2)); t.r(26, 20, 78, 4, P.soil2); t.r(42, 32, 44, 3, P.soil2); }, OL);
+  b.r(28, 23, 2, 2, P.soil3);
+  for (let i = 0; i < 12; i++) b.p(60 + (i * 7) % 18, 26 + i * 4, mix(P.soil2, P.butter, .4));
+  b.layer((t) => { t.r(70, 44, 6, 7, P.ink); t.r(71, 45, 4, 5, P.butter); t.r(70, 42, 6, 2, P.ember1); }, OL);
+  light(b, 73, 48, 34, 30, P.ember3, .35, 5);
+  b.l(96, 50, 99, 60, P.ink); b.l(99, 60, 97, 68, P.ink); b.p(98, 58, P.fog);
+  return plate(b, (g) => { F(g, 58, 90, CAST.miner, { s: 1.8, dir: 1, hairStyle: "bun", hair: P.ink, front: [70, 62], back: [60, 64], emo: "open", hold: pick }); }); };
+
+EVNOTE.lamparas = { scene: "Un túnel viejo con lámparas de aceite en las paredes. Sebo, el lamparero, rellena una y se para a escuchar el eco.", hidden: "Una de las lámparas apagadas tiene un nombre de mujer grabado debajo." };
+EVSC.lamparas = () => { const b = new Pic(EW, EH); caveBack(b, { arch: 70, seed: 22 });
+  caveFloor(b, 74, { seed: 9 });
+  wallLamp(b, 24, 44); wallLamp(b, 50, 50, false); wallLamp(b, 92, 46); wallLamp(b, 112, 40, false);
+  b.r(46, 52, 8, 1, mix(P.soil2, P.fog, .4));
+  return plate(b, (g) => { F(g, 80, 92, CAST.poor, { s: 1.75, dir: 1, hairStyle: "none", beard: P.fog, cloth: [P.soil2, P.soil1, P.soil3], front: [88, 52], back: [76, 72], emo: "closed",
+    hold: (q, x, y) => HD.shape(q, (z) => z.rect(x - 1, y - 1, 3, 3.4), { fill: P.plum3, shade: P.plum2, lw: .3 }) }); }); };
+
+EVNOTE.grieta = { scene: "La grieta del este, tan estrecha que hay que pasar de lado. Sale aire caliente y dorado de debajo del Prado. Junto a la entrada hay algo grabado con letra grande y torpe.", hidden: "En el polvo del suelo hay huellas anchas, de piedra, que vuelven hacia dentro." };
+EVSC.grieta = () => { const b = new Pic(EW, EH); caveBack(b, { arch: false, seed: 33 });
+  b.poly([[58, 0], [72, 0], [70, 30], [76, 56], [70, 80], [60, 80], [64, 54], [56, 28]], P.ink);
+  b.poly([[61, 4], [69, 4], [67, 30], [72, 56], [67, 78], [63, 78], [66, 54], [60, 28]], mix(P.ember2, P.butter, .4));
+  light(b, 66, 44, 40, 40, P.ember3, .4, 5);
+  verses(b, 26, 40, 50, 56, { col: mix(P.soil2, P.cream, .35), seed: 6 }); b.r(30, 60, 6, 1, P.cream);
+  caveFloor(b, 78, { seed: 12 });
+  [[70, 86], [78, 90], [66, 92]].forEach(([x, y]) => b.layer((t) => t.e(x, y, 3, 1.4, P.plum2), OL));
+  return plate(b, (g) => { HD.creature(g, "pebb", 100, 92, { s: 1.4, emo: "o", dir: -1 }); }); };
+
+EVNOTE.nombres = { scene: "Un rincón de la Sala de los Ecos con una lista de nombres escrita en la pared con letra lenta. Arriba pone «Voces apagadas». Los últimos nombres son más grandes y más torcidos.", hidden: "Al pie de la pared hay polvo de piedra fresco, como si alguien acabara de escribir." };
+EVSC.nombres = () => { const b = new Pic(EW, EH); caveBack(b, { arch: false, seed: 41 });
+  b.layer((t) => { t.r(28, 10, 72, 62, mix(P.soil1, P.plum2, .25)); }, OL);
+  b.r(46, 14, 36, 2, mix(P.fog, P.cream, .4));
+  for (let i = 0; i < 9; i++) { const y = 22 + i * 5 + Math.floor(i * i * .1), w = 18 + (i * 7) % 20; b.r(36 + (i > 6 ? 2 : 0), y, w, 1 + (i > 6 ? 1 : 0), mix(P.fog, P.soil2, i * .06)); }
+  light(b, 64, 44, 34, 30, P.ember3, .15, 4);
+  caveFloor(b, 72, { seed: 7 });
+  b.r(60, 72, 14, 1, mix(P.fog, P.soil2, .4));
+  return plate(b, (g) => { F(g, 98, 92, CAST.poor, { s: 1.8, dir: -1, hat: null, hairStyle: "short", front: [86, 62], emo: "open" }); HD.creature(g, "lumo", 112, 70, { s: 1.1, emo: "o", dir: -1 }); }); };
+
+EVNOTE.mapas = { scene: "En la Sala de los Ecos, Lindero, agrimensor de Albor, mide las paredes con una cuerda de nudos. A sus pies hay un rollo de mapas con el sello de Albor.", hidden: "El mapa de arriba del rollo está firmado con la marca del Primer Picador." };
+EVSC.mapas = () => { const b = new Pic(EW, EH); caveBack(b, { arch: false, seed: 4 });
+  b.layer((t) => { t.e(64, 40, 56, 44, mix(P.soil1, P.plum2, .3)); }, OL);
+  verses(b, 18, 10, 110, 64, { crack: 40, seed: 9 });
+  caveFloor(b, 70, { seed: 3 });
+  b.l(20, 34, 72, 58, P.cream); for (let i = 0; i < 6; i++) b.p(24 + i * 8, 36 + Math.round(i * 8 * 24 / 52), P.soil2);
+  b.layer((t) => { t.r(88, 82, 18, 5, P.cream); t.e(88, 84.5, 2.5, 2.5, P.fog); t.e(97, 84, 2, 1.6, P.ember3); }, OL);
+  return plate(b, (g) => { F(g, 76, 90, CAST.albor, { s: 1.85, dir: -1, front: [70, 60], back: [82, 64], emo: "happy" }); }); };
+
+EVNOTE.semillas = { scene: "La casa de la Guardiana, llena de piedras grandes y quietas que antes eran Grava. Basalto, sentado entre ellas, separa semillas en montoncitos.", hidden: "Una de las semillas es negra y brilla un poco, apartada de las demás." };
+EVSC.semillas = () => { const b = new Pic(EW, EH); caveBack(b, { arch: false, seed: 61 });
+  b.layer((t) => { [[22, 62, 18, 16], [44, 52, 14, 22], [104, 60, 20, 18], [86, 50, 12, 14]].forEach(([x, y, rx, ry]) => { t.e(x, y, rx, ry, mix(P.plum2, P.soil1, .4)); t.e(x - rx * .3, y - ry * .4, rx * .4, ry * .3, mix(P.plum3, P.soil2, .4)); }); }, OL);
+  caveFloor(b, 76, { seed: 4 });
+  [[46, 84], [54, 86], [62, 84], [70, 86]].forEach(([x, y], i) => { for (let k = 0; k < 5; k++) b.p(x + (k % 3), y - Math.floor(k / 3), [P.butter, P.moss3, P.soil3, P.rose2][i]); });
+  b.p(80, 86, SAP.sheen); b.p(81, 86, P.ink); light(b, 80, 86, 5, 3, SAP.sheen, .3, 3);
+  wallLamp(b, 64, 30);
+  return plate(b, (g) => { F(g, 98, 92, CAST.basalto, { s: 1.85, dir: -1, pose: "sit", front: [84, 84], emo: "closed" }); }); };
+/* ================= Event scenes: common path events ================= */
+// a neutral trail: soft hills, a few trees, a dirt path; works for any zone
+function trailBack(b, o = {}) {
+  OL = P.ink;
+  const n = o.night, dusk = o.dusk;
+  b.r(0, 0, EW, EH, P.moss1);
+  if (n) { band(b, 0, 0, EW, 56, P.ink, mix(P.sea0, P.plum1, .5), 7, mix(P.plum1, P.sea1, .5)); b.stars(0, 0, EW, 34, 30, o.seed || 2); }
+  else if (dusk) band(b, 0, 0, EW, 56, mix(P.sea1, P.plum2, .4), P.rose1, 7, P.ember3);
+  else band(b, 0, 0, EW, 56, mix(P.sea3, P.cream, .2), P.sea4, 7, mix(P.cream, P.butter, .3));
+  const h1 = n ? mix(P.sea0, P.moss0, .5) : dusk ? mix(P.plum2, P.moss1, .4) : mix(P.moss2, P.sea2, .45);
+  const h2 = n ? P.moss0 : dusk ? mix(P.plum1, P.moss0, .5) : mix(P.moss2, P.moss1, .4);
+  b.poly([[0, 56], [0, 38], [26, 30], [50, 38], [78, 28], [104, 36], [128, 30], [128, 56]], h1);
+  haze(b, 34, 56, n ? mix(P.sea1, P.plum1, .4) : dusk ? P.rose2 : mix(P.cream, P.sea4, .4), .3);
+  b.poly([[0, 60], [0, 46], [40, 42], [74, 48], [128, 42], [128, 60]], h2);
+  band(b, 0, 58, EW, 38, n ? mix(P.moss0, P.sea0, .3) : dusk ? mix(P.moss1, P.plum2, .3) : P.moss2, n ? P.moss0 : P.moss1, 4);
+  if (o.path !== false) b.poly([[54, 58], [70, 58], [96, 96], [28, 96]], n ? mix(P.soil0, P.moss0, .3) : mix(P.soil2, P.soil3, .3));
+  const r = rng(o.seed || 71); for (let i = 0; i < 22; i++) { const x = Math.floor(r() * EW), y = 62 + Math.floor(r() * 32); b.r(x, y, 2, 1, n ? P.moss1 : P.moss3); }
+}
+function tree(b, x, gy, h, o = {}) {
+  b.layer((t) => { t.r(x - 2, gy - h, 4, h, P.soil0); t.r(x - 2, gy - h, 1, h, P.soil1);
+    t.e(x, gy - h - 4, 12, 9, o.leaf || P.moss1); t.e(x - 6, gy - h + 2, 8, 6, o.leaf || P.moss1); t.e(x + 6, gy - h + 1, 8, 6, o.leaf || P.moss1);
+    t.e(x - 3, gy - h - 7, 6, 4, o.leaf2 || mix(P.moss2, P.moss3, .3)); }, OL);
+}
+function rock(b, x, y, rx, ry, c = P.plum2) { b.layer((t) => { t.e(x, y, rx, ry, c); t.r(x - rx, y, rx * 2, ry, c); t.e(x - rx * .3, y - ry * .4, rx * .45, ry * .35, mix(c, P.fog, .3)); }, OL); }
+function fire(b, x, y) {
+  b.layer((t) => { for (let i = 0; i < 6; i++) t.e(x - 7 + i * 2.8, y + 1, 1.8, 1.4, P.plum2); t.r(x - 6, y - 2, 12, 2, P.soil0); t.l(x - 5, y - 1, x + 5, y - 3, P.soil1); }, OL);
+  b.poly([[x - 4, y - 2], [x, y - 12], [x + 4, y - 2]], P.ember2); b.poly([[x - 2, y - 2], [x, y - 8], [x + 2, y - 2]], P.ember4); b.p(x, y - 3, P.butter);
+  light(b, x, y - 4, 40, 22, P.ember3, .4, 5);
+}
+
+EVNOTE.fogata = { scene: "Una fogata recién dejada al borde del camino, de noche: brasas tibias, un tronco para sentarse y un cazo abollado colgado de un palo. Tus criaturas ya se han tumbado.", hidden: "En el suelo hay una flecha dibujada: la señal de los viajeros para «agua cerca, sigue recto»." };
+EVSC.fogata = () => { const b = new Pic(EW, EH); trailBack(b, { night: true, path: false, seed: 5 });
+  tree(b, 16, 60, 18, { leaf: P.moss0, leaf2: mix(P.moss0, P.moss1, .5) }); tree(b, 112, 58, 22, { leaf: P.moss0, leaf2: mix(P.moss0, P.moss1, .5) });
+  b.layer((t) => { t.r(28, 78, 26, 6, P.soil1); t.e(28, 81, 3, 3, P.soil2); t.e(28, 81, 1.5, 1.5, P.soil1); }, OL);
+  b.l(72, 60, 72, 82, P.soil1); b.l(72, 60, 82, 66, P.soil1); b.layer((t) => { t.e(82, 70, 4, 3, P.plum2); t.r(78, 66, 8, 4, P.plum2); }, OL);
+  fire(b, 66, 84);
+  b.l(96, 88, 108, 88, P.soil3); b.l(108, 88, 105, 86, P.soil3); b.l(108, 88, 105, 90, P.soil3);
+  return plate(b, (g) => { HD.creature(g, "lumo", 44, 92, { s: 1.3, emo: "sleep" }); HD.creature(g, "pebb", 88, 92, { s: 1.4, emo: "happy", dir: -1 }); }); };
+
+EVNOTE.viajero = { scene: "Retal, un viajero con un abrigo de retales de todos los pueblos, asa castañas en una fogata pequeña al atardecer.", hidden: "Entre los retales del abrigo hay uno gris de la Sombra cosido justo al lado de uno amarillo de la Luz." };
+EVSC.viajero = () => { const b = new Pic(EW, EH); trailBack(b, { dusk: true, seed: 9 });
+  tree(b, 104, 62, 24, { leaf: mix(P.moss1, P.plum1, .3) });
+  fire(b, 72, 86);
+  b.layer((t) => { t.r(12, 76, 20, 8, P.soil1); t.r(14, 72, 6, 4, P.rose1); t.r(20, 70, 8, 6, P.sea2); t.r(26, 73, 5, 3, P.butter); }, OL);
+  return plate(b, (g) => { F(g, 50, 90, CAST.poor, { s: 1.8, pose: "sit", hairStyle: "short", hair: P.fog, beard: P.fog, cloth: [P.plum2, P.sea2, P.ember3], hat: { k: "wide", c: [P.soil1, P.soil0] }, front: [64, 76], emo: "happy",
+    hold: (q, x, y) => HD.stroke(q, (z) => { z.moveTo(x, y); z.lineTo(x + 6, y + 4); }, P.soil1, .45) }); }); };
+
+EVNOTE.cofre = { scene: "Un cofre de madera con refuerzos de hierro, medio enterrado junto a una roca. Alrededor, la tierra está removida.", hidden: "En la tapa está grabada una marca de viajero: un círculo con una raya, «para quien lo necesite»." };
+EVSC.cofre = () => { const b = new Pic(EW, EH); trailBack(b, { seed: 13 });
+  tree(b, 20, 60, 20); rock(b, 82, 72, 18, 12);
+  b.e(64, 82, 22, 5, mix(P.soil1, P.soil0, .3)); for (let i = 0; i < 10; i++) b.e(46 + i * 4, 80 + (i % 3), 2, 1, P.soil2);
+  b.layer((t) => { t.r(52, 70, 24, 12, P.soil1); t.r(52, 70, 24, 3, P.soil2); t.r(52, 70, 2, 12, P.plum2); t.r(74, 70, 2, 12, P.plum2); t.r(52, 75, 24, 1, P.plum2); t.r(62, 74, 4, 4, P.plum3); t.p(63, 76, P.ink); }, OL);
+  b.e(64, 71, 2, 1, P.fog); b.p(64, 71, P.soil1);
+  return plate(b, (g) => { HD.creature(g, "fizz", 100, 92, { s: 1.4, emo: "o", dir: -1 }); }); };
+
+EVNOTE.manantial = { scene: "Un manantial pequeño entre rocas cubiertas de musgo, tan claro que solo se ve por el temblor del agua. Alrededor crecen flores que no hay en ningún otro sitio del camino.", hidden: "En el fondo, entre los guijarros, brillan monedas antiguas de muchos pueblos." };
+EVSC.manantial = () => { const b = new Pic(EW, EH); trailBack(b, { path: false, seed: 17 });
+  tree(b, 106, 58, 26); rock(b, 40, 64, 16, 10, mix(P.plum2, P.moss1, .3)); rock(b, 70, 62, 12, 9, mix(P.plum2, P.moss1, .3));
+  b.layer((t) => { t.e(40, 58, 12, 3, P.moss2); t.e(70, 56, 9, 2.4, P.moss2); }, OL);
+  b.r(54, 60, 4, 16, mix(P.sea3, P.cream, .4)); b.r(55, 60, 1, 16, P.cream);
+  b.layer((t) => { t.e(56, 84, 26, 7, P.sea2); t.e(52, 83, 10, 2, P.sea3); }, P.moss0);
+  [[46, 86], [62, 85], [56, 88]].forEach(([x, y]) => b.p(x, y, P.ember3));
+  [[24, 80], [30, 86], [88, 82], [94, 88], [84, 90]].forEach(([x, y]) => { b.l(x, y, x, y - 4, P.moss3); b.e(x, y - 5, 1.6, 1.4, P.cream); b.p(x, y - 5, P.sea3); });
+  light(b, 56, 80, 30, 14, P.sea4, .2, 4);
+  return plate(b, (g) => { HD.creature(g, "brotin", 104, 90, { s: 1.4, emo: "happy", dir: -1 }); }); };
+
+EVNOTE.mochila = { scene: "Una mochila de viaje colgada de una rama a la altura de la mano, con un nudo cuidadoso. En el tronco hay muescas recientes.", hidden: "Asoma de la mochila la esquina de un sobre con un nombre escrito." };
+EVSC.mochila = () => { const b = new Pic(EW, EH); trailBack(b, { seed: 21 });
+  b.layer((t) => { t.r(80, 10, 8, 74, P.soil0); t.r(80, 10, 2, 74, P.soil1); t.l(84, 40, 64, 34, P.soil0); t.l(84, 41, 64, 35, P.soil0); t.e(84, 8, 22, 12, P.moss1); t.e(70, 16, 14, 8, P.moss1); t.e(96, 14, 12, 8, P.moss1); }, OL);
+  [[86, 50], [86, 44], [86, 38]].forEach(([x, y]) => b.r(x - 2, y, 3, 1, P.soil3));
+  b.l(68, 36, 68, 44, P.soil3);
+  b.layer((t) => { t.r(62, 44, 12, 14, P.ember1); t.r(62, 44, 12, 4, P.ember0); t.r(64, 50, 8, 5, mix(P.ember1, P.soil1, .3)); t.r(66, 42, 4, 2, P.cream); }, OL);
+  return plate(b, (g) => { HD.creature(g, "remolin", 34, 88, { s: 1.4, emo: "o" }); }); };
+
+EVNOTE.tormenta = { scene: "Llueve a cántaros. Bajo un saliente de roca, una criatura salvaje empapada tiembla y te mira: no tiene adónde ir, y tú tampoco.", hidden: "Junto a la criatura hay un nido de hojas secas: este saliente es su casa." };
+EVSC.tormenta = () => { const b = new Pic(EW, EH); trailBack(b, { path: false, seed: 25 });
+  tint(b, 0, 0, EW, EH, P.sea0, .45);
+  b.layer((t) => { t.poly([[0, 20], [92, 26], [104, 32], [86, 36], [0, 38]], P.plum2); t.r(0, 36, 30, 60, P.plum2); t.r(0, 36, 30, 1, P.plum1); }, OL);
+  b.r(30, 38, 76, 42, mix(P.plum1, P.ink, .2)); band(b, 30, 80, 76, 16, mix(P.soil0, P.plum1, .3), P.soil0, 3);
+  b.e(84, 82, 8, 2, P.soil2);
+  for (let i = 0; i < 90; i++) { const x = (i * 37) % EW, y = (i * 53) % EH; if (!(x > 30 && x < 104 && y > 36)) b.l(x, y, x - 2, y + 5, mix(P.sea3, P.cream, .3)); }
+  return plate(b, (g) => { HD.creature(g, "bostezo", 84, 82, { s: 1.4, emo: "sad", dir: -1 }); F(g, 46, 92, CAST.poor, { s: 1.6, pose: "sit", hat: null, hairStyle: "short", emo: "open" }); }); };
+
+EVNOTE.altar = { scene: "Un altar pequeño de piedra al borde del camino, con la figura gastada y sin cara de una mujer cantando. Alguien le ha dejado flores, una vela y una moneda.", hidden: "En la base hay cuatro inscripciones en cuatro letras distintas. Alguien ha intentado borrar la última." };
+EVSC.altar = () => { const b = new Pic(EW, EH); trailBack(b, { dusk: true, seed: 29 });
+  tree(b, 18, 62, 22, { leaf: mix(P.moss1, P.plum1, .3) });
+  b.layer((t) => { t.r(80, 72, 30, 10, P.plum2); t.r(80, 72, 30, 1, P.plum3); t.r(86, 46, 18, 26, P.plum2); t.poly([[84, 46], [95, 38], [106, 46]], P.plum1);
+    t.e(95, 52, 4, 4, P.mist); t.poly([[90, 70], [95, 56], [100, 70]], P.mist); t.l(95, 58, 90, 54, P.mist); }, OL);
+  for (let y = 74; y < 81; y += 2) b.r(84, y, 22, 1, mix(P.plum3, P.fog, .3));
+  b.layer((t) => { t.r(82, 68, 2, 4, P.cream); }, OL); b.p(82, 66, P.ember4); light(b, 82, 66, 14, 10, P.ember3, .35, 4);
+  [[106, 70], [109, 69]].forEach(([x, y]) => { b.e(x, y, 1.4, 1.2, P.rose2); }); b.p(100, 71, P.ember3);
+  return plate(b, (g) => { F(g, 56, 92, CAST.poor, { s: 1.7, dir: 1, hat: null, hairStyle: "bun", hair: P.soil0, emo: "closed" }); HD.creature(g, "lumo", 40, 90, { s: 1.1, emo: "happy" }); }); };
+
+EVNOTE.herido = { scene: "En la cuneta, una criatura salvaje tiene una pata atrapada en una trampa de lazo y enseña los dientes.", hidden: "La trampa lleva una chapa con un número: alguien vive de esto y volverá a mirarla." };
+EVSC.herido = () => { const b = new Pic(EW, EH); trailBack(b, { seed: 33 });
+  tree(b, 108, 60, 24);
+  b.layer((t) => { t.e(40, 84, 30, 8, mix(P.moss1, P.soil0, .4)); }, OL);
+  b.r(56, 74, 2, 10, P.soil1); b.l(57, 76, 46, 84, P.fog); b.r(57, 80, 3, 2, P.mist);
+  for (let i = 0; i < 12; i++) b.l(14 + i * 5, 80, 14 + i * 5 - 1, 76, P.moss3);
+  return plate(b, (g) => { HD.creature(g, "espinardo", 40, 90, { s: 2, emo: "sad" }); }); };
+
+EVNOTE.alforja = { scene: "Doña Alforja viene por el camino tirando de un burro cargado de bolsas con carteles escritos a mano: «Remedios», «Hilo», «Cosas que no sabías que necesitabas».", hidden: "De una de las bolsas asoma un ovillo de lana roja." };
+EVSC.alforja = () => { const b = new Pic(EW, EH); trailBack(b, { seed: 37 });
+  tree(b, 16, 60, 22); tree(b, 118, 58, 18);
+  b.layer((t) => { // the donkey
+    t.e(82, 70, 16, 8, P.plum3); t.r(68, 70, 28, 6, P.plum3); [[70], [76], [88], [94]].forEach(([x]) => t.r(x, 74, 3, 14, P.plum2));
+    t.poly([[96, 68], [104, 58], [110, 60], [108, 66], [100, 72]], P.plum3); t.r(104, 52, 2, 7, P.plum2); t.r(107, 53, 2, 6, P.plum2); t.p(105, 61, P.ink); t.r(66, 70, 3, 8, P.plum2);
+    t.r(72, 56, 12, 12, P.soil2); t.r(84, 58, 10, 10, P.ember1); t.r(76, 50, 10, 8, P.sea2); t.r(74, 60, 8, 3, P.cream); t.r(86, 62, 6, 2, P.cream); t.r(78, 52, 6, 2, P.cream);
+    t.e(94, 58, 2, 2, P.rose0); }, OL);
+  return plate(b, (g) => { F(g, 44, 90, CAST.poor, { s: 1.7, dir: 1, hairStyle: "bun", hair: P.fog, hat: { k: "scarf", c: [P.rose1, P.rose0] }, cloth: [P.soil2, P.soil1, P.soil3], front: [54, 72], emo: "happy" }); }); };
+
+EVNOTE.brillo = { scene: "Una grieta estrecha y oscura entre dos rocas. Al fondo, algo brilla con el sol.", hidden: "Dentro de la grieta se adivina un nido de ramas lleno de botones, cucharas y trozos de vidrio." };
+EVSC.brillo = () => { const b = new Pic(EW, EH); trailBack(b, { path: false, seed: 41 });
+  rock(b, 44, 74, 28, 20); rock(b, 86, 72, 26, 22, mix(P.plum2, P.soil1, .3));
+  b.poly([[62, 92], [64, 58], [68, 58], [70, 92]], P.ink);
+  b.p(66, 80, P.cream); b.p(65, 80, P.butter); b.p(67, 80, P.butter); b.p(66, 79, P.butter); b.p(66, 81, P.butter); light(b, 66, 80, 8, 6, P.butter, .4, 3);
+  return plate(b, (g) => { HD.creature(g, "fizz", 24, 92, { s: 1.3, emo: "o" }); }); };
 const ART = {};
 function art(id) { if (!SCENE[id]) return null; return ART[id] || (ART[id] = SCENE[id]()); }
 

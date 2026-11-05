@@ -4,7 +4,7 @@
    walks there on its own along the shortest path (A*), then the place's action runs.
    Two maps for now: the Keeper's corner of the Glade (home) and El Vado (the plaza). Moving between them and setting out
    on an expedition costs daily steps ("pasos"); talking, looking, shops and care at home are free.
-   Steps belong to each creature: 10 a day, up to 20 saved, plus 1 for every 10 energy that food or a recharge gives
+   Steps belong to each creature: 10 a day, up to 30 saved, plus 1 for every 10 energy that food or a recharge gives
    (at most 12 bought a day). Sleeping gives none. */
 (function () {
 "use strict";
@@ -15,7 +15,7 @@ const L = () => EV.LANG;
 
 const TX = {
   es: {
-    nav: "Mapa", title: "El Claro y el Vado", steps: "{n} pasos", stepsT: "Pasos de hoy: {n}. Pasear es gratis; los pasos solo se gastan en el Rincón de búsqueda. Se recargan 10 a medianoche (máximo 20 guardados), y el té, el guiso y la recarga de energía dan más, hasta 12 al día.",
+    nav: "Mapa", title: "El Claro y el Vado", steps: "{n} pasos", stepsT: "Pasos de hoy: {n}. Pasear es gratis; los pasos solo se gastan en el Rincón de búsqueda. Se recargan 10 a medianoche (máximo 30 guardados), y el té, el guiso y la recarga de energía dan más, hasta 12 al día.",
     where: "¿Adónde vas?", walking: "{name} va de camino…", free: "gratis", cost1: "1 paso", costN: "{n} pasos", noSteps: "A {name} no le quedan pasos hoy. Un té o una recarga de energía dan más.", noStepsShort: "Sin pasos",
     needAlive: "Primero necesitas una criatura que pueda caminar.", asleep: "{name} está dormida. Despiértala para salir.",
     gotSteps: "+{n} pasos para {name}", stepsCap: "Hoy ya no se pueden comprar más pasos.",
@@ -43,11 +43,11 @@ const TX = {
     "g.coins": "{n} Chispas", "g.dust": "∴ {n} de Polvo", "g.item": "1 × {item}",
     "f.sol": "{name} rebusca entre las matas y vuelve con {g}.", "f.sky": "{name} salta tras las brisas hasta atrapar una y se ríe un buen rato. +{n} Chispas y más diversión.",
     "f.lake": "{name} escarba junto a la piedra y encuentra ∴ {n} de Polvo entre la tierra.", "f.frost": "{name} recoge hojas escarchadas a la sombra. Sirven para un té: +1 Té.",
-    "f.star": "{name} canta bajito y el Claro le contesta. +{n} Chispas y ∴ {d} de Polvo.", "f.done": "{name} ya buscó hoy en este rincón. Mañana habrá más.",
+    "f.star": "{name} canta bajito y el Claro le contesta. +{n} Chispas y ∴ {d} de Polvo.", "f.done": "{name} ya buscó en este rincón. Mañana habrá más, y si no vienes se guardan hasta 3 días.",
     "s.fed": "Comidas", "s.cuddles": "Mimos", "s.plays": "Partidas", "s.messes": "Manchas limpias", "s.expDone": "Expediciones", "s.dailyDone": "Tareas",
   },
   en: {
-    nav: "Map", title: "The Glade and El Vado", steps: "{n} steps", stepsT: "Steps today: {n}. Walking around is free; steps are only spent at the foraging nook. 10 come back at midnight (up to 20 saved), and tea, stew and the energy recharge give more, up to 12 a day.",
+    nav: "Map", title: "The Glade and El Vado", steps: "{n} steps", stepsT: "Steps today: {n}. Walking around is free; steps are only spent at the foraging nook. 10 come back at midnight (up to 30 saved), and tea, stew and the energy recharge give more, up to 12 a day.",
     where: "Where to?", walking: "{name} is on the way…", free: "free", cost1: "1 step", costN: "{n} steps", noSteps: "{name} has no steps left today. A tea or an energy recharge gives more.", noStepsShort: "No steps",
     needAlive: "First you need a creature that can walk.", asleep: "{name} is asleep. Wake it up to go out.",
     gotSteps: "+{n} steps for {name}", stepsCap: "No more steps can be bought today.",
@@ -75,7 +75,7 @@ const TX = {
     "g.coins": "{n} Chispas", "g.dust": "∴ {n} Stardust", "g.item": "1 × {item}",
     "f.sol": "{name} rummages through the bushes and comes back with {g}.", "f.sky": "{name} leaps after the breezes until it catches one, and laughs for a long while. +{n} Chispas and more fun.",
     "f.lake": "{name} digs by the stone and finds ∴ {n} Stardust in the soil.", "f.frost": "{name} gathers frosted leaves in the shade. They make a good tea: +1 Tea.",
-    "f.star": "{name} sings softly and the Glade sings back. +{n} Chispas and ∴ {d} Stardust.", "f.done": "{name} already searched this nook today. There'll be more tomorrow.",
+    "f.star": "{name} sings softly and the Glade sings back. +{n} Chispas and ∴ {d} Stardust.", "f.done": "{name} already searched this nook. There'll be more tomorrow, and they wait up to 3 days if you're away.",
     "s.fed": "Meals", "s.cuddles": "Cuddles", "s.plays": "Games", "s.messes": "Messes cleaned", "s.expDone": "Expeditions", "s.dailyDone": "Tasks",
   },
 };
@@ -84,7 +84,7 @@ const tx = (k, v) => { let s = (TX[L()] || TX.en)[k]; if (s == null) s = TX.en[k
 /* ---------- Steps ("pasos"), per creature ---------- */
 // walking between maps and setting out are free (design rule 5: no steps gate on just playing or moving);
 // steps only pay for rewarded actions, like the foraging nook
-const STEPS = { daily: 10, keep: 20, buyMax: 12, move: 0, trail: 0 };
+const STEPS = { daily: 10, keep: 30, buyMax: 12, move: 0, trail: 0 };
 const today = () => { const d = new Date(); return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate(); };
 const creatureKey = () => { const S = EV.S; return S ? S.species + ":" + (S.born || 0) : null; };
 function steps() {
@@ -564,11 +564,15 @@ function forage() {
   const S = EV.S, P = EV.P, key = creatureKey();
   P.forage = P.forage || {};
   // the Nook build (build.js) allows more searches a day; old saves kept just the day
+  // searches pile up for up to 3 days (design rule 4); old saves kept the day, or { day, n } used today
+  const per = EV.BUILD ? EV.BUILD.nookN() : 1;
   let fg = P.forage[key]; if (typeof fg === "string") fg = { day: fg, n: 1 };
-  if (!fg || fg.day !== today()) fg = { day: today(), n: 0 };
-  if (fg.n >= (EV.BUILD ? EV.BUILD.nookN() : 1)) { dialog = { who: "pet", emo: "normal", text: tx("f.done", { name: S.name }), opts: [] }; return; }
+  if (fg && fg.left == null) fg = { day: fg.day, left: fg.day === today() ? Math.max(0, per - (fg.n || 0)) : 0 };
+  fg = EV.DAILY ? EV.DAILY.charge(fg || { day: null, left: 0 }, per, per * 3) : fg || { day: today(), left: per };
+  P.forage[key] = fg;
+  if (fg.left <= 0) { dialog = { who: "pet", emo: "normal", text: tx("f.done", { name: S.name }), opts: [] }; return; }
   if (!spendSteps(2)) { EV.toast(tx("noSteps", { name: S.name })); EV.sfx("deny"); return; }
-  fg.n++; P.forage[key] = fg; P.c.forage = (P.c.forage || 0) + 1;
+  fg.left--; P.forage[key] = fg; P.c.forage = (P.c.forage || 0) + 1;
   const k = circle(); let text;
   if (k === "sol") { P.inv.melon = (P.inv.melon || 0) + 1; text = tx("f.sol", { name: S.name, g: tx("g.item", { item: EV.itemName("melon") }) }); }
   else if (k === "sky") { EV.addCoins(12); S.stats.fun = EV.clamp(S.stats.fun + 10); text = tx("f.sky", { name: S.name, n: 12 }); }

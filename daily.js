@@ -19,7 +19,7 @@ const TX = {
     "week.title": "Tareas de la semana", "week.reset": "Se renuevan el lunes.", "week.bonus": "Completa 4 de 6 para ganar 5 Notas.",
     "week.claimBonus": "Cobrar 5 ♪", "week.bonusDone": "5 Notas cobradas esta semana",
     "cal.title": "Calendario de visitas", "cal.sub": "Avanza una casilla por cada día que entras. Si faltas, no se pierde nada.", "cal.claim": "Recoger el día {n}", "cal.claimed": "Hoy ya recogiste tu casilla.",
-    "pantry.title": "Despensa", "pantry.sub": "Una tirada gratis al día. Las demás cuestan {c} Chispas.", "pantry.free": "Tirada gratis ({n})", "pantry.pay": "Tirar · {c} ✦",
+    "pantry.title": "Despensa", "pantry.sub": "Una tirada gratis al día, y se guardan hasta 3 si no vienes. Las demás cuestan {c} Chispas.", "pantry.free": "Tirada gratis ({n})", "pantry.pay": "Tirar · {c} ✦",
     "pantry.odds": "Probabilidades: comida 50 %, medicinas 20 %, Chispas 20 %, juguete 6 %, 1 Nota 4 %. Premio especial seguro cada {p} tiradas (faltan {n}).",
     "pantry.bonus": "Obras de la Despensa: la tirada gratis tiene +{n} puntos de premio especial.", "pantry.got": "La Despensa te da: {what}", "pantry.special": "¡Premio especial!",
     "ex.title": "Cambiar Chispas por Notas", "ex.sub": "{c} Chispas = 1 Nota. Máximo {m} a la semana (te quedan {n}).", "ex.btn": "Cambiar {c} ✦ → 1 ♪",
@@ -44,7 +44,7 @@ const TX = {
     "week.title": "This week's tasks", "week.reset": "They refresh on Monday.", "week.bonus": "Complete 4 of 6 to earn 5 Notes.",
     "week.claimBonus": "Claim 5 ♪", "week.bonusDone": "5 Notes claimed this week",
     "cal.title": "Visit calendar", "cal.sub": "Moves one square for every day you come in. Missing a day costs nothing.", "cal.claim": "Collect day {n}", "cal.claimed": "You already collected today's square.",
-    "pantry.title": "Pantry", "pantry.sub": "One free pull a day. The rest cost {c} Chispas.", "pantry.free": "Free pull ({n})", "pantry.pay": "Pull · {c} ✦",
+    "pantry.title": "Pantry", "pantry.sub": "One free pull a day, and up to 3 wait for you if you're away. The rest cost {c} Chispas.", "pantry.free": "Free pull ({n})", "pantry.pay": "Pull · {c} ✦",
     "pantry.odds": "Odds: food 50%, medicine 20%, Chispas 20%, toy 6%, 1 Note 4%. A special prize is guaranteed every {p} pulls ({n} to go).",
     "pantry.bonus": "Pantry builds: the free pull has +{n} points of special prize.", "pantry.got": "The Pantry gives you: {what}", "pantry.special": "Special prize!",
     "ex.title": "Trade Chispas for Notes", "ex.sub": "{c} Chispas = 1 Note. Up to {m} a week ({n} left).", "ex.btn": "Trade {c} ✦ → 1 ♪",
@@ -69,6 +69,18 @@ const shifted = () => new Date(Date.now() - 5 * 3600e3);
 const dayKey = () => keyOf(shifted());
 const weekKey = () => { const d = shifted(); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return keyOf(d); };
 const dayNum = (k) => Math.round(Date.UTC(+k.slice(0, 4), +k.slice(5, 7) - 1, +k.slice(8, 10)) / 864e5);
+// Design rule 4: daily things pile up for a few days instead of expiring. A charge { day, left } gains `per` for each
+// day that passed since it was last topped up, up to `cap` (it never takes away what is already there).
+const KEEP_DAYS = 3;
+function charge(o, per, cap) {
+  const t = dayKey();
+  if (o.day !== t) {
+    const gap = o.day ? Math.max(1, dayNum(t) - dayNum(o.day)) : 1;
+    o.left = Math.max(o.left || 0, Math.min(cap, (o.left || 0) + per * gap));
+    o.day = t;
+  }
+  return o;
+}
 const shortDate = (k) => { const d = new Date(+k.slice(0, 4), +k.slice(5, 7) - 1, +k.slice(8, 10)); return d.toLocaleDateString(L() === "es" ? "es-ES" : "en-GB", { weekday: "short", day: "numeric" }); };
 
 /* ---------- Catalogue ---------- */
@@ -145,7 +157,8 @@ function tick() {
     d.sets.unshift({ day: today, tasks: rollDaily(), lit: false });
     d.sets = d.sets.slice(0, 3);
   }
-  if (d.pantry.day !== today) { d.pantry.day = today; d.pantry.free = 1; }
+  // the free pull waits for you: one a day, up to 3 saved
+  if (d.pantry.day !== today) { const c = charge({ day: d.pantry.day, left: d.pantry.free }, 1, KEEP_DAYS); d.pantry.day = c.day; d.pantry.free = c.left; }
   if (!d.week || d.week.key !== wk) d.week = { key: wk, tasks: rollWeekly(), bonus: false };
   if (d.ex.week !== wk) { d.ex.week = wk; d.ex.n = 0; }
 }
@@ -375,5 +388,5 @@ const prevShow = EV.HOOKS.showScreen;
 EV.HOOKS.showScreen = function () { if (prevShow) prevShow.apply(this, arguments); refreshChip(); };
 EV.every(4000, refreshChip);
 tick(); EV.save(); refreshChip();
-EV.DAILY = { tick, D, dayKey, weekKey, DAILY, WEEKLY, CHESTS, hasNews, render, calReward, totalStars };
+EV.DAILY = { tick, D, dayKey, dayNum, charge, KEEP_DAYS, weekKey, DAILY, WEEKLY, CHESTS, hasNews, render, calReward, totalStars };
 })(typeof window !== "undefined" ? window : globalThis);
