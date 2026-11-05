@@ -184,7 +184,8 @@ function renderCards() {
     const counts = {};
     for (const c of list) counts[c.g] = (counts[c.g] || 0) + 1;
     const gs = Object.keys(counts).map(Number).sort((a, b) => b - a);
-    const copies = `<p class="rc-copies">${esc(tx("cards.copies"))}: ${gs.map((gi) => `<span class="gr" style="--g:${GRADES[gi].col}">${esc(GRADES[gi][L()])} ×${counts[gi]}</span>`).join(" ")}</p>`;
+    const copies = `<p class="rc-copies">${esc(tx("cards.copies"))}: ${gs.map((gi) => `<span class="gr" style="--g:${GRADES[gi].col}">${esc(GRADES[gi][L()])} ×${counts[gi]}</span>`).join(" ")}</p>` +
+      gs.filter((gi) => gi < GRADES.length - 1 && counts[gi] < UPGRADE_N).map((gi) => `<div class="rc-up"><small>${esc(tx("cards.toNext", { a: GRADES[gi][L()], g: GRADES[gi + 1][L()], n: counts[gi], m: UPGRADE_N }))}</small><div class="bar"><i style="width:${Math.round(100 * counts[gi] / UPGRADE_N)}%"></i></div></div>`).join("");
     const spare = list.filter((c) => !eqSet.has(c.uid)).sort((a, b) => a.g - b.g);
     if (list.length > 1 && spare.length) btns.push(`<button class="btn ghost" type="button" data-dust="${spare[0].uid}">${esc(tx("dust.btn", { n: DUST_OF(spare[0].g) }))}</button>`);
     for (const gi of gs.slice().reverse()) if (counts[gi] >= UPGRADE_N && gi < GRADES.length - 1) btns.push(`<button class="btn" type="button" data-fuse="${id}:${gi}">${esc(tx("cards.fuse", { n: UPGRADE_N, a: GRADES[gi][L()], g: GRADES[gi + 1][L()] }))}</button>`);

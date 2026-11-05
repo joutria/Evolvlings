@@ -209,6 +209,11 @@ function effText(id, n) {
 }
 
 /* ---------- Panel ---------- */
+// how close you are to paying for the next level (design rule 7: show progress toward upgrades)
+function needBars(c) {
+  const P = EV.P, b = B(), row = (ic, have, need) => `<div class="bd-need"><span>${ic} ${Math.min(have, need)} / ${need}</span><div class="bar"><i style="width:${Math.min(100, Math.round(100 * have / need))}%"></i></div></div>`;
+  return (c.c ? row("✦", P.coins, c.c) : "") + (c.w ? row("🪵", b.wood, c.w) : "");
+}
 const pips = (n) => `<span class="bd-pips" aria-label="${esc(tx("lvl", { n }))}">${"■".repeat(n)}<i>${"□".repeat(MAX - n)}</i></span>`;
 function render() {
   const el = $("buildPanel"); if (!el || el.hidden) return;
@@ -225,7 +230,7 @@ function render() {
     if (c) x += `<p class="bd-eff next"><b>${esc(tx("next", { n: to }))}:</b> ${esc(effText(id, to))}</p>`;
     if (id === "garden") { const s = gardenStock(); x += `<p class="bd-store">${esc(tx("store", { f: s.f, w: s.w }))}${s.full ? ` <span class="poor">${esc(tx("full"))}</span>` : ""}</p><button class="btn ghost" type="button" data-bharv="1" ${s.f || s.w ? "" : "disabled"}>${esc(tx("harvest"))}</button>`; }
     if (!c) x += `<p class="bd-max">${esc(tx("max"))}</p>`;
-    else x += `<button class="btn" type="button" data-bup="${id}" ${busy || miss.length ? "disabled" : ""}>${esc(tx("up", { c: c.c, w: c.w, t: fmt(hoursOf(c) * HOUR) }))}</button>${busy && !here ? `<small class="muted">${esc(tx("busy"))}</small>` : miss.length ? `<small class="poor">${esc(tx("poor", { what: miss.join(" · ") }))}</small>` : ""}`;
+    else x += `<button class="btn" type="button" data-bup="${id}" ${busy || miss.length ? "disabled" : ""}>${esc(tx("up", { c: c.c, w: c.w, t: fmt(hoursOf(c) * HOUR) }))}</button>${busy && !here ? `<small class="muted">${esc(tx("busy"))}</small>` : miss.length ? `<small class="poor">${esc(tx("poor", { what: miss.join(" · ") }))}</small>${needBars(c)}` : ""}`;
     return x + "</div>";
   }).join("")}</div>`;
   h += jobsHtml() + ordersHtml();

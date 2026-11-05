@@ -43,7 +43,7 @@ const RPG_EN = {
     "cards.desc": "Each card carries three effects; only the one for the slot you put it in works. If the card's type matches your creature's, it resonates (+15%).",
     "cards.noCreature": "Raise a creature to kid stage to use cards.", "cards.stats": "Health {hp} · Strength {str} · Defence {def} · Speed {spd} · Crit {cr}%",
     "sh.title": "Battle stats", "sh.lvl": "Level {n}", "sh.sub": "Level {n}. Today's care adds up to 25% to each value.", "sh.hp": "Health", "sh.str": "Strength", "sh.def": "Defence", "sh.spd": "Speed", "sh.cr": "Crit", "sh.dodge": "Dodge", "sh.by": "from {c}", "sh.need": "Shows up once your creature is a kid.",
-    "cards.unequip": "Remove", "cards.inUse": "In use",
+    "cards.toNext": "{a} → {g}: {n} / {m} copies", "cards.unequip": "Remove", "cards.inUse": "In use",
     "cf.search": "Search cards (name, type, effect…)", "cf.sort": "Sort", "cf.sort.use": "Usable first", "cf.sort.new": "Newest", "cf.sort.rar": "Rarity", "cf.sort.type": "Type", "cf.sort.name": "Name", "cf.sort.copies": "Copies",
     "cf.dir.down": "Normal order (tap to reverse)", "cf.dir.up": "Reversed order (tap to restore)", "cf.filters": "Filters", "cf.quick": "Quick", "cf.type": "Type", "cf.grade": "Rarity", "cf.fx": "Effect",
     "cf.only.fav": "Favourites", "cf.only.usable": "Can use", "cf.only.inUse": "In use", "cf.only.fuse": "Ready to upgrade",

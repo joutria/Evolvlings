@@ -374,6 +374,12 @@ body.sheet-on { overflow: hidden; }
 .cf-pips { font-size: 9px; letter-spacing: -1px; }
 .cf-count { margin: 6px 0 0; min-height: 0; }
 .cf-count:empty { display: none; }
+.bd-need { display: flex; align-items: center; gap: 8px; font-size: 12px; margin-top: 4px; }
+.bd-need span { min-width: 92px; font-family: var(--font-mono); }
+.bd-need .bar, .rc-up .bar { flex: 1; height: 10px; }
+.rc-up { margin: 4px 0; }
+.rc-up small { display: block; font-size: 12px; }
+.age-bar { display: block; height: 8px; max-width: 220px; margin-top: 4px; }
 .cpick .cf-wrap { flex: none; max-height: 45dvh; overflow-y: auto; padding: 0 12px 6px; border-bottom: 2px dashed var(--line); margin-bottom: 6px; }
 .cpick .cf-bar { margin-top: 4px; }
 .pickrow[hidden] { display: none; }
@@ -491,6 +497,7 @@ body.sheet-on { overflow: hidden; }
   </section>
 
   <section id="cardsPanel" class="panel" hidden></section>
+  <section id="guidePanel" class="panel" hidden></section>
   <section id="teamsPanel" class="panel" hidden></section>
   <section id="dailyPanel" class="panel" hidden></section>
   <section id="refugePanel" class="panel" hidden></section>
@@ -1854,7 +1861,8 @@ function renderStats() {
   $("petName").textContent = S.name;
   $("petSpecies").textContent = `${t("stage." + S.stage)} · ${stageName()}, ${stageDesc()}`;
   const nextAt = S.stage === 0 ? TEEN_AT : S.stage === 1 ? ADULT_AT : null;
-  $("petAge").innerHTML = `${t("age.age", { d: fmtDur(S.age) })}<br>${nextAt ? t("age.grows", { d: fmtDur(Math.max(0, nextAt - S.age)) }) : t("age.grown")}${S.speed > 1 ? `<br>${t("age.speed", { n: S.speed })}` : ""}`;
+  const fromAt = S.stage === 1 ? TEEN_AT : 0, growBar = nextAt ? `<span class="bar age-bar" aria-hidden="true"><i style="width:${Math.round(100 * clamp((S.age - fromAt) / (nextAt - fromAt), 0, 1))}%"></i></span>` : "";
+  $("petAge").innerHTML = `${t("age.age", { d: fmtDur(S.age) })}<br>${nextAt ? t("age.grows", { d: fmtDur(Math.max(0, nextAt - S.age)) }) + growBar : t("age.grown")}${S.speed > 1 ? `<br>${t("age.speed", { n: S.speed })}` : ""}`;
   const sl = S.sleeping, busy = !!mini;
   $("aFeed").disabled = sl || busy; $("aPlay").disabled = sl || busy; $("aClean").disabled = busy;
   $("aHeal").disabled = busy; $("aPet").disabled = sl || busy; $("aSleep").disabled = busy; $("aItems").disabled = busy;
@@ -1889,13 +1897,14 @@ function renderSettings() {
 }
 
 /* ---------- Panels (one open at a time) ---------- */
-const PANELS = { settings: "settingsPanel", journal: "journalPanel", shop: "shopPanel", ach: "achPanel", cards: "cardsPanel", teams: "teamsPanel", daily: "dailyPanel", refuge: "refugePanel", season: "seasonPanel", map: "mapPanel", build: "buildPanel" };
+const PANELS = { settings: "settingsPanel", journal: "journalPanel", shop: "shopPanel", ach: "achPanel", cards: "cardsPanel", teams: "teamsPanel", daily: "dailyPanel", refuge: "refugePanel", season: "seasonPanel", map: "mapPanel", build: "buildPanel", guide: "guidePanel" };
 function togglePanel(name, forceOpen) {
   const id = PANELS[name], el = $(id);
   const open = forceOpen || el.hidden;
   for (const k in PANELS) $(PANELS[k]).hidden = true;
   closeMenus();
-  if (!open) return;
+  if (!open) { if (HOOKS.panelsClosed) HOOKS.panelsClosed(); return; }
+  el.hidden = false; // show first: some panels (builds) only draw while visible
   if (name === "journal") renderJournal();
   if (name === "shop") renderShop();
   if (name === "ach") renderAch();
@@ -1906,7 +1915,8 @@ function togglePanel(name, forceOpen) {
   if (name === "season" && HOOKS.renderSeason) HOOKS.renderSeason();
   if (name === "map" && HOOKS.renderMap) HOOKS.renderMap();
   if (name === "build" && HOOKS.renderBuild) HOOKS.renderBuild();
-  el.hidden = false;
+  if (name === "guide" && HOOKS.renderGuide) HOOKS.renderGuide();
+  if (HOOKS.panelOpened) HOOKS.panelOpened(name);
   syncSheet(); $("sheetBody").scrollTop = 0;
 }
 /* Every menu opens as a sheet over the game instead of at the end of the page */
@@ -1916,7 +1926,7 @@ function syncSheet() {
   $("sheet").hidden = !on; $("sheetBack").hidden = !on;
   document.body.classList.toggle("sheet-on", on);
 }
-function closeSheets() { for (const id of SHEETS) $(id).hidden = true; closeCard(); }
+function closeSheets() { for (const id of SHEETS) $(id).hidden = true; closeCard(); if (HOOKS.panelsClosed) HOOKS.panelsClosed(); }
 for (const id of SHEETS) { $("sheetBody").appendChild($(id)); new MutationObserver(syncSheet).observe($(id), { attributes: true, attributeFilter: ["hidden"] }); }
 $("sheetX").addEventListener("click", () => { sfx("tap"); closeSheets(); });
 $("sheetBack").addEventListener("click", closeSheets);
@@ -2125,5 +2135,6 @@ requestAnimationFrame(frame);
 <script src="seasons.js"></script>
 <script src="ach.js"></script>
 <script src="world.js"></script>
+<script src="guide.js"></script>
 </body>
 </html>
