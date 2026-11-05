@@ -180,7 +180,7 @@ const typeChip = (ty) => `<span class="ty ty-${ty}" title="${esc(TYPES[ty][L()])
 const gradeChip = (gi) => `<span class="gr" style="--g:${GRADES[gi].col}">${esc(GRADES[gi][L()])}</span>`;
 /* TCG-style card: frame in the type colour, name bar with type gem and cooldown orb,
    pixel-art box, type line with grade pips, effect box, lore, and a set number. */
-const TCOL = { fire: "#d9542c", plant: "#4f9a3c", light: "#e2ae2e", bolt: "#d8b81c", air: "#6fb8d0", music: "#cf5f9f", water: "#3f7fc9", stone: "#8a7a64", shadow: "#5b4b8e", ice: "#8fcbe0", mush: "#b0603c", dream: "#8a78d4", star: "#e0b84a" };
+const TCOL = {}; for (const t of TYPE_ORDER) TCOL[t] = TYPES[t].col; // from TYPES in rpg/data-cards.js
 const CARD_NO = Object.keys(CARDS);
 function tcgArt(by, ty, sil, id) {
   return `<div class="tcg-art"><canvas class="rc-art" width="120" height="72" data-by="${by || ""}" data-ty="${ty}" data-card="${id || ""}"${sil ? " data-sil=\"1\"" : ""}></canvas></div>`;
@@ -304,7 +304,7 @@ function giveCard(id, gi) { const P = EV.P; const c = { uid: "c" + P.cardSeq++, 
 // the Workshop build (build.js) lowers the crafting cost
 const craftCost = () => (EV.BUILD ? EV.BUILD.craftCost() : CRAFT_BASE);
 const DUST_OF = (gi) => Math.pow(UPGRADE_N, gi), CRAFT_BASE = 10, PACK = { price: 60, perDay: 3 };
-const GRIM_ORDER = ["fire", "plant", "light", "bolt", "air", "music", "water", "stone", "shadow", "ice", "mush", "dream", "star"];
+const GRIM_ORDER = TYPE_ORDER;
 const grimIds = (types) => Object.keys(CARDS).filter((id) => types.includes(CARDS[id].type));
 const grimDone = (p, types) => grimIds(types).every((id) => (p.grim || {})[id]);
 const dayKeyNow = () => (EV.DAILY && EV.DAILY.dayKey ? EV.DAILY.dayKey() : new Date().toDateString());

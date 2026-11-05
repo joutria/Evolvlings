@@ -190,6 +190,12 @@ const RPG_EN = {
     dreams: { t: "A family of the House of Dreams has just woken up and, like every morning, they tell each other what they dreamed before they forget.", c: ["Tell your dream", "Listen to theirs", "Keep walking"],
       o: ["You tell a dream about a lantern and a shadow singing together. The grandmother goes very quiet. You gain experience.", "They dream of rising water, of ice that weeps and of a thirsty root. The team rests while listening.", "The family keeps telling dreams behind you."] },
   },
+  // other outcomes for choices that can go two ways (rpg/data-events.js "say")
+  EVT_ALT: {
+    vine: ["The vines thrash and wake the wood's creatures…", "You get through untouched. You gain experience.", "The vines scratch you as you pass. The team loses some health."],
+    fog: ["You run blind and come out the other side. On the ground there's something they dropped.", "The fog closes in around you and dimmed creatures appear…"],
+    sneak: ["You slip past unseen. On the other side you find something they dropped.", "They spot you. \"Halt!\" The wardens call in some dimmed creatures…"],
+  },
   MON_DESC: { unisona: "Star creature born of two lullabies at once", raiz: "The Root beneath the Glade", lumo: "Playful spark from the Lantern Houses", fizz: "Sleepy cloud from the Heights", pebb: "Stubborn glutton from the Deep", fuellito: "Apprentice of the Ember Guild", brotin: "Patient acorn from the Deep Wood", remolin: "Wandering otter of the Tides", bostezo: "Woolly moth-lamb from the White Hollow", mecha: "Candle on legs from the Dim Quarter", yunqueron: "Anvil turtle of the Mother Forge", espinardo: "Bramble hedgehog born in the Hedge", nim: "Little bat of the Shadow folk", centinela: "Guard of King Lóbrego", vidriela: "Glass fish of Mirror Lake", ecolito: "Singing stone of the Echo Caves", relampin: "Messenger ferret of the Thunder Spire", trinilla: "Minstrel bird of the House of Verse", carambano: "Ice mole of the Frozen Tomb", capuchon: "Hermit crab with a mushroom for a shell", guardatumba: "Ice giant who guards the Tomb" },
   CT: {
     flash: ["Mischief Flash", "A spark that slipped out of its lantern and never wanted to go back."],

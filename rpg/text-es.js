@@ -190,6 +190,12 @@ const RPG_ES = {
     dreams: { t: "Una familia de la casa del Sueño se acaba de despertar y, como cada mañana, se cuenta lo que ha soñado antes de que se le olvide.", c: ["Contar tu sueño", "Escuchar los suyos", "Seguir tu camino"],
       o: ["Cuentas un sueño sobre un farol y una sombra que cantaban juntos. La abuela se queda muy callada. Ganas experiencia.", "Sueñan con agua que sube, con hielo que llora y con una raíz que tiene sed. El equipo descansa escuchando.", "La familia sigue contando sueños a tu espalda."] },
   },
+  // other outcomes for choices that can go two ways (rpg/data-events.js "say")
+  EVT_ALT: {
+    vine: ["Las enredaderas se revuelven y despiertan a las criaturas del bosque…", "Pasáis sin que os toquen. Ganas experiencia.", "Las enredaderas os arañan al pasar. El equipo pierde algo de vida."],
+    fog: ["Corres a ciegas y sales al otro lado. En el suelo hay algo que se les cayó.", "La niebla se cierra a tu alrededor y salen criaturas apagadas…"],
+    sneak: ["Te cuelas sin que te vean. Al otro lado encuentras algo que se les cayó.", "Te pillan. «¡Alto ahí!» Los guardas llaman a unas criaturas apagadas…"],
+  },
   MON_DESC: { unisona: "Criatura Estrella nacida de dos nanas a la vez", raiz: "La Raíz que hay bajo el Claro", lumo: "Chispa juguetona de las Casas del Farol", fizz: "Nube dormilona de los Altos", pebb: "Comilón tozudo de la Hondura", fuellito: "Aprendiz del Gremio de la Brasa", brotin: "Bellota paciente del Bosque Hondo", remolin: "Nutria viajera de las Mareas", bostezo: "Ovejita-polilla del Fondo Blanco", mecha: "Vela con patas del Barrio Apagado", yunqueron: "Tortuga-yunque de la Forja Madre", espinardo: "Erizo de zarza nacido en el Seto", nim: "Murcielaguito del pueblo de la Sombra", centinela: "Guardia del Rey Lóbrego", vidriela: "Pez de cristal del Lago Espejo", ecolito: "Piedra que canta, de las Cuevas del Eco", relampin: "Hurón mensajero de la Aguja del Trueno", trinilla: "Pájaro juglar de la casa del Verso", carambano: "Topo de hielo de la Tumba Helada", capuchon: "Cangrejo ermitaño con una seta por concha", guardatumba: "Gigante de hielo que guarda la Tumba" },
   CT: {
     flash: ["Destello Travieso", "Una chispa que se escapó del farol y nunca quiso volver."],

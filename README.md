@@ -138,9 +138,10 @@ The old `rpg.js` is now split into `rpg/`. They are still plain scripts, loaded 
 
 | File | What it holds |
 |---|---|
-| `data-cards.js` | types, grades, statuses, skill cards and card scaling |
+| `data-cards.js` | the type table (the only place for a type's circle, colour, opposite and names; beats, opposites, circles and the Grimoire order are derived from it), grades, statuses, skill cards and card scaling |
 | `data-mons.js` | creatures and level curves |
 | `data-zones.js` | expedition zones and the list of path events |
+| `data-events.js` | what each choice of a path event does (xp, coins, cost, heal, hurt, fights, chests, flags, 50 % rolls, flag conditions) |
 | `engine.js` | battle units and the `Battle` engine (no DOM; `tools/check.js` runs it in Node) |
 | `text-es.js`, `text-en.js` | all RPG texts, one file per language (interface, zones, events, creature blurbs, card names) |
 | `ui-core.js` | text helpers, card text and card HTML, saved data |
@@ -161,3 +162,5 @@ Jose approved eight rules to keep in every feature. These are the first three:
 - **Nobody leaves because you were away.** While the game is closed or hidden for more than two minutes, food, fun, energy and cleanliness never drop below 25 and health never drops below 30 (unless they were already lower). If health still reaches zero, the creature rests at the Refuge: it comes back with 60 health, cured and clean, keeping its level, cards and companions. **Hard mode** in Settings brings back the old rule where it leaves for good.
 - **Care only adds.** In battle each care value now gives 0 % to +25 % to its stat (it used to be −25 % to +25 %).
 - **Backups.** Settings → Backup saves the whole game (creature, profile and journal) as a `.json` file and loads it back. A gentle reminder appears once a week for games with some progress.
+
+To add a path event: write its texts in `EVT` in both `rpg/text-*.js` files, its effects in `rpg/data-events.js` (one object per choice) and its id in a zone's `events`. `node tools/check.js` fails if any of the three is missing, if the choice counts differ, or if an effect has an unknown key.
