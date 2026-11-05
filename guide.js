@@ -22,6 +22,7 @@ const TIPS = {
     shop: ["Tienda", "Comida, medicinas y juguetes por ✦ Chispas. Lo que compras va a la mochila y no caduca."],
     ach: ["Logros", "Cada logro da Chispas una sola vez. No hace falta perseguirlos: la mayoría llegan solos jugando."],
     journal: ["Recuerdos", "Aquí quedan las criaturas que criaste y lo que les pasó. Es solo para recordar."],
+    talents: ["Talentos", "Cada 3 niveles tu criatura y cada compañero eligen un talento entre dos: uno ofensivo y otro defensivo, del tipo de la criatura. Nada es definitivo: puedes cambiarlos cuando quieras con ∴ Polvo de Estrella."],
     exp: ["Expediciones", "Elige una zona, dos compañeros y tus cartas. Si superas el nivel de una zona, sus enemigos suben poco, así que puedes volver más fuerte a por las 3 ★. Perder solo acorta el viaje: no pierdes cartas ni niveles."],
   },
   en: {
@@ -35,6 +36,7 @@ const TIPS = {
     shop: ["Shop", "Food, medicine and toys for ✦ Chispas. What you buy goes to your bag and never expires."],
     ach: ["Achievements", "Each achievement gives Chispas once. No need to chase them: most come on their own as you play."],
     journal: ["Memories", "The creatures you raised and what became of them. It's only for remembering."],
+    talents: ["Talents", "Every 3 levels your creature and each companion choose one of two talents: one offensive, one defensive, from the creature's type. Nothing is final: change them any time with ∴ Stardust."],
     exp: ["Expeditions", "Pick a zone, two companions and your cards. Above a zone's level its foes grow only a little, so you can come back stronger for 3 ★. Losing only cuts the trip short: you keep your cards and levels."],
   },
 };
@@ -43,7 +45,7 @@ const GLOSS = {
   es: [
     ["✦", "Chispas", "Cuidando, con tareas, expediciones, logros y el Huerto.", "Tienda, obras, sobres del Taller y la Despensa."],
     ["♪", "Notas del Canto", "Tareas diarias y semanales, 3 ★ en una zona, la temporada y el Refugio. También se cambian Chispas por Notas (con límite semanal).", "Huevos del Refugio y el Pozo de los Ecos. Nunca caducan."],
-    ["∴", "Polvo de Estrella", "Deshaciendo cartas repetidas, huevos repetidos y el Rincón de búsqueda.", "Crear cartas en el Grimorio (Cartas → Grimorio)."],
+    ["∴", "Polvo de Estrella", "Deshaciendo cartas repetidas, huevos repetidos y el Rincón de búsqueda.", "Crear cartas en el Grimorio (Cartas → Grimorio) y cambiar talentos."],
     ["🪵", "Madera", "Al terminar expediciones y con trabajos de tus compañeros.", "Obras del Claro."],
     ["👣", "Pasos", "10 cada día; se guardan hasta 20 y se pueden comprar unos pocos.", "Buscar en el Rincón de búsqueda. Pasear y salir de expedición son gratis."],
     ["🕯", "Cera", "Solo durante el evento: tareas, expediciones y ayudar a Tila.", "Encender los faroles del evento."],
@@ -51,7 +53,7 @@ const GLOSS = {
   en: [
     ["✦", "Chispas", "Care, tasks, expeditions, achievements and the Garden.", "Shop, builds, Workshop packs and the Pantry."],
     ["♪", "Song Notes", "Daily and weekly tasks, 3 ★ in a zone, the season and the Refuge. Chispas can also be traded for Notes (weekly limit).", "Refuge eggs and the Well of Echoes. They never expire."],
-    ["∴", "Stardust", "Breaking down duplicate cards, duplicate eggs and the foraging nook.", "Crafting cards in the Grimoire (Cards → Grimoire)."],
+    ["∴", "Stardust", "Breaking down duplicate cards, duplicate eggs and the foraging nook.", "Crafting cards in the Grimoire (Cards → Grimoire) and changing talents."],
     ["🪵", "Wood", "Finishing expeditions and your companions' jobs.", "Glade builds."],
     ["👣", "Steps", "10 a day; up to 20 keep and a few can be bought.", "Searching the foraging nook. Walking around and setting out are free."],
     ["🕯", "Wax", "Only during the event: tasks, expeditions and helping Tila.", "Lighting the event's lanterns."],

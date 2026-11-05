@@ -160,7 +160,7 @@ function renderCards() {
     const u = makeUnit(ownUnitOpts(1));
     const need = xpNeed(R.lvl);
     html += `<div class="slotbox" style="border-style:solid"><div class="panel-head"><strong style="font-family:var(--font-display);font-size:18px">${esc(S.name)} · ${esc(tx("cards.lvl", { n: R.lvl }))}</strong><span>${u.types.map(typeChip).join(" ")}</span></div>
-      <div class="bar xpbar"><i style="width:${Math.round(100 * R.xp / need)}%"></i></div><p class="rstats">${esc(tx("cards.xp", { x: R.xp, y: need }))}</p><details class="fold"><summary><h3>${esc(tx("sh.title"))}</h3></summary>${ownSheetHtml()}</details></div>`;
+      <div class="bar xpbar"><i style="width:${Math.round(100 * R.xp / need)}%"></i></div><p class="rstats">${esc(tx("cards.xp", { x: R.xp, y: need }))}</p>${talentsHtml("own")}<details class="fold"><summary><h3>${esc(tx("sh.title"))}</h3></summary>${ownSheetHtml()}</details></div>`;
     html += slotRowsHtml("own");
   } else html += `<p class="muted">${esc(tx("cards.noCreature"))}</p>`;
   if (R) html += `<p class="muted">${esc(canTypesText())}</p>`;

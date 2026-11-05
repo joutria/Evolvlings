@@ -324,7 +324,7 @@ function ownUnitOpts(hpPct) {
   const S = EV.S, R = rpgState();
   const cards = {};
   for (const k of ["a", "p", "s"]) { const c = R.eq[k] && cardByUid(R.eq[k]); if (c && R.lvl >= SLOT_LVL[k]) cards[k] = scaled(c.id, c.g); }
-  return { kind: S.species, lvl: R.lvl, side: "ally", name: S.name, own: true, care: S.stats, stage: S.stage, form: S.form, cards, hpPct, lowFun: S.stats.fun < 30 };
+  return { kind: S.species, lvl: R.lvl, side: "ally", name: S.name, own: true, care: S.stats, stage: S.stage, form: S.form, cards, hpPct, lowFun: S.stats.fun < 30, tal: talentsOf(S.species, R.lvl, R.tal) };
 }
 /* Stat sheet: bars are relative to a strong creature of the same level, so they stay readable as levels go up.
    care: own creature only, shows how today's care shifts each stat. */

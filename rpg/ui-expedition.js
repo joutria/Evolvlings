@@ -287,7 +287,8 @@ function partyUnits() {
     if (m.lvl >= SLOT_LVL.s || m.kind === "unisona") cards.s = scaled(mc[2], gr(mc[2]));
     // a Refuge companion carries the cards you gave it; empty slots keep its usual ones
     if (m.roster) for (const k of ["a", "p", "s"]) { const c = compCard(m.kind, k); if (c) cards[k] = scaled(c.id, c.g); }
-    return makeUnit({ kind: m.kind, lvl: m.lvl, side: "ally", name: monName(m.kind), wild: true, cards, hpPct: m.hp, stage: 1, form: "bright", bond: m.bond || 0, star: m.star || 0 });
+    const ro = m.roster && EV.P.eg && EV.P.eg.roster[m.kind];
+    return makeUnit({ kind: m.kind, lvl: m.lvl, side: "ally", name: monName(m.kind), wild: true, cards, hpPct: m.hp, stage: 1, form: "bright", bond: m.bond || 0, star: m.star || 0, tal: ro ? talentsOf(m.kind, m.lvl, ro.tal) : [] });
   });
 }
 // Above a zone's level its foes only grow by a share of your extra levels (Jose's rule): in the first zone 50 % for one
@@ -330,7 +331,8 @@ function foeUnits(boss) {
 function show(v) { view = v; render(); const el = $("scrExp"); if (el && !el.hidden) el.scrollIntoView({ behavior: "smooth", block: "start" }); }
 function pickStats(k) {
   const r = refOf(k);
-  const u = makeUnit({ kind: k, lvl: r ? r.lvl : rpgState().lvl, side: "ally", wild: true, stage: 1, bond: r ? r.bond : 0, star: r ? r.star : 0 });
+  const ro = EV.P.eg && EV.P.eg.roster[k];
+  const u = makeUnit({ kind: k, lvl: r ? r.lvl : rpgState().lvl, side: "ally", wild: true, stage: 1, bond: r ? r.bond : 0, star: r ? r.star : 0, tal: ro ? talentsOf(k, ro.lvl, ro.tal) : [] });
   const v = { hp: u.maxHp, str: Math.round(u.base.str), def: Math.round(u.base.def), spd: Math.round(u.base.spd), cr: Math.round(u.crit) + " %" };
   return `<span class="mstats">${Object.keys(v).map((k) => `<span><i>${esc(tx("sh." + k))}</i><b>${v[k]}</b></span>`).join("")}</span>`;
 }

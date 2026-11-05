@@ -379,6 +379,18 @@ body.sheet-on { overflow: hidden; }
 .bd-need .bar, .rc-up .bar { flex: 1; height: 10px; }
 .rc-up { margin: 4px 0; }
 .rc-up small { display: block; font-size: 12px; }
+.tal { margin-top: 8px; display: flex; flex-direction: column; gap: 4px; }
+.tal-h { font-family: var(--font-display); font-size: 14px; }
+.tal.compact .tal-h { font-size: 12px; }
+.tal-list { display: flex; flex-wrap: wrap; gap: 4px; margin: 0; }
+.tal-chip { display: inline-flex; flex-direction: column; font: 600 12px var(--font-body); padding: 3px 8px; border: 1px solid var(--line); background: var(--bg); }
+.tal-chip small { font-weight: 400; color: var(--muted); }
+.tal-chip.o { border-left: 4px solid var(--bad); }
+.tal-chip.d { border-left: 4px solid var(--moss); }
+.tal .btn { align-self: flex-start; }
+.tal-opt .tal-ic { font-size: 28px; width: 56px; text-align: center; align-self: center; }
+.tal-opt.o { border-left: 6px solid var(--bad); }
+.tal-opt.d { border-left: 6px solid var(--moss); }
 .age-bar { display: block; height: 8px; max-width: 220px; margin-top: 4px; }
 .cpick .cf-wrap { flex: none; max-height: 45dvh; overflow-y: auto; padding: 0 12px 6px; border-bottom: 2px dashed var(--line); margin-bottom: 6px; }
 .cpick .cf-bar { margin-top: 4px; }
@@ -2114,6 +2126,7 @@ requestAnimationFrame(frame);
 <script src="lore.js"></script>
 <script src="rpg/data-cards.js"></script>
 <script src="rpg/data-mons.js"></script>
+<script src="rpg/data-talents.js"></script>
 <script src="rpg/data-zones.js"></script>
 <script src="rpg/data-events.js"></script>
 <script src="rpg/engine.js"></script>
@@ -2126,6 +2139,7 @@ requestAnimationFrame(frame);
 <script src="rpg/ui-battle.js"></script>
 <script src="rpg/ui-events.js"></script>
 <script src="rpg/ui-cards.js"></script>
+<script src="rpg/ui-talents.js"></script>
 <script src="rpg/ui-hooks.js"></script>
 <script src="rpg/registry.js"></script>
 <script src="daily.js"></script>
