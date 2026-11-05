@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* Evolvlings data checker. Run: node tools/check.js
-   1. In Node: loads the battle engine (rpg.js exports it) and runs 200 seeded battles.
+   1. In Node: loads the battle data and engine (rpg/data-*.js and rpg/engine.js) and runs 200 seeded battles.
    2. In a headless browser: loads the game and checks that every zone, card, event and text exists in both languages.
    Exits with code 1 when anything is wrong, so the GitHub Action fails. Needs the "playwright" package for part 2. */
 "use strict";
@@ -10,7 +10,12 @@ const errors = [], warns = [];
 const err = (m) => errors.push(m), warn = (m) => warns.push(m);
 
 /* ---------- 1. battle engine in Node ---------- */
-const R = require(path.join(ROOT, "rpg.js"));
+const vm = require("vm");
+// the rpg/ files are classic scripts that share top-level names, so run them one after another in one context
+const ENGINE = ["data-cards", "data-mons", "data-zones", "engine"];
+const ctx = vm.createContext({ console, Math, Date });
+for (const f of ENGINE) vm.runInContext(fs.readFileSync(path.join(ROOT, "rpg", f + ".js"), "utf8"), ctx, { filename: "rpg/" + f + ".js" });
+const R = vm.runInContext("api", ctx);
 function mulberry(seed) { return function () { seed |= 0; seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 function unit(kind, lvl, side, rnd, boss) {
   const m = R.MONS[kind], g = () => Math.floor(rnd() * 3);
@@ -36,7 +41,7 @@ function sims(n) {
 }
 
 /* ---------- static facts read from the source ---------- */
-const rpgSrc = fs.readFileSync(path.join(ROOT, "rpg.js"), "utf8");
+const rpgSrc = fs.readdirSync(path.join(ROOT, "rpg")).filter((f) => f.endsWith(".js")).map((f) => fs.readFileSync(path.join(ROOT, "rpg", f), "utf8")).join("\n");
 function body(src, head) { const i = src.indexOf(head); if (i < 0) return ""; let d = 0; for (let j = src.indexOf("{", i); j < src.length; j++) { if (src[j] === "{") d++; else if (src[j] === "}" && --d === 0) return src.slice(i, j + 1); } return ""; }
 const DECORS = new Set([...body(rpgSrc, "function drawDecor(").matchAll(/decor === "(\w+)"/g)].map((m) => m[1]).concat(["lanterns"])); // "lanterns" is the final else
 const EVENT_CASES = new Set([...body(rpgSrc, "function chooseEvent(").matchAll(/case "(\w+)"/g)].map((m) => m[1]));
@@ -81,7 +86,7 @@ function inPage(facts) {
     for (const c of m.cards) if (!CARDS[c]) E(`creature ${k}: card "${c}" is not in CARDS`);
     if (EV.RPG.monName(k) === k) E(`creature ${k}: no display name`);
     const boss = Object.values(ZONES).some((z) => z.boss === k);
-    if (!boss && window.EVS && EVS.KINDS && !EVS.KINDS.includes(k)) W(`creature ${k}: no sprite in sprites.js`); // bosses are drawn by rpg.js
+    if (!boss && window.EVS && EVS.KINDS && !EVS.KINDS.includes(k)) W(`creature ${k}: no sprite in sprites.js`); // bosses are drawn by rpg/ui-art.js
   }
   // cards
   for (const id of Object.keys(CARDS)) {
@@ -94,7 +99,7 @@ function inPage(facts) {
   }
   // texts: the same keys in both languages
   const same = (a, b, what) => { for (const k of Object.keys(a)) if (!(k in b)) E(`${what}: "${k}" is in es but not en`); for (const k of Object.keys(b)) if (!(k in a)) E(`${what}: "${k}" is in en but not es`); };
-  same(TX.es, TX.en, "rpg.js TX");
+  same(TX.es, TX.en, "rpg TX");
   if (EV.STR) { same(EV.STR.es, EV.STR.en, "index.html STR"); if (EV.STR.es.ach) same(EV.STR.es.ach, EV.STR.en.ach, "achievements"); }
   same(EVT.es, EVT.en, "EVT"); same(ZT.es, ZT.en, "ZT");
   return out;

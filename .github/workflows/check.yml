@@ -13,7 +13,7 @@ jobs:
         with:
           node-version: 20
       - name: Syntax
-        run: for f in *.js tools/*.js; do node --check "$f"; done
+        run: for f in *.js rpg/*.js tools/*.js; do node --check "$f"; done
       - name: Install headless browser
         run: |
           npm install --no-save --no-package-lock playwright@1.48.2

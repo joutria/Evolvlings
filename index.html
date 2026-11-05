@@ -519,7 +519,7 @@ body.sheet-on { overflow: hidden; }
     </div>
   </section>
 
-  <!-- expedition (filled by rpg.js) -->
+  <!-- expedition (filled by rpg/ui-*.js) -->
   <section id="scrExp" class="exp" hidden></section>
 
   <!-- gone -->
@@ -1919,7 +1919,7 @@ if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
   window.addEventListener("load", () => { navigator.serviceWorker.register("sw.js").catch(() => {}); });
 }
 
-/* ---------- Hooks for add-on modules (rpg.js) ---------- */
+/* ---------- Hooks for add-on modules (rpg/*.js and the others) ---------- */
 const HOOKS = {};
 window.EV = {
   get S() { return S; }, get P() { return P; }, get LANG() { return LANG; },
@@ -1952,7 +1952,20 @@ requestAnimationFrame(frame);
 })();
 </script>
 <script src="lore.js"></script>
-<script src="rpg.js"></script>
+<script src="rpg/data-cards.js"></script>
+<script src="rpg/data-mons.js"></script>
+<script src="rpg/data-zones.js"></script>
+<script src="rpg/engine.js"></script>
+<script src="rpg/text-es.js"></script>
+<script src="rpg/text-en.js"></script>
+<script src="rpg/ui-core.js"></script>
+<script src="rpg/ui-style.js"></script>
+<script src="rpg/ui-art.js"></script>
+<script src="rpg/ui-expedition.js"></script>
+<script src="rpg/ui-battle.js"></script>
+<script src="rpg/ui-events.js"></script>
+<script src="rpg/ui-cards.js"></script>
+<script src="rpg/ui-hooks.js"></script>
 <script src="daily.js"></script>
 <script src="well.js"></script>
 <script src="eggs.js"></script>

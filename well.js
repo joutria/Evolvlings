@@ -1,5 +1,5 @@
 /* Evolvlings: the Well of Echoes, card pool (engagement delivery 2).
-   Loaded after rpg.js. Pulls cost Song Notes (never real money). Visible odds, a floor of one Epic or
+   Loaded after the rpg/ scripts. Pulls cost Song Notes (never real money). Visible odds, a floor of one Epic or
    better every 10 pulls, soft pity from pull 50, a sure Legendary at 70, and the Well's Promise (50/50:
    if a Legendary isn't the featured card, the next one is). Counters and the Promise carry across banners.
    Story creatures and their cards are never in the Well. */

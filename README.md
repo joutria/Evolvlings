@@ -26,7 +26,7 @@ To host it on **GitHub Pages**: open the repo's *Settings → Pages*, choose *De
 - **Settings → Time speed** offers 10× and 60× modes to see the whole life cycle quickly.
 - **Chispas** (✦) are the coin. You earn them by feeding a hungry creature, cleaning messes, curing sniffles, catching starseeds, growing up, and slowly over time while care stays above 60% (also while the page is closed).
 - **Shop and bag**: five extra foods, two medicines, foam soap, and two permanent toys (the Burr ball boosts play rounds, the Leaf kite makes them last 15 s). Dewberry and Honey bun stay free.
-- **Expeditions (RPG mode, `rpg.js`)**: once your creature is a Kid, take it with two wild companions to one of nine zones. The Dayside: Aurora Meadow (Light), Warm Crater (Fire) and Deep Wood (Plant). The Underside, opened by calming the Crater or Wood guardian: Gloom Hollow (Shadow), Mirror Lake (Water) and Echo Caves (Stone). Beyond them, opened by calming an Underside guardian: the Heights (Air) and the White Deep (Mushroom). Once all eight guardians are calm, the Heart of the Glade (Star) opens: the stump above the Root, with the final guardian, the Aching Root. Each guardian gives a verse of the Song of the Glade, and some encounters remember choices made in other zones. Pick your path leg by leg (battles, encounters, chests, rests) and face the zone's guardian (Great Lantern, Wakeful Forge, Hungry Hedge, Empty Throne, She Who Watches from Below, Grava, Great Weathervane, Mother Mycelium, the Aching Root). Every guardian also leaves one of its own cards.
+- **Expeditions (RPG mode, `rpg/`)**: once your creature is a Kid, take it with two wild companions to one of nine zones. The Dayside: Aurora Meadow (Light), Warm Crater (Fire) and Deep Wood (Plant). The Underside, opened by calming the Crater or Wood guardian: Gloom Hollow (Shadow), Mirror Lake (Water) and Echo Caves (Stone). Beyond them, opened by calming an Underside guardian: the Heights (Air) and the White Deep (Mushroom). Once all eight guardians are calm, the Heart of the Glade (Star) opens: the stump above the Root, with the final guardian, the Aching Root. Each guardian gives a verse of the Song of the Glade, and some encounters remember choices made in other zones. Pick your path leg by leg (battles, encounters, chests, rests) and face the zone's guardian (Great Lantern, Wakeful Forge, Hungry Hedge, Empty Throne, She Who Watches from Below, Grava, Great Weathervane, Mother Mycelium, the Aching Root). Every guardian also leaves one of its own cards.
 - **Unísona**: the Star story creature. Tila and Nim bring it to the Heart of the Glade, where it is always offered as a companion; after the Aching Root is calm it can join any expedition. It never comes from packs or drops: each Heart win gives another copy of one of its cards, and it fights with your best copy of each, so fusing them makes it stronger. Star cards work for every creature. Turn-based battles run in Auto or Manual mode at ×1/×2/×4 speed.
 - **Skill cards**: 57 cards from 19 creatures, plus guardian cards. Each card prints three effects (Active, Passive, Support) and only the one for its slot works. Slots unlock at levels 1, 4 and 8. Each creature can only use some card types (its own, a few related ones and its signature cards). Six grades (Common, Rare, Super rare, Epic, Mythic, Legendary) scale values, durations and cooldowns; 5 identical cards upgrade into 1 of the next grade, so each grade is worth 5 of the one below. Duplicates are grouped in the collection.
 - **Pixel art (`pixel.js`)**: everything is drawn with the original Glimmer-32 palette. Lumo, Fizz and Pebb are procedural pixel sprites (3 stages, faces for happy, sad, surprised and sleepy, a 2-frame idle and a faded look when poorly cared for), the home scene and eggs are drawn at 180 × 140 and scaled up sharply, and expedition battles are drawn at half resolution and snapped to the palette. The interface uses Pixelify Sans, square frames and segmented bars.
@@ -61,7 +61,7 @@ To host it on **GitHub Pages**: open the repo's *Settings → Pages*, choose *De
   - *Message in a bottle*: on about two days in three a bottle floats in the pond. Opening it gives a rumour from the lore and a small gift (10 Chispas, 12 Stardust, a cookie or a fizzpop).
   - *Foraging nook*: once a day per creature, for 2 steps, each circle searches its own way. Sol harvests a melon, Sky catches breezes (+12 Chispas and fun), Lake digs up 8 to 14 Stardust, Frost gathers leaves for a tea, and Star (Unísona) sings for Chispas and Stardust. The nook looks different for each circle.
   - *Portraits with feelings*: Tila's portrait smiles or worries with the conversation, and your creature's face shows its reaction next to every dialogue.
-- **Parchment map and key items** (`rpg.js`, second part of phase 5): the expedition screen opens on a parchment map of the valley. The Dayside is above the stream, the Underside below it, and El Vado sits on the ford. Locked places show "?", and gold stamps show your stars. Tapping a place walks your creature's token there along the path and opens it; the list of zones stays below. Two zones now need a key item from the story. Mirror Lake needs a raft, which the loggers give you the first time you calm the Deep Wood's guardian. The Heights need a rope, which the miners give you for the Echo Caves' guardian. Saves that already cleared those zones count as having them. The lock text says what's missing and where to get it.
+- **Parchment map and key items** (`rpg/ui-expedition.js`, second part of phase 5): the expedition screen opens on a parchment map of the valley. The Dayside is above the stream, the Underside below it, and El Vado sits on the ford. Locked places show "?", and gold stamps show your stars. Tapping a place walks your creature's token there along the path and opens it; the list of zones stays below. Two zones now need a key item from the story. Mirror Lake needs a raft, which the loggers give you the first time you calm the Deep Wood's guardian. The Heights need a rope, which the miners give you for the Echo Caves' guardian. Saves that already cleared those zones count as having them. The lock text says what's missing and where to get it.
 - **Lore threads**: when you own both writings of a pair, the Grimoire adds a line that ties them together.
 - **Spanish and English**: picked from the browser language, switchable in Settings.
 - **Sound effects** generated with Web Audio (no audio files), plus optional vibration on phones. Mute from the header.
@@ -131,3 +131,25 @@ Six more places in the Builds menu, each improved on its own:
 It needs the `playwright` package (`npm i --no-save playwright`), because the second half runs in a headless browser.
 
 All modules share one clock, `EV.every(ms, fn)`, which stops while the tab is hidden and catches up when it comes back.
+
+## Where the RPG code lives
+
+The old `rpg.js` is now split into `rpg/`. They are still plain scripts, loaded in this order by `index.html`, and they share their top-level names:
+
+| File | What it holds |
+|---|---|
+| `data-cards.js` | types, grades, statuses, skill cards and card scaling |
+| `data-mons.js` | creatures and level curves |
+| `data-zones.js` | expedition zones and the list of path events |
+| `engine.js` | battle units and the `Battle` engine (no DOM; `tools/check.js` runs it in Node) |
+| `text-es.js`, `text-en.js` | all RPG texts, one file per language (interface, zones, events, creature blurbs, card names) |
+| `ui-core.js` | text helpers, card text and card HTML, saved data |
+| `ui-style.js` | CSS for expeditions, battles and cards |
+| `ui-art.js` | extra sounds, achievements, drawing of the other creatures |
+| `ui-expedition.js` | expedition state, zones, key items, parchment map, views, card picker, teams |
+| `ui-battle.js` | battle presentation and drawing |
+| `ui-events.js` | path events, ending the trip, click wiring |
+| `ui-cards.js` | cards panel (collection, Grimoire, shop) |
+| `ui-hooks.js` | hooks into the main game and the `EV.RPG` export |
+
+To add a script, add its `<script src>` tag to `index.html` and its path to `CORE` in `sw.js`. `python3 tools/build-single.py out.html` inlines every script into one file.
