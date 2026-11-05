@@ -189,9 +189,15 @@ The game keeps three things in the browser: the creature, the profile (everythin
 
 ## Card filters
 
-The collection has a search box (name, type, owner, effects and lore, ignoring accents) and a sort menu (usable first, newest, rarity, type, name, copies) with a button to reverse it. **Filters** opens chips for type, rarity, effect (damage, several targets, healing, shield and defence, foe statuses, boosts, cleanse) and quick toggles (favourites, usable, in use, ready to upgrade). Chips of different groups combine. Open a card to mark it as a favourite: favourites show a star and always come first. Favourites and the sort order are saved; the filters reset on reload.
+The collection has a search box (name, type, owner, effects and lore, ignoring accents) and a sort menu (usable first, newest, rarity, type, name, copies) with a button to reverse it. **Filters** opens chips for type, rarity, effect (damage, several targets, healing, shield and defence, foe statuses, boosts, cleanse) and quick toggles (favourites, usable, in use, ready to upgrade). Chips of different groups combine. Open a card to mark it as a favourite: favourites show a star and always come first. Favourites and the sort order are saved; the filters reset on reload. The same search, sort and filters appear in the card picker used everywhere cards are chosen (your creature's slots, Teams, the companions' cards and the screen before an expedition), with their own filter state and only the types that picker offers.
 
 ## Zone levels when you come back stronger
 
 Above a zone's level, its foes only grow by a share of your extra levels: in the first zone 50 % for one extra level, 33 % for two, 25 % for three, and so on, never below 10 %. Later zones keep a bigger share (`zoneShare` in `rpg/ui-expedition.js`). The zone list shows the guardian's current level. Savia Mode and the Guardian's Echo still grow with you in full.
+
+## Caretaker's Guide and progress bars
+
+`guide.js` adds the Caretaker's Guide (design rule 6). The first time you open each system (the Glade, cards, teams, tasks, Refuge, season, builds, shop, achievements, memories, expeditions) a short note explains it, with **Got it** and **Open the guide**. The **Guide** button in the menu keeps every note and a glossary of all six currencies (✦ Chispas, ♪ Song Notes, ∴ Stardust, 🪵 Wood, 👣 Steps, 🕯 Wax): how you earn each one and what it is for. "Show the notes again" resets them. Seen notes live in `P.guide`. To add a note for a new system, add `TIPS[lang][panelName]`.
+
+Progress toward upgrades (design rule 7) is shown as bars: a build's next level shows how much of its Chispas and Wood you have, a card shows its copies toward the next rarity (for example 3 / 5), and the creature's age shows how close it is to growing up. These join the bars that were already there (creature and companion levels, Bond, eggs, tasks, season pass).
 

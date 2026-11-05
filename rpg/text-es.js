@@ -43,7 +43,7 @@ const RPG_ES = {
     "cards.desc": "Cada carta trae tres efectos; solo funciona el del hueco donde la pongas. Si el tipo de la carta coincide con el de tu criatura, resuena (+15 %).",
     "cards.noCreature": "Ten una criatura joven para usar cartas.", "cards.stats": "Vida {hp} · Fuerza {str} · Defensa {def} · Velocidad {spd} · Crítico {cr} %",
     "sh.title": "Ficha de combate", "sh.lvl": "Nivel {n}", "sh.sub": "Nivel {n}. Los cuidados de hoy suman hasta un 25 % a cada valor.", "sh.hp": "Vida", "sh.str": "Fuerza", "sh.def": "Defensa", "sh.spd": "Velocidad", "sh.cr": "Crítico", "sh.dodge": "Esquiva", "sh.by": "por {c}", "sh.need": "Aparece cuando tu criatura sea joven.",
-    "cards.unequip": "Quitar", "cards.inUse": "En uso",
+    "cards.toNext": "{a} → {g}: {n} / {m} copias", "cards.unequip": "Quitar", "cards.inUse": "En uso",
     "cf.search": "Buscar cartas (nombre, tipo, efecto…)", "cf.sort": "Ordenar", "cf.sort.use": "Útiles primero", "cf.sort.new": "Más recientes", "cf.sort.rar": "Rareza", "cf.sort.type": "Tipo", "cf.sort.name": "Nombre", "cf.sort.copies": "Copias",
     "cf.dir.down": "Orden normal (toca para invertir)", "cf.dir.up": "Orden invertido (toca para volver)", "cf.filters": "Filtros", "cf.quick": "Rápidos", "cf.type": "Tipo", "cf.grade": "Rareza", "cf.fx": "Efecto",
     "cf.only.fav": "Favoritas", "cf.only.usable": "Puede usarlas", "cf.only.inUse": "En uso", "cf.only.fuse": "Listas para mejorar",

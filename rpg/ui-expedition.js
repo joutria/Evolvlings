@@ -504,13 +504,18 @@ function openPick(who, slot) {
     el = document.createElement("div"); el.id = "cpick"; el.className = "cpick-wrap"; document.body.appendChild(el);
     el.addEventListener("click", onPickClick);
   }
-  const nm = who === "own" ? EV.S.name : monName(who);
+  const nm = who === "own" ? EV.S.name : monName(who), rows = pickRows(who, slot);
   el.innerHTML = `<div class="cpick-back" data-cp="close"></div><div class="cpick" role="dialog" aria-modal="true"><div class="cp-head"><div><span class="sub">${esc(nm)}</span><h3>${esc(tx("load.pickTitle", { s: tx("slot." + slot) }))}</h3></div><button class="sheet-x" type="button" data-cp="close" aria-label="${esc(tx("load.close"))}">✕</button></div>` +
-    `<div class="cp-list">${pickRows(who, slot).map((r) => `<button type="button" class="lrow pickrow${r.on ? " on" : ""}" data-cpu="${r.uid}">${r.empty ? `<div class="lr-empty">∅</div><div class="lr-txt"><span class="lr-slot">${esc(tx("slot." + slot))}</span><strong>${esc(tx("cards.empty"))}</strong><span class="lr-fx">${esc(tx("load.emptyFx"))}</span></div>` : cardRowInner(r.id, r.g, slot, r.on ? tx("load.equipped") : r.tag)}</button>`).join("")}</div></div>`;
+    `${rows.length > 4 ? cfFilterHtml("pick", TYPE_ORDER.filter((t) => rows.some((r) => r.uid && CARDS[r.id].type === t))) : ""}<div class="cp-list">${rows.map((r) => `<button type="button" class="lrow pickrow${r.on ? " on" : ""}" data-cpu="${r.uid}"${r.uid ? ` data-cpk="${r.uid}"` : ""}>${r.empty ? `<div class="lr-empty">∅</div><div class="lr-txt"><span class="lr-slot">${esc(tx("slot." + slot))}</span><strong>${esc(tx("cards.empty"))}</strong><span class="lr-fx">${esc(tx("load.emptyFx"))}</span></div>` : cardRowInner(r.id, r.g, slot, r.on ? tx("load.equipped") : r.tag)}</button>`).join("")}</div></div>`;
   el.hidden = false;
+  const cards = rows.filter((r) => r.uid), eqSet = new Set(["a", "p", "s"].map((k) => (who === "own" ? (rpgState() || { eq: {} }).eq[k] : (compCard(who, k) || {}).uid)).filter(Boolean));
+  for (const u of compUids()) eqSet.add(u);
+  CFX.pick = { keys: cards.map((r) => r.uid), id: (k) => (cardByUid(k) || {}).id, cards: (k) => [cardByUid(k)], copies: (k) => EV.P.cards.filter((c) => c.id === (cardByUid(k) || {}).id), eqSet, box: el.querySelector(".cp-list"), attr: "data-cpk" };
+  applyCF("pick");
 }
 function closePick() { CPICK = null; const el = $("cpick"); if (el) el.hidden = true; }
 function onPickClick(e) {
+  const f = e.target.closest("button"); if (f && CPICK && cfClick(f, () => openPick(CPICK.who, CPICK.slot))) return;
   const t = e.target.closest("[data-cp],[data-cpu]"); if (!t || !CPICK) return;
   if (t.dataset.cp === "close") { EV.sfx("tap"); closePick(); return; }
   const { who, slot } = CPICK; closePick();
