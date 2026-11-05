@@ -187,3 +187,11 @@ The game keeps three things in the browser: the creature, the profile (everythin
 - **Versions.** The creature and the profile each carry a version (`SAVE_V`, `PROFILE_V` in `index.html`). To change their shape, raise the version and add `MIGRATE.save[old]` or `MIGRATE.profile[old]`, a function that updates an old save; saves and backups from any older version are brought up to date when they load. A save from a newer version of the game is played but never written over, so an old cached copy of the game can't damage it.
 - **Module parts.** Each module keeps its part of the profile (`P.d`, `P.eg`, `P.bd`, `P.well`, `P.cosm`, `P.team`) through `EV.slice(key, fresh)`. The first time, the part is made from `fresh()`; later, any field that a newer version added to `fresh()` is filled in for older saves.
 
+## Card filters
+
+The collection has a search box (name, type, owner, effects and lore, ignoring accents) and a sort menu (usable first, newest, rarity, type, name, copies) with a button to reverse it. **Filters** opens chips for type, rarity, effect (damage, several targets, healing, shield and defence, foe statuses, boosts, cleanse) and quick toggles (favourites, usable, in use, ready to upgrade). Chips of different groups combine. Open a card to mark it as a favourite: favourites show a star and always come first. Favourites and the sort order are saved; the filters reset on reload.
+
+## Zone levels when you come back stronger
+
+Above a zone's level, its foes only grow by a share of your extra levels: in the first zone 50 % for one extra level, 33 % for two, 25 % for three, and so on, never below 10 %. Later zones keep a bigger share (`zoneShare` in `rpg/ui-expedition.js`). The zone list shows the guardian's current level. Savia Mode and the Guardian's Echo still grow with you in full.
+

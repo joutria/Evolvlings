@@ -151,7 +151,7 @@ function saviaHtml() {
   let h = "";
   const sav = Object.keys(ZONES).filter((id) => (st[id] || 0) >= 3);
   h += `<h3 class="cat-title">${esc(tx("sav.title"))}</h3><p class="muted" style="margin:0">${esc(tx(sav.length ? "sav.sub" : "sav.hint"))}</p>`;
-  if (sav.length) h += `<div class="nodes zones">${sav.map((id) => `<button type="button" class="node zone savia" data-zone="${id}" data-savia="1"><span class="ic" aria-hidden="true">${tyIcon(ZONES[id].type)}</span><strong>${esc(zt("name", null, id))}</strong><small>${esc(tx("zones.lvl", { n: ZONES[id].min + 2 }))}</small><small class="ok">${starStr(sS[id] || 0)}</small></button>`).join("")}</div>`;
+  if (sav.length) h += `<div class="nodes zones">${sav.map((id) => `<button type="button" class="node zone savia" data-zone="${id}" data-savia="1"><span class="ic" aria-hidden="true">${tyIcon(ZONES[id].type)}</span><strong>${esc(zt("name", null, id))}</strong><small>${esc(tx("zones.lvlS", { n: ZONES[id].min + 2 }))}</small><small class="ok">${starStr(sS[id] || 0)}</small></button>`).join("")}</div>`;
   return h;
 }
 /* ---------- The parchment map of the valley ---------- */
@@ -241,7 +241,7 @@ function zonesHtml() {
     const done = cl[id] || 0;
     return `<button type="button" class="node zone" data-zone="${id}" ${open ? "" : "disabled"}><span class="ic" aria-hidden="true">${tyIcon(z.type)}</span>
       <strong>${esc(zt("name", null, id))}</strong><small>${esc(zt("sub", null, id))}</small>
-      <small>${open ? esc(tx("zones.lvl", { n: z.min })) : "🔒 " + esc(keyLock(id) || tx(z.unlockAll ? "zones.lockHeart" : Array.isArray(z.unlock) ? (z.unlock.includes("hollow") ? "zones.lockHigh" : "zones.lockEnv") : "zones.lock"))}</small>
+      <small>${open ? esc(tx("zones.lvl", { n: z.min, m: zoneLvl(z, (rpgState() || { lvl: 1 }).lvl) })) : "🔒 " + esc(keyLock(id) || tx(z.unlockAll ? "zones.lockHeart" : Array.isArray(z.unlock) ? (z.unlock.includes("hollow") ? "zones.lockHigh" : "zones.lockEnv") : "zones.lock"))}</small>
       ${done ? `<small class="ok">✓ ${esc(tx("zones.done", { n: done }))} · ${starStr((EV.P.stars || {})[id] || 0)}<br>${esc(tx("zones.verse", { v: zt("verse", null, id) }))}</small>` : ""}</button>`;
   }).join("")}</div>`;
 }
@@ -290,11 +290,17 @@ function partyUnits() {
     return makeUnit({ kind: m.kind, lvl: m.lvl, side: "ally", name: monName(m.kind), wild: true, cards, hpPct: m.hp, stage: 1, form: "bright", bond: m.bond || 0, star: m.star || 0 });
   });
 }
+// Above a zone's level its foes only grow by a share of your extra levels (Jose's rule): in the first zone 50 % for one
+// level more, 33 % for two, 25 % for three... never below 10 %; later zones keep a bigger share (rank = the zone's level).
+// So an early zone can be replayed with a stronger team for 3 stars. Savia Mode and the Guardian's Echo still grow
+// with you in full, since they are the hard versions.
+function zoneShare(z, extra) { const r = z.min - 1; return Math.min(1, Math.max(0.1 + 0.05 * r, (1 + 0.25 * r) / (extra + 1))); }
+function zoneLvl(z, lvl) { const extra = Math.max(0, lvl - z.min); return z.min + Math.round(extra * zoneShare(z, extra)); }
 function foeUnits(boss) {
   const z = ZONES[X.zone], R = rpgState();
   if (X.deep) return deepFoes(boss);
   if (boss) {
-    const lvl = Math.max(z.min, R.lvl);
+    const lvl = X.savia || X.echo ? Math.max(z.min, R.lvl) : zoneLvl(z, R.lvl);
     const m = MONS[z.boss];
     const cards = { a: scaled(m.cards[0], 0), p: scaled(m.cards[1], 0), s: scaled(m.cards[2], 0) };
     const u = makeUnit({ kind: z.boss, lvl: lvl + (X.savia ? 2 : X.echo ? 1 : 0), side: "foe", name: monName(z.boss), boss: true, cards, stage: 1 });
@@ -308,7 +314,7 @@ function foeUnits(boss) {
     return [u];
   }
   const count = X.section <= 1 ? 2 : rnd() < 0.5 ? 3 : 2;
-  const lvl = Math.max(z.min, Math.round(R.lvl * 0.8 + (X.section - 1) * 0.25));
+  const lvl = Math.max(z.min, Math.round((X.savia ? R.lvl : zoneLvl(z, R.lvl)) * 0.8 + (X.section - 1) * 0.25));
   return pickN(z.foes.concat(z.foes), count).map((k) => {
     const cs = MONS[k].cards;
     const cards = { a: scaled(cs[Math.floor(rnd() * 2)], 0) };
