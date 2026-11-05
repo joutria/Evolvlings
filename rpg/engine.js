@@ -13,11 +13,15 @@ function makeUnit(o) {
   const stageF = o.stage === 2 ? (o.form === "bright" ? 1.15 : 1.1) : 1;
   const hollowF = o.hollow ? 0.8 : 1;
   const bondF = (1 + 0.015 * (o.bond || 0)) * (1 + 0.04 * (o.star || 0)); // Refuge companions: +1.5 % per Bond level, +4 % per star
+  // the Song's Fork talents (data-talents.js): each adds a few % to a stat, or points of crit / dodge
+  const tal = { hp: 0, str: 0, def: 0, spd: 0, crit: 0, dodge: 0 };
+  for (const t of o.tal || []) for (const k in tal) tal[k] += t[k] || 0;
+  const talF = (k) => 1 + tal[k] / 100;
   const base = {
-    hp: m.st.hp * 3 * sc * careF("health") * stageF * hollowF * bondF,
-    str: m.st.str * sc * careF("full") * stageF * hollowF * bondF,
-    def: m.st.def * sc * careF("clean") * stageF * hollowF * bondF,
-    spd: m.st.spd * sc * careF("energy") * stageF * bondF,
+    hp: m.st.hp * 3 * sc * careF("health") * stageF * hollowF * bondF * talF("hp"),
+    str: m.st.str * sc * careF("full") * stageF * hollowF * bondF * talF("str"),
+    def: m.st.def * sc * careF("clean") * stageF * hollowF * bondF * talF("def"),
+    spd: m.st.spd * sc * careF("energy") * stageF * bondF * talF("spd"),
     cr: m.st.cr * careF("fun"),
   };
   const types = m.types.slice();
@@ -28,8 +32,8 @@ function makeUnit(o) {
     uid: Math.random().toString(36).slice(2, 9), kind: o.kind, name: o.name, side: o.side, own: !!o.own, wild: !!o.wild, hollow: !!o.hollow, boss: !!o.boss,
     lvl: o.lvl, types, stage: o.stage == null ? 1 : o.stage, form: o.form || "bright",
     base, maxHp, hp: Math.max(1, Math.round(maxHp * (o.hpPct == null ? 1 : o.hpPct))),
-    crit: Math.min(40, base.cr / 4) + (o.bond || 0) + ((o.star || 0) >= 2 ? 5 : 0) + (pm.crit || 0) + (o.lowFun && pm.lowFun ? pm.lowFun : 0),
-    dodge: Math.max(0, base.spd / 20 + (pm.dodge || 0) + ((o.star || 0) >= 4 ? 6 : 0)),
+    crit: Math.min(40, base.cr / 4) + (o.bond || 0) + ((o.star || 0) >= 2 ? 5 : 0) + (pm.crit || 0) + (o.lowFun && pm.lowFun ? pm.lowFun : 0) + tal.crit,
+    dodge: Math.max(0, base.spd / 20 + (pm.dodge || 0) + ((o.star || 0) >= 4 ? 6 : 0) + tal.dodge),
     mods: pm, cards: o.cards || {}, cd: 0, st: {}, shield: 0, shieldT: 0, hitOnce: false, skip: 0, sUsed: false, sCount: 0, hitsTaken: 0,
   };
   if (u.cards.a) u.cd = Math.ceil(u.cards.a.a.cd / 2);

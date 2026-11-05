@@ -15,7 +15,7 @@ const L = () => EV.LANG;
 
 const TX = {
   es: {
-    nav: "Mapa", title: "El Claro y el Vado", steps: "{n} pasos", stepsT: "Pasos de hoy: {n}. Se recargan 10 a medianoche (máximo 20 guardados). El té, el guiso y la recarga de energía dan pasos extra, hasta 12 al día.",
+    nav: "Mapa", title: "El Claro y el Vado", steps: "{n} pasos", stepsT: "Pasos de hoy: {n}. Pasear es gratis; los pasos solo se gastan en el Rincón de búsqueda. Se recargan 10 a medianoche (máximo 20 guardados), y el té, el guiso y la recarga de energía dan más, hasta 12 al día.",
     where: "¿Adónde vas?", walking: "{name} va de camino…", free: "gratis", cost1: "1 paso", costN: "{n} pasos", noSteps: "A {name} no le quedan pasos hoy. Un té o una recarga de energía dan más.", noStepsShort: "Sin pasos",
     needAlive: "Primero necesitas una criatura que pueda caminar.", asleep: "{name} está dormida. Despiértala para salir.",
     gotSteps: "+{n} pasos para {name}", stepsCap: "Hoy ya no se pueden comprar más pasos.",
@@ -34,7 +34,7 @@ const TX = {
     "tila.a1": "Pues mira, lo último que he oído:", "tila.a1none": "Nada nuevo. El Vado está tan quieto que hasta el arroyo bosteza.",
     "tila.a2lit": "¡Encendida entera! Desde la Noche de Faroles los vecinos se paran a mirarla. Gracias por ayudarme.", "tila.a2dark": "Media calle a oscuras todavía. Cuando llegue la Noche de Faroles, ¿me echas una mano?",
     "tila.a3": "¿Esto? El aceite de Albor mancha que da gusto. En mi barrio decimos que si no te manchas, no has encendido nada.",
-    trailName: "Sendero", trailAsk: "El sendero sale del Vado hacia las zonas del valle. Cuesta 3 pasos y la energía de siempre.", go: "Salir ({n} pasos)", stay: "Ahora no",
+    trailName: "Sendero", trailAsk: "El sendero sale del Vado hacia las zonas del valle. Salir no cuesta pasos, solo la energía de siempre.", go: "Salir", stay: "Ahora no",
     bedName: "Antes de dormir", "bed.sum": "Así ha ido el día de {name}:", "bed.none": "Ha sido un día tranquilo, sin mucho que contar.", "bed.board": "En el tablón hay algo nuevo esperando.",
     "bed.steps": "Le quedan {n} pasos y mañana se recargan {d}.", "bed.sleep": "Dormir", "bed.later": "Todavía no",
     "p.bottle": "Botella", "p.bottle.d": "Algo flota en la charca", "p.patch": "Rincón de búsqueda", "p.patch.d": "Buscar a su manera",
@@ -47,7 +47,7 @@ const TX = {
     "s.fed": "Comidas", "s.cuddles": "Mimos", "s.plays": "Partidas", "s.messes": "Manchas limpias", "s.expDone": "Expediciones", "s.dailyDone": "Tareas",
   },
   en: {
-    nav: "Map", title: "The Glade and El Vado", steps: "{n} steps", stepsT: "Steps today: {n}. 10 come back at midnight (up to 20 saved). Tea, stew and the energy recharge give extra steps, up to 12 a day.",
+    nav: "Map", title: "The Glade and El Vado", steps: "{n} steps", stepsT: "Steps today: {n}. Walking around is free; steps are only spent at the foraging nook. 10 come back at midnight (up to 20 saved), and tea, stew and the energy recharge give more, up to 12 a day.",
     where: "Where to?", walking: "{name} is on the way…", free: "free", cost1: "1 step", costN: "{n} steps", noSteps: "{name} has no steps left today. A tea or an energy recharge gives more.", noStepsShort: "No steps",
     needAlive: "First you need a creature that can walk.", asleep: "{name} is asleep. Wake it up to go out.",
     gotSteps: "+{n} steps for {name}", stepsCap: "No more steps can be bought today.",
@@ -66,7 +66,7 @@ const TX = {
     "tila.a1": "Well, the latest I've heard:", "tila.a1none": "Nothing new. El Vado is so still even the stream is yawning.",
     "tila.a2lit": "Fully lit! Since the Night of Lanterns the neighbours stop to look at it. Thanks for helping me.", "tila.a2dark": "Half the street is still dark. When the Night of Lanterns comes, will you give me a hand?",
     "tila.a3": "These? Albor oil stains like nothing else. In my quarter we say if you don't get stained, you haven't lit anything.",
-    trailName: "Trail", trailAsk: "The trail leaves El Vado for the valley's zones. It costs 3 steps and the usual energy.", go: "Set out ({n} steps)", stay: "Not now",
+    trailName: "Trail", trailAsk: "The trail leaves El Vado for the valley's zones. Setting out costs no steps, only the usual energy.", go: "Set out", stay: "Not now",
     bedName: "Before bed", "bed.sum": "Here's how {name}'s day went:", "bed.none": "It was a quiet day, not much to tell.", "bed.board": "Something new is waiting on the notice board.",
     "bed.steps": "It has {n} steps left, and {d} come back tomorrow.", "bed.sleep": "Sleep", "bed.later": "Not yet",
     "p.bottle": "Bottle", "p.bottle.d": "Something is floating in the pond", "p.patch": "Foraging nook", "p.patch.d": "Search in its own way",
@@ -82,7 +82,9 @@ const TX = {
 const tx = (k, v) => { let s = (TX[L()] || TX.en)[k]; if (s == null) s = TX.en[k]; if (s == null) return k; if (v) s = s.replace(/\{(\w+)\}/g, (m, n) => (v[n] != null ? v[n] : m)); return s; };
 
 /* ---------- Steps ("pasos"), per creature ---------- */
-const STEPS = { daily: 10, keep: 20, buyMax: 12, move: 1, trail: 3 };
+// walking between maps and setting out are free (design rule 5: no steps gate on just playing or moving);
+// steps only pay for rewarded actions, like the foraging nook
+const STEPS = { daily: 10, keep: 20, buyMax: 12, move: 0, trail: 0 };
 const today = () => { const d = new Date(); return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate(); };
 const creatureKey = () => { const S = EV.S; return S ? S.species + ":" + (S.born || 0) : null; };
 function steps() {

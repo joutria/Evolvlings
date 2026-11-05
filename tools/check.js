@@ -12,7 +12,7 @@ const err = (m) => errors.push(m), warn = (m) => warns.push(m);
 /* ---------- 1. battle engine in Node ---------- */
 const vm = require("vm");
 // the rpg/ files are classic scripts that share top-level names, so run them one after another in one context
-const ENGINE = ["data-cards", "data-mons", "data-zones", "engine"];
+const ENGINE = ["data-cards", "data-mons", "data-talents", "data-zones", "engine"];
 const ctx = vm.createContext({ console, Math, Date });
 for (const f of ENGINE) vm.runInContext(fs.readFileSync(path.join(ROOT, "rpg", f + ".js"), "utf8"), ctx, { filename: "rpg/" + f + ".js" });
 const R = vm.runInContext("api", ctx);

@@ -87,6 +87,6 @@ function pickUsable(n, minGrade) {
   return ids.map((id) => ({ id, g: Math.max(minGrade, rollGrade(minGrade)) }));
 }
 function takeCard(id, g) { rpgState(); const c = giveCard(id, g); EV.save(); return c; }
-EV.RPG = Object.defineProperties(Object.assign(api, { renderCards, startExpedition, finish, cardHtml, cardName, pickUsable, takeCard, starStr, paintMon, monName, typeChip, rpgState, MON_DESC, deepState, deepTotal, deepZone, deepOpen, deepNo, deepRule, deepWin, DEEP_CHESTS }), { X: { get: () => X }, battle: { get: () => battle },
+EV.RPG = Object.defineProperties(Object.assign(api, { talentsHtml, talentPending, openTalentPick, renderCards, startExpedition, finish, cardHtml, cardName, pickUsable, takeCard, starStr, paintMon, monName, typeChip, rpgState, MON_DESC, deepState, deepTotal, deepZone, deepOpen, deepNo, deepRule, deepWin, DEEP_CHESTS }), { X: { get: () => X }, battle: { get: () => battle },
   // read-only view of the data tables for tools/check.js
   DATA: { get: () => ({ DECOR, CT, EVT, EVT_ALT, EVENT_FX, ZT, PMAP, TX, CIRCLE, ZONES, MONS, CARDS, EVENTS, TYPES, DROP_POOL }) } });

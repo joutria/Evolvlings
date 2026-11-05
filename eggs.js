@@ -421,7 +421,7 @@ function refugeHtml() {
       <small class="progress">${esc(tx("lvl", { n: r.lvl }))}</small><div class="bar"><i style="width:${xpPct}%"></i></div>
       <small class="progress rf-bond">♥ ${esc(b >= 10 ? tx("bondMax") : tx("bond", { n: b }))}</small><div class="bar bond"><i style="width:${pct}%"></i></div>
       <small class="muted">${esc(tx("bond." + band, { n: monName(k) }))}</small>
-      ${frags}<button class="btn${r.pet === today() ? " ghost" : ""}" type="button" data-rpet="${k}" ${r.pet === today() ? "disabled" : ""}>${esc(r.pet === today() ? tx("petDone") : tx("pet"))}</button></div>`;
+      ${RPG.talentsHtml ? RPG.talentsHtml(k, true) : ""}${frags}<button class="btn${r.pet === today() ? " ghost" : ""}" type="button" data-rpet="${k}" ${r.pet === today() ? "disabled" : ""}>${esc(r.pet === today() ? tx("petDone") : tx("pet"))}</button></div>`;
   }).join("")}</div><p class="muted rf-small">${esc(tx("bondWhy"))}</p><p class="muted rf-small">${esc(tx("starWhy"))}</p>`;
   return h;
 }

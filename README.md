@@ -166,6 +166,8 @@ Jose approved eight rules to keep in every feature. These are the first three:
 - **Care only adds.** In battle each care value now gives 0 % to +25 % to its stat (it used to be −25 % to +25 %).
 - **Backups.** Settings → Backup saves the whole game (creature, profile and journal) as a `.json` file and loads it back. A gentle reminder appears once a week for games with some progress.
 
+- **Walking and setting out are free** (rule 5). Going between the Glade and El Vado and leaving on an expedition no longer cost 👣 Steps; steps are only spent on rewarded actions (the foraging nook). Expeditions still use the usual energy.
+
 To add a path event: write its texts in `EVT` in both `rpg/text-*.js` files, its effects in `rpg/data-events.js` (one object per choice) and its id in a zone's `events`. `node tools/check.js` fails if any of the three is missing, if the choice counts differ, or if an effect has an unknown key.
 
 ## Adding content
@@ -201,3 +203,7 @@ Above a zone's level, its foes only grow by a share of your extra levels: in the
 
 Progress toward upgrades (design rule 7) is shown as bars: a build's next level shows how much of its Chispas and Wood you have, a card shows its copies toward the next rarity (for example 3 / 5), and the creature's age shows how close it is to growing up. These join the bars that were already there (creature and companion levels, Bond, eggs, tasks, season pass).
 
+
+## Song's Fork: talents every 3 levels
+
+`rpg/data-talents.js` and `rpg/ui-talents.js` add the Song's Fork (the first MiniTroopers idea Jose approved). At levels 3, 6, 9, 12… a creature offers two talents from its own types, always one offensive and one defensive (tier k uses `types[(k - 1) % types.length]`). Each talent adds a few % to strength, life, defence or speed, or points of crit or dodge; `makeUnit` adds them up. Your creature's talents show on its sheet in the Cards panel and each companion's on its Refuge card, with a bar toward the next one. No choice is final: changing a creature's talents costs 10 ∴ Stardust per pick and opens the choice again. Picks are stored as a string of `o`/`d` letters, in `S.rpg.tal` for your creature and `roster[kind].tal` for companions. To add a type's talents, add `TALENTS[type] = { o: {...}, d: {...} }`.
