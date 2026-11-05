@@ -518,9 +518,10 @@ function refreshLoadViews() {
 }
 /* ---------- Teams: your creature and two Refuge companions, with up to 5 saved sets ---------- */
 const SETS_N = 5;
+const teamSlice = EV.slice("team", () => ({ comp: [], sets: [] }));
 function teamState() {
   const P = EV.P;
-  if (!P.team) P.team = { comp: [], sets: [] };
+  teamSlice();
   const ro = (P.eg && P.eg.roster) || {};
   P.team.comp = (P.team.comp || []).filter((k) => ro[k]).slice(0, 2);
   while (P.team.sets.length < SETS_N) P.team.sets.push(null);

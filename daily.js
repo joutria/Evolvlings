@@ -126,11 +126,11 @@ function rollWeekly() {
   while (out.length < 6 && ids.length) out.push(ids.splice(Math.floor(Math.random() * ids.length), 1)[0]);
   return out.map(newTask);
 }
+const dSlice = EV.slice("d", () => ({ sets: [], cal: { n: 0, last: null }, pantry: { day: null, free: 0, pity: 0 }, ex: { week: null, n: 0 }, chests: {}, week: null, reroll: null, back: 0, lastDay: null, pick: null }));
 function D() {
-  const P = EV.P;
-  if (!P.d) P.d = { sets: [], cal: { n: 0, last: null }, pantry: { day: null, free: 0, pity: 0 }, ex: { week: null, n: 0 }, chests: {}, week: null, reroll: null, back: 0, lastDay: null, pick: null };
+  const P = EV.P, d = dSlice();
   if (P.notes == null) P.notes = 0;
-  return P.d;
+  return d;
 }
 // move to the current day/week: keep up to 2 unfinished days, renew the free pull, welcome back after 14 days away
 function tick() {
