@@ -13,7 +13,7 @@ function cardTabs() {
 function grimHtml() {
   const P = EV.P, all = Object.keys(CARDS), seen = all.filter((id) => (P.grim || {})[id]).length;
   let h = `<p class="muted" style="margin:0">${esc(tx("grim.desc"))}</p><p class="progress">${esc(tx("grim.count", { n: seen, m: all.length }))} · ${esc(tx("dust.have", { n: P.dust || 0 }))}</p>`;
-  const circles = [["sol", ["fire", "plant", "light"]], ["sky", ["bolt", "air", "music"]], ["lake", ["water", "stone", "shadow"]], ["frost", ["ice", "mush", "dream"]], ["star", ["star"]]];
+  const circles = CIRCLES.map((c) => [c, circleTypes(c)]).concat([["star", ["star"]]]);
   for (const [ck, types] of circles) {
     const ids = grimIds(types); if (!ids.length) continue;
     const got = ids.filter((id) => P.grim[id]).length;

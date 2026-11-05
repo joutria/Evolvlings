@@ -6,26 +6,32 @@
 /* ====================================================================== */
 /* Types of the Glade: 12 in 4 circles of 3, plus Star (cards only)       */
 /* ====================================================================== */
+/* The one table for types: icon, circle (in order: each type beats the next one in its circle), day or night,
+   card colour (col), opposite type (opp) and names. Everything else (BEATS, OPPOSITE, CIRCLE, TCOL, the Grimoire
+   order) is derived from it, so a new type only needs a row here. */
 const TYPES = {
-  fire:   { icon: "🔥", circle: "sol",  day: true,  es: "Fuego",  en: "Fire" },
-  plant:  { icon: "🌿", circle: "sol",  day: true,  es: "Planta", en: "Plant" },
-  light:  { icon: "☀️", circle: "sol",  day: true,  es: "Luz",    en: "Light" },
-  bolt:   { icon: "⚡", circle: "sky",  day: true,  es: "Rayo",   en: "Bolt" },
-  air:    { icon: "🌬️", circle: "sky",  day: true,  es: "Aire",   en: "Air" },
-  music:  { icon: "🎵", circle: "sky",  day: true,  es: "Música", en: "Music" },
-  water:  { icon: "💧", circle: "lake", day: false, es: "Agua",   en: "Water" },
-  stone:  { icon: "🪨", circle: "lake", day: false, es: "Piedra", en: "Stone" },
-  shadow: { icon: "🌙", circle: "lake", day: false, es: "Sombra", en: "Shadow" },
-  ice:    { icon: "❄️", circle: "frost", day: false, es: "Hielo", en: "Ice" },
-  mush:   { icon: "🍄", circle: "frost", day: false, es: "Seta",  en: "Mushroom" },
-  dream:  { icon: "💤", circle: "frost", day: false, es: "Sueño", en: "Dream" },
-  star:   { icon: "✦",  circle: null,   day: null,  es: "Estrella", en: "Star" },
+  fire:   { icon: "🔥", circle: "sol",   day: true,  col: "#d9542c", opp: "water",  es: "Fuego",  en: "Fire" },
+  plant:  { icon: "🌿", circle: "sol",   day: true,  col: "#4f9a3c", opp: "mush",   es: "Planta", en: "Plant" },
+  light:  { icon: "☀️", circle: "sol",   day: true,  col: "#e2ae2e", opp: "shadow", es: "Luz",    en: "Light" },
+  bolt:   { icon: "⚡", circle: "sky",   day: true,  col: "#d8b81c", opp: "ice",    es: "Rayo",   en: "Bolt" },
+  air:    { icon: "🌬️", circle: "sky",   day: true,  col: "#6fb8d0", opp: "stone",  es: "Aire",   en: "Air" },
+  music:  { icon: "🎵", circle: "sky",   day: true,  col: "#cf5f9f", opp: "dream",  es: "Música", en: "Music" },
+  water:  { icon: "💧", circle: "lake",  day: false, col: "#3f7fc9", opp: "fire",   es: "Agua",   en: "Water" },
+  stone:  { icon: "🪨", circle: "lake",  day: false, col: "#8a7a64", opp: "air",    es: "Piedra", en: "Stone" },
+  shadow: { icon: "🌙", circle: "lake",  day: false, col: "#5b4b8e", opp: "light",  es: "Sombra", en: "Shadow" },
+  ice:    { icon: "❄️", circle: "frost", day: false, col: "#8fcbe0", opp: "bolt",   es: "Hielo",  en: "Ice" },
+  mush:   { icon: "🍄", circle: "frost", day: false, col: "#b0603c", opp: "plant",  es: "Seta",   en: "Mushroom" },
+  dream:  { icon: "💤", circle: "frost", day: false, col: "#8a78d4", opp: "music",  es: "Sueño",  en: "Dream" },
+  star:   { icon: "✦",  circle: null,    day: null,  col: "#e0b84a", opp: null,     es: "Estrella", en: "Star" },
 };
+const TYPE_ORDER = Object.keys(TYPES);
+const CIRCLES = [...new Set(TYPE_ORDER.map((t) => TYPES[t].circle).filter(Boolean))]; // sol, sky, lake, frost
+const circleTypes = (c) => TYPE_ORDER.filter((t) => TYPES[t].circle === c);
 // each type beats the next one in its circle
-const BEATS = { fire: "plant", plant: "light", light: "fire", bolt: "air", air: "music", music: "bolt",
-  water: "stone", stone: "shadow", shadow: "water", ice: "mush", mush: "dream", dream: "ice" };
-const OPPOSITE = { light: "shadow", shadow: "light", fire: "water", water: "fire", plant: "mush", mush: "plant",
-  air: "stone", stone: "air", bolt: "ice", ice: "bolt", music: "dream", dream: "music" };
+const BEATS = {};
+for (const c of CIRCLES) { const ts = circleTypes(c); ts.forEach((t, i) => { BEATS[t] = ts[(i + 1) % ts.length]; }); }
+const OPPOSITE = {};
+for (const t of TYPE_ORDER) if (TYPES[t].opp) OPPOSITE[t] = TYPES[t].opp;
 
 function typeMult(atk, def) {
   if (!TYPES[atk] || atk === "star" || def === "star") return 1;

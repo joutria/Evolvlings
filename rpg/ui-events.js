@@ -69,20 +69,17 @@ function escritosHtml() {
   }).join("")}</div>${hilosHtml(have)}`;
 }
 const EVT = { es: RPG_ES.EVT, en: RPG_EN.EVT };
-const vineTx = { es: ["Las enredaderas se revuelven y despiertan a las criaturas del bosque…", "Pasáis sin que os toquen. Ganas experiencia.", "Las enredaderas os arañan al pasar. El equipo pierde algo de vida."], en: ["The vines thrash and wake the wood's creatures…", "You get through untouched. You gain experience.", "The vines scratch you as you pass. The team loses some health."] };
-const fogTx = { es: ["Corres a ciegas y sales al otro lado. En el suelo hay algo que se les cayó.", "La niebla se cierra a tu alrededor y salen criaturas apagadas…"], en: ["You run blind and come out the other side. On the ground there's something they dropped.", "The fog closes in around you and dimmed creatures appear…"] };
-const sneakTx = { es: ["Te cuelas sin que te vean. Al otro lado encuentras algo que se les cayó.", "Te pillan. «¡Alto ahí!» Los guardas llaman a unas criaturas apagadas…"], en: ["You slip past unseen. On the other side you find something they dropped.", "They spot you. \"Halt!\" The wardens call in some dimmed creatures…"] };
+const EVT_ALT = { es: RPG_ES.EVT_ALT, en: RPG_EN.EVT_ALT };
 // lore events share the encounter view
 if (LORE) for (const lg of ["es", "en"]) Object.assign(EVT[lg], LORE.LORE_EVT[lg]);
 function eventHtml() {
   const E = EVT[L()][X.event];
   if (X.eventOut == null) {
-    const ch = X.event === "orilla" && hasLetter() ? E.cL : E.c;
+    const ch = X.event === "orilla" && hasLetter() ? E.cL : E.c, fx = fxOf(X.event);
     const le = loreEv(X.event);
     return `<div class="panel"><div class="sub">${esc(tx("node.event"))}</div><p class="evt-text">${esc(E.t)}</p><div class="choices">${ch.map((c, i) => {
       if (le && le.cNeed && le.cNeed[i] && !(EV.P.flags || {})[le.cNeed[i]]) return "";
-      if (le) return `<button class="btn ghost" type="button" data-ev="${i}" ${(le.fx[i].cost || 0) > EV.P.coins ? "disabled" : ""}>${esc(c)}</button>`;
-      const poor = (X.event === "patrol" && i === 2 && EV.P.coins < 8) || ((X.event === "tila" || X.event === "liquen") && i === 0 && EV.P.coins < 10) || (X.event === "whisper" && i === 1 && EV.P.coins < 10) || (X.event === "coplo" && i === 0 && EV.P.coins < 8) || (X.event === "news" && i === 0 && EV.P.coins < 6) || (X.event === "pass" && i === 0 && EV.P.coins < 10);
+      const poor = ((fx[i] || {}).cost || 0) > EV.P.coins;
       return `<button class="btn ghost" type="button" data-ev="${i}" ${poor ? "disabled" : ""}>${esc(c)}</button>`;
     }).join("")}</div></div><div class="panel"><h3>${esc(tx("exp.party"))}</h3>${partyHtml()}</div>`;
   }
@@ -91,153 +88,35 @@ function eventHtml() {
 const hasLetter = () => !!(EV.P.flags && EV.P.flags.olaLetter && !EV.P.flags.olaDelivered);
 const hurtParty = (f) => { for (const m of X.party) if (m.hp > 0) m.hp = Math.max(0.05, m.hp - f); };
 const healParty = (f) => { for (const m of X.party) if (m.hp > 0) m.hp = Math.min(1, m.hp + f); };
+// the effects of each choice are data: rpg/data-events.js for path events, lore.js for lore events
+const fxOf = (ev) => { const le = loreEv(ev); return le ? le.fx : EVENT_FX[ev] || []; };
+const flagsOk = (c) => { const F = EV.P.flags || {}; return (!c.flag || !!F[c.flag]) && (!c.not || !F[c.not]); };
+// applies one choice's effects; returns the outcome text, or null when it can't be paid
+function runFx(f, E, out) {
+  if (f.if) return runFx(flagsOk(f.if) ? f.then || {} : f.else || {}, E, out);
+  if (f.roll) return runFx(rnd() < 0.5 ? f.roll[0] : f.roll[1], E, out);
+  const P = EV.P;
+  if (f.cost && !EV.spendCoins(f.cost)) return null;
+  if (f.xp) X.loot.xp += f.xp;
+  if (f.xpPerZone) X.loot.xp += f.xpPerZone * Object.keys(P.cleared || {}).filter((z) => P.cleared[z] > 0).length;
+  if (f.coins) X.loot.coins += f.coins;
+  if (f.heal) healParty(f.heal);
+  if (f.hurt) hurtParty(f.hurt);
+  if (f.foeBuff) X.nextFoeBuff = f.foeBuff;
+  if (f.card) X.eventCard = true;
+  if (f.fight) X.eventFight = true;
+  if (f.flag) { P.flags = P.flags || {}; for (const k of [].concat(f.flag)) P.flags[k] = 1; }
+  if (f.escrito) giveEscrito(f.escrito);
+  if (f.say) out = EVT_ALT[L()][f.say[0]][f.say[1]];
+  if (f.sayE) out = Array.isArray(f.sayE) ? E[f.sayE[0]][f.sayE[1]] : E[f.sayE];
+  return out;
+}
 function chooseEvent(i) {
-  const E = EVT[L()][X.event];
+  const E = EVT[L()][X.event], le = loreEv(X.event);
   X.eventFight = false; X.eventCard = null;
-  let out = E.o[i];
-  const le = loreEv(X.event);
-  if (le) {
-    const f = le.fx[i] || {}, P = EV.P;
-    if (f.cost && !EV.spendCoins(f.cost)) return;
-    if (f.xp) X.loot.xp += f.xp;
-    if (f.coins) X.loot.coins += f.coins;
-    if (f.heal) healParty(f.heal);
-    if (f.hurt) hurtParty(f.hurt);
-    if (f.foeBuff) X.nextFoeBuff = f.foeBuff;
-    if (f.card) X.eventCard = true;
-    if (f.fight) X.eventFight = true;
-    if (f.flag) { P.flags = P.flags || {}; for (const k of [].concat(f.flag)) P.flags[k] = 1; }
-    if (f.escrito) giveEscrito(f.escrito);
-    (P.loreSeen = P.loreSeen || {})[X.event] = 1;
-    X.eventOut = out; EV.save(); EV.sfx("tap"); render(); return;
-  }
-  switch (X.event) {
-    case "farol":
-      if (i === 0) { for (const m of X.party) if (m.hp > 0) m.hp = Math.max(0.05, m.hp - 0.1); X.loot.xp += 15; }
-      if (i === 1) { X.loot.coins += 12; X.nextFoeBuff = 15; }
-      break;
-    case "patrol":
-      if (i === 0) X.loot.xp += 8;
-      if (i === 1) { if (rnd() < 0.5) { out = sneakTx[L()][0]; X.eventCard = true; } else { out = sneakTx[L()][1]; X.eventFight = true; } }
-      if (i === 2) { EV.spendCoins(8); X.loot.xp += 4; }
-      break;
-    case "tila":
-      if (i === 0) { EV.spendCoins(10); healParty(0.4); X.loot.xp += 10; }
-      if (i === 1) X.loot.xp += 12;
-      break;
-    case "dam":
-      if (i === 0) { hurtParty(0.08); X.loot.xp += 16; EV.P.flags = Object.assign(EV.P.flags || {}, { damOpen: 1 }); }
-      if (i === 1) X.eventCard = true;
-      break;
-    case "apprentice":
-      if (i === 0) { hurtParty(0.1); X.loot.coins += 10; X.loot.xp += 6; }
-      if (i === 1) X.loot.xp += 12;
-      break;
-    case "ola":
-      if (i === 0) { X.loot.xp += 15; EV.P.flags = Object.assign(EV.P.flags || {}, { olaLetter: 1 }); }
-      if (i === 1) healParty(0.3);
-      break;
-    case "liquen":
-      if (i === 0) { EV.spendCoins(10); X.eventCard = true; }
-      if (i === 1) X.loot.xp += 12;
-      break;
-    case "vines":
-      if (i === 0) { out = vineTx[L()][0]; X.eventFight = true; X.loot.xp += 6; }
-      if (i === 1) { if (rnd() < 0.5) { out = vineTx[L()][1]; X.loot.xp += 10; } else { out = vineTx[L()][2]; hurtParty(0.15); } }
-      break;
-    case "loggers":
-      if (i === 0) { X.loot.coins += 8; healParty(0.1); }
-      if (i === 1) X.loot.xp += 12;
-      break;
-    case "court":
-      if (i === 0) { X.eventFight = true; X.loot.xp += 8; }
-      if (i === 1) healParty(0.3);
-      if (i === 2) X.loot.xp += 12;
-      break;
-    case "dig":
-      if (i === 0) X.loot.xp += 14;
-      if (i === 1) { hurtParty(0.1); X.loot.coins += 10; }
-      if (i === 2) X.eventCard = true;
-      break;
-    case "whisper":
-      if (i === 0) X.loot.xp += 12;
-      if (i === 1) { EV.spendCoins(10); X.nextFoeBuff = -15; }
-      if (i === 2) { if (rnd() < 0.5) { out = fogTx[L()][0]; X.eventCard = true; } else { out = fogTx[L()][1]; X.eventFight = true; } }
-      break;
-    case "orilla":
-      if (i === 0 && hasLetter()) { out = E.oL[0]; EV.P.flags.olaDelivered = 1; X.loot.coins += 25; X.loot.xp += 20; healParty(0.4); X.eventCard = true; }
-      else if (i === 0) { healParty(0.15); X.loot.coins += 6; }
-      if (i === 1) X.loot.xp += 14;
-      break;
-    case "reflection":
-      if (i === 0) { X.eventFight = true; X.loot.xp += 6; }
-      if (i === 1) X.loot.xp += 14;
-      if (i === 2) healParty(0.2);
-      break;
-    case "boats":
-      if (i === 0) { if (EV.P.flags && EV.P.flags.damOpen) { out = E.dam; healParty(0.3); } else hurtParty(0.1); X.loot.xp += 14; }
-      if (i === 1) X.eventCard = true;
-      break;
-    case "gravasong":
-      if (i === 0) X.loot.xp += 16;
-      if (i === 1) X.eventCard = true;
-      if (i === 2) healParty(0.15);
-      break;
-    case "tunnels":
-      if (i === 0) { X.loot.coins += 12; X.nextFoeBuff = 15; }
-      if (i === 1) { hurtParty(0.1); X.loot.xp += 16; }
-      break;
-    case "miners":
-      if (i === 0) { hurtParty(0.15); X.loot.coins += 10; X.loot.xp += 10; }
-      if (i === 1) X.loot.xp += 8;
-      break;
-    case "coplo":
-      if (i === 0) { EV.spendCoins(8); healParty(0.3); }
-      if (i === 1) X.loot.xp += 14;
-      if (i === 2) X.eventCard = true;
-      break;
-    case "news":
-      if (i === 0) { EV.spendCoins(6); X.nextFoeBuff = -15; }
-      if (i === 1) X.loot.coins += 10;
-      break;
-    case "pass":
-      if (i === 0) { EV.spendCoins(10); X.loot.xp += 6; }
-      if (i === 1) { hurtParty(0.15); X.loot.xp += 18; }
-      if (i === 2) { healParty(0.3); X.nextFoeBuff = 15; }
-      break;
-    case "duo":
-      if (i === 0) healParty(0.45);
-      if (i === 1) X.loot.xp += 20;
-      if (i === 2) X.eventCard = true;
-      break;
-    case "albor":
-      if (i === 0) { hurtParty(0.15); X.loot.xp += 28; }
-      if (i === 1) { X.loot.coins += 18; EV.P.flags = Object.assign(EV.P.flags || {}, { alborTruth: 1 }); }
-      if (i === 2) { X.nextFoeBuff = -15; EV.P.flags = Object.assign(EV.P.flags || {}, { alborProof: 1 }); }
-      break;
-    case "cantora":
-      if (i === 0) X.loot.xp += 4 * Object.keys(EV.P.cleared || {}).filter((z) => EV.P.cleared[z] > 0).length;
-      if (i === 1) X.eventCard = true;
-      if (i === 2) healParty(0.35);
-      break;
-    case "esporina":
-      if (i === 0) { healParty(0.5); EV.P.flags = Object.assign(EV.P.flags || {}, { sporeRemedy: 1 }); }
-      if (i === 1) X.loot.xp += 16;
-      break;
-    case "tomb":
-      if (i === 0) X.eventCard = true;
-      if (i === 1) { hurtParty(0.1); X.loot.xp += 16; }
-      break;
-    case "dreams":
-      if (i === 0) X.loot.xp += 14;
-      if (i === 1) healParty(0.25);
-      break;
-    case "well":
-      if (i === 0) healParty(0.5);
-      if (i === 1) X.loot.xp += 14;
-      if (i === 2) X.eventCard = true;
-      break;
-  }
+  const out = runFx(fxOf(X.event)[i] || {}, E, E.o[i]);
+  if (out == null) return;
+  if (le) { (EV.P.loreSeen = EV.P.loreSeen || {})[X.event] = 1; EV.save(); }
   X.eventOut = out;
   EV.sfx("tap");
   render();

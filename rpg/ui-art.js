@@ -16,8 +16,8 @@ Object.assign(EV.SFX, {
 
 /* ---------- Achievements ---------- */
 EV.ACH.push(["exp1", 15, (p) => (p.c.expWins || 0) >= 1], ["guard1", 40, (p) => ((p.cleared || {}).aurora || 0) >= 1], ["guard3", 60, (p) => ["aurora", "crater", "forest"].every((z) => ((p.cleared || {})[z] || 0) >= 1)], ["guard6", 80, (p) => ["hollow", "lake", "caves"].every((z) => ((p.cleared || {})[z] || 0) >= 1)], ["guard8", 120, (p) => ZONES.heart.unlock.every((z) => ((p.cleared || {})[z] || 0) >= 1)], ["heart1", 200, (p) => ((p.cleared || {}).heart || 0) >= 1], ["cards10", 20, (p) => (p.cards || []).length >= 10], ["fuse1", 15, (p) => (p.c.fused || 0) >= 1],
-  ["grimSol", 40, (p) => grimDone(p, ["fire", "plant", "light"])], ["grimSky", 40, (p) => grimDone(p, ["bolt", "air", "music"])],
-  ["grimLake", 40, (p) => grimDone(p, ["water", "stone", "shadow"])], ["grimFrost", 40, (p) => grimDone(p, ["ice", "mush", "dream"])],
+  ["grimSol", 40, (p) => grimDone(p, circleTypes("sol"))], ["grimSky", 40, (p) => grimDone(p, circleTypes("sky"))],
+  ["grimLake", 40, (p) => grimDone(p, circleTypes("lake"))], ["grimFrost", 40, (p) => grimDone(p, circleTypes("frost"))],
   ["grimAll", 150, (p) => grimDone(p, GRIM_ORDER)], ["dust1", 10, (p) => (p.c.dusted || 0) >= 1]);
 for (const lg of ["es", "en"]) {
   for (const id of ["exp1", "guard1", "guard3", "guard6", "guard8", "cards10", "fuse1", "grimSol", "grimSky", "grimLake", "grimFrost", "grimAll", "dust1", "heart1"]) EV.STR[lg].ach[id] = TX[lg]["ach." + id];

@@ -44,7 +44,6 @@ function sims(n) {
 const rpgSrc = fs.readdirSync(path.join(ROOT, "rpg")).filter((f) => f.endsWith(".js")).map((f) => fs.readFileSync(path.join(ROOT, "rpg", f), "utf8")).join("\n");
 function body(src, head) { const i = src.indexOf(head); if (i < 0) return ""; let d = 0; for (let j = src.indexOf("{", i); j < src.length; j++) { if (src[j] === "{") d++; else if (src[j] === "}" && --d === 0) return src.slice(i, j + 1); } return ""; }
 const DECORS = new Set([...body(rpgSrc, "function drawDecor(").matchAll(/decor === "(\w+)"/g)].map((m) => m[1]).concat(["lanterns"])); // "lanterns" is the final else
-const EVENT_CASES = new Set([...body(rpgSrc, "function chooseEvent(").matchAll(/case "(\w+)"/g)].map((m) => m[1]));
 
 /* ---------- 2. data tables in the browser ---------- */
 const TYPES = { ".html": "text/html", ".js": "text/javascript", ".json": "application/json", ".webmanifest": "application/manifest+json", ".png": "image/png", ".svg": "image/svg+xml" };
@@ -60,9 +59,17 @@ function serve() {
   });
 }
 function inPage(facts) {
-  const out = { errors: [], warns: [] }, E = (m) => out.errors.push(m), W = (m) => out.warns.push(m);
+  const out = { errors: [], warns: [] }, E = (m) => out.errors.push(m), W = (m) => out.warns.push(m), E_ = E;
   const D = EV.RPG.DATA, { CT, EVT, ZT, PMAP, TX, ZONES, MONS, CARDS } = D;
-  const decors = new Set(facts.decors), cases = new Set(facts.cases), lore = (window.EvoLore && window.EvoLore.LORE_EVENTS) || {};
+  const decors = new Set(facts.decors), FX = D.EVENT_FX, lore = (window.EvoLore && window.EvoLore.LORE_EVENTS) || {};
+  // every key an effect may use (see the top of rpg/data-events.js); a typo would silently do nothing
+  const FX_KEYS = new Set(["xp", "coins", "cost", "heal", "hurt", "foeBuff", "card", "fight", "flag", "escrito", "xpPerZone", "say", "sayE", "roll", "if", "then", "else"]);
+  const checkFx = (f, where, E, lg) => {
+    for (const k of Object.keys(f)) if (!FX_KEYS.has(k)) E_(`${where}: unknown effect "${k}"`);
+    if (f.say && !(D.EVT_ALT[lg][f.say[0]] || [])[f.say[1]]) E_(`${where}: EVT_ALT.${lg}.${f.say.join(".")} is missing`);
+    if (f.sayE && !(Array.isArray(f.sayE) ? (E[f.sayE[0]] || [])[f.sayE[1]] : E[f.sayE])) E_(`${where}: EVT.${lg} has no "${[].concat(f.sayE).join(".")}"`);
+    for (const sub of [].concat(f.roll || [], f.then || [], f.else || [])) checkFx(sub, where, E, lg);
+  };
   const pair = (o, what) => { for (const lg of ["es", "en"]) if (!o || !o[lg]) E(`${what}: missing ${lg}`); };
   // zones
   for (const [zk, z] of Object.entries(ZONES)) {
@@ -75,12 +82,20 @@ function inPage(facts) {
         const e = EVT[lg][ev];
         if (!e) { E(`event ${ev} (zone ${zk}): no EVT.${lg}`); continue; }
         if (!e.t || !Array.isArray(e.c) || !Array.isArray(e.o) || e.c.length !== e.o.length) E(`event ${ev}: EVT.${lg} needs t, and c/o of the same length`);
+        const fx = lore[ev] ? lore[ev].fx : FX[ev];
+        if (!fx) { E(`event ${ev} (zone ${zk}): no effects in rpg/data-events.js or lore.js`); continue; }
+        if (fx.length !== e.c.length) E(`event ${ev}: ${e.c.length} choices in EVT.${lg} but ${fx.length} in its effects`);
+        fx.forEach((f, i) => checkFx(f, `event ${ev} choice ${i}`, e, lg));
       }
-      if (!cases.has(ev) && !lore[ev]) W(`event ${ev} (zone ${zk}): no effects in chooseEvent() or lore.js, choices only show text`);
     }
   }
   // lore events also need both languages
-  for (const k of Object.keys(lore)) for (const lg of ["es", "en"]) if (!EVT[lg][k]) E(`lore event ${k}: no EVT.${lg}`);
+  for (const k of Object.keys(lore)) for (const lg of ["es", "en"]) { if (!EVT[lg][k]) { E(`lore event ${k}: no EVT.${lg}`); continue; } lore[k].fx.forEach((f, i) => checkFx(f, `lore event ${k} choice ${i}`, EVT[lg][k], lg)); }
+  // types: every type has a colour, and opposites go both ways
+  for (const [t, T] of Object.entries(D.TYPES)) {
+    if (!T.col || !T.es || !T.en) E(`type ${t}: needs col, es and en`);
+    if (T.opp && (!D.TYPES[T.opp] || D.TYPES[T.opp].opp !== t)) E(`type ${t}: opposite ${T.opp} does not point back`);
+  }
   // creatures
   for (const [k, m] of Object.entries(MONS)) {
     for (const c of m.cards) if (!CARDS[c]) E(`creature ${k}: card "${c}" is not in CARDS`);
@@ -101,7 +116,8 @@ function inPage(facts) {
   const same = (a, b, what) => { for (const k of Object.keys(a)) if (!(k in b)) E(`${what}: "${k}" is in es but not en`); for (const k of Object.keys(b)) if (!(k in a)) E(`${what}: "${k}" is in en but not es`); };
   same(TX.es, TX.en, "rpg TX");
   if (EV.STR) { same(EV.STR.es, EV.STR.en, "index.html STR"); if (EV.STR.es.ach) same(EV.STR.es.ach, EV.STR.en.ach, "achievements"); }
-  same(EVT.es, EVT.en, "EVT"); same(ZT.es, ZT.en, "ZT");
+  same(EVT.es, EVT.en, "EVT"); same(ZT.es, ZT.en, "ZT"); same(D.EVT_ALT.es, D.EVT_ALT.en, "EVT_ALT");
+  for (const k of Object.keys(FX)) if (!D.EVENTS.includes(k)) W(`event ${k} has effects but is not in EVENTS`);
   return out;
 }
 
@@ -114,7 +130,7 @@ function inPage(facts) {
     page.on("pageerror", (e) => pageErrs.push(e.message));
     await page.goto(`http://127.0.0.1:${s.address().port}/`);
     await page.waitForFunction(() => window.EV && EV.RPG && EV.RPG.DATA, null, { timeout: 15000 });
-    const r = await page.evaluate(inPage, { decors: [...DECORS], cases: [...EVENT_CASES] });
+    const r = await page.evaluate(inPage, { decors: [...DECORS] });
     errors.push(...r.errors); warns.push(...r.warns);
     for (const m of pageErrs) err("page error: " + m);
     await b.close(); s.close();

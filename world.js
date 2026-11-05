@@ -539,8 +539,7 @@ function bedtime() {
 }
 
 /* ---------- The foraging nook and the bottle in the pond ---------- */
-const CIRC = { fire: "sol", plant: "sol", light: "sol", bolt: "sky", air: "sky", music: "sky", water: "lake", stone: "lake", shadow: "lake", ice: "frost", mush: "frost", dream: "frost", star: "star" };
-function circle() { const S = EV.S, t = S && typeof EVS !== "undefined" && EVS.KIND_TYPE ? EVS.KIND_TYPE[S.species] : null; return CIRC[t] || "sol"; }
+function circle() { const S = EV.S, t = S && typeof EVS !== "undefined" && EVS.KIND_TYPE ? EVS.KIND_TYPE[S.species] : null; if (t === "star") return "star"; const T = EV.RPG && EV.RPG.TYPES[t]; return (T && T.circle) || "sol"; } // circles come from TYPES in rpg/data-cards.js
 // the same answer all day, different each day
 function dayRnd(salt) { let h = 2166136261; for (const ch of today() + salt) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return ((h >>> 0) % 10000) / 10000; }
 // a bottle drifts into the pond on about two days in three; it stays until opened

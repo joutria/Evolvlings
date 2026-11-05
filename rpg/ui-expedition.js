@@ -49,7 +49,7 @@ function echoInfo() {
   if (!P.echo || P.echo.week !== w) P.echo = { week: w, zone: cl[w % cl.length], rule: ECHO_RULES[w % ECHO_RULES.length], tries: 0, wins: 0 };
   return { zone: P.echo.zone, rule: P.echo.rule, left: ECHO_TRIES - P.echo.tries, lvlOk: !EV.EGGS || EV.EGGS.clLvl() >= ECHO_LVL };
 }
-const CIRCLE = { fire: "sol", plant: "sol", light: "sol", bolt: "cielo", air: "cielo", music: "cielo", water: "lago", stone: "lago", shadow: "lago", ice: "escarcha", mush: "escarcha", dream: "escarcha" };
+const CIRCLE = {}; for (const t of TYPE_ORDER) if (TYPES[t].circle) CIRCLE[t] = TYPES[t].circle; // from TYPES in rpg/data-cards.js
 function buffUnit(u, f) { u.base.hp *= f; u.maxHp = Math.round(u.maxHp * f); u.hp = u.maxHp; u.base.str *= f; u.base.def *= f; }
 /* The Deep Root: 12 floors down the sick Root. Floors 4, 8 and 12 hold a guardian.
    Every 2 weeks the zones, the rule and the stars start over; chests pay out by total stars (10 Notes at 36). */
