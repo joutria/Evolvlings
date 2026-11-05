@@ -358,6 +358,23 @@ body.sheet-on { overflow: hidden; }
 .ct-meta { font-size: 11px; display: flex; gap: 3px; align-items: center; flex-wrap: wrap; justify-content: center; }
 .ct-meta i { font-style: normal; color: var(--moss); }
 .ctile:hover { border-color: var(--accent); }
+.ctile { position: relative; }
+.ctile[hidden] { display: none; }
+.ct-fav { position: absolute; top: 2px; right: 4px; color: var(--warn); font-size: 14px; line-height: 1; }
+.cf-bar { display: flex; gap: 6px; margin-top: 10px; align-items: stretch; }
+.cf-q { flex: 1; min-width: 0; font: 15px var(--font-body); padding: 8px 10px; border: 2px solid var(--line); background: var(--bg); color: var(--ink); }
+.cf-sort select { height: 100%; font: 600 13px var(--font-body); padding: 0 6px; border: 2px solid var(--line); background: var(--bg); color: var(--ink); max-width: 130px; }
+.cf-dir { min-width: 40px; font: 700 16px var(--font-body); border: 2px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; }
+.cf-more { margin-top: 6px; }
+.cf-more summary { cursor: pointer; font: 600 14px var(--font-body); padding: 4px 0; }
+.cf-row { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; margin: 6px 0; }
+.cf-lab { font: 600 12px var(--font-body); color: var(--muted); min-width: 64px; }
+.cf-chip { font: 600 12px var(--font-body); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 999px; padding: 5px 10px; cursor: pointer; }
+.cf-chip[aria-pressed="true"] { border-color: var(--moss); background: color-mix(in srgb, var(--moss) 18%, var(--bg)); box-shadow: inset 0 0 0 1px var(--moss); }
+.cf-pips { font-size: 9px; letter-spacing: -1px; }
+.cf-count { margin: 6px 0 0; min-height: 0; }
+.cf-count:empty { display: none; }
+.linkish { background: none; border: 0; padding: 0; color: var(--accent); text-decoration: underline; cursor: pointer; font: inherit; }
 .cview .cp-list { align-items: center; }
 .cview .rcard { max-width: 340px; width: 100%; }
 .atiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px; }

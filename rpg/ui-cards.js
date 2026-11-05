@@ -40,6 +40,105 @@ function workshopHtml() {
   if (lastPack) h += `<h3 class="cat-title">${esc(tx("pack.got"))}</h3><div class="rcards">${lastPack.map((c) => cardHtml(c.id, c.g, { foot: cantNote(c.id) })).join("")}</div>`;
   return h;
 }
+/* ---------- Collection filters ----------
+   Search by words (name, type, owner, effects, lore), filter by type, rarity, effect and a few quick toggles, and sort.
+   Favourites and the sort order are saved with the profile (P.cf); the filters last until the page is reloaded. */
+const cfSlice = EV.slice("cf", () => ({ fav: {}, sort: "use", dir: 1 }));
+const CF = { q: "", type: new Set(), grade: new Set(), fx: new Set(), only: new Set(), open: false };
+const CF_FX = ["dmg", "area", "heal", "shield", "foe", "buff", "cleanse"];
+const CF_ONLY = ["fav", "usable", "inUse", "fuse"];
+const CF_SORT = ["use", "new", "rar", "type", "name", "copies"];
+const fxCache = {};
+function fxCats(id) {
+  if (fxCache[id]) return fxCache[id];
+  const C = CARDS[id], out = new Set();
+  const walk = (o, k) => {
+    if (Array.isArray(o)) { const s = STATUS[o[0]]; if (s) out.add(s.neg ? "foe" : "buff"); else o.forEach((x) => walk(x, k)); return; }
+    if (o && typeof o === "object") { for (const key in o) walk(o[key], key); return; }
+    if (k === "pow" || k === "dmg" || k === "firstHit" || k === "thorns") out.add("dmg");
+    if (k === "tgt" && /foes/i.test(o)) out.add("area");
+    if (/^(heal|healRecv|healGive|drain|lifesteal|revive)$/.test(k)) out.add("heal");
+    if (/^(shield|shieldLong|dodge|immune|critImmune|def|defRound)$/.test(k)) out.add("shield");
+    if (k === "cleanse" || k === "strip") out.add("cleanse");
+    if (k === "status" && STATUS[o]) out.add("cleanse");
+  };
+  for (const sl of ["a", "p", "s"]) walk(C[sl], sl);
+  if (out.has("buff") && JSON.stringify(C).match(/"(guard|cushion|evade|hidden|taunt)"/)) out.add("shield");
+  return (fxCache[id] = out);
+}
+const fold = (s) => String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+const searchCache = {};
+function searchText(id) {
+  const key = L() + ":" + id; if (searchCache[key]) return searchCache[key];
+  const C = CARDS[id], sc = scaled(id, 0);
+  const parts = [cardName(id), cardLore(id), TYPES[C.type][L()], C.by && MONS[C.by] ? monName(C.by) : "", ...["a", "p", "s"].map((sl) => slotText(sc, sl))];
+  return (searchCache[key] = fold(parts.join(" ")));
+}
+let colInfo = null;
+function cfFilterHtml(total) {
+  const chip = (k, v, label, title) => `<button type="button" class="cf-chip" data-cf="${k}:${v}" aria-pressed="${CF[k].has(String(v))}"${title ? ` title="${esc(title)}"` : ""}>${label}</button>`;
+  const cf = cfSlice();
+  const n = CF.type.size + CF.grade.size + CF.fx.size + CF.only.size;
+  return `<div class="cf-bar"><input id="cfQ" class="cf-q" type="search" placeholder="${esc(tx("cf.search"))}" aria-label="${esc(tx("cf.search"))}" value="${esc(CF.q)}" autocomplete="off">
+    <label class="cf-sort"><span class="sr-only">${esc(tx("cf.sort"))}</span><select id="cfSort" aria-label="${esc(tx("cf.sort"))}">${CF_SORT.map((k) => `<option value="${k}"${cf.sort === k ? " selected" : ""}>${esc(tx("cf.sort." + k))}</option>`).join("")}</select></label>
+    <button type="button" class="cf-dir" data-cfdir="1" aria-label="${esc(tx(cf.dir > 0 ? "cf.dir.down" : "cf.dir.up"))}" title="${esc(tx(cf.dir > 0 ? "cf.dir.down" : "cf.dir.up"))}">${cf.dir > 0 ? "↓" : "↑"}</button></div>
+  <details class="cf-more" id="cfMore"${CF.open ? " open" : ""}><summary>${esc(tx("cf.filters"))}<b class="cf-n">${n ? " · " + n : ""}</b></summary>
+    <p class="cf-row"><span class="cf-lab">${esc(tx("cf.quick"))}</span>${CF_ONLY.map((k) => chip("only", k, (k === "fav" ? "★ " : "") + esc(tx("cf.only." + k)))).join("")}</p>
+    <p class="cf-row"><span class="cf-lab">${esc(tx("cf.type"))}</span>${TYPE_ORDER.map((t) => chip("type", t, `${tyIcon(t)} ${esc(TYPES[t][L()])}`)).join("")}</p>
+    <p class="cf-row"><span class="cf-lab">${esc(tx("cf.grade"))}</span>${GRADES.map((g, i) => chip("grade", i, `<span class="cf-pips" style="color:${g.col}">${"◆".repeat(i + 1)}</span> ${esc(g[L()])}`)).join("")}</p>
+    <p class="cf-row"><span class="cf-lab">${esc(tx("cf.fx"))}</span>${CF_FX.map((k) => chip("fx", k, esc(tx("cf.fx." + k)), tx("cf.fxd." + k))).join("")}</p>
+    <p class="cf-row"><button type="button" class="btn ghost" data-cfclear="1">${esc(tx("cf.clear"))}</button></p>
+  </details>
+  <p class="progress cf-count" id="cfCount" aria-live="polite"></p>`;
+}
+function cfPass(id) {
+  const I = colInfo, list = I.groups[id];
+  if (CF.q) { const words = fold(CF.q).split(/\s+/).filter(Boolean); const t = searchText(id); if (!words.every((w) => t.includes(w))) return false; }
+  if (CF.type.size && !CF.type.has(CARDS[id].type)) return false;
+  if (CF.grade.size && !list.some((c) => CF.grade.has(String(c.g)))) return false;
+  if (CF.fx.size) { const f = fxCats(id); for (const k of CF.fx) if (!f.has(k)) return false; }
+  for (const k of CF.only) {
+    if (k === "fav" && !cfSlice().fav[id]) return false;
+    if (k === "usable" && !usable(id)) return false;
+    if (k === "inUse" && !list.some((c) => I.eqSet.has(c.uid))) return false;
+    if (k === "fuse") { const n = {}; for (const c of list) n[c.g] = (n[c.g] || 0) + 1; if (!Object.keys(n).some((g) => n[g] >= UPGRADE_N && +g < GRADES.length - 1)) return false; }
+  }
+  return true;
+}
+function cfSorted(ids) {
+  const I = colInfo, cf = cfSlice(), seq = (id) => Math.max(...I.groups[id].map((c) => parseInt(String(c.uid).slice(1), 10) || 0));
+  const byName = (a, b) => cardName(a).localeCompare(cardName(b));
+  const cmp = {
+    use: (a, b) => (usable(b) - usable(a)) || I.bestG(b) - I.bestG(a) || byName(a, b),
+    new: (a, b) => seq(b) - seq(a),
+    rar: (a, b) => I.bestG(b) - I.bestG(a) || byName(a, b),
+    type: (a, b) => TYPE_ORDER.indexOf(CARDS[a].type) - TYPE_ORDER.indexOf(CARDS[b].type) || byName(a, b),
+    name: byName,
+    copies: (a, b) => I.groups[b].length - I.groups[a].length || byName(a, b),
+  }[cf.sort] || (() => 0);
+  const fav = (id) => (cf.fav[id] ? 1 : 0);
+  return ids.slice().sort((a, b) => (fav(b) - fav(a)) || cmp(a, b) * cf.dir);
+}
+function applyCF() {
+  const box = document.querySelector("#cardsPanel .ctiles"); if (!box || !colInfo) return;
+  const all = Object.keys(colInfo.groups), shown = cfSorted(all.filter(cfPass));
+  const tiles = {}; for (const b of box.querySelectorAll("[data-cview]")) tiles[b.dataset.cview] = b;
+  for (const id of all) if (tiles[id]) tiles[id].hidden = true;
+  for (const id of shown) if (tiles[id]) { tiles[id].hidden = false; box.appendChild(tiles[id]); }
+  const n = CF.type.size + CF.grade.size + CF.fx.size + CF.only.size, cnt = $("cfCount");
+  if (cnt) cnt.innerHTML = shown.length === all.length ? "" : `${esc(tx("cf.count", { n: shown.length, m: all.length }))}${shown.length ? "" : ` · <button type="button" class="linkish" data-cfclear="1">${esc(tx("cf.clear"))}</button>`}`;
+  const nb = document.querySelector("#cfMore .cf-n"); if (nb) nb.textContent = n ? " · " + n : "";
+}
+document.addEventListener("input", (e) => { if (e.target.id === "cfQ") { CF.q = e.target.value; applyCF(); } });
+document.addEventListener("change", (e) => { if (e.target.id === "cfSort") { cfSlice().sort = e.target.value; EV.saveProfile(); applyCF(); } });
+document.addEventListener("toggle", (e) => { if (e.target.id === "cfMore") CF.open = e.target.open; }, true);
+function cfClick(t) {
+  if (t.dataset.cf) { const [k, v] = t.dataset.cf.split(":"); if (CF[k].has(v)) CF[k].delete(v); else CF[k].add(v); t.setAttribute("aria-pressed", CF[k].has(v)); EV.sfx("tap"); applyCF(); return true; }
+  if (t.dataset.cfdir) { const cf = cfSlice(); cf.dir = -cf.dir; EV.saveProfile(); t.textContent = cf.dir > 0 ? "↓" : "↑"; t.title = t.ariaLabel = tx(cf.dir > 0 ? "cf.dir.down" : "cf.dir.up"); EV.sfx("tap"); applyCF(); return true; }
+  if (t.dataset.cfclear) { CF.q = ""; for (const k of ["type", "grade", "fx", "only"]) CF[k].clear(); EV.sfx("tap"); renderCards(); return true; }
+  if (t.dataset.fav) { const f = cfSlice().fav, id = t.dataset.fav; if (f[id]) delete f[id]; else f[id] = 1; EV.saveProfile(); EV.sfx("tap"); renderCards(); return true; }
+  return false;
+}
 let colCard = null;
 function renderCards() {
   const el = $("cardsPanel"); if (!el) return;
@@ -73,6 +172,8 @@ function renderCards() {
     const inUse = best.find((c) => eqSet.has(c.uid));
     const btns = [];
     if (R && ok) for (const sl of ["a", "p", "s"]) btns.push(`<button class="btn ghost" type="button" data-equip="${(inUse || best[0]).uid}" data-slot="${sl}" ${R.lvl < SLOT_LVL[sl] ? "disabled" : ""}>${esc(tx("slot." + sl))}</button>`);
+    const isFav = !!cfSlice().fav[id];
+    btns.push(`<button class="btn ghost cf-fav" type="button" data-fav="${id}" aria-pressed="${isFav}">${isFav ? "★ " + esc(tx("cf.unfav")) : "☆ " + esc(tx("cf.fav"))}</button>`);
     if (inUse) btns.push(`<span class="progress">${esc(tx("cards.inUse"))}</span>`);
     const counts = {};
     for (const c of list) counts[c.g] = (counts[c.g] || 0) + 1;
@@ -84,11 +185,15 @@ function renderCards() {
     return cardHtml(id, g, { count: list.length, foot: `${copies}${cantNote(id)}${btns.length ? `<div class="rc-btns">${btns.join("")}</div>` : ""}` });
   };
   // the collection is a grid of thumbnails; tapping one opens the whole card with its buttons
+  colInfo = { groups, eqSet, bestG };
+  if (ids.length) html += cfFilterHtml(ids.length);
+  const favs = cfSlice().fav;
   html += `<div class="ctiles">${ids.map((id) => {
     const g = bestG(id), n = groups[id].length, inUse = groups[id].some((c) => eqSet.has(c.uid));
-    return `<button type="button" class="ctile${usable(id) ? "" : " cant"}" data-cview="${id}" aria-label="${esc(cardName(id))}">${thumbHtml(id, g)}<span class="ct-name">${esc(cardName(id))}</span><span class="ct-meta">${gradeChip(g)}${n > 1 ? ` <b>×${n}</b>` : ""}${inUse ? ` <i>${esc(tx("cards.inUse"))}</i>` : ""}</span></button>`;
+    return `<button type="button" class="ctile${usable(id) ? "" : " cant"}" data-cview="${id}" aria-label="${esc(cardName(id))}">${favs[id] ? `<span class="ct-fav" title="${esc(tx("cf.only.fav"))}">★</span>` : ""}${thumbHtml(id, g)}<span class="ct-name">${esc(cardName(id))}</span><span class="ct-meta">${gradeChip(g)}${n > 1 ? ` <b>×${n}</b>` : ""}${inUse ? ` <i>${esc(tx("cards.inUse"))}</i>` : ""}</span></button>`;
   }).join("")}</div>`;
   el.innerHTML = html;
+  applyCF();
 }
 function openCardView(id, html) {
   let el = $("cview");
@@ -101,6 +206,7 @@ document.addEventListener("keydown", (e) => { const el = $("cview"); if (e.key =
 function onCardsClick(e) {
   const t = e.target.closest("button"); if (!t || t.disabled) return;
   if (t.dataset.cview) { EV.sfx("tap"); openCardView(t.dataset.cview); return; }
+  if (cfClick(t)) return;
   if (t.dataset.chg) { EV.sfx("tap"); const [w, sl] = t.dataset.chg.split(":"); openPick(w, sl); return; }
   const R = rpgState(); const P = EV.P;
   if (t.dataset.ctab) { cTab = t.dataset.ctab; EV.sfx("tap"); renderCards(); return; }
