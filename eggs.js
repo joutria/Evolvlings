@@ -23,7 +23,7 @@ const TX = {
     "lvl": "Nv {n}", "bond": "Vínculo {n}", "bondMax": "Vínculo máximo", "pet": "Acariciar", "petDone": "Ya la acariciaste hoy",
     "bond.0": "{n} te observa desde su rincón del Refugio.", "bond.1": "{n} viene corriendo cuando te ve llegar.",
     "bond.2": "{n} no se separa de ti en todo el día.", "bond.3": "{n} y tú os entendéis sin palabras.",
-    "bondWhy": "El Vínculo sube al viajar juntos (+1), al ganar (+1 más) y al acariciarla una vez al día (+1). Cada nivel da +1,5 % a sus estadísticas y +1 % de crítico. Con Vínculo 5 y 10 sus cartas suben de rareza.",
+    "bondWhy": "El Vínculo sube al viajar juntos (+1), al ganar (+1 más) y al acariciarla una vez al día (+1; si faltas, se guardan hasta 3 caricias). Cada nivel da +1,5 % a sus estadísticas y +1 % de crítico. Con Vínculo 5 y 10 sus cartas suben de rareza.",
     "badge": "Refugio · Nv {l} · ♥ {b}", "born": "¡Ha nacido {n}!", "bornSub": "Ya vive en el Refugio y puede acompañarte en tu próxima expedición.",
     "dup": "¡Otra vez {n}!", "dupSub": "{n} ya tiene sus 5 estrellas. Su hermano se queda con la familia de Tila y te deja {d} ∴ de Polvo y +1 de Vínculo.",
     "dupStar": "¡Otra vez {n}! ★ {s}", "dupStarSub": "Su hermano se queda con la familia de Tila, y crecer juntos le ha hecho bien: {n} llega a {s} estrellas (+4 % a sus estadísticas por estrella) y +1 de Vínculo.",
@@ -78,7 +78,7 @@ const TX = {
     "lvl": "Lv {n}", "bond": "Bond {n}", "bondMax": "Max Bond", "pet": "Pet", "petDone": "Already petted today",
     "bond.0": "{n} watches you from its corner of the Refuge.", "bond.1": "{n} comes running when it sees you arrive.",
     "bond.2": "{n} stays by your side all day.", "bond.3": "{n} and you understand each other without words.",
-    "bondWhy": "Bond grows when you travel together (+1), when you win (+1 more) and when you pet it once a day (+1). Each level gives +1.5% stats and +1% crit. At Bond 5 and 10 its cards go up a grade.",
+    "bondWhy": "Bond grows when you travel together (+1), when you win (+1 more) and when you pet it once a day (+1; if you miss days, up to 3 pats wait for you). Each level gives +1.5% stats and +1% crit. At Bond 5 and 10 its cards go up a grade.",
     "badge": "Refuge · Lv {l} · ♥ {b}", "born": "{n} has hatched!", "bornSub": "It lives in the Refuge now and can join your next expedition.",
     "dup": "{n} again!", "dupSub": "{n} already has all 5 stars. Its sibling stays with Tila's family and leaves you {d} ∴ Stardust and +1 Bond.",
     "dupStar": "{n} again! ★ {s}", "dupStarSub": "Its sibling stays with Tila's family, and growing up together did it good: {n} reaches {s} stars (+4% to its stats per star) and +1 Bond.",
@@ -308,11 +308,16 @@ function hatch(id) {
 }
 
 /* ---------- Refuge and Bond ---------- */
+// pats pile up: one a day per companion, up to 3 if you're away (design rule 4); old saves kept only r.pet = the day
+function pats(r) {
+  if (!r.pc) r.pc = { day: r.pet || null, left: 0 };
+  return EV.DAILY ? EV.DAILY.charge(r.pc, 1, 3).left : r.pet === today() ? 0 : 1;
+}
 function pet(k) {
-  const r = G().roster[k]; if (!r || r.pet === today()) return;
+  const r = G().roster[k]; if (!r || pats(r) <= 0) return;
   const before = bondLvl(r.bxp);
   const gain = (EV.BUILD ? EV.BUILD.nestPet() : 1) + (RPG.BIRTH[RPG.birthKey(k, r)].pet || 0);
-  r.pet = today(); r.bxp += gain;
+  r.pet = today(); r.pc.left--; r.bxp += gain;
   EV.P.c.refugePets = (EV.P.c.refugePets || 0) + 1;
   EV.toast(tx("petted", { n: monName(k), b: gain }), "♥"); EV.sfx(bondLvl(r.bxp) > before ? "grow" : "tap");
   save();
@@ -388,7 +393,7 @@ function hasNews() {
   const g = G();
   if (g.inc.some((e) => !left(e))) return true;
   if (g.bag.length && g.inc.length < slots()) return true;
-  if (Object.values(g.roster).some((r) => r.pet !== today())) return true;
+  if (Object.values(g.roster).some((r) => pats(r) > 0)) return true;
   if (clPending().any) return true;
   if (WELCOME.some((w) => !g.wel[w.id] && w.ok(EV.P))) return true;
   return false;
@@ -436,7 +441,7 @@ function refugeHtml() {
     const pct = b >= 10 ? 100 : Math.round(100 * (r.bxp - pv) / (nx - pv));
     const band = b >= 10 ? 3 : b >= 7 ? 2 : b >= 4 ? 1 : 0;
     const xpPct = Math.round(100 * r.xp / RPG.xpNeed(r.lvl));
-    const st = r.st || 0, fr = fragsOf(k) || [];
+    const st = r.st || 0, fr = fragsOf(k) || [], pl = pats(r);
     const traits = [1, 2].filter((i) => st >= i * 2).map((i) => `<small class="rf-trait">✦ ${esc(tx("trait." + i))}</small>`).join("");
     const frags = fr.length ? `<details class="rf-frags"><summary>${esc(tx("frags", { n: Math.min(2, Math.floor(st / 2)) }))}</summary>${fr.map((f, i) => st >= (i + 1) * 2 ? `<p>${esc(f)}</p>` : `<p class="muted">🔒 ${esc(tx("fragLock", { n: (i + 1) * 2 }))}</p>`).join("")}</details>` : "";
     return `<div class="rf-mon${b >= 10 ? " max" : ""}${st >= STAR_MAX ? " star5" : ""}"><canvas width="96" height="80" data-mon="${k}"></canvas>
@@ -445,7 +450,7 @@ function refugeHtml() {
       <small class="progress">${esc(tx("lvl", { n: r.lvl }))}</small><div class="bar"><i style="width:${xpPct}%"></i></div>
       <small class="progress rf-bond">♥ ${esc(b >= 10 ? tx("bondMax") : tx("bond", { n: b }))}</small><div class="bar bond"><i style="width:${pct}%"></i></div>
       <small class="muted">${esc(tx("bond." + band, { n: monName(k) }))}</small>
-      ${RPG.talentsHtml ? RPG.talentsHtml(k, true) : ""}${frags}<button class="btn${r.pet === today() ? " ghost" : ""}" type="button" data-rpet="${k}" ${r.pet === today() ? "disabled" : ""}>${esc(r.pet === today() ? tx("petDone") : tx("pet"))}</button></div>`;
+      ${RPG.talentsHtml ? RPG.talentsHtml(k, true) : ""}${frags}<button class="btn${pl ? "" : " ghost"}" type="button" data-rpet="${k}" ${pl ? "" : "disabled"}>${esc(pl ? tx("pet") + (pl > 1 ? ` (${pl})` : "") : tx("petDone"))}</button></div>`;
   }).join("")}</div><p class="muted rf-small">${esc(tx("bondWhy"))}</p><p class="muted rf-small">${esc(tx("starWhy"))}</p>`;
   return h;
 }

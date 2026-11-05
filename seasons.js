@@ -140,9 +140,11 @@ const SHOP = [
 const waxEarned = () => { const s = SS(); return delta("dailyDone") * 3 + delta("expDone") * 4 + delta("expWins") + s.wax; };
 const wax = () => waxEarned() - SS().spent;
 function spend(c) { if (wax() < c) { EV.toast(tx("poor")); EV.sfx("deny"); return false; } SS().spent += c; return true; }
+// helping during an event: once a day, and up to 3 helps wait if you miss days (design rule 4)
+function helps(s) { if (!s.hc) s.hc = { day: s.help || null, left: 0 }; return EV.DAILY.charge(s.hc, 1, 3).left; }
 function help() {
-  const s = SS(), t = EV.DAILY.dayKey(); if (!now().evOn || s.help === t) return;
-  s.help = t; s.wax += 5; s.xp += 50; EV.toast(tx("toast.wax", { n: 5 }), "🕯"); EV.sfx("coin"); save();
+  const s = SS(), t = EV.DAILY.dayKey(); if (!now().evOn || helps(s) <= 0) return;
+  s.help = t; s.hc.left--; s.wax += 5; s.xp += 50; EV.toast(tx("toast.wax", { n: 5 }), "🕯"); EV.sfx("coin"); save();
 }
 function light() {
   const s = SS(); if (!now().evOn || s.lit >= LAMPS || !spend(lampCost(s.lit))) return;
@@ -208,7 +210,7 @@ function eventHtml() {
   if (s.ended) h += `<p class="evt-out">🏮 ${esc(tx("end"))}</p>`;
   if (n.evOn) {
     h += `<div class="ss-wax"><b>${esc(tx("ev.wax", { n: wax() }))}</b><small class="muted">${esc(tx("ev.how"))}</small></div><div class="rc-btns">`;
-    h += `<button class="btn${s.help === EV.DAILY.dayKey() ? " ghost" : ""}" type="button" data-shelp="1" ${s.help === EV.DAILY.dayKey() ? "disabled" : ""}>${esc(s.help === EV.DAILY.dayKey() ? tx("ev.helped") : tx("ev.help"))}</button>`;
+    h += `<button class="btn${helps(s) > 0 ? "" : " ghost"}" type="button" data-shelp="1" ${helps(s) > 0 ? "" : "disabled"}>${esc(helps(s) <= 0 ? tx("ev.helped") : tx("ev.help"))}</button>`;
     h += s.lit < LAMPS ? `<button class="btn" type="button" data-slight="1" ${wax() < lampCost(s.lit) ? "disabled" : ""}>${esc(tx("ev.light", { n: s.lit + 1, c: lampCost(s.lit) }))}</button>` : `<span class="progress">✓ ${esc(tx("ev.lit"))}</span>`;
     h += `</div><h3 class="cat-title">${esc(tx("ev.shop"))}</h3><div class="ss-shop">${SHOP.map((it) => {
       const b = s.bought[it.id] || 0, out = b >= it.max || (it.id.startsWith("esc:") && (EV.P.escritos || {})[it.id.slice(4)]), lock = it.id.startsWith("esc:") && !escOk(it.id.slice(4));
@@ -239,7 +241,7 @@ function hasNews() {
   const s = SS(), lv = passLvl(), n = now();
   for (let l = 1; l <= lv; l++) if (!s.got[l]) return true;
   if (s.pick) return true;
-  if (n.evOn && (s.help !== EV.DAILY.dayKey() || (s.lit < LAMPS && wax() >= lampCost(s.lit)))) return true;
+  if (n.evOn && (helps(s) > 0 || (s.lit < LAMPS && wax() >= lampCost(s.lit)))) return true;
   return false;
 }
 let lastLvl = null;
