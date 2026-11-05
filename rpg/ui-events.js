@@ -11,7 +11,7 @@ function rollEvent() {
   const P = EV.P, seen = P.loreSeen || {};
   const lore = LORE ? Object.keys(LORE.LORE_EVENTS).filter((k) => { const e = LORE.LORE_EVENTS[k]; return e.zone === X.zone && !seen[k] && LORE.needOk(e.need, P); }) : [];
   if (lore.length && rnd() < 0.45) return lore[Math.floor(rnd() * lore.length)];
-  const ev = ZONES[X.zone].events; return ev[Math.floor(rnd() * ev.length)];
+  return drawDeck(X.zone);
 }
 function giveEscrito(id) {
   const P = EV.P; P.escritos = P.escritos || {};
@@ -73,6 +73,7 @@ const EVT_ALT = { es: RPG_ES.EVT_ALT, en: RPG_EN.EVT_ALT };
 // lore events share the encounter view
 if (LORE) for (const lg of ["es", "en"]) Object.assign(EVT[lg], LORE.LORE_EVT[lg]);
 function eventHtml() {
+  if (X.talk && X.talk.id === X.event) return talkHtml();
   const E = EVT[L()][X.event];
   if (X.eventOut == null) {
     const ch = X.event === "orilla" && hasLetter() ? E.cL : E.c, fx = fxOf(X.event);
@@ -251,9 +252,10 @@ function onExpClick(e) {
     else if (n === "boss") startBattle(true);
     else if (n === "rest") { healParty(0.35); for (const m of X.party) if (m.hp <= 0) m.hp = 0.2; EV.sfx("heal"); X.reward = { title: tx("node.rest"), text: tx("node.rest.d"), after: "next" }; show("reward"); }
     else if (n === "chest") { const w = rnd() < 0.35 ? escritoFor("chest", X.zone) : null; if (w) giveEscrito(w); X.reward = { title: tx("node.chest"), offer: offerCards(3, 0), after: "next" }; show("reward"); }
-    else if (n === "event") { X.event = rollEvent(); X.eventOut = null; show("event"); }
+    else if (n === "event") { X.event = rollEvent(); X.eventOut = null; X.talk = null; if (talkEv(X.event)) talkStart(X.event); show("event"); }
     return;
   }
+  if (d.tk != null) { talkPick(+d.tk); return; }
   if (d.ev != null) { EV.P.c.evChoices = (EV.P.c.evChoices || 0) + 1; chooseEvent(+d.ev); return; }
   if (d.take != null) {
     const i = +d.take, r = X.reward;
@@ -272,10 +274,11 @@ function onExpClick(e) {
     case "quit": finish("quit"); break;
     case "continue": afterReward(); break;
     case "evnext":
+      X.talk = null;
       if (X.eventCard) { X.eventCard = null; X.reward = { title: tx("node.chest"), offer: offerCards(3, 0), after: "next" }; show("reward"); }
       else nextSection();
       break;
-    case "evfight": X.eventFight = false; startBattle(false); break;
+    case "evfight": X.talk = null; X.eventFight = false; startBattle(false); break;
     case "home": goHome(); break;
   }
 }

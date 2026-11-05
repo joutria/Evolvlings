@@ -318,7 +318,9 @@ function foeUnits(boss) {
   }
   const count = X.section <= 1 ? 2 : rnd() < 0.5 ? 3 : 2;
   const lvl = Math.max(z.min, Math.round((X.savia ? R.lvl : zoneLvl(z, R.lvl)) * 0.8 + (X.section - 1) * 0.25));
-  return pickN(z.foes.concat(z.foes), count).map((k) => {
+  const kinds = X.eventFoes && X.eventFoes.length ? X.eventFoes.filter((k) => MONS[k]) : pickN(z.foes.concat(z.foes), count);
+  X.eventFoes = null;
+  return kinds.map((k) => {
     const cs = MONS[k].cards;
     const cards = { a: scaled(cs[Math.floor(rnd() * 2)], 0) };
     if (X.section >= 4) cards.p = scaled(cs[1], 0);
@@ -388,6 +390,7 @@ function render() {
   el.innerHTML = head + body;
   if (view === "pick") el.querySelectorAll("canvas[data-mon]").forEach(paintMon);
   if (view === "battle") battleMount();
+  if (view === "event" && X.talk) talkMount(el);
   if (view === "zones") pmapMount();
   el.querySelectorAll("canvas[data-key]").forEach((c) => drawKeyIcon(c.getContext("2d"), c.dataset.key, 8, 8, true));
 }
