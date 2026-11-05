@@ -132,6 +132,8 @@ Six more places in the Builds menu, each improved on its own:
 
 It needs the `playwright` package (`npm i --no-save playwright`), because the second half runs in a headless browser.
 
+`node tools/economy.js` estimates the Chispas a new, a mid and an advanced player earn and spend on a typical day, and how many days of Chispas and of wood all the builds take (design rule 8). It reads prices and rewards from the game files, so it follows every change; `--release` assumes `FAST` is off in `build.js`, `--json` prints the raw numbers. It only warns, never fails.
+
 All modules share one clock, `EV.every(ms, fn)`, which stops while the tab is hidden and catches up when it comes back.
 
 ## Where the RPG code lives
