@@ -29,3 +29,34 @@ function talentsOf(kind, lvl, picks) {
   for (let k = 1; k <= n; k++) { const side = picks[k - 1], ty = talentType(kind, k), T = TALENTS[ty] && TALENTS[ty][side]; if (T) out.push(Object.assign({ type: ty, side, tier: k }, T)); }
   return out;
 }
+
+/* Birth traits (MiniTroopers idea 2): every Refuge companion is born with one small quirk, so two of the same kind
+   are different individuals. roster[kind].bt holds its key; a repeat hatch offers the sibling's trait instead.
+   Stat keys work like talents. day / night: only then. pet: extra Bond when petted. xp: % more trip experience. */
+const BIRTH = {
+  early:   { spd: 5, day: 1, es: "Madrugador", en: "Early riser", fx: { es: "+5 % velocidad de día", en: "+5% speed by day" } },
+  owl:     { spd: 5, night: 1, es: "Trasnochador", en: "Night owl", fx: { es: "+5 % velocidad de noche", en: "+5% speed at night" } },
+  glutton: { hp: 6, es: "Glotón", en: "Glutton", fx: { es: "+6 % vida", en: "+6% life" } },
+  brave:   { str: 4, es: "Valiente", en: "Brave", fx: { es: "+4 % fuerza", en: "+4% strength" } },
+  stubborn:{ def: 5, es: "Testarudo", en: "Stubborn", fx: { es: "+5 % defensa", en: "+5% defence" } },
+  shy:     { dodge: 3, es: "Tímido", en: "Shy", fx: { es: "+3 de esquiva", en: "+3 dodge" } },
+  lucky:   { crit: 3, es: "Afortunado", en: "Lucky", fx: { es: "+3 de crítico", en: "+3 crit" } },
+  sleepy:  { hp: 9, spd: -3, es: "Dormilón", en: "Sleepyhead", fx: { es: "+9 % vida, −3 % velocidad", en: "+9% life, −3% speed" } },
+  cuddly:  { pet: 1, es: "Mimoso", en: "Cuddly", fx: { es: "+1 de Vínculo extra al acariciarlo", en: "+1 extra Bond when petted" } },
+  curious: { xp: 20, es: "Curioso", en: "Curious", fx: { es: "+20 % de experiencia en los viajes", en: "+20% experience from trips" } },
+};
+const BIRTH_KEYS = Object.keys(BIRTH);
+const rollBirth = (not) => { const ks = BIRTH_KEYS.filter((k) => k !== not); return ks[Math.floor(Math.random() * ks.length)]; };
+// a companion hatched before traits existed gets a fixed one from its kind and birth time, until a sibling replaces it
+function birthKey(kind, r) {
+  if (r && BIRTH[r.bt]) return r.bt;
+  let h = 7; for (const ch of kind + ":" + ((r && r.at) || 0)) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return BIRTH_KEYS[h % BIRTH_KEYS.length];
+}
+// the bonuses a companion takes into battle: its talents plus its birth trait when it applies now
+function companionTal(kind, lvl, r) {
+  const out = talentsOf(kind, lvl, r && r.tal), B = BIRTH[birthKey(kind, r)];
+  const day = typeof isDayNow === "function" ? isDayNow() : true;
+  if (B && !(B.day && !day) && !(B.night && day)) out.push(Object.assign({ birth: true }, B));
+  return out;
+}

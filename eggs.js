@@ -27,6 +27,9 @@ const TX = {
     "badge": "Refugio · Nv {l} · ♥ {b}", "born": "¡Ha nacido {n}!", "bornSub": "Ya vive en el Refugio y puede acompañarte en tu próxima expedición.",
     "dup": "¡Otra vez {n}!", "dupSub": "{n} ya tiene sus 5 estrellas. Su hermano se queda con la familia de Tila y te deja {d} ∴ de Polvo y +1 de Vínculo.",
     "dupStar": "¡Otra vez {n}! ★ {s}", "dupStarSub": "Su hermano se queda con la familia de Tila, y crecer juntos le ha hecho bien: {n} llega a {s} estrellas (+4 % a sus estadísticas por estrella) y +1 de Vínculo.",
+    "bornTrait": "Ha nacido con un rasgo propio: {t}.", "sibTrait": "Su hermano nació con otro rasgo: {t}. ¿Con cuál se queda {n}?",
+    "bt.keep": "Seguir con {t}", "bt.take": "Quedarse con {t}", "btTaken": "{n} ahora es {t}.",
+    "btWhy": "Rasgo de nacimiento: cada criatura del Refugio nace con uno. Cuando nace un hermano puedes cambiarlo por el suyo.",
     "starTrait": "Nuevo rasgo: {t}.", "starFrag": "Nuevo fragmento de su historia.", "starMax": "Ya tiene todas las estrellas. Lleva un borde dorado.",
     "trait.1": "Instinto (+5 % de crítico)", "trait.2": "Reflejos de camada (+6 % de esquiva)",
     "stars": "Estrellas", "frags": "Su historia ({n} de 2)", "fragLock": "Se abre con ★ {n}",
@@ -79,6 +82,9 @@ const TX = {
     "badge": "Refuge · Lv {l} · ♥ {b}", "born": "{n} has hatched!", "bornSub": "It lives in the Refuge now and can join your next expedition.",
     "dup": "{n} again!", "dupSub": "{n} already has all 5 stars. Its sibling stays with Tila's family and leaves you {d} ∴ Stardust and +1 Bond.",
     "dupStar": "{n} again! ★ {s}", "dupStarSub": "Its sibling stays with Tila's family, and growing up together did it good: {n} reaches {s} stars (+4% to its stats per star) and +1 Bond.",
+    "bornTrait": "It was born with a trait of its own: {t}.", "sibTrait": "Its sibling was born with another trait: {t}. Which one should {n} keep?",
+    "bt.keep": "Keep {t}", "bt.take": "Take {t}", "btTaken": "{n} is now {t}.",
+    "btWhy": "Birth trait: every Refuge creature is born with one. When a sibling hatches you can swap it for theirs.",
     "starTrait": "New trait: {t}.", "starFrag": "A new piece of its story.", "starMax": "It has every star now. It wears a golden border.",
     "trait.1": "Instinct (+5% crit)", "trait.2": "Litter reflexes (+6% dodge)",
     "stars": "Stars", "frags": "Its story ({n} of 2)", "fragLock": "Opens at ★ {n}",
@@ -292,9 +298,9 @@ function hatch(id) {
   if (i < 0 || left(g.inc[i]) > 0) return;
   const e = g.inc.splice(i, 1)[0], r = g.roster[e.kind];
   EV.P.c.eggHatched = (EV.P.c.eggHatched || 0) + 1;
-  if (r && (r.st || 0) < STAR_MAX) { r.st = (r.st || 0) + 1; r.bxp++; born = { kind: e.kind, star: r.st }; EV.P.c.eggStars = (EV.P.c.eggStars || 0) + 1; }
-  else if (r) { r.bxp++; EV.P.dust = (EV.P.dust || 0) + DUP_DUST[e.tier]; born = { kind: e.kind, dup: DUP_DUST[e.tier] }; }
-  else { g.roster[e.kind] = { lvl: startLvl(), xp: 0, bxp: 0, pet: null, at: Date.now() }; born = { kind: e.kind }; }
+  if (r && (r.st || 0) < STAR_MAX) { r.st = (r.st || 0) + 1; r.bxp++; born = { kind: e.kind, star: r.st, sib: RPG.rollBirth(RPG.birthKey(e.kind, r)) }; EV.P.c.eggStars = (EV.P.c.eggStars || 0) + 1; }
+  else if (r) { r.bxp++; EV.P.dust = (EV.P.dust || 0) + DUP_DUST[e.tier]; born = { kind: e.kind, dup: DUP_DUST[e.tier], sib: RPG.rollBirth(RPG.birthKey(e.kind, r)) }; }
+  else { g.roster[e.kind] = { lvl: startLvl(), xp: 0, bxp: 0, pet: null, at: Date.now(), bt: RPG.rollBirth() }; born = { kind: e.kind, bt: 1 }; }
   autoIncubate();
   tab = "refuge";
   EV.sfx("hatch"); EV.buzz && EV.buzz(40);
@@ -305,9 +311,10 @@ function hatch(id) {
 function pet(k) {
   const r = G().roster[k]; if (!r || r.pet === today()) return;
   const before = bondLvl(r.bxp);
-  r.pet = today(); r.bxp += EV.BUILD ? EV.BUILD.nestPet() : 1;
+  const gain = (EV.BUILD ? EV.BUILD.nestPet() : 1) + (RPG.BIRTH[RPG.birthKey(k, r)].pet || 0);
+  r.pet = today(); r.bxp += gain;
   EV.P.c.refugePets = (EV.P.c.refugePets || 0) + 1;
-  EV.toast(tx("petted", { n: monName(k), b: EV.BUILD ? EV.BUILD.nestPet() : 1 }), "♥"); EV.sfx(bondLvl(r.bxp) > before ? "grow" : "tap");
+  EV.toast(tx("petted", { n: monName(k), b: gain }), "♥"); EV.sfx(bondLvl(r.bxp) > before ? "grow" : "tap");
   save();
 }
 // for rpg/ui-expedition.js: what this creature brings to an expedition
@@ -330,7 +337,7 @@ function afterTrip(res, xp, party, plvl) {
     const b0 = bondLvl(r.bxp), l0 = r.lvl;
     r.bxp += 1 + (res === "win" ? 1 : 0);
     // double experience while behind your creature; never past its level
-    const gain = xp * (r.lvl < plvl ? 2 : 1);
+    const gain = Math.round(xp * (r.lvl < plvl ? 2 : 1) * (1 + (RPG.BIRTH[RPG.birthKey(m.kind, r)].xp || 0) / 100));
     r.xp += gain;
     while (r.lvl < plvl && r.xp >= RPG.xpNeed(r.lvl)) { r.xp -= RPG.xpNeed(r.lvl); r.lvl++; }
     if (r.lvl >= plvl) r.xp = Math.min(r.xp, RPG.xpNeed(r.lvl) - 1);
@@ -395,6 +402,15 @@ function fmtLeft(ms) {
   return h ? `${h} h ${String(mm).padStart(2, "0")} min` : `${mm} min`;
 }
 const eggCv = (tier, crack, w) => `<canvas class="egg-px" width="${w}" height="${Math.round(w * 1.15)}" data-egg="${tier}" data-crack="${crack.toFixed(2)}"></canvas>`;
+// birth traits (data in rpg/data-talents.js)
+const btLabel = (key) => { const B = RPG.BIRTH[key]; return `${B[L()]} (${B.fx[L()]})`; };
+const btName = (k, r) => btLabel(RPG.birthKey(k, r));
+function sibTrait(w) {
+  const r = born && born.sib && G().roster[born.kind]; if (!r) return;
+  if (w === "take") { r.bt = born.sib; EV.toast(tx("btTaken", { n: monName(born.kind), t: RPG.BIRTH[r.bt][L()] }), "🥚"); }
+  else r.bt = RPG.birthKey(born.kind, r);
+  born.sib = null; EV.sfx("tap"); save();
+}
 function refugeHtml() {
   const g = G(), ks = Object.keys(g.roster);
   let h = "";
@@ -404,7 +420,15 @@ function refugeHtml() {
     let s = st ? tx("dupStarSub", { n, s: st }) : born.dup ? tx("dupSub", { n, d: born.dup }) : tx("bornSub");
     if (st === 2 || st === 4) s += " " + tx("starTrait", { t: tx("trait." + st / 2) }) + (fragsOf(born.kind) ? " " + tx("starFrag") : "");
     if (st === STAR_MAX) s += " " + tx("starMax");
-    h += `<div class="rf-born"><canvas width="96" height="80" data-mon="${born.kind}"></canvas><div><h3>${esc(t)}</h3><p class="muted">${esc(s)}</p></div></div>`;
+    const r0 = g.roster[born.kind];
+    if (born.bt && r0) s += " " + tx("bornTrait", { n, t: btName(born.kind, r0) });
+    let pick = "";
+    if (born.sib && r0) {
+      const cur = RPG.birthKey(born.kind, r0);
+      s += " " + tx("sibTrait", { n, t: btLabel(born.sib) });
+      pick = `<div class="rf-sib">${[["keep", cur], ["take", born.sib]].map(([w, key]) => `<button class="btn${w === "keep" ? " ghost" : ""}" type="button" data-rbt="${w}">${esc(tx("bt." + w, { t: btLabel(key) }))}</button>`).join("")}</div>`;
+    }
+    h += `<div class="rf-born"><canvas width="96" height="80" data-mon="${born.kind}"></canvas><div><h3>${esc(t)}</h3><p class="muted">${esc(s)}</p>${pick}</div></div>`;
   }
   if (!ks.length) return h + `<p class="muted">${esc(tx("empty"))}</p>`;
   h += `<div class="rf-grid">${ks.sort((a, b) => g.roster[b].lvl - g.roster[a].lvl).map((k) => {
@@ -417,7 +441,7 @@ function refugeHtml() {
     const frags = fr.length ? `<details class="rf-frags"><summary>${esc(tx("frags", { n: Math.min(2, Math.floor(st / 2)) }))}</summary>${fr.map((f, i) => st >= (i + 1) * 2 ? `<p>${esc(f)}</p>` : `<p class="muted">🔒 ${esc(tx("fragLock", { n: (i + 1) * 2 }))}</p>`).join("")}</details>` : "";
     return `<div class="rf-mon${b >= 10 ? " max" : ""}${st >= STAR_MAX ? " star5" : ""}"><canvas width="96" height="80" data-mon="${k}"></canvas>
       <strong>${esc(monName(k))}</strong>${RPG.typeChip(RPG.MONS[k].types[0])}
-      <small class="rf-stars" title="${esc(tx("stars"))}" aria-label="${esc(tx("stars"))}: ${st}">${"★".repeat(st)}<i>${"☆".repeat(STAR_MAX - st)}</i></small>${traits}
+      <small class="rf-stars" title="${esc(tx("stars"))}" aria-label="${esc(tx("stars"))}: ${st}">${"★".repeat(st)}<i>${"☆".repeat(STAR_MAX - st)}</i></small><small class="rf-bt" title="${esc(tx("btWhy"))}">🥚 ${esc(btName(k, r))}</small>${traits}
       <small class="progress">${esc(tx("lvl", { n: r.lvl }))}</small><div class="bar"><i style="width:${xpPct}%"></i></div>
       <small class="progress rf-bond">♥ ${esc(b >= 10 ? tx("bondMax") : tx("bond", { n: b }))}</small><div class="bar bond"><i style="width:${pct}%"></i></div>
       <small class="muted">${esc(tx("bond." + band, { n: monName(k) }))}</small>
@@ -518,6 +542,7 @@ function onClick(e) {
   else if (d.rtalk) talk(+d.rtalk);
   else if (d.rhatch) hatch(+d.rhatch);
   else if (d.rpet) pet(d.rpet);
+  else if (d.rbt) sibTrait(d.rbt);
   else if (d.rcl) claimCl();
   else if (d.rwel) claimWel(d.rwel);
 }
@@ -532,6 +557,8 @@ css.textContent = `
 .rf-mon canvas, .rf-born canvas { width: 96px; height: 80px; image-rendering: pixelated; align-self: center; }
 .rf-mon .bar { width: 100%; height: 7px; }
 .rf-stars { color: #d9a520; letter-spacing: 1px; font-size: 15px; } .rf-stars i { color: var(--muted); font-style: normal; opacity: .6; }
+.rf-bt { font-size: 12px; color: var(--muted); }
+.rf-sib { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .rf-trait { font-size: 12px; color: var(--moss, #3c7a2c); }
 .rf-mon.star5 { border-color: #d9a520; box-shadow: inset 0 0 0 2px #f2d27a; }
 .rf-frags { width: 100%; font-size: 13px; } .rf-frags summary { cursor: pointer; font-weight: 600; } .rf-frags p { margin: 4px 0; font-family: Georgia, serif; line-height: 1.45; }
