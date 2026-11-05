@@ -222,7 +222,7 @@ Every Refuge companion is born with one small trait of its own (the second MiniT
 
 ## Illustrated path conversations
 
-The path events now include illustrated conversations, in the style of Life in Adventure. They were written in the thread "Crear eventos ilustrados por etapa", and Jose approved them. There are 12 in the Prado Aurora, 9 in the Cráter and 9 in the Bosque.
+The path events now include illustrated conversations, in the style of Life in Adventure. They were written in the thread "Crear eventos ilustrados por etapa", and Jose approved them. There are 12 in the Prado Aurora and 9 in each of the Cráter, Bosque, Hondonada, Lago and Cuevas, plus 10 common ones (campfires, springs, chests...) that can come up anywhere.
 
 - **Data:** `rpg/events-<zone>.js` holds `window.EVEVENTS[zone][id]` with the Spanish text and effects. `rpg/events-<zone>.en.js` holds the English text in the same order.
 - **Shape:** each event is a small conversation:
