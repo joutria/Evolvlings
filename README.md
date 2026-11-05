@@ -126,6 +126,8 @@ Six more places in the Builds menu, each improved on its own:
 - every event a zone can roll has its text and choices in both languages;
 - every card has a name and flavour line in both languages and a lore scene, and every card a player can own has its small art and an animation;
 - the text tables have the same keys in Spanish and English;
+- every zone, creature (bosses aside) and card reads back as a whole entry from the registry;
+- the home maps all have the same size, and every place stands on a free tile and does something when tapped;
 - 200 battles with fixed random seeds all end cleanly.
 
 It needs the `playwright` package (`npm i --no-save playwright`), because the second half runs in a headless browser.
@@ -152,6 +154,7 @@ The old `rpg.js` is now split into `rpg/`. They are still plain scripts, loaded 
 | `ui-events.js` | path events, ending the trip, click wiring |
 | `ui-cards.js` | cards panel (collection, Grimoire, shop) |
 | `ui-hooks.js` | hooks into the main game and the `EV.RPG` export |
+| `registry.js` | one entry per zone, creature and card, and the way to add new ones |
 
 To add a script, add its `<script src>` tag to `index.html` and its path to `CORE` in `sw.js`. `python3 tools/build-single.py out.html` inlines every script into one file.
 
@@ -164,3 +167,14 @@ Jose approved eight rules to keep in every feature. These are the first three:
 - **Backups.** Settings → Backup saves the whole game (creature, profile and journal) as a `.json` file and loads it back. A gentle reminder appears once a week for games with some progress.
 
 To add a path event: write its texts in `EVT` in both `rpg/text-*.js` files, its effects in `rpg/data-events.js` (one object per choice) and its id in a zone's `events`. `node tools/check.js` fails if any of the three is missing, if the choice counts differ, or if an effect has an unknown key.
+
+## Adding content
+
+A zone, creature or card still lives in a few tables (rules, texts in both languages, art), so `rpg/registry.js` gathers each one in a single place:
+
+- `EV.RPG.zone("aurora")`, `EV.RPG.creature("brotin")`, `EV.RPG.card("acorn")` return everything the game knows about it: rules, texts, map position and paths, key items, background, events with their effects, which zones a creature lives in, which creatures own a card, whether it has art.
+- `EV.RPG.addZone(id, def)`, `addCreature(id, def)` and `addCard(id, def)` add a new one in one call and refuse it with a clear message if a piece is missing (a text in one language, an unknown creature or card, an event whose choices and effects differ, an incomplete colour set). `def.decor` can bring the zone's own background as a drawing function, and `def.events` its own path events.
+- `EV.WORLD.addPlace("home", place)` adds a spot to a home map with its name in both languages, its drawing (`obj` can be a function) and what tapping it does (`act`). Tap actions for the built-in places live in the `ACT` table in `world.js`.
+
+The launch content stays in the data files; these calls are for new content and tests. A new creature without a sprite in `sprites.js` is drawn with the plain fallback shape.
+
