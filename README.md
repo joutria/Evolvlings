@@ -166,6 +166,8 @@ Jose approved eight rules to keep in every feature. These are the first three:
 - **Care only adds.** In battle each care value now gives 0 % to +25 % to its stat (it used to be −25 % to +25 %).
 - **Backups.** Settings → Backup saves the whole game (creature, profile and journal) as a `.json` file and loads it back. A gentle reminder appears once a week for games with some progress.
 
+- **Walking and setting out are free** (rule 5). Going between the Glade and El Vado and leaving on an expedition no longer cost 👣 Steps; steps are only spent on rewarded actions (the foraging nook). Expeditions still use the usual energy.
+
 To add a path event: write its texts in `EVT` in both `rpg/text-*.js` files, its effects in `rpg/data-events.js` (one object per choice) and its id in a zone's `events`. `node tools/check.js` fails if any of the three is missing, if the choice counts differ, or if an effect has an unknown key.
 
 ## Adding content

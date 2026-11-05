@@ -12,7 +12,7 @@ const $ = EV.$, esc = EV.escapeHtml, L = () => EV.LANG;
 // one entry per system: [title, text]; the key is the panel name (or "exp" for the expedition screen)
 const TIPS = {
   es: {
-    map: ["El Claro", "Toca un sitio para que tu criatura vaya andando: comedero, cama, charca, tablón... Cuidarla no cuesta nada. Ir a otro mapa o salir de expedición gasta unos pocos 👣 Pasos, que se recargan cada día."],
+    map: ["El Claro", "Toca un sitio para que tu criatura vaya andando: comedero, cama, charca, tablón... Cuidarla, ir a otro mapa y salir de expedición no cuestan nada; los 👣 Pasos solo se gastan en el Rincón de búsqueda."],
     cards: ["Cartas", "Cada carta tiene tres efectos y solo funciona el del hueco donde la pongas (Activa, Pasiva o Soporte). Cinco copias iguales se mejoran a la rareza siguiente; las repetidas que sobren dan ∴ Polvo de Estrella. Usa el buscador y los Filtros para encontrarlas."],
     teams: ["Equipos", "Elige dos compañeros del Refugio para ir contigo y qué cartas lleva cada uno. Puedes guardar hasta 5 equipos y cargarlos con un toque antes de salir."],
     daily: ["Tareas y premios", "Cuatro tareas al día y seis a la semana dan ♪ Notas del Canto. Lo que no hagas hoy se guarda hasta 2 días más, y el calendario nunca se pierde si faltas."],
@@ -25,7 +25,7 @@ const TIPS = {
     exp: ["Expediciones", "Elige una zona, dos compañeros y tus cartas. Si superas el nivel de una zona, sus enemigos suben poco, así que puedes volver más fuerte a por las 3 ★. Perder solo acorta el viaje: no pierdes cartas ni niveles."],
   },
   en: {
-    map: ["The Glade", "Tap a spot and your creature walks there: bowl, bed, pond, notice board... Caring for it is free. Going to another map or setting out on an expedition spends a few 👣 Steps, which refill every day."],
+    map: ["The Glade", "Tap a spot and your creature walks there: bowl, bed, pond, notice board... Caring for it, going to another map and setting out are all free; 👣 Steps are only spent at the foraging nook."],
     cards: ["Cards", "Each card has three effects and only the one for its slot works (Active, Passive or Support). Five identical copies upgrade to the next rarity; spare duplicates give ∴ Stardust. Use search and Filters to find them."],
     teams: ["Teams", "Pick two Refuge companions to come with you and the cards each one carries. Save up to 5 teams and load one with a tap before you leave."],
     daily: ["Tasks and rewards", "Four daily and six weekly tasks give ♪ Song Notes. What you don't do today keeps for 2 more days, and the calendar never resets if you miss a day."],
@@ -45,7 +45,7 @@ const GLOSS = {
     ["♪", "Notas del Canto", "Tareas diarias y semanales, 3 ★ en una zona, la temporada y el Refugio. También se cambian Chispas por Notas (con límite semanal).", "Huevos del Refugio y el Pozo de los Ecos. Nunca caducan."],
     ["∴", "Polvo de Estrella", "Deshaciendo cartas repetidas, huevos repetidos y el Rincón de búsqueda.", "Crear cartas en el Grimorio (Cartas → Grimorio)."],
     ["🪵", "Madera", "Al terminar expediciones y con trabajos de tus compañeros.", "Obras del Claro."],
-    ["👣", "Pasos", "10 cada día; se guardan hasta 20 y se pueden comprar unos pocos.", "Ir a otro mapa, el Rincón de búsqueda y salir de expedición."],
+    ["👣", "Pasos", "10 cada día; se guardan hasta 20 y se pueden comprar unos pocos.", "Buscar en el Rincón de búsqueda. Pasear y salir de expedición son gratis."],
     ["🕯", "Cera", "Solo durante el evento: tareas, expediciones y ayudar a Tila.", "Encender los faroles del evento."],
   ],
   en: [
@@ -53,7 +53,7 @@ const GLOSS = {
     ["♪", "Song Notes", "Daily and weekly tasks, 3 ★ in a zone, the season and the Refuge. Chispas can also be traded for Notes (weekly limit).", "Refuge eggs and the Well of Echoes. They never expire."],
     ["∴", "Stardust", "Breaking down duplicate cards, duplicate eggs and the foraging nook.", "Crafting cards in the Grimoire (Cards → Grimoire)."],
     ["🪵", "Wood", "Finishing expeditions and your companions' jobs.", "Glade builds."],
-    ["👣", "Steps", "10 a day; up to 20 keep and a few can be bought.", "Going to another map, the foraging nook and setting out on expeditions."],
+    ["👣", "Steps", "10 a day; up to 20 keep and a few can be bought.", "Searching the foraging nook. Walking around and setting out are free."],
     ["🕯", "Wax", "Only during the event: tasks, expeditions and helping Tila.", "Lighting the event's lanterns."],
   ],
 };
