@@ -189,7 +189,7 @@ The game keeps three things in the browser: the creature, the profile (everythin
 
 ## Card filters
 
-The collection has a search box (name, type, owner, effects and lore, ignoring accents) and a sort menu (usable first, newest, rarity, type, name, copies) with a button to reverse it. **Filters** opens chips for type, rarity, effect (damage, several targets, healing, shield and defence, foe statuses, boosts, cleanse) and quick toggles (favourites, usable, in use, ready to upgrade). Chips of different groups combine. Open a card to mark it as a favourite: favourites show a star and always come first. Favourites and the sort order are saved; the filters reset on reload.
+The collection has a search box (name, type, owner, effects and lore, ignoring accents) and a sort menu (usable first, newest, rarity, type, name, copies) with a button to reverse it. **Filters** opens chips for type, rarity, effect (damage, several targets, healing, shield and defence, foe statuses, boosts, cleanse) and quick toggles (favourites, usable, in use, ready to upgrade). Chips of different groups combine. Open a card to mark it as a favourite: favourites show a star and always come first. Favourites and the sort order are saved; the filters reset on reload. The same search, sort and filters appear in the card picker used everywhere cards are chosen (your creature's slots, Teams, the companions' cards and the screen before an expedition), with their own filter state and only the types that picker offers.
 
 ## Zone levels when you come back stronger
 
