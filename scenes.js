@@ -1422,6 +1422,639 @@ NOTE.rootheart = { scene: "Dentro de la Raíz hay un corazón de madera que late
 SCENE.rootheart = () => { const b = PL.root({ seed: 21 });
   return hd(b, (g) => { [[16, P.butter], [11, P.ember3], [6, SAP.sheen]].forEach(([r, c], i) => HD.stroke(g, (gg) => gg.arc(32, 26, r + 6, 0, Math.PI * 2), c, .4 + i * .1));
     glowDot(g, 32, 26, 6, P.ember3, 40); HD.shape(g, (gg) => HD.blob(gg, [[26, 22], [29, 18], [32, 21], [35, 18], [38, 22], [32, 32]]), { fill: P.soil2, shade: P.soil1, light: P.soil3, lw: .45 }); HD.dot(g, 30, 22, .7, P.butter); }); };
+/* ================= Event scenes, v2: Prado Aurora =================
+   Life in Adventure-like plates: 128x96 native pixels (4x the card scenes), shown at 512x384.
+   Backgrounds are built in depth layers (far = dark and flat, near = outlined and detailed) so props read
+   at a glance; people and creatures are the same hand-drawn figures as the cards, on top.
+   EVNOTE[id] = { scene, hidden }. */
+const EVSC = {}, EVNOTE = {};
+const EW = 128, EH = 96, EK = 4;
+function hd2(b, fn) {
+  const c = canvas(EW * EK, EH * EK), g = c.getContext("2d"), s = canvas(EW, EH); b.draw(s.getContext("2d"));
+  g.imageSmoothingEnabled = false; g.drawImage(s, 0, 0, EW * EK, EH * EK);
+  g.save(); g.scale(EK, EK); g.lineJoin = "round"; g.lineCap = "round"; fn(g); g.restore(); return c;
+}
+let OL = P.ink; // outline tone for near props, set per scene
+const BGC = [P.ink, P.sea0, P.plum1, P.plum2]; // colours a light spill may tint
+
+/* ---------- clean light: no dithering. Colours are mixed between palette tones and posterised in flat steps ---------- */
+const hx = (c) => [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16));
+const mix = (a, b, t) => { const A = hx(a), B = hx(b); return "#" + A.map((v, i) => Math.round(v + (B[i] - v) * t).toString(16).padStart(2, "0")).join(""); };
+// vertical gradient in n flat bands
+function band(b, x, y, w, h, c0, c1, n = 6, c2) { for (let j = 0; j < h; j++) { const f = Math.min(n - 1, Math.floor(j / h * n)) / (n - 1);
+  const c = c2 ? (f < .5 ? mix(c0, c1, f * 2) : mix(c1, c2, (f - .5) * 2)) : mix(c0, c1, f); b.r(x, y + j, w, 1, c); } }
+// soft light in flat rings: pulls the pixels already there toward col
+function light(b, cx, cy, rx, ry, col, a = .6, n = 4) { for (let y = Math.floor(cy - ry); y <= cy + ry; y++) for (let x = Math.floor(cx - rx); x <= cx + rx; x++) {
+  const d = Math.hypot((x + .5 - cx) / rx, (y + .5 - cy) / ry); if (d >= 1) continue; const cur = b.g(x, y); if (!cur) continue;
+  const k = Math.ceil((1 - d) * n) / n; b.p(x, y, mix(cur, col, a * k * k)); } }
+// a haze band: everything between y0 and y1 drifts toward col, strongest at the middle
+function haze(b, y0, y1, col, a = .5, n = 4) { for (let y = y0; y < y1; y++) { const f = 1 - Math.abs((y - y0) / (y1 - y0) * 2 - 1), k = Math.ceil(f * n) / n * a;
+  for (let x = 0; x < EW; x++) { const cur = b.g(x, y); if (cur) b.p(x, y, mix(cur, col, k)); } } }
+// tint a whole rectangle (to push a layer back in depth)
+function tint(b, x0, y0, w, h, col, a) { for (let y = y0; y < y0 + h; y++) for (let x = x0; x < x0 + w; x++) { const c = b.g(x, y); if (c) b.p(x, y, mix(c, col, a)); } }
+// figures drawn as vector, then snapped to the same pixel grid as the scene (alpha cut, no soft edges)
+function pixFig(fn, res = 2) {
+  const W = EW * res, H = EH * res, c = canvas(W, H), g = c.getContext("2d");
+  g.save(); g.scale(res, res); g.lineJoin = "round"; g.lineCap = "round"; fn(g); g.restore();
+  const im = g.getImageData(0, 0, W, H), d = im.data;
+  for (let i = 0; i < d.length; i += 4) { if (d[i + 3] < 165) { d[i + 3] = 0; continue; } d[i + 3] = 255; }
+  g.putImageData(im, 0, 0); return c;
+}
+function plate(b, figs, res = 2) {
+  const c = canvas(EW * EK, EH * EK), g = c.getContext("2d"), s = canvas(EW, EH); b.draw(s.getContext("2d"));
+  g.imageSmoothingEnabled = false; g.drawImage(s, 0, 0, EW * EK, EH * EK);
+  if (figs) g.drawImage(pixFig(figs, res), 0, 0, EW * EK, EH * EK); return c;
+}
+
+/* ---------- scenery kit ---------- */
+// far rooftops: flat dark silhouettes with a few warm windows
+function skyline(b, y, col, seed, lit = P.ember3) {
+  const r = rng(seed); let x = -2;
+  while (x < EW) { const w = 8 + Math.floor(r() * 9), h = 4 + Math.floor(r() * 7), roof = 2 + Math.floor(r() * 4);
+    b.r(x, y - h, w, h + 30, col); b.poly([[x - 1, y - h], [x + w / 2, y - h - roof], [x + w + 1, y - h]], col);
+    if (r() < .5) b.r(x + 2, y - h - roof, 2, roof, col);
+    for (let i = 0; i < 2; i++) if (r() < .45) b.p(x + 2 + Math.floor(r() * (w - 4)), y - h + 2 + Math.floor(r() * 3), lit);
+    x += w + Math.floor(r() * 2); }
+}
+// the Torre del Alba: seven floors, the lantern that never goes out on top
+function towerAlba(b, x, top, w, base, o = {}) {
+  const wall = o.wall || P.plum2, dark = o.dark || P.plum1;
+  b.layer((t) => {
+    t.r(x, top, w, base - top, wall); t.r(x + w - 2, top, 2, base - top, dark);
+    const fl = (base - top) / 7;
+    for (let i = 1; i < 7; i++) { const y = Math.round(top + i * fl); t.r(x - 1, y, w + 2, 1, o.trim || P.mist); }
+    for (let i = 0; i < 7; i++) { const y = Math.round(top + i * fl + fl / 2 - 1); t.r(x + Math.floor(w / 2) - 1, y, 2, 3, o.lit ? P.ember4 : dark); }
+    t.poly([[x - 2, top], [x + w / 2, top - 7], [x + w + 2, top]], dark);
+    t.r(x + w / 2 - 2, top - 13, 4, 6, P.butter); t.r(x + w / 2 - 3, top - 14, 6, 1, P.mist); t.r(x + w / 2 - 3, top - 7, 6, 1, P.mist); t.p(x + w / 2 - 1, top - 11, P.cream);
+  }, o.ol || wall);
+  light(b, x + w / 2, top - 10, 16, 14, P.ember4, .4, 5);
+}
+// detailed house: stone courses, timber frame, tiled roof, framed windows, planked door. o.night tints it down
+function house2(b, x, y, w, h, o = {}) {
+  const N = o.night;
+  const wall = o.wall || (N ? P.plum2 : P.fog), course = N ? P.plum1 : P.mist, edge = N ? P.plum3 : P.cream;
+  const beam = P.soil0, tile = o.tile || (N ? [P.plum1, P.ink, P.plum2] : [P.ember1, P.ember0, P.ember2]);
+  const rh = o.roofH || Math.round(w * .32);
+  b.layer((t) => {
+    t.r(x, y, w, h, wall);
+    for (let j = y + 3; j < y + h; j += 3) { t.r(x, j, w, 1, course); for (let i = x + ((j / 3) % 2 ? 2 : 5); i < x + w; i += 7) t.p(i, j + 1, course); }
+    t.r(x, y, 1, h, edge);
+    if (o.timber !== false) { t.r(x, y, w, 1, beam); t.r(x, y + Math.floor(h * .45), w, 1, beam); t.r(x, y, 1, h, beam); t.r(x + w - 1, y, 1, h, beam); }
+    // roof
+    t.poly([[x - 3, y + 1], [x + w / 2, y - rh], [x + w + 3, y + 1]], tile[0]);
+    for (let j = y - rh + 3; j <= y; j += 2) { const f = (j - (y - rh)) / rh, hw = (w / 2 + 3) * f; for (let i = Math.ceil(x + w / 2 - hw) + (j % 4 ? 0 : 1); i < x + w / 2 + hw; i += 2) t.p(i, j, tile[1]); }
+    t.l(x - 3, y + 1, x + w / 2, y - rh, tile[2]); t.r(x - 3, y + 1, w + 6, 1, tile[1]);
+    if (o.chimney) t.r(x + Math.round(w * .7), y - rh * .7 - 3, 3, 6, course);
+    // windows
+    (o.win || []).forEach(([wx, wy, lit, box]) => { const X = x + wx, Y = y + wy;
+      t.r(X - 1, Y - 1, 8, 9, beam); t.r(X, Y, 6, 7, lit ? P.butter : (N ? P.ink : P.sea1));
+      if (lit) { t.r(X, Y + 4, 6, 3, P.ember4); t.p(X + 1, Y + 1, P.cream); } else t.p(X + 1, Y + 1, N ? P.plum2 : P.sea3);
+      t.r(X + 3, Y, 1, 7, beam); t.r(X, Y + 3, 6, 1, beam); t.r(X - 2, Y + 8, 10, 1, edge);
+      if (box) { t.r(X - 1, Y + 9, 8, 2, P.soil1); [0, 2, 4, 6].forEach((k) => t.p(X + k, Y + 8, k % 4 ? P.rose2 : P.cream)); } });
+    // door
+    if (o.door != null) { const X = x + o.door, Y = y + h - 13;
+      t.r(X - 1, Y - 1, 9, 14, beam); t.r(X, Y, 7, 13, o.doorLit ? P.ember3 : P.soil1); for (let i = X + 2; i < X + 7; i += 2) t.r(i, Y + 1, 1, 12, P.soil0);
+      t.p(X + 5, Y + 7, P.ember4); t.r(X - 2, Y + 13, 11, 1, edge); }
+  }, OL);
+  (o.win || []).forEach(([wx, wy, lit]) => { if (lit) light(b, x + wx + 3, y + wy + 3, 10, 9, P.ember4, N ? .35 : .2, 3); });
+}
+// an Albor street lantern on a post: base, post, crossbar, glass cage; o.sap = the hidden 1 px seam
+function lamp2(b, x, gy, h, o = {}) {
+  const top = gy - h, s = o.small;
+  b.layer((t) => {
+    t.r(x - (s ? 1 : 2), gy - 2, s ? 3 : 5, 2, P.plum2); t.r(x, top, 1, h, P.plum1); if (!s) t.r(x + 1, top, 1, h, P.plum2);
+    if (!s) { t.r(x - 3, top + 2, 8, 1, P.plum1); t.p(x - 3, top + 3, P.plum1); t.p(x + 4, top + 3, P.plum1); }
+    const gw = s ? 3 : 5, gh = s ? 4 : 7, gx = x + 1 - Math.ceil(gw / 2);
+    t.r(gx - 1, top - gh - 1, gw + 2, 1, P.mist); t.poly([[gx - 1, top - gh - 1], [gx + gw / 2, top - gh - (s ? 3 : 4)], [gx + gw + 1, top - gh - 1]], P.plum2);
+    t.r(gx, top - gh, gw, gh, o.off ? P.plum1 : P.butter); if (!o.off && !s) { t.r(gx + 1, top - gh + 1, gw - 2, gh - 3, P.cream); t.r(gx, top - 2, gw, 2, P.ember4); t.r(gx + 2, top - gh, 1, gh, P.mist); }
+    t.r(gx - 1, top, gw + 2, 1, P.mist);
+  }, OL);
+  if (!o.off) { const gh = s ? 4 : 7; light(b, x + .5, top - gh / 2, o.r || 18, (o.r || 18) * .8, o.gc || P.ember4, o.k || .45, 5); }
+  if (o.sap) { b.p(x - 1, top + 1, SAP.s2); b.p(x, top + 1, SAP.s2); b.p(x + 1, top + 1, SAP.sheen); }
+}
+// cobbles in perspective: rows grow toward the viewer
+function cobbles2(b, y0, o = {}) {
+  const base = o.base || P.plum1, st = o.stone || P.plum2, hi = o.hi || P.plum3, r = rng(o.seed || 9);
+  b.r(0, y0, EW, EH - y0, base);
+  let y = y0 + 1, row = 0;
+  while (y < EH) { const rh = 1 + Math.floor((y - y0) / 7), sw = 3 + Math.floor((y - y0) / 4);
+    for (let x = -((row * 3) % sw); x < EW; x += sw + 1) { const w = sw - Math.floor(r() * 2); b.r(x, y, w, rh, st); b.r(x, y, w, 1, hi); b.p(x, y, o.hi2 || P.mist); }
+    y += rh + 1; row++; }
+  b.r(0, y0, EW, 1, P.ink);
+}
+const latas = (b, list) => b.layer((t) => list.forEach(([x, y]) => { t.r(x, y - 7, 6, 7, P.mist); t.r(x + 4, y - 7, 2, 7, P.plum3); t.r(x + 1, y - 6, 1, 5, P.cream);
+  t.r(x, y - 8, 6, 1, P.fog); t.r(x + 2, y - 9, 2, 1, P.plum3); t.r(x + 1, y - 4, 4, 2, P.ember1); t.p(x + 2, y - 4, P.ember2); }));
+function whiteFlowers(b, x0, x1, y0, y1, seed, greyFn) { const r = rng(seed);
+  for (let i = 0; i < (x1 - x0) * (y1 - y0) / 24; i++) { const x = x0 + Math.floor(r() * (x1 - x0)), y = y0 + Math.floor(r() * (y1 - y0)), grey = greyFn && greyFn(x, y);
+    const big = y > y0 + (y1 - y0) * .5; b.p(x, y + 1, grey ? P.plum2 : P.moss1);
+    if (big) { b.p(x - 1, y, grey ? P.plum3 : P.cream); b.p(x + 1, y, grey ? P.plum3 : P.cream); b.p(x, y - 1, grey ? P.plum3 : P.cream); b.p(x, y, grey ? P.mist : P.butter); }
+    else b.p(x, y, grey ? P.plum3 : P.cream); } }
+
+/* ---------- 1 · Pabilo, el farolero que cuenta ---------- */
+EVNOTE.farolero = { scene: "Una calle del Prado de noche. Pabilo, farolero viejo de la Casa Albor, enciende con su pértiga el farol ciento doce. Al fondo, entre la neblina, la Torre del Alba; el cielo brilla tanto que no se ve ni una estrella.",
+  hidden: "A su lado hay tres latas de aceite con el sello rojo sin romper, y en la base del farol asoma la línea de savia de un píxel." };
+EVSC.farolero = () => { const b = new Pic(EW, EH); OL = mix(P.ink, P.plum1, .4);
+  band(b, 0, 0, EW, 64, P.ink, P.plum1, 8, mix(P.plum2, P.rose0, .35));
+  towerAlba(b, 58, 16, 11, 64, { wall: mix(P.plum2, P.plum3, .3), dark: P.plum2, trim: P.plum3, lit: true });
+  skyline(b, 52, mix(P.plum1, P.plum2, .5), 4, mix(P.ember3, P.plum2, .4));
+  haze(b, 40, 64, mix(P.plum2, P.rose0, .4), .45);
+  house2(b, -6, 22, 46, 44, { night: true, win: [[10, 8, 1, 1], [28, 8, 0, 1], [10, 26, 1]], door: 26, chimney: true });
+  house2(b, 92, 26, 42, 40, { night: true, win: [[8, 8, 1, 1], [24, 8, 1], [24, 24, 0]], door: 8 });
+  b.poly([[40, 66], [56, 53], [72, 53], [92, 66]], mix(P.plum1, P.plum2, .4));
+  [[53, 55, 8, true], [71, 55, 8, true], [47, 59, 13], [80, 59, 13]].forEach(([x, gy, h, sm]) => lamp2(b, x, gy, h, { small: sm, r: sm ? 7 : 11, k: .35 }));
+  tint(b, 40, 30, 52, 36, mix(P.plum2, P.rose0, .4), .25);
+  cobbles2(b, 66, { base: P.plum1, stone: mix(P.plum1, P.plum2, .6), hi: P.plum2, hi2: mix(P.plum2, P.plum3, .5), seed: 12 });
+  latas(b, [[66, 90], [73, 91], [69, 84]]);
+  lamp2(b, 96, 88, 54, { r: 30, k: .5, sap: true });
+  return plate(b, (g) => {
+    F(g, 84, 92, CAST.albor, { s: 1.75, beard: P.fog, hairStyle: "none", cloth: [P.butter, P.ember3, P.cream], front: [92.6, 34.4], back: [80.4, 77], emo: "closed",
+      hold: (q, x, y) => { HD.stroke(q, (z) => { z.moveTo(x - 1, y + 9); z.lineTo(x + .6, y - 2.2); }, P.ink, .8); HD.stroke(q, (z) => { z.moveTo(x - 1, y + 9); z.lineTo(x + .6, y - 2.2); }, P.soil2, .4); HD.dot(q, x + .7, y - 2.6, .5, P.ember4); } });
+    HD.shape(g, (q) => q.rect(77.6, 75.6, 3.6, 2.8), { fill: P.cream, shade: P.fog, sx: 0, sy: .6, lw: .3 }); }); };
+
+/* ---------- 2 · Alvar, el chico de las botas limpias ---------- */
+EVNOTE.alvar = { scene: "Atardecer en una plaza del Prado, entre un parterre de flores blancas y los primeros faroles. Un chico con un abrigo remendado te corta el paso con los brazos abiertos. Detrás, la Torre del Alba.",
+  hidden: "Sus botas brillan como dos faroles, cosa que nadie del Barrio puede pagar, y en una ventana alta de la Torre hay una silueta mirando." };
+EVSC.alvar = () => { const b = new Pic(EW, EH); OL = P.soil0;
+  band(b, 0, 0, EW, 66, mix(P.sea0, P.rose0, .5), P.ember2, 9, P.butter);
+  b.e(34, 50, 8, 8, P.cream); light(b, 34, 50, 34, 26, P.butter, .55, 5);
+  skyline(b, 58, mix(P.rose0, P.ember1, .35), 21, P.ember4);
+  haze(b, 46, 66, P.ember3, .35);
+  towerAlba(b, 84, 20, 16, 66, { wall: mix(P.plum3, P.rose0, .3), dark: mix(P.plum2, P.rose0, .3), trim: mix(P.fog, P.ember3, .3), ol: mix(P.plum2, P.rose0, .3), lit: false });
+  b.r(91, 44, 2, 3, P.ink); b.p(91, 43, P.ink);
+  house2(b, -4, 28, 40, 38, { win: [[8, 8, 1, 1], [24, 8, 0, 1]], door: 14, chimney: true });
+  house2(b, 104, 34, 30, 32, { win: [[6, 8, 1]], door: 16 });
+  tint(b, 0, 20, EW, 46, P.ember3, .12);
+  cobbles2(b, 66, { base: P.soil1, stone: mix(P.soil1, P.soil2, .6), hi: P.soil2, hi2: P.soil3, seed: 31 });
+  b.layer((t) => { t.r(0, 78, 40, 18, P.moss1); t.r(0, 77, 41, 1, P.mist); t.r(40, 77, 1, 19, P.mist); }, OL);
+  whiteFlowers(b, 1, 39, 80, 95, 5);
+  [[48, 66, 30], [76, 66, 24]].forEach(([x, gy, h]) => lamp2(b, x, gy, h, { r: 10, k: .3 }));
+  light(b, 64, 60, 60, 30, P.ember4, .18, 3);
+  return plate(b, (g) => {
+    F(g, 64, 90, CAST.poor, { s: 1.75, hair: P.butter, hairStyle: "short", cloth: [P.soil1, P.soil0, P.soil2], front: [76.4, 66.2], back: [51.6, 67.4], emo: "open" });
+    [[62.2, 89.5], [66.3, 89.5]].forEach(([x, y]) => { HD.shape(g, (q) => HD.E(q, x, y, 1.4, .8), { fill: P.butter, lw: .35 }); HD.dot(g, x - .5, y - .3, .35, P.cream); });
+    [[59.5, 72], [64.4, 75], [61.6, 79]].forEach(([x, y]) => HD.stroke(g, (q) => { q.moveTo(x, y); q.lineTo(x + 1.6, y + 1.4); }, P.soil0, .45)); }); };
+
+/* ---------- 3 · Nim bajo la verja ---------- */
+EVNOTE.verja = { scene: "Las afueras del Prado de noche. Las flores blancas se vuelven grises cerca de la verja de Albor. Nim, de rodillas junto a un hueco excavado bajo los barrotes, dibuja con carbón en una piedra. Al otro lado, de la boca de un pozo con aros de hierro sube una columna de luz fría.",
+  hidden: "Dentro de la columna de luz suben gotas de savia, y a lo lejos, a la izquierda, se acerca el farolillo de un guarda." };
+EVSC.verja = () => { const b = new Pic(EW, EH); OL = P.ink;
+  band(b, 0, 0, EW, 60, P.ink, P.sea0, 7, mix(P.sea0, P.plum2, .5));
+  const r = rng(41); for (let i = 0; i < 22; i++) { const x = 44 + Math.floor(r() * 84), y = Math.floor(r() * 34); b.p(x, y, i % 4 ? mix(P.fog, P.sea0, .4) : P.cream); }
+  light(b, 0, 58, 46, 22, P.ember3, .35, 4);
+  skyline(b, 60, mix(P.ink, P.plum1, .5), 9, P.ember4);
+  b.poly([[0, 64], [0, 58], [30, 56], [64, 59], [100, 55], [128, 57], [128, 64]], mix(P.plum1, P.sea0, .5));
+  haze(b, 50, 66, mix(P.sea0, P.plum2, .5), .4);
+  band(b, 0, 62, EW, 34, mix(P.moss0, P.sea0, .4), P.moss1, 5);
+  // the well and its column of cold light
+  const wx = 94, wy = 64;
+  for (let y = 0; y < wy; y++) { const f = y / wy, hw = 4 + f * 9; for (let x = Math.floor(wx - hw); x <= wx + hw; x++) { const d = Math.abs(x + .5 - wx) / hw; if (d < 1) { const k = Math.ceil((1 - d) * 3) / 3 * (.2 + f * .45); b.p(x, y, mix(b.g(x, y), P.sea3, k)); } } }
+  light(b, wx, wy, 34, 16, P.sea2, .45, 4);
+  b.layer((t) => { t.e(wx, wy + 1, 16, 5, P.plum2); t.r(wx - 16, wy + 1, 33, 4, P.plum2); t.e(wx, wy + 5, 16, 3, P.plum1); for (let i = -14; i <= 14; i += 4) t.r(wx + i, wy + 2, 1, 5, P.plum1);
+    t.e(wx, wy, 13.5, 3.6, P.sea4); t.e(wx, wy + .3, 9.5, 2.2, P.cream); }, mix(P.ink, P.sea0, .5));
+  b.layer((t) => { t.r(wx - 15, wy - 16, 2, 17, P.plum2); t.r(wx + 14, wy - 16, 2, 17, P.plum2); t.r(wx - 16, wy - 17, 33, 2, P.plum2); t.r(wx - 15, wy - 17, 31, 1, P.plum3); }, mix(P.ink, P.sea0, .5));
+  for (let i = 0; i < 4; i++) b.l(wx - 6 + i * 4, wy - 15, wx - 7 + i * 4.4, wy - 1, mix(P.ember4, P.sea3, .3));
+  [[wx - 3, wy - 22], [wx + 4, wy - 30], [wx - 5, wy - 38], [wx + 1, wy - 46]].forEach(([x, y]) => dropUp(b, x, y));
+  whiteFlowers(b, 0, EW, 68, 95, 17, (x, y) => x > 44 || (x > 26 && (x + y) % 2));
+  const fy = 80, iron = mix(P.ink, P.plum1, .6), iron2 = P.plum2;
+  for (let x = 2; x < EW; x += 7) { b.r(x, fy - 24, 1, 25, iron); b.poly([[x - 1, fy - 24], [x + .5, fy - 28], [x + 2, fy - 24]], iron); }
+  b.r(0, fy - 20, EW, 1, iron2); b.r(0, fy - 6, EW, 1, iron2);
+  b.r(58, fy - 30, 5, 31, iron2); b.r(58, fy - 30, 1, 31, P.plum3); b.poly([[57, fy - 30], [60.5, fy - 35], [64, fy - 30]], iron2);
+  b.e(60.5, fy - 18, 4.4, 4.4, P.ember3); b.e(60.5, fy - 18, 3, 3, P.ember4); b.r(60, fy - 21, 1, 5, P.butter); b.r(58, fy - 19, 5, 1, P.butter);
+  b.e(40, fy + 1, 9, 3.6, P.ink); b.e(40, fy, 7, 2.2, P.sea0);
+  b.e(28, fy + 4, 7, 2.6, P.soil0); b.e(27, fy + 3, 5, 1.6, P.soil1);
+  b.e(16, 88, 7, 4.2, P.plum3); b.e(15, 87, 5, 2.6, P.mist); b.r(9, 90, 14, 1, P.plum2);
+  b.l(12, 86, 15, 88, P.ink); b.l(15, 88, 18, 86, P.ink); b.p(13, 89, P.ink); b.p(19, 88, P.ink);
+  light(b, 6, 60, 9, 7, P.ember4, .5, 3); b.r(6, 58, 1, 2, P.butter);
+  return plate(b, (g) => {
+    F(g, 26, 92, CAST.night, { s: 1.6, hat: null, hair: P.ink, hairStyle: "short", pose: "kneel", front: [16.4, 86.4], back: [23, 84], emo: "open",
+      hold: (q, x, y) => HD.stroke(q, (z) => { z.moveTo(x, y); z.lineTo(x - .5, y + 1); }, P.ink, .6) }); }); };
+
+const EVART = {};
+function evArt(id) { if (!EVSC[id]) return null; return EVART[id] || (EVART[id] = EVSC[id]()); }
+/* ================= Event scenes, v2: Prado Aurora (rest of the deck) ================= */
+// a poor street of the Barrio Apagado at night: plank houses, one lit street far off
+function barrio(b, o = {}) {
+  OL = mix(P.ink, P.plum1, .4);
+  band(b, 0, 0, EW, 62, P.ink, P.sea0, 7, mix(P.plum1, P.plum2, .4));
+  if (o.stars !== false) { const r = rng(o.seed || 3); for (let i = 0; i < 14; i++) b.p(Math.floor(r() * EW), Math.floor(r() * 26), i % 3 ? mix(P.fog, P.sea0, .5) : P.fog); }
+  skyline(b, 54, mix(P.ink, P.plum1, .5), (o.seed || 3) + 5, mix(P.ember3, P.plum1, .5));
+  haze(b, 42, 62, mix(P.plum1, P.sea0, .5), .4);
+}
+const poorH = (b, x, y, w, h, win, door) => house2(b, x, y, w, h, { night: true, wall: mix(P.soil0, P.plum1, .35), tile: [P.plum1, P.ink, P.plum2], timber: false, win, door });
+function plankWall(b, x, y, w, h, col) { b.r(x, y, w, h, col); for (let i = x + 2; i < x + w; i += 4) b.r(i, y, 1, h, mix(col, P.ink, .35)); b.r(x, y, w, 1, mix(col, P.mist, .2)); }
+function dirt(b, y0, col = P.plum1) { band(b, 0, y0, EW, EH - y0, mix(col, P.soil0, .3), col, 4); const r = rng(77); for (let i = 0; i < 40; i++) b.r(Math.floor(r() * EW), y0 + 2 + Math.floor(r() * (EH - y0 - 2)), 2, 1, mix(col, P.plum3, .25)); }
+
+/* 4 · La multa */
+EVNOTE.multa = { scene: "Una calle del Barrio Apagado. Un guarda del Farol clava un aviso de multa en una puerta mientras su Mecha le alumbra el martillo. En el umbral, una vecina con su hijo.",
+  hidden: "En el tejado de la izquierda, agachada junto a la chimenea, Tila lo está viendo todo con una aceitera bajo el brazo." };
+EVSC.multa = () => { const b = new Pic(EW, EH); barrio(b, { seed: 11 });
+  poorH(b, -4, 34, 42, 34, [[10, 8, 0], [26, 8, 0]], 16);
+  b.r(28, 14, 4, 8, mix(P.plum1, P.ink, .3)); 
+  poorH(b, 70, 30, 60, 38, [[8, 8, 1], [44, 8, 0]], 24);
+  b.r(94, 55, 7, 13, P.ember3); b.r(95, 56, 5, 12, P.ember4); light(b, 97, 60, 18, 14, P.ember3, .35, 4);
+  dirt(b, 68);
+  light(b, 70, 74, 26, 14, P.ember3, .3, 4);
+  return plate(b, (g) => {
+    F(g, 26, 22.6, CAST.tila, { s: .9, pose: "kneel", front: [30, 16.4], emo: "open", hold: (q, x, y) => HD.shape(q, (z) => z.roundRect(x - .4, y - .2, 2.2, 2.6, .3), { fill: P.mist, lw: .3 }) });
+    F(g, 100, 70, CAST.poor, { s: 1.6, dir: -1, hairStyle: "bun", hair: P.soil0, emo: "sad" }); F(g, 106, 70.5, kid(CAST.poor), { s: 1.2, dir: -1, hair: P.ink });
+    F(g, 78, 91, CAST.albor, { s: 1.8, front: [93.4, 62.4], back: [91.6, 66], hold: (q, x, y) => { HD.stroke(q, (z) => { z.moveTo(x, y); z.lineTo(x + .8, y - 1.6); }, P.soil1, .6); HD.shape(q, (z) => z.rect(x + .2, y - 2.6, 1.8, 1), { fill: P.mist, lw: .3 }); } });
+    HD.shape(g, (q) => q.rect(92.4, 63, 4, 5), { fill: P.cream, shade: P.fog, sx: 0, sy: .6, lw: .3 }); HD.dot(g, 94.4, 64.2, .6, P.ember1);
+    HD.creature(g, "mecha", 62, 92, { s: 1.6, emo: "o" }); }); };
+
+/* 5 · Penumbra */
+EVNOTE.penumbra = { scene: "Un escalón del Barrio Apagado bajo la única calle encendida. Una mujer de la Sombra remienda una chaqueta pequeña.",
+  hidden: "Tiene polvo dorado bajo las uñas, el mismo de los faroles, y en la pared de atrás hay un mapa de la verja dibujado con carbón." };
+EVSC.penumbra = () => { const b = new Pic(EW, EH); barrio(b, { seed: 23 });
+  plankWall(b, 0, 26, 92, 42, mix(P.soil0, P.plum1, .3));
+  b.r(40, 34, 30, 18, mix(P.soil0, P.plum1, .15));
+  const ch = mix(P.plum3, P.fog, .3);
+  b.r(44, 40, 22, 1, ch); for (let x = 45; x < 66; x += 3) b.r(x, 38, 1, 3, ch); b.e(55, 46, 3, 1.6, ch); b.l(55, 46, 52, 43, ch); b.l(66, 41, 70, 46, ch); b.p(59, 37, P.cream);
+  b.r(10, 40, 12, 22, P.ink); b.r(11, 41, 10, 21, P.soil0);
+  b.r(0, 68, 92, 6, P.plum2); b.r(0, 68, 92, 1, P.plum3); b.r(0, 74, 96, 22, P.plum1);
+  lamp2(b, 108, 74, 40, { r: 30, k: .5 });
+  dirt(b, 76);
+  light(b, 100, 60, 70, 40, P.ember3, .22, 4);
+  return plate(b, (g) => {
+    F(g, 40, 70, CAST.nightBare, { s: 1.7, pose: "sit", hairStyle: "bun", hair: P.ink, front: [52, 60.4], back: [49, 62], emo: "open" });
+    HD.shape(g, (q) => HD.blob(q, [[48.6, 59.6], [56, 59], [57, 64], [52, 65.6], [48, 64]]), { fill: P.sea1, shade: P.sea0, lw: .35 });
+    HD.stroke(g, (q) => { q.moveTo(52, 60.4); q.quadraticCurveTo(54.4, 56.6, 56.4, 60.6); }, P.cream, .3);
+    [[51.4, 60], [52.6, 61], [48.6, 62.2]].forEach(([x, y]) => HD.dot(g, x, y, .35, P.butter)); }); };
+
+/* 6 · El Brotín enredado */
+EVNOTE.enredado = { scene: "Un camino del Prado al atardecer. Un Brotín está atado a la base de un farol torcido por tallos negros de savia y enseña los dientes.",
+  hidden: "El farol no está clavado: está hundido en la tierra como una raíz, y de la misma grieta salen los tallos negros." };
+EVSC.enredado = () => { const b = new Pic(EW, EH); OL = P.soil0;
+  band(b, 0, 0, EW, 60, mix(P.sea0, P.rose0, .5), P.ember2, 8, P.butter);
+  b.e(98, 54, 7, 7, P.cream); light(b, 98, 54, 30, 22, P.butter, .5, 5);
+  b.poly([[0, 60], [0, 52], [22, 49], [50, 53], [80, 50], [128, 54], [128, 60]], mix(P.moss1, P.rose0, .45));
+  haze(b, 44, 62, P.ember3, .35);
+  band(b, 0, 58, EW, 38, mix(P.moss2, P.ember3, .25), P.moss1, 5);
+  b.poly([[40, 96], [56, 58], [70, 58], [104, 96]], mix(P.soil2, P.ember3, .2)); b.poly([[46, 96], [58, 58], [68, 58], [96, 96]], mix(P.soil3, P.ember4, .25));
+  whiteFlowers(b, 0, 40, 64, 95, 8); whiteFlowers(b, 100, 128, 64, 95, 9);
+  // the leaning lamp sunk into a crack
+  b.layer((t) => { for (let i = 0; i < 40; i++) { const x = 30 + Math.round(i * .22); t.r(x, 86 - i, 2, 1, P.plum1); }
+    t.r(36, 40, 9, 1, P.mist); t.r(37, 41, 7, 8, P.butter); t.r(38, 42, 5, 4, P.cream); t.r(36, 49, 9, 1, P.mist); t.poly([[36, 40], [40.5, 36], [45, 40]], P.plum2); }, P.ink);
+  light(b, 40.5, 45, 22, 18, P.ember4, .4, 4);
+  b.p(39, 50, SAP.s2); b.p(40, 50, SAP.sheen);
+  b.e(31, 88, 8, 2.6, P.ink); b.l(25, 89, 21, 92, P.ink); b.l(37, 89, 42, 93, P.ink);
+  [[46, 66], [52, 58], [44, 52]].forEach(([x, y]) => dropUp(b, x, y));
+  return plate(b, (g) => {
+    HD.creature(g, "brotin", 34, 88, { s: 1.9, emo: "o" });
+    for (let k = 0; k < 4; k++) HD.stroke(g, (q) => { q.moveTo(28 + k * 2, 88.4); q.bezierCurveTo(24, 80 - k, 44, 78 + k * 2, 36 + k, 66 - k * 2); }, SAP.s1, 1);
+    for (let k = 0; k < 4; k++) HD.stroke(g, (q) => { q.moveTo(28 + k * 2, 88.4); q.bezierCurveTo(24, 80 - k, 44, 78 + k * 2, 36 + k, 66 - k * 2); }, SAP.s2, .45); }); };
+
+/* 7 · La Primera Farolera */
+EVNOTE.farolera = { scene: "Amanecer en la plaza vieja del Prado. Sobre su pedestal, la estatua de la Primera Farolera levanta un farol de piedra. Tila, subida en el pedestal, frota el cristal con un trapo.",
+  hidden: "En el pedestal hay siete nombres de Casas grabados; el séptimo, Candil, está raspado a cincel." };
+EVSC.farolera = () => { const b = new Pic(EW, EH); OL = mix(P.plum2, P.soil0, .5);
+  band(b, 0, 0, EW, 62, mix(P.glim0, P.sea0, .4), P.rose1, 8, P.butter);
+  light(b, 64, 64, 70, 30, P.butter, .4, 5);
+  skyline(b, 58, mix(P.rose0, P.plum2, .4), 13, P.butter);
+  haze(b, 44, 64, mix(P.rose2, P.butter, .4), .45);
+  house2(b, -8, 30, 34, 34, { win: [[8, 8, 0, 1]], door: 18 }); house2(b, 104, 32, 32, 32, { win: [[6, 8, 0, 1]], door: 18 });
+  tint(b, 0, 20, EW, 46, P.rose2, .15);
+  cobbles2(b, 64, { base: mix(P.soil1, P.plum2, .4), stone: mix(P.soil2, P.plum3, .4), hi: P.soil3, hi2: P.butter, seed: 61 });
+  // the pedestal, seven names
+  const st = mix(P.mist, P.fog, .4), st2 = P.mist, st3 = P.plum3;
+  b.layer((t) => { t.r(46, 66, 36, 6, st2); t.r(50, 44, 28, 22, st); t.r(48, 42, 32, 3, st2); t.r(50, 44, 2, 22, P.fog); t.r(76, 44, 2, 22, st3); }, OL);
+  for (let i = 0; i < 7; i++) { const y = 47 + i * 2.6; b.r(55, Math.round(y), i === 6 ? 6 : 12 + (i % 3) * 2, 1, st3); }
+  b.r(55, 63, 9, 1, mix(st3, P.fog, .5)); b.p(57, 62, st3); b.p(60, 64, st3);
+  // bucket
+  b.layer((t) => { t.r(88, 64, 7, 6, P.plum3); t.r(88, 64, 7, 1, P.fog); t.r(89, 63, 5, 1, P.sea3); }, OL);
+  return plate(b, (g) => {
+    const STONE = { skin: [P.fog, P.mist], cloth: [P.fog, P.mist, P.cream], robe: true, hairStyle: "bun", hair: P.mist };
+    F(g, 62, 42, STONE, { s: 1.7, front: [70, 14], emo: "closed", hold: (q, x, y) => { HD.shape(q, (z) => z.rect(x - 1.2, y - 4.4, 2.6, 3.4), { fill: P.fog, shade: P.mist, lw: .35 }); HD.shape(q, (z) => HD.poly(z, [[x - 1.6, y - 4.4], [x + .1, y - 6], [x + 1.8, y - 4.4]]), { fill: P.mist, lw: .3 }); } });
+    F(g, 74, 42, CAST.tila, { s: 1.45, dir: -1, front: [69.6, 10.6], back: [76, 32], emo: "open", hold: (q, x, y) => HD.shape(q, (z) => HD.E(z, x, y, 1, .7), { fill: P.cream, lw: .3 }) }); }); };
+
+/* 8 · Luz prestada / 9 · La luz devuelta: the same alley, night and dawn */
+function alley(b, dawn) {
+  OL = mix(P.ink, P.plum1, .4);
+  if (dawn) band(b, 0, 0, EW, 70, mix(P.sea0, P.glim0, .5), P.rose1, 7, P.ember4); else band(b, 0, 0, EW, 70, P.ink, P.sea0, 6, P.plum1);
+  b.poly([[56, 70], [60, 30], [68, 30], [72, 70]], dawn ? mix(P.rose1, P.plum2, .5) : mix(P.plum1, P.sea0, .5));
+  plankWall(b, 0, 0, 52, 80, mix(P.soil0, P.plum1, .4)); plankWall(b, 76, 0, 52, 80, mix(P.soil0, P.plum1, .25));
+  b.poly([[52, 0], [60, 30], [60, 80], [52, 80]], mix(P.soil0, P.ink, .4)); b.poly([[76, 0], [68, 30], [68, 80], [76, 80]], mix(P.soil0, P.ink, .2));
+  b.layer((t) => { t.r(12, 22, 12, 12, P.ink); t.r(13, 23, 10, 10, dawn ? mix(P.sea1, P.rose1, .4) : P.plum1); t.r(18, 23, 1, 10, P.soil0); }, OL);
+  b.layer((t) => { t.r(98, 30, 14, 2, P.soil1); t.r(100, 26, 3, 4, P.moss1); t.r(106, 25, 3, 5, P.moss1); }, OL);
+  b.r(96, 10, 22, 1, P.plum2); [[99, 11], [104, 11], [110, 11]].forEach(([x, y]) => b.r(x, y, 3, 4, [P.sea2, P.rose1, P.fog][(x / 5) % 3 | 0]));
+  dirt(b, 80, dawn ? mix(P.plum2, P.soil1, .4) : P.plum1);
+  if (dawn) { light(b, 64, 40, 40, 50, P.ember4, .25, 4); tint(b, 0, 0, EW, EH, P.rose2, .08); }
+}
+EVNOTE.prestamo = { scene: "Un callejón del Barrio Apagado, de noche. Una niña intenta leer un papel pegándoselo a la nariz. Lumo se le acerca, curioso, y su luz le cae sobre las manos.",
+  hidden: "El papel lleva el sello de la Casa Albor: es un aviso de desalojo." };
+EVSC.prestamo = () => { const b = new Pic(EW, EH); alley(b, false); light(b, 52, 74, 30, 22, P.ember4, .45, 5);
+  return plate(b, (g) => {
+    F(g, 46, 92, kid(CAST.poor), { s: 2, pose: "kneel", hair: P.soil0, hairStyle: "bun", front: [55, 76], back: [50, 78], emo: "open" });
+    HD.shape(g, (q) => q.rect(51.6, 74, 5.4, 4.2), { fill: P.cream, shade: P.fog, sx: 0, sy: .6, lw: .35 }); HD.dot(g, 54.2, 75.4, .7, P.ember1);
+    HD.creature(g, "lumo", 66, 90, { s: 1.5, emo: "happy" }); }); };
+EVNOTE.devuelta = { scene: "El mismo callejón al amanecer. Brizna espera sentada en un cubo boca abajo; Lumo salta de su regazo para volver contigo.",
+  hidden: "En el muro de la derecha, la ropa tendida es la de una familia entera: alguien ya está recogiendo para la mudanza de primavera." };
+EVSC.devuelta = () => { const b = new Pic(EW, EH); alley(b, true);
+  b.layer((t) => { t.r(40, 80, 9, 9, P.plum3); t.r(40, 80, 9, 1, P.fog); }, OL);
+  return plate(b, (g) => {
+    F(g, 44, 82, kid(CAST.poor), { s: 2, pose: "sit", hair: P.soil0, hairStyle: "bun", front: [56, 66], emo: "open", hold: (q, x, y) => HD.shape(q, (z) => z.rect(x - .4, y - 1.2, 3.4, 2.6), { fill: P.cream, shade: P.fog, lw: .3 }) });
+    HD.creature(g, "lumo", 70, 84, { s: 1.5, emo: "happy" }); }); };
+
+/* 10 · El jardinero de la Torre */
+EVNOTE.jardinero = { scene: "Medianoche al pie de la Torre del Alba. Romero, el jardinero, arranca flores grises de un parterre y planta flores blancas que trae en una carretilla.",
+  hidden: "La tierra que saca la pala es negra y está húmeda, y en lo alto de la Torre hay una ventana encendida mirando el jardín." };
+EVSC.jardinero = () => { const b = new Pic(EW, EH); OL = mix(P.ink, P.plum1, .4);
+  band(b, 0, 0, EW, 64, P.ink, P.plum1, 7, mix(P.plum2, P.rose0, .3));
+  towerAlba(b, 88, 6, 26, 66, { wall: mix(P.plum2, P.plum3, .4), dark: P.plum2, trim: P.plum3, lit: false });
+  b.r(100, 20, 3, 4, P.ember4); light(b, 101.5, 22, 10, 8, P.ember4, .4, 3);
+  b.layer((t) => { for (let x = 0; x < 84; x += 6) t.r(x, 44, 5, 24, P.moss0); t.e(10, 44, 10, 6, P.moss0); t.e(36, 42, 12, 7, P.moss0); t.e(64, 44, 10, 6, P.moss0); }, mix(P.ink, P.moss0, .4));
+  haze(b, 50, 68, mix(P.plum2, P.sea0, .4), .35);
+  band(b, 0, 66, EW, 30, P.moss0, mix(P.moss1, P.moss0, .4), 4);
+  // the bed: left half grey, right half white
+  b.layer((t) => { t.r(8, 74, 80, 14, P.soil0); t.r(8, 74, 80, 1, P.soil1); t.r(6, 73, 84, 1, P.mist); t.r(6, 88, 84, 1, P.mist); }, OL);
+  const r = rng(91); for (let i = 0; i < 70; i++) { const x = 10 + Math.floor(r() * 76), y = 76 + Math.floor(r() * 10), grey = x < 44;
+    b.p(x, y + 1, grey ? P.plum2 : P.moss1); b.p(x, y, grey ? P.plum3 : P.cream); if (!grey && i % 3 === 0) b.p(x + 1, y, P.butter); }
+  b.r(40, 76, 10, 8, P.ink); b.r(41, 77, 8, 6, mix(P.ink, SAP.s1, .5));
+  // wheelbarrow with white flowers
+  b.layer((t) => { t.poly([[94, 74], [118, 74], [114, 84], [98, 84]], P.soil1); t.r(94, 74, 24, 1, P.soil2); t.e(104, 88, 3.4, 3.4, P.soil0); t.r(116, 78, 8, 1, P.soil1); }, OL);
+  const r2 = rng(92); for (let i = 0; i < 26; i++) b.p(96 + Math.floor(r2() * 20), 70 + Math.floor(r2() * 4), i % 4 ? P.cream : P.butter);
+  lamp2(b, 4, 74, 28, { r: 20, k: .4 });
+  return plate(b, (g) => {
+    F(g, 54, 90, CAST.forest, { s: 1.7, pose: "kneel", hat: { k: "wide", c: [P.soil2, P.soil1] }, beard: P.mist, front: [44, 80], back: [58, 82],
+      hold: (q, x, y) => { HD.stroke(q, (z) => { z.moveTo(x + 2, y - 5); z.lineTo(x, y + 1); }, P.soil1, .6); HD.shape(q, (z) => HD.E(z, x, y + 1.2, .9, .6), { fill: P.mist, lw: .3 }); } }); }); };
+
+/* 11 · El carro de aceite */
+EVNOTE.carro = { scene: "El camino del Prado al anochecer. Un carro de la Casa Albor cargado de barriles está atascado en el barro; el carretero empuja la rueda y su Lumo le alumbra los pies.",
+  hidden: "Entre los arbustos de la derecha brillan dos pares de ojos, y uno de los barriles tiene la tapa suelta: dentro solo hay polvo dorado." };
+EVSC.carro = () => { const b = new Pic(EW, EH); OL = P.soil0;
+  band(b, 0, 0, EW, 58, mix(P.sea0, P.plum1, .4), mix(P.rose0, P.ember1, .5), 7, P.ember2);
+  b.poly([[0, 58], [0, 50], [26, 48], [56, 52], [90, 47], [128, 51], [128, 58]], mix(P.plum1, P.rose0, .4));
+  towerAlba(b, 16, 30, 6, 52, { wall: mix(P.plum2, P.rose0, .4), dark: mix(P.plum1, P.rose0, .3), trim: mix(P.plum2, P.rose0, .4), lit: false });
+  haze(b, 40, 60, mix(P.rose0, P.ember1, .4), .4);
+  band(b, 0, 56, EW, 40, mix(P.moss1, P.rose0, .3), P.moss0, 5);
+  b.poly([[0, 96], [0, 80], [40, 64], [80, 62], [128, 70], [128, 96]], mix(P.soil1, P.rose0, .2)); b.e(56, 82, 22, 5, mix(P.soil0, P.plum1, .4)); b.e(56, 81, 18, 3, mix(P.soil0, P.sea0, .3));
+  // bushes with eyes
+  b.layer((t) => { t.e(112, 66, 14, 8, P.moss0); t.e(100, 70, 10, 6, P.moss0); }, mix(P.ink, P.moss0, .5));
+  [[106, 66], [111, 67], [117, 64], [121, 65]].forEach(([x, y]) => b.p(x, y, P.ember4));
+  // the cart
+  b.layer((t) => { t.r(30, 58, 44, 14, P.soil1); for (let x = 32; x < 74; x += 4) t.r(x, 58, 1, 14, P.soil0); t.r(30, 58, 44, 1, P.soil2); t.r(72, 62, 14, 2, P.soil1);
+    [[36, 50], [48, 49], [60, 50]].forEach(([x, y], i) => { t.r(x, y, 10, 9, P.soil2); t.r(x, y, 10, 1, P.soil3); t.r(x, y + 3, 10, 1, P.plum2); t.r(x, y + 7, 10, 1, P.plum2); t.r(x + 1, y + 1, 1, 7, P.soil3); if (i === 2) { t.r(x - 1, y - 2, 6, 2, P.soil3); t.r(x + 2, y, 6, 1, P.ember4); } });
+    t.e(40, 76, 7, 7, P.soil0); t.e(40, 76, 5.4, 5.4, P.soil1); t.e(40, 76, 1.4, 1.4, P.plum2); }, OL);
+  for (let a = 0; a < 6; a++) b.l(40, 76, 40 + Math.cos(a) * 5, 76 + Math.sin(a) * 5, P.soil0);
+  b.r(46, 52, 4, 1, P.ember1); b.r(58, 51, 1, 1, P.ember1);
+  return plate(b, (g) => {
+    F(g, 30, 86, CAST.albor, { s: 1.7, pose: "walk", front: [36, 72], back: [35, 74] });
+    HD.creature(g, "lumo", 18, 90, { s: 1.4, emo: "o" }); }); };
+
+/* 12 · La nana del Prado */
+EVNOTE.nana = { scene: "Noche en una plaza del Prado. Bajo un farol, tres niños cantan en corro y una anciana teje en un banco.",
+  hidden: "Al fondo, en la boca de una calle oscura del Barrio, dos niños de la Sombra escuchan con la misma música en los labios." };
+EVSC.nana = () => { const b = new Pic(EW, EH); OL = mix(P.ink, P.plum1, .4);
+  band(b, 0, 0, EW, 62, P.ink, P.plum1, 7, mix(P.plum2, P.rose0, .3));
+  skyline(b, 50, mix(P.plum1, P.plum2, .5), 33, mix(P.ember3, P.plum2, .4)); haze(b, 38, 62, mix(P.plum2, P.rose0, .3), .4);
+  house2(b, -6, 26, 40, 40, { night: true, win: [[10, 8, 1, 1], [26, 8, 0, 1]], door: 18 });
+  b.r(100, 30, 30, 36, mix(P.ink, P.plum1, .3)); b.r(108, 46, 10, 20, P.ink);
+  cobbles2(b, 66, { base: P.plum1, stone: mix(P.plum1, P.plum2, .6), hi: P.plum2, hi2: mix(P.plum2, P.plum3, .5), seed: 71 });
+  b.layer((t) => { t.r(80, 76, 22, 2, P.soil1); t.r(80, 72, 22, 1, P.soil1); t.r(82, 78, 1, 6, P.soil0); t.r(99, 78, 1, 6, P.soil0); }, OL);
+  lamp2(b, 58, 84, 46, { r: 36, k: .5 });
+  return plate(b, (g) => {
+    F(g, 110, 66, kid(CAST.nightBare), { s: 1.1, dir: -1, emo: "open" }); F(g, 114, 66.4, kid(CAST.nightBare), { s: 1, dir: -1, hairStyle: "bun", hair: P.ink, emo: "closed" });
+    F(g, 44, 92, kid(CAST.albor), { s: 1.7, hat: null, hair: P.soil1, front: [50, 76], back: [38, 78], emo: "closed" });
+    F(g, 72, 92, kid(CAST.poor), { s: 1.7, dir: -1, hair: P.butter, hairStyle: "long", front: [66, 76], back: [78, 78], emo: "closed" });
+    F(g, 58, 86, kid(CAST.albor), { s: 1.5, hat: null, hair: P.ink, cloth: [P.rose1, P.rose0, P.rose2], front: [52, 72], back: [64, 72], emo: "closed" });
+    F(g, 90, 84, CAST.poor, { s: 1.6, pose: "sit", dir: -1, hairStyle: "bun", hair: P.fog, front: [84, 74], emo: "closed", hold: (q, x, y) => HD.shape(q, (z) => HD.E(z, x, y, 1.2, .9), { fill: P.rose1, lw: .3 }) }); }); };
+/* ================= Event scenes: Cráter Tibio ================= */
+// the crater rim against a warm sky, smoke from the forges
+function craterBack(b, o = {}) {
+  OL = P.soil0;
+  if (o.night) band(b, 0, 0, EW, 60, P.ink, mix(P.ember0, P.plum1, .5), 7, P.ember1);
+  else band(b, 0, 0, EW, 60, mix(P.rose0, P.sea0, .4), P.ember2, 8, P.ember4);
+  b.poly([[0, 62], [0, 30], [18, 22], [44, 26], [64, 20], [90, 24], [110, 18], [128, 24], [128, 62]], o.night ? mix(P.ember0, P.ink, .4) : mix(P.ember0, P.rose0, .4));
+  b.poly([[0, 62], [0, 40], [30, 36], [58, 40], [88, 34], [128, 38], [128, 62]], o.night ? P.ember0 : mix(P.ember0, P.ember1, .4));
+  [[30, 22], [70, 18], [104, 16]].forEach(([x, y], i) => { for (let k = 0; k < 6; k++) b.e(x + Math.sin(k + i) * 2 + k, y - k * 3, 3 + k * .6, 1.8, mix(o.night ? P.plum1 : P.rose1, P.mist, .2 + k * .06)); });
+  haze(b, 30, 60, o.night ? P.ember1 : P.ember3, .3);
+}
+const stoneH = (b, x, y, w, h, win, door, o = {}) => house2(b, x, y, w, h, Object.assign({ wall: mix(P.soil2, P.soil1, .3), tile: [P.ember1, P.ember0, P.ember2], timber: false, win, door, chimney: true }, o));
+function warmGround(b, y0) { band(b, 0, y0, EW, EH - y0, mix(P.soil1, P.ember0, .2), P.soil0, 4); const r = rng(5); for (let i = 0; i < 30; i++) { const x = Math.floor(r() * EW), y = y0 + 2 + Math.floor(r() * (EH - y0 - 3)); b.r(x, y, 3, 1, mix(P.soil1, P.ember1, .4)); } }
+function forgeIn(b, fx) { // inside a forge: brick wall, hood, the fire
+  OL = P.soil0;
+  b.r(0, 0, EW, 72, mix(P.soil0, P.ember0, .3));
+  for (let y = 2; y < 72; y += 5) { b.r(0, y, EW, 1, mix(P.soil0, P.ink, .4)); for (let x = (y / 5) % 2 ? 0 : 5; x < EW; x += 10) b.r(x, y, 1, 5, mix(P.soil0, P.ink, .4)); }
+  b.layer((t) => { t.poly([[fx - 22, 0], [fx + 22, 0], [fx + 15, 20], [fx - 15, 20]], P.plum1); t.r(fx - 16, 20, 32, 2, P.plum2);
+    t.r(fx - 16, 24, 32, 30, P.plum2); t.r(fx - 16, 24, 32, 1, P.mist); t.e(fx, 40, 10, 10, P.ink); t.r(fx - 10, 40, 20, 12, P.ink);
+    t.e(fx, 41, 8.4, 8.4, P.ember2); t.r(fx - 8, 41, 16, 10, P.ember2); t.e(fx, 44, 5, 5, P.ember4); t.e(fx, 46, 3, 3, P.butter); }, OL);
+  b.r(0, 72, EW, 24, P.plum1); for (let x = 0; x < EW; x += 12) b.r(x, 72, 1, 24, P.ink); b.r(0, 72, EW, 1, P.ink);
+  light(b, fx, 44, 60, 46, P.ember3, .5, 5);
+}
+function anvil(b, x, y) { b.layer((t) => { t.r(x - 8, y - 9, 16, 3, P.plum3); t.r(x - 10, y - 8, 3, 2, P.plum3); t.r(x - 4, y - 6, 8, 4, P.plum2); t.r(x - 7, y - 2, 14, 2, P.plum2); t.r(x - 8, y - 9, 16, 1, P.fog); }, P.ink); }
+
+EVNOTE.fogarin = { scene: "Dentro de una forja del Cráter, Fogarín tira solo de las cuerdas de un fuelle enorme mientras el fuego ruge en el horno.", hidden: "Junto al yunque hay dos delantales colgados: uno grande y uno pequeño, azul, de alguien del Agua." };
+EVSC.fogarin = () => { const b = new Pic(EW, EH); forgeIn(b, 82);
+  b.layer((t) => { t.poly([[30, 58], [60, 52], [60, 66]], P.soil1); t.r(60, 50, 4, 18, P.soil2); t.r(30, 58, 2, 1, P.soil2); }, OL);
+  b.l(44, 50, 40, 6, P.soil2); b.l(48, 52, 52, 6, P.soil2);
+  anvil(b, 110, 86);
+  b.layer((t) => { t.r(8, 30, 6, 14, P.soil2); t.r(16, 30, 5, 11, P.sea2); t.r(6, 29, 18, 1, P.soil1); }, OL);
+  return plate(b, (g) => { F(g, 40, 94, CAST.tizon, { s: 1.9, beard: null, hairStyle: "short", hair: P.soil0, front: [44, 50], back: [48, 52], emo: "closed" });
+    HD.creature(g, "fuellito", 64, 92, { s: 1.4, emo: "happy" }); }); };
+
+EVNOTE.termas = { scene: "Las termas secas del Cráter: piletas de piedra vacías bajo un cielo de humo. Una anciana tiene los pies metidos en el único charco templado.", hidden: "Arriba del todo, en el borde del cráter, se ve el muro gris de la presa." };
+EVSC.termas = () => { const b = new Pic(EW, EH); craterBack(b);
+  b.layer((t) => { t.r(80, 12, 30, 10, P.plum3); t.r(80, 12, 30, 1, P.fog); for (let x = 82; x < 110; x += 6) t.r(x, 13, 1, 9, P.plum2); }, OL);
+  warmGround(b, 60);
+  const pool = (x, y, w, h, water) => { b.layer((t) => { t.e(x, y, w, h, P.mist); t.e(x, y + .4, w - 2, h - 1.4, water ? P.sea2 : mix(P.soil1, P.plum2, .4)); if (water) t.e(x - w * .3, y, w * .3, 1, P.sea4); }, OL); };
+  pool(30, 72, 22, 6); pool(96, 70, 20, 5); pool(64, 86, 24, 7, true);
+  [[56, 82], [70, 80], [64, 79]].forEach(([x, y]) => b.e(x, y, 2, 1, mix(P.fog, P.sea3, .5)));
+  return plate(b, (g) => { F(g, 74, 88, CAST.poor, { s: 1.5, pose: "sit", dir: -1, hairStyle: "bun", hair: P.fog, emo: "closed", cloth: [P.ember1, P.ember0, P.ember2] });
+    HD.creature(g, "fuellito", 48, 88, { s: 1.2, emo: "happy" }); }); };
+
+EVNOTE.compuerta = { scene: "En lo alto de la presa, Junco, una enfriadora del Agua, gira la rueda de una compuerta. A un lado, el lago nuevo y gris; al otro, el cauce seco que baja hacia el Vado.", hidden: "Muy lejos, en el cauce, se ven barcas volcadas como peces muertos." };
+EVSC.compuerta = () => { const b = new Pic(EW, EH); OL = P.plum1;
+  band(b, 0, 0, EW, 50, mix(P.sea0, P.rose0, .3), P.ember3, 7, P.butter);
+  b.poly([[0, 50], [0, 40], [40, 36], [80, 40], [128, 34], [128, 50]], mix(P.plum2, P.rose0, .4)); haze(b, 30, 52, P.ember3, .35);
+  band(b, 0, 46, 64, 26, mix(P.plum3, P.soil1, .3), mix(P.plum2, P.soil0, .3), 4);
+  for (let y = 48; y < 70; y += 4) b.r(4 + (y % 8), y, 18, 1, P.mist);
+  band(b, 64, 46, 64, 26, mix(P.soil2, P.ember3, .2), P.soil1, 4);
+  b.poly([[64, 72], [80, 50], [92, 46], [128, 44], [128, 50], [96, 52], [84, 60], [76, 72]], mix(P.soil3, P.plum3, .4));
+  [[106, 47], [118, 46]].forEach(([x, y]) => b.layer((t) => { t.e(x, y, 4, 1.4, P.soil1); }, OL));
+  b.layer((t) => { t.r(0, 70, EW, 26, P.plum2); for (let y = 72; y < EH; y += 5) { t.r(0, y, EW, 1, P.plum1); for (let x = (y / 5) % 2 ? 0 : 6; x < EW; x += 12) t.r(x, y, 1, 5, P.plum1); } t.r(0, 70, EW, 2, P.plum3); }, OL);
+  b.layer((t) => { t.e(52, 66, 9, 9, P.plum1); t.e(52, 66, 7, 7, P.mist); t.e(52, 66, 2, 2, P.plum1); for (let a = 0; a < 6; a++) t.l(52, 66, 52 + Math.cos(a) * 7, 66 + Math.sin(a) * 7, P.plum1); t.r(51, 66, 2, 6, P.plum1); }, OL);
+  return plate(b, (g) => { F(g, 40, 92, CAST.water, { s: 1.8, hairStyle: "bun", hair: P.sea0, front: [48, 60], back: [46, 64], emo: "open" }); }); };
+
+EVNOTE.carbon = { scene: "La puerta de una forja del Cráter. Un minero de Hondura con un saco de carbón a la espalda discute con Maese Fragua, que le cierra el paso.", hidden: "Sobre el dintel está grabada la regla del Gremio: «Ningún fuego es de nadie». Alguien le ha clavado encima un cartel de Albor." };
+EVSC.carbon = () => { const b = new Pic(EW, EH); craterBack(b, { night: true });
+  stoneH(b, 50, 22, 80, 46, [[60, 10, 1]], null, { roofH: 16 });
+  b.layer((t) => { t.r(64, 40, 26, 28, P.ink); t.r(66, 42, 22, 26, P.ember1); t.r(66, 50, 22, 18, P.ember2); }, OL); light(b, 77, 56, 34, 26, P.ember3, .45, 5);
+  b.r(62, 34, 30, 3, P.soil3); for (let x = 64; x < 90; x += 3) b.p(x, 35, P.soil1);
+  b.layer((t) => { t.r(70, 32, 14, 6, P.butter); t.e(77, 35, 2, 2, P.ember3); }, OL);
+  warmGround(b, 68);
+  return plate(b, (g) => {
+    F(g, 30, 92, CAST.miner, { s: 1.75, front: [40, 74], back: [26, 68], emo: "open", hold: (q, x, y) => {} });
+    HD.shape(g, (q) => HD.blob(q, [[16, 62], [24, 60], [28, 70], [22, 74], [14, 70]]), { fill: P.soil2, shade: P.soil1, lw: .35 });
+    F(g, 78, 92, CAST.tizon, { s: 1.8, dir: -1, beard: P.soil1, hairStyle: "short", hair: P.ink, front: [72, 74], back: [84, 74], emo: "open" }); }); };
+
+EVNOTE.pan = { scene: "Una calle del Cráter con el suelo tan tibio que Miga hornea pan sobre las losas, bajo campanas de barro.", hidden: "El saco de harina apoyado en la pared lleva impreso el farol de la Casa Albor." };
+EVSC.pan = () => { const b = new Pic(EW, EH); craterBack(b);
+  stoneH(b, -4, 26, 50, 42, [[10, 10, 1, 1], [32, 10, 0]], 22); stoneH(b, 86, 30, 46, 38, [[12, 8, 1]], 26);
+  warmGround(b, 68);
+  for (let x = 30; x < 110; x += 8) b.r(x, 70 + ((x / 8) % 2) * 6, 7, 1, mix(P.soil1, P.ember2, .5));
+  [[48, 80], [60, 84], [72, 80], [84, 86]].forEach(([x, y]) => b.layer((t) => { t.e(x, y, 5, 4, P.soil2); t.e(x, y - 1, 4, 2.6, P.soil3); t.r(x - 1, y - 5, 2, 1, P.soil1); }, OL));
+  b.layer((t) => { t.e(98, 74, 5, 6, P.cream); t.r(95, 70, 6, 2, P.fog); }, OL); b.r(96, 73, 4, 3, P.ember4); b.p(98, 74, P.ember1);
+  light(b, 64, 84, 50, 14, P.ember3, .3, 4);
+  return plate(b, (g) => { F(g, 30, 92, CAST.poor, { s: 1.7, pose: "kneel", hairStyle: "bun", hair: P.ember0, cloth: [P.cream, P.fog, P.cream], apron: P.soil3, front: [44, 82], emo: "open",
+    hold: (q, x, y) => HD.shape(q, (z) => HD.E(z, x + .6, y, 2.2, 1.4), { fill: P.soil3, shade: P.soil2, lw: .35 }) });
+    HD.creature(g, "fuellito", 112, 92, { s: 1.3, dir: -1, emo: "happy" }); }); };
+
+EVNOTE.almacen = { scene: "El almacén de los mil faroles: estanterías hasta el techo con cientos de faroles nuevos, todos apagados. Remache, el escribano, los cuenta en su libro.", hidden: "Los faroles no tienen depósito para el aceite: su base es un tubo hueco, como si fueran a clavarse en algo." };
+EVSC.almacen = () => { const b = new Pic(EW, EH); OL = P.ink;
+  band(b, 0, 0, EW, 78, P.ink, mix(P.soil0, P.plum1, .5), 5);
+  for (let y = 8; y < 76; y += 17) { b.r(0, y + 14, EW, 2, P.soil1); b.r(0, y + 14, EW, 1, P.soil2);
+    for (let x = 3; x < EW; x += 8) b.layer((t) => { t.r(x, y + 3, 5, 9, P.plum2); t.r(x + 1, y + 4, 3, 6, mix(P.plum3, P.sea1, .3)); t.r(x - 1, y + 2, 7, 1, P.plum3); t.poly([[x - 1, y + 2], [x + 2.5, y - 1], [x + 6, y + 2]], P.plum2); t.r(x + 2, y + 12, 1, 2, P.plum1); }, P.ink); }
+  b.r(0, 78, EW, 18, P.plum1); b.r(0, 78, EW, 1, P.ink);
+  for (let x = 0; x < 30; x++) for (let y = 0; y < EH; y++) { const c = b.g(x, y); if (c) b.p(x, y, mix(c, P.ink, .5 - x / 60)); }
+  b.layer((t) => { t.r(70, 72, 30, 3, P.soil1); t.r(72, 75, 2, 12, P.soil0); t.r(96, 75, 2, 12, P.soil0); t.r(78, 69, 14, 3, P.cream); t.r(84, 69, 1, 3, P.fog); }, OL);
+  b.layer((t) => { t.r(102, 64, 3, 8, P.cream); }, OL); light(b, 103.5, 63, 24, 22, P.ember4, .5, 5); b.r(103, 62, 1, 2, P.ember4);
+  return plate(b, (g) => { F(g, 90, 92, CAST.albor, { s: 1.6, hat: null, hairStyle: "none", beard: null, cloth: [P.plum3, P.plum2, P.mist], front: [86, 70], back: [94, 72], emo: "open" }); }); };
+
+EVNOTE.ladera = { scene: "La ladera sur del Cráter, con casas de piedra recién levantadas. Guijo, un niño de las Cuevas, golpea una roca con un martillo de juguete.", hidden: "En la puerta de una casa hay un dibujo de una montaña con muchas cuevas, y debajo, en tiza, la palabra «Hondura»." };
+EVSC.ladera = () => { const b = new Pic(EW, EH); craterBack(b);
+  b.poly([[0, 96], [0, 54], [40, 46], [90, 52], [128, 44], [128, 96]], mix(P.soil1, P.ember0, .2));
+  stoneH(b, 4, 30, 34, 26, [[6, 6, 1]], 20, { wall: mix(P.plum3, P.soil2, .5), tile: [P.plum2, P.plum1, P.plum3] });
+  stoneH(b, 52, 34, 30, 22, [[6, 6, 0]], 18, { wall: mix(P.plum3, P.soil2, .5), tile: [P.plum2, P.plum1, P.plum3] });
+  stoneH(b, 96, 28, 32, 26, [[8, 6, 1]], 20, { wall: mix(P.plum3, P.soil2, .5), tile: [P.plum2, P.plum1, P.plum3] });
+  b.l(72, 46, 75, 42, P.cream); b.l(75, 42, 78, 46, P.cream); b.p(75, 45, P.cream);
+  band(b, 0, 64, EW, 32, mix(P.soil1, P.ember0, .2), P.soil0, 4);
+  b.layer((t) => { t.e(70, 82, 12, 8, P.plum3); t.e(68, 80, 9, 5, P.mist); t.l(66, 78, 70, 84, P.plum2); }, OL);
+  b.p(73, 81, P.ember3); b.p(74, 82, P.ember4); light(b, 73.5, 81.5, 6, 5, P.ember4, .5, 3);
+  return plate(b, (g) => { F(g, 52, 92, kid(CAST.miner), { s: 1.9, pose: "kneel", front: [62, 78], back: [48, 80], emo: "open",
+    hold: (q, x, y) => { HD.stroke(q, (z) => { z.moveTo(x - 1, y + 1); z.lineTo(x + 2, y - 1.6); }, P.soil1, .5); HD.shape(q, (z) => z.rect(x + 1.2, y - 2.6, 1.4, 2), { fill: P.plum3, lw: .3 }); } }); }); };
+
+EVNOTE.escoria = { scene: "Detrás de las forjas, una montaña de escoria todavía caliente. Un nido de Fuellitos se revuelve dentro; sus llamas son verdes y oscuras.", hidden: "Entre la escoria brilla carbón con vetas negras: está empapado de savia." };
+EVSC.escoria = () => { const b = new Pic(EW, EH); craterBack(b, { night: true });
+  stoneH(b, -6, 30, 50, 36, [[10, 10, 1]], null); stoneH(b, 88, 34, 44, 32, [[10, 8, 1]], null);
+  warmGround(b, 66);
+  b.layer((t) => { t.poly([[24, 92], [44, 62], [60, 56], [78, 60], [102, 92]], P.plum1); }, OL);
+  const r = rng(7); for (let i = 0; i < 60; i++) { const x = 30 + Math.floor(r() * 66), y = 62 + Math.floor(r() * 28); if (b.g(x, y) === P.plum1) b.r(x, y, 2, 1, [P.plum2, P.soil0, SAP.s1, P.ember1][i % 4]); }
+  [[52, 70], [66, 66], [74, 76]].forEach(([x, y]) => { b.p(x, y, SAP.sheen); b.p(x + 1, y, SAP.s2); });
+  light(b, 62, 70, 40, 24, mix(SAP.sheen, P.moss0, .6), .3, 4);
+  return plate(b, (g) => { [[46, 72, 1.3, 1], [64, 64, 1.5, -1], [80, 76, 1.3, -1]].forEach(([x, y, s, d]) => HD.creature(g, "fuellito", x, y, { s, dir: d, emo: "o" })); }); };
+
+EVNOTE.tizon = { scene: "Atardecer en la puerta de la Forja Madre. Maese Tizón sale secándose el sudor y abre los brazos para dar un abrazo de forja.", hidden: "En la pared, junto a la puerta, hay una placa con un nombre medio tapado por el hollín: la forja que perdió su padre." };
+EVSC.tizon = () => { const b = new Pic(EW, EH); craterBack(b);
+  stoneH(b, 30, 14, 98, 56, [[8, 12, 1], [80, 12, 1]], null, { roofH: 20 });
+  b.layer((t) => { t.e(80, 50, 16, 14, P.ink); t.r(64, 50, 32, 20, P.ink); t.e(80, 51, 14, 12, P.ember2); t.r(66, 51, 28, 19, P.ember2); t.e(80, 58, 9, 8, P.ember4); }, OL);
+  light(b, 80, 58, 48, 34, P.ember3, .45, 5);
+  b.layer((t) => { t.r(42, 46, 12, 6, P.soil2); t.r(43, 47, 10, 4, mix(P.soil0, P.ink, .4)); }, OL); b.r(45, 48, 5, 1, P.soil1);
+  warmGround(b, 70);
+  return plate(b, (g) => { F(g, 80, 92, CAST.tizon, { s: 2, front: [96, 64], back: [64, 64], emo: "open" }); }); };
+/* ================= Event scenes: Bosque Hondo ================= */
+// deep forest: green light from above, trunks in three depths, light shafts in flat bands
+function forestBack(b, o = {}) {
+  OL = P.moss0;
+  band(b, 0, 0, EW, 74, o.night ? P.ink : mix(P.moss0, P.sea0, .3), o.night ? P.moss0 : P.moss1, 6, o.night ? mix(P.moss0, P.sea0, .5) : mix(P.moss2, P.moss3, .3));
+  const r = rng(o.seed || 4);
+  // far trunks: flat, close to the fog colour
+  for (let i = 0; i < 9; i++) { const x = Math.floor(r() * EW), w = 3 + Math.floor(r() * 3); b.r(x, 0, w, 74, mix(o.night ? P.moss0 : P.moss1, P.ink, .25)); }
+  haze(b, 20, 74, o.night ? mix(P.moss0, P.sea1, .4) : mix(P.moss2, P.moss4, .4), .35);
+  // mid trunks with bark
+  for (let i = 0; i < 4; i++) { const x = 6 + i * 34 + Math.floor(r() * 10), w = 7 + Math.floor(r() * 4);
+    b.r(x, 0, w, 76, mix(P.soil0, P.moss0, .3)); b.r(x, 0, 2, 76, mix(P.soil1, P.moss1, .3)); for (let y = 4; y < 76; y += 7) b.r(x + 3, y, 2, 3, P.soil0); }
+  // canopy
+  for (let x = -6; x < EW + 6; x += 9) { b.e(x, 4 + (x % 4), 9, 6, P.moss0); b.e(x + 3, 2, 6, 3, mix(P.moss0, P.moss1, .5)); }
+  // light shafts
+  if (!o.night) (o.shafts || [[30, 18], [86, 14]]).forEach(([x, w]) => { for (let y = 8; y < 80; y++) for (let i = 0; i < w; i++) { const xx = Math.floor(x + i + y * .35); const c = b.g(xx, y); if (c) b.p(xx, y, mix(c, P.moss4, .18 + (i > w * .3 && i < w * .7 ? .08 : 0))); } });
+}
+function forestFloor(b, y0, o = {}) { band(b, 0, y0, EW, EH - y0, o.night ? P.moss0 : mix(P.moss2, P.moss1, .4), o.night ? mix(P.moss0, P.ink, .4) : P.moss0, 4);
+  const r = rng(o.seed || 21); for (let i = 0; i < 40; i++) { const x = Math.floor(r() * EW), y = y0 + 2 + Math.floor(r() * (EH - y0 - 2)); b.r(x, y, 2, 1, i % 3 ? mix(P.moss2, P.moss3, .5) : P.soil1); if (i % 5 === 0) { b.p(x, y - 1, P.moss3); b.p(x + 2, y - 1, P.moss3); } } }
+// the Hedge: a wall of dark thorny branches
+function hedge(b, x0, x1, top, bottom, o = {}) {
+  b.layer((t) => { t.r(x0, top, x1 - x0, bottom - top, P.moss0); for (let x = x0; x < x1; x += 4) t.e(x + 2, top, 3, 3, P.moss0); }, P.ink);
+  const r = rng(o.seed || 13); for (let i = 0; i < (x1 - x0) * (bottom - top) / 10; i++) { const x = x0 + Math.floor(r() * (x1 - x0)), y = top + Math.floor(r() * (bottom - top));
+    b.l(x, y, x + 2 + Math.floor(r() * 3), y - 1 - Math.floor(r() * 2), i % 4 ? mix(P.moss0, P.soil0, .5) : mix(P.moss1, P.moss0, .4)); if (i % 6 === 0) b.p(x, y, P.soil2); }
+}
+function bigTrunk(b, x, w, top = 0, bottom = 84, o = {}) {
+  b.layer((t) => { t.r(x, top, w, bottom - top, P.soil0); t.r(x, top, 3, bottom - top, P.soil1); for (let y = top + 3; y < bottom; y += 6) { t.r(x + 5, y, 2, 4, mix(P.soil0, P.ink, .4)); t.r(x + w - 6, y + 3, 2, 3, mix(P.soil0, P.ink, .4)); }
+    t.poly([[x - 8, bottom], [x, bottom - 10], [x + 4, bottom]], P.soil0); t.poly([[x + w - 4, bottom], [x + w, bottom - 10], [x + w + 8, bottom]], P.soil0); }, mix(P.ink, P.moss0, .5));
+}
+
+EVNOTE.abrojo = { scene: "El hueco del Seto, entre espinas negras. Abrojo, guarda del Bosque, cierra el paso con una lanza de madera.", hidden: "Los bordes del hueco están cortados limpios, con navaja: alguien de dentro lo abrió a propósito." };
+EVSC.abrojo = () => { const b = new Pic(EW, EH); forestBack(b, { seed: 5 });
+  hedge(b, 0, 46, 30, 84); hedge(b, 80, 128, 28, 84, { seed: 14 });
+  b.l(46, 40, 46, 84, P.soil3); b.l(80, 38, 80, 84, P.soil3);
+  forestFloor(b, 82);
+  return plate(b, (g) => { F(g, 64, 94, CAST.forest, { s: 1.9, cloth: [P.moss1, P.moss0, P.moss2], hat: { k: "hood", c: [P.moss0, P.ink] }, front: [74, 60], back: [58, 74], emo: "open",
+    hold: (q, x, y) => { HD.stroke(q, (z) => { z.moveTo(x - .6, y + 9); z.lineTo(x + .6, y - 8); }, P.ink, .8); HD.stroke(q, (z) => { z.moveTo(x - .6, y + 9); z.lineTo(x + .6, y - 8); }, P.soil2, .4); HD.shape(q, (z) => HD.poly(z, [[x, y - 8], [x + .9, y - 11], [x + 1.4, y - 7.6]]), { fill: P.mist, lw: .3 }); } }); }); };
+
+EVNOTE.llovizna = { scene: "Por fuera del Seto, Llovizna, una niña del Agua, entierra bellotas con una cuchara. Una fila de palitos marca cada una.", hidden: "Por encima del Seto asoma una rama torcida del roble de la linde, la que deja caer las bellotas." };
+EVSC.llovizna = () => { const b = new Pic(EW, EH); OL = P.moss0;
+  band(b, 0, 0, EW, 40, mix(P.sea2, P.sea3, .4), P.sea4, 5);
+  b.e(30, 6, 30, 16, mix(P.moss1, P.sea2, .3)); b.e(96, 4, 40, 18, mix(P.moss1, P.sea2, .3)); haze(b, 0, 40, P.sea4, .3);
+  hedge(b, 0, EW, 26, 70, { seed: 22 });
+  b.layer((t) => { t.poly([[70, 24], [86, 14], [108, 10], [110, 13], [90, 18], [74, 28]], P.soil0); t.e(98, 14, 10, 5, P.moss1); }, P.ink);
+  [[92, 20], [100, 22]].forEach(([x, y]) => b.layer((t) => { t.e(x, y, 1.4, 1.8, P.soil2); t.r(x - 1, y - 2, 3, 1, P.soil1); }, P.ink));
+  band(b, 0, 70, EW, 26, mix(P.moss2, P.soil1, .4), mix(P.moss1, P.soil0, .3), 4);
+  for (let x = 14; x < 120; x += 9) { if (x > 56 && x < 74) continue; b.r(x, 74 + (x % 3), 1, 5, P.soil2); b.p(x, 73 + (x % 3), P.moss3); b.e(x, 80 + (x % 3), 2, .8, P.soil0); }
+  return plate(b, (g) => { F(g, 62, 92, kid(CAST.water), { s: 2, pose: "kneel", hairStyle: "bun", hair: P.sea0, front: [70, 84], back: [56, 84], emo: "open",
+    hold: (q, x, y) => { HD.stroke(q, (z) => { z.moveTo(x, y); z.lineTo(x + 1.6, y + 1.8); }, P.mist, .45); HD.shape(q, (z) => HD.E(z, x + 1.8, y + 2, .7, .5), { fill: P.mist, lw: .25 }); } }); }); };
+
+EVNOTE.agalla = { scene: "Un roble viejísimo de corteza agrietada. Dos grietas parecen ojos, y en la base del tronco se abre un hueco oscuro.", hidden: "Dentro del hueco, una gota negra sube por la pared de madera." };
+EVSC.agalla = () => { const b = new Pic(EW, EH); forestBack(b, { seed: 9, shafts: [[10, 16]] });
+  b.layer((t) => { t.r(42, 0, 46, 86, P.soil0); t.poly([[30, 86], [42, 66], [42, 86]], P.soil0); t.poly([[88, 86], [88, 64], [104, 86]], P.soil0); t.r(42, 0, 4, 86, P.soil1); }, P.ink);
+  for (let y = 4; y < 84; y += 5) { b.r(50 + (y % 10), y, 3, 3, mix(P.soil0, P.ink, .4)); b.r(74 - (y % 8), y + 2, 3, 2, mix(P.soil0, P.ink, .4)); }
+  b.layer((t) => { t.e(56, 34, 4, 1.4, P.ink); t.e(74, 34, 4, 1.4, P.ink); }, P.ink); b.p(57, 34, P.moss3); b.p(75, 34, P.moss3);
+  b.l(52, 30, 60, 31, P.ink); b.l(70, 31, 78, 30, P.ink);
+  b.e(65, 72, 10, 13, P.ink); b.e(65, 74, 8, 10, mix(P.ink, SAP.s1, .5)); b.p(64, 66, SAP.sheen); b.p(64, 67, SAP.s2);
+  b.e(65, 46, 6, 2, mix(P.soil0, P.ink, .5));
+  forestFloor(b, 84, { seed: 12 });
+  return plate(b, (g) => { HD.creature(g, "remolin", 104, 90, { s: 1.4, dir: -1, emo: "o" }); }); };
+
+EVNOTE.liquen = { scene: "Entre las raíces del Roble Sentado, donde se reúne el consejo, Abuelo Liquen pela una manzana con su capucha verde.", hidden: "En el asiento de raíz más alto, el de Liquen, hay grabada una bellota pequeñita y una fecha muy antigua." };
+EVSC.liquen = () => { const b = new Pic(EW, EH); forestBack(b, { seed: 31, shafts: [[50, 22]] });
+  bigTrunk(b, 40, 48, 0, 74);
+  b.layer((t) => { [[20, 78, 22, 8], [86, 76, 26, 8], [56, 82, 16, 6]].forEach(([x, y, w, h]) => { t.e(x + w / 2, y, w / 2, h / 2, P.soil1); t.e(x + w / 2, y - 1, w / 2 - 2, h / 2 - 2, P.soil2); }); }, P.ink);
+  b.layer((t) => { t.r(58, 62, 12, 10, P.soil1); t.r(58, 62, 12, 1, P.soil2); }, P.ink); b.e(64, 66, 1.4, 1.6, P.soil3);
+  forestFloor(b, 80, { seed: 33 });
+  return plate(b, (g) => { F(g, 31, 82, CAST.liquen, { s: 1.7, pose: "sit", front: [42, 70], back: [40, 72], emo: "closed",
+    hold: (q, x, y) => HD.shape(q, (z) => HD.E(z, x + .4, y - .2, 1.3, 1.2), { fill: P.ember1, light: P.rose2, lw: .3 }) }); }); };
+
+EVNOTE.cripta = { scene: "Bajo las raíces de un roble enorme, la puerta de la Cripta de Semillas con su sello de musgo roto. Un Espinardo manchado de negro eriza las púas delante.", hidden: "De la rendija de la puerta salen hilos de savia que suben por las raíces hacia arriba." };
+EVSC.cripta = () => { const b = new Pic(EW, EH); forestBack(b, { night: true, seed: 41 });
+  b.layer((t) => { t.poly([[10, 84], [30, 40], [50, 20], [80, 20], [100, 40], [120, 84]], P.soil0); }, P.ink);
+  for (let i = 0; i < 6; i++) b.l(24 + i * 14, 84, 40 + i * 9, 24, mix(P.soil0, P.soil1, .5));
+  b.layer((t) => { t.e(65, 58, 14, 14, P.ink); t.r(51, 58, 28, 24, P.ink); t.e(65, 59, 12, 12, P.soil1); t.r(53, 59, 24, 23, P.soil1);
+    for (let x = 56; x < 76; x += 4) t.r(x, 50, 1, 32, P.soil0); t.e(65, 66, 4, 4, P.moss1); t.l(63, 64, 67, 68, P.ink); }, P.ink);
+  [[62, 50], [70, 44], [58, 40], [74, 32]].forEach(([x, y]) => dropUp(b, x, y));
+  light(b, 65, 70, 30, 20, mix(SAP.sheen, P.moss0, .7), .2, 3);
+  forestFloor(b, 84, { night: true, seed: 42 });
+  return plate(b, (g) => { HD.creature(g, "espinardo", 66, 94, { s: 1.9, emo: "o" }); }); };
+
+EVNOTE.silencio = { scene: "Un claro del Bosque. Yedra, con hojas en el pelo, intenta dormir en una hamaca de lianas entre dos troncos y no lo consigue.", hidden: "Todos los búhos del claro tienen los ojos abiertos. Nadie duerme este invierno." };
+EVSC.silencio = () => { const b = new Pic(EW, EH); forestBack(b, { seed: 51, shafts: [[48, 26]] });
+  bigTrunk(b, 10, 14, 0, 82); bigTrunk(b, 104, 14, 0, 82);
+  b.layer((t) => { for (let i = 0; i <= 40; i++) { const x = 24 + i * 2, y = 44 + Math.sin(i / 40 * Math.PI) * 14; t.r(x, y, 2, 2, P.moss1); } t.l(24, 44, 24, 36, P.moss1); t.l(104, 44, 104, 36, P.moss1); }, P.moss0);
+  [[16, 22], [110, 30], [112, 60]].forEach(([x, y]) => b.layer((t) => { t.e(x, y, 2.4, 3, P.soil2); t.p(x - 1, y - 1, P.butter); t.p(x + 1, y - 1, P.butter); }, P.ink));
+  forestFloor(b, 82, { seed: 52 });
+  return plate(b, (g) => { F(g, 56, 60, CAST.forest, { s: 1.6, pose: "sit", hairStyle: "long", hair: P.moss0, cloth: [P.moss2, P.moss1, P.moss3], front: [64, 50], emo: "open" }); }); };
+
+EVNOTE.fuera = { scene: "Por fuera del Seto, una familia de la Sombra ha levantado un refugio con mantas. Bruma, el padre, recoge solo ramitas caídas.", hidden: "Una de las mantas está remendada con un trozo de tapiz con el escudo de la Corte de la Sombra." };
+EVSC.fuera = () => { const b = new Pic(EW, EH); OL = mix(P.ink, P.plum1, .4);
+  band(b, 0, 0, EW, 40, P.plum1, mix(P.plum2, P.sea1, .4), 5);
+  hedge(b, 0, EW, 18, 66, { seed: 61 }); tint(b, 0, 14, EW, 52, P.plum1, .25);
+  band(b, 0, 64, EW, 32, mix(P.moss1, P.plum1, .5), mix(P.moss0, P.plum1, .4), 4);
+  b.layer((t) => { t.poly([[14, 84], [36, 54], [58, 84]], P.plum3); t.poly([[36, 54], [58, 84], [64, 84], [42, 54]], P.plum2); t.poly([[26, 84], [36, 66], [46, 84]], P.ink); }, OL);
+  b.r(40, 60, 6, 5, P.rose0); b.p(42, 62, P.ember4); b.p(43, 61, P.ember4);
+  b.layer((t) => { t.r(80, 82, 14, 2, P.soil1); t.l(82, 80, 92, 84, P.soil1); }, OL); light(b, 87, 80, 10, 6, P.ember3, .4, 3);
+  return plate(b, (g) => { F(g, 104, 92, CAST.nightBare, { s: 1.8, pose: "kneel", dir: -1, front: [96, 84], emo: "open", hold: (q, x, y) => HD.stroke(q, (z) => { z.moveTo(x, y); z.lineTo(x - 3, y - 1); }, P.soil1, .5) });
+    F(g, 34, 90, kid(CAST.nightBare), { s: 1.4, pose: "sit", emo: "open" }); }); };
+
+EVNOTE.musgo = { scene: "Un claro alfombrado de musgo con tres niños del Bosque sentados en corro, escuchando el suelo.", hidden: "Bajo el musgo, en un corte del terreno, se ve una raíz enorme y pálida con una vena negra dentro." };
+EVSC.musgo = () => { const b = new Pic(EW, EH); forestBack(b, { seed: 71, shafts: [[40, 30]] });
+  band(b, 0, 70, EW, 26, mix(P.moss3, P.moss2, .4), P.moss1, 4);
+  const r = rng(72); for (let i = 0; i < 40; i++) b.e(Math.floor(r() * EW), 72 + Math.floor(r() * 22), 2, 1, mix(P.moss3, P.moss4, .5));
+  b.layer((t) => { t.r(100, 82, 28, 14, P.soil0); t.e(116, 90, 10, 3, mix(P.fog, P.soil3, .5)); }, P.ink); b.l(108, 90, 124, 90, SAP.s1);
+  return plate(b, (g) => { [[30, 84], [54, 88], [78, 85]].forEach(([x, y], i) => F(g, x, y, kid(CAST.forest), { s: 1.4, pose: "sit", hairStyle: i === 1 ? "bun" : "short", emo: "closed" })); }); };
+
+EVNOTE.espinas = { scene: "El sendero cortado por una pared de espinas que el Seto ha levantado de la noche a la mañana. Un Remolín está atrapado entre las ramas.", hidden: "Las raíces del Seto no buscan agua: bajan rectas, muy hondo, y algunas brillan negras." };
+EVSC.espinas = () => { const b = new Pic(EW, EH); forestBack(b, { seed: 81 });
+  hedge(b, 20, 110, 20, 82, { seed: 82 });
+  for (let i = 0; i < 6; i++) b.l(30 + i * 14, 82, 28 + i * 14, 96, i % 2 ? SAP.s1 : P.soil0);
+  forestFloor(b, 82, { seed: 83 });
+  b.poly([[40, 96], [56, 82], [72, 82], [90, 96]], mix(P.soil2, P.moss2, .4));
+  return plate(b, (g) => { HD.creature(g, "remolin", 66, 56, { s: 1.6, emo: "o" });
+    for (let k = 0; k < 3; k++) HD.stroke(g, (q) => { q.moveTo(56, 44 + k * 6); q.bezierCurveTo(62, 48 + k * 4, 70, 46 + k * 5, 78, 50 + k * 4); }, P.moss0, .9); }); };
 const ART = {};
 function art(id) { if (!SCENE[id]) return null; return ART[id] || (ART[id] = SCENE[id]()); }
 
@@ -1469,5 +2102,5 @@ function card(id, gi = 0, o = {}) {
   return big;
 }
 
-root.EVSCENE = { art, card, IDS: Object.keys(SCENE), AW, AH, CW, CH, K, Pic, SAP, HD, PL, hd, NOTE };
+root.EVSCENE = { event: evArt, EVIDS: Object.keys(EVSC), EVNOTE, art, card, IDS: Object.keys(SCENE), AW, AH, CW, CH, K, Pic, SAP, HD, PL, hd, NOTE };
 })(typeof window !== "undefined" ? window : globalThis);

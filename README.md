@@ -219,3 +219,18 @@ Every Refuge companion is born with one small trait of its own (the second MiniT
 - **El Vado's ladder**: every week four neighbours bring a team built around one type circle: Ruda (Sun), Bruno (Lake), Esporina (Frost) and Mirlo (Sky). Their teams are seeded by the week, so they stay the same until Monday, and they are your level −1, +0, +1 and +2. Beat one to unlock the next. First wins pay ✦ 15 / 20 / 25 / 30, a little Stardust, and Mirlo also gives a Song Note.
 - **Friends' codes**: "Your team code" turns your creature and your saved team's companions (cards, talents, birth traits, stars, Bond) into a `EVO1-…` text code. Pasting a friend's code saves their team (up to 6) to fight against, played by the AI. The first win against each code gives ✦ 20 and ∴ 5, at most 3 times a week, so made-up codes can't be farmed. Pasted codes are fully validated (known creatures and cards, level and grade ranges, a short plain-text name).
 - Saved in `P.duel` (`EV.slice("duel")`). The duel reuses the expedition pick screen and battle (`X.duel`), with no zone bonus.
+
+## Illustrated path conversations
+
+The path events now include illustrated conversations, in the style of Life in Adventure. They were written in the thread "Crear eventos ilustrados por etapa", and Jose approved them. There are 12 in the Prado Aurora and 9 in the Cráter.
+
+- **Data:** `rpg/events-<zone>.js` holds `window.EVEVENTS[zone][id]` with the Spanish text and effects. `rpg/events-<zone>.en.js` holds the English text in the same order.
+- **Shape:** each event is a small conversation:
+  - nodes say lines;
+  - options lead to other nodes or back to a hub, and "once" options disappear after use;
+  - `cNeed` options only show once another event has set their flag;
+  - a node with `end` closes the event with the usual `EVENT_FX` effects, plus `foes` for a fight against named creatures.
+  - `need` gates when an event can appear, by lore layer and flags.
+- **Scenes:** each event has a 128 × 96 pixel-art scene, `EVSCENE.event(id)` in `scenes.js`, drawn above the conversation.
+- **The deck:** `rpg/ui-talk.js` keeps a shuffled bag for each zone (`P.evDeck`). It holds the zone's old short events plus the conversations that are open now. Draws never repeat until the bag is empty, and the same event never comes twice in a row. Lore events from `lore.js` keep their 45 % chance first.
+- **Checks:** `node tools/check.js` validates every conversation file. That covers where options lead, speakers, matching English line and option counts, effect keys, known foes, and ids that clash with short events.

@@ -42,6 +42,56 @@ function sims(n) {
 
 /* ---------- static facts read from the source ---------- */
 
+/* ---------- 1b. path conversations (rpg/events-*.js) ---------- */
+// every option leads somewhere, every line has a speaker, the English text matches, effects and foes are known
+{
+  const FX = new Set(["xp", "coins", "heal", "hurt", "cost", "card", "fight", "foes", "foeBuff", "flag", "escrito", "xpPerZone"]);
+  const files = fs.readdirSync(path.join(ROOT, "rpg")).filter((f) => /^events-[a-z]+\.js$/.test(f));
+  const w = { EVEVENTS: {}, EVEVENTS_EN: {} }; const ectx = vm.createContext({ window: w });
+  for (const f of files) {
+    vm.runInContext(fs.readFileSync(path.join(ROOT, "rpg", f), "utf8"), ectx, { filename: "rpg/" + f });
+    const en = f.replace(".js", ".en.js");
+    if (fs.existsSync(path.join(ROOT, "rpg", en))) vm.runInContext(fs.readFileSync(path.join(ROOT, "rpg", en), "utf8"), ectx, { filename: "rpg/" + en });
+  }
+  let n = 0;
+  const fxOk = (where, f) => { for (const k in f || {}) if (!FX.has(k)) err(`${where}: unknown effect "${k}"`); for (const k of (f && f.foes) || []) if (!R.MONS[k]) err(`${where}: unknown foe "${k}"`); };
+  for (const zone in w.EVEVENTS) {
+    if (!R.ZONES[zone]) err(`events: unknown zone "${zone}"`);
+    for (const id in w.EVEVENTS[zone]) {
+      n++;
+      const ev = w.EVEVENTS[zone][id], en = (w.EVEVENTS_EN[zone] || {})[id], at = `event ${zone}/${id}`;
+      if (R.ZONES[zone] && R.ZONES[zone].events.includes(id)) err(`${at}: id also used by a short event`);
+      if (!ev.nodes[ev.start]) err(`${at}: start node "${ev.start}" missing`);
+      if (!en) err(`${at}: no English text`);
+      let ends = 0;
+      for (const nid in ev.nodes) {
+        const N = ev.nodes[nid], M = en && en.nodes[nid], wh = `${at} node ${nid}`;
+        if (!Array.isArray(N.say)) err(`${wh}: no say`);
+        for (const s of N.say || []) if (s[0] && !ev.who[s[0]]) err(`${wh}: unknown speaker "${s[0]}"`);
+        if (N.end) ends++;
+        if (!N.opts && !N.back && !N.end) err(`${wh}: dead end (no opts, back or end)`);
+        if (N.back && !ev.nodes[N.back]) err(`${wh}: back to missing "${N.back}"`);
+        fxOk(wh, N.fx); fxOk(wh, N.end);
+        (N.opts || []).forEach((o, i) => {
+          if (o.go && !ev.nodes[o.go]) err(`${wh} option ${i}: goes to missing "${o.go}"`);
+          if (o.back && !ev.nodes[o.back]) err(`${wh} option ${i}: back to missing "${o.back}"`);
+          if (!o.go && !o.back) err(`${wh} option ${i}: leads nowhere`);
+          fxOk(`${wh} option ${i}`, o.fx);
+        });
+        if (en) {
+          if (!M) err(`${wh}: no English text`);
+          else {
+            if ((M.say || []).length !== (N.say || []).length) err(`${wh}: ${(N.say || []).length} lines but ${(M.say || []).length} in English`);
+            if ((M.opts || []).length !== (N.opts || []).length) err(`${wh}: ${(N.opts || []).length} options but ${(M.opts || []).length} in English`);
+          }
+        }
+      }
+      if (!ends) err(`${at}: no ending`);
+    }
+  }
+  console.log(`path conversations: ${n} checked`);
+}
+
 /* ---------- 2. data tables in the browser ---------- */
 const TYPES = { ".html": "text/html", ".js": "text/javascript", ".json": "application/json", ".webmanifest": "application/manifest+json", ".png": "image/png", ".svg": "image/svg+xml" };
 function serve() {
