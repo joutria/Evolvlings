@@ -198,8 +198,9 @@ function afterReward() {
 }
 
 /* ---------- Battle drawing ---------- */
-function drawDecor(c, decor, t, day) {
-  if (decor === "heart") {
+// the background of each zone in battle, by its "decor" name (rpg/data-zones.js); EV.RPG.addZone can add new ones
+const DECOR = {
+  heart(c, t, day) {
     // the great stump at the centre of the valley, root veins with black sap, floating star motes
     const m = BW / 2;
     c.fillStyle = day ? "#7a5a48" : "#3a2a30";
@@ -208,32 +209,28 @@ function drawDecor(c, decor, t, day) {
     c.strokeStyle = day ? "#8a6a50" : "#4a3838"; c.lineWidth = 1; for (const r of [40, 26, 12]) { EV.ell(c, m, 16, r, r * 0.16); c.stroke(); }
     c.strokeStyle = SAP.c0; c.lineWidth = 3; for (const [x1, x2] of [[m - 60, 0], [m + 60, BW], [m - 30, 60], [m + 30, BW - 60]]) { c.beginPath(); c.moveTo(x1, 66); c.quadraticCurveTo((x1 + x2) / 2, 58, x2, 70); c.stroke(); }
     c.save(); for (let i = 0; i < 14; i++) { const x = (i * 53 + t * 8) % BW, y = 60 - ((i * 17 + t * 10) % 60); c.globalAlpha = (0.5 + 0.5 * Math.sin(t * 3 + i)) * (day ? 0.7 : 1); c.fillStyle = i % 2 ? "#ffe9a0" : "#c8b8ff"; c.fillRect(x, y, 2, 2); } c.restore();
-    return;
-  }
-  if (decor === "peaks") {
+  },
+  peaks(c, t, day) {
     // snowy peaks, drifting clouds and a spinning vane far away
     c.fillStyle = day ? "#8ea6c0" : "#26304a";
     c.beginPath(); c.moveTo(0, 70); for (const [x, y] of [[40, 22], [90, 52], [150, 14], [210, 48], [270, 24], [330, 50], [360, 34]]) c.lineTo(x, y); c.lineTo(BW, 70); c.closePath(); c.fill();
     c.fillStyle = day ? "#ffffff" : "#c8d4e8"; for (const [x, y] of [[40, 22], [150, 14], [270, 24]]) { c.beginPath(); c.moveTo(x - 10, y + 12); c.lineTo(x, y); c.lineTo(x + 10, y + 12); c.closePath(); c.fill(); }
     c.save(); c.globalAlpha = day ? 0.8 : 0.35; c.fillStyle = "#ffffff"; for (let i = 0; i < 4; i++) { const x = ((i * 110 + t * 10) % (BW + 80)) - 40; EV.ell(c, x, 30 + (i % 2) * 14, 26, 7); c.fill(); EV.ell(c, x + 14, 26 + (i % 2) * 14, 16, 6); c.fill(); } c.restore();
     c.save(); c.translate(150, 10); c.strokeStyle = day ? "#5a5060" : "#8a90b0"; c.lineWidth = 1.5; c.beginPath(); c.moveTo(0, 4); c.lineTo(0, -6); c.stroke(); c.rotate(Math.sin(t * 0.8) * 0.8); c.beginPath(); c.moveTo(-7, -6); c.lineTo(7, -6); c.stroke(); c.restore();
-    return;
-  }
-  if (decor === "ice") {
+  },
+  ice(c, t, day) {
     // icicles, a frozen wall and glowing mushrooms
     c.fillStyle = day ? "#c8e4f0" : "#2c4250"; c.fillRect(0, 0, BW, 10);
     for (let i = 0; i < 16; i++) { const x = 6 + i * 24, h = 10 + ((i * 29) % 22); c.beginPath(); c.moveTo(x - 5, 9); c.lineTo(x + 5, 9); c.lineTo(x, 9 + h); c.closePath(); c.fill(); }
     for (let i = 0; i < 6; i++) { const x = 30 + i * 62, y = 64 + (i % 2) * 4, g = 0.6 + 0.4 * Math.sin(t * 2 + i); c.fillStyle = "#e8e0d0"; c.fillRect(x - 1, y - 6, 3, 8); c.save(); c.shadowColor = "#a8f0e0"; c.shadowBlur = 8 * g; c.fillStyle = i % 2 ? "#9ae8d8" : "#c8b8f0"; EV.ell(c, x + 0.5, y - 7, 7, 4); c.fill(); c.restore(); }
     c.save(); c.globalAlpha = 0.5; c.fillStyle = "#ffffff"; for (let i = 0; i < 18; i++) { const x = (i * 41 + t * 6) % BW, y = (i * 23 + t * 14) % 70; c.fillRect(x, y, 2, 2); } c.restore();
-    return;
-  }
-  if (decor === "mist") {
+  },
+  mist(c, t, day) {
     // crooked posts and drifting fog banks
     for (let i = 0; i < 5; i++) { const x = 24 + i * 82; c.fillStyle = day ? "#5c5868" : "#1d1b25"; c.fillRect(x - 3, 30 + (i % 2) * 8, 6, 44); c.fillRect(x - 10, 34 + (i % 2) * 8, 20, 4); }
     for (let k = 0; k < 4; k++) { c.save(); c.globalAlpha = day ? 0.28 : 0.2; c.fillStyle = "#e8e4f0"; const y = 40 + k * 12, off = ((t * (8 + k * 3)) % 120); for (let i = -1; i < 5; i++) { EV.ell(c, i * 120 + off, y, 70, 9); c.fill(); } c.restore(); }
-    return;
-  }
-  if (decor === "lake") {
+  },
+  lake(c, t, day) {
     // still water on the horizon with a reflection that doesn't match
     c.fillStyle = day ? "#7fb0cc" : "#1b3350"; c.fillRect(0, 46, BW, 26);
     c.save(); c.globalAlpha = 0.45; c.strokeStyle = "#ffffff"; c.lineWidth = 1.5;
@@ -241,18 +238,16 @@ function drawDecor(c, decor, t, day) {
     c.restore();
     for (let i = 0; i < 3; i++) { const x = 60 + i * 140; c.fillStyle = day ? "#5a4a3a" : "#20180f"; c.beginPath(); c.moveTo(x - 18, 44); c.lineTo(x + 18, 44); c.lineTo(x + 12, 50); c.lineTo(x - 12, 50); c.closePath(); c.fill(); }
     c.save(); c.globalAlpha = 0.35 + 0.15 * Math.sin(t * 1.3); c.fillStyle = "#e8f6ff"; EV.ell(c, BW * 0.72, 60, 10, 4); c.fill(); c.restore();
-    return;
-  }
-  if (decor === "caves") {
+  },
+  caves(c, t, day) {
     // a cave ceiling with stalactites and faint echo rings
     c.fillStyle = day ? "#4a3e34" : "#15110e"; c.fillRect(0, 0, BW, 14);
     for (let i = 0; i < 14; i++) { const x = 8 + i * 30, h = 14 + ((i * 37) % 26); c.beginPath(); c.moveTo(x - 9, 12); c.lineTo(x + 9, 12); c.lineTo(x, 12 + h); c.closePath(); c.fill(); }
     c.save(); c.strokeStyle = "#e8d8b8"; c.lineWidth = 1.5;
     for (let k = 0; k < 3; k++) { const ph = (t * 0.4 + k / 3) % 1; c.globalAlpha = (1 - ph) * 0.4; c.beginPath(); c.arc(BW / 2, 58, 10 + ph * 90, Math.PI * 1.1, Math.PI * 1.9); c.stroke(); }
     c.restore();
-    return;
-  }
-  if (decor === "forge") {
+  },
+  forge(c, t, day) {
     // chimneys with rising embers
     for (let i = 0; i < 4; i++) {
       const x = 30 + i * 96, h = 34 + (i % 2) * 12;
@@ -261,7 +256,8 @@ function drawDecor(c, decor, t, day) {
       for (let k = 0; k < 4; k++) { const ph = (t * 0.6 + k * 0.25 + i * 0.13) % 1; c.globalAlpha = 1 - ph; c.fillStyle = k % 2 ? "#ffb347" : "#ff7a3a"; c.fillRect(x - 2 + Math.sin(t * 3 + k) * 4, 70 - h - ph * 40, 3, 3); }
       c.restore();
     }
-  } else if (decor === "forest") {
+  },
+  forest(c, t, day) {
     // tree trunks and canopy
     for (let i = 0; i < 7; i++) {
       const x = 10 + i * 56, w = 10 + (i % 3) * 3;
@@ -271,11 +267,13 @@ function drawDecor(c, decor, t, day) {
     c.save(); c.globalAlpha = 0.35; c.fillStyle = "#1d1426";
     for (let i = 0; i < 5; i++) { const x = 40 + i * 70; c.beginPath(); c.moveTo(x, 74); c.quadraticCurveTo(x + 8, 60 + Math.sin(t + i) * 3, x + 2, 50); c.lineWidth = 3; c.strokeStyle = "#1d1426"; c.stroke(); }
     c.restore();
-  } else {
+  },
+  lanterns(c, t, day) {
     // distant lanterns
     for (let i = 0; i < 6; i++) { const x = 20 + i * 64, y = 44 + (i % 2) * 8; c.save(); c.globalAlpha = 0.5 + 0.3 * Math.sin(t * 2 + i); c.shadowColor = "#ffd35a"; c.shadowBlur = 10; c.fillStyle = "#ffe27a"; c.fillRect(x - 3, y - 6, 6, 9); c.restore(); c.fillStyle = "#00000033"; c.fillRect(x - 1, y + 3, 2, 26); }
-  }
-}
+  },
+};
+function drawDecor(c, decor, t, day) { (DECOR[decor] || DECOR.lanterns)(c, t, day); }
 // Battles are drawn at half resolution, snapped to the Glimmer-32 palette and blown up x2; names and numbers stay sharp on top.
 const BLOW = typeof PX !== "undefined" ? PX.layer(BW / 2, BH / 2) : null;
 const REDUCE = typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;

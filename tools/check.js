@@ -41,9 +41,6 @@ function sims(n) {
 }
 
 /* ---------- static facts read from the source ---------- */
-const rpgSrc = fs.readdirSync(path.join(ROOT, "rpg")).filter((f) => f.endsWith(".js")).map((f) => fs.readFileSync(path.join(ROOT, "rpg", f), "utf8")).join("\n");
-function body(src, head) { const i = src.indexOf(head); if (i < 0) return ""; let d = 0; for (let j = src.indexOf("{", i); j < src.length; j++) { if (src[j] === "{") d++; else if (src[j] === "}" && --d === 0) return src.slice(i, j + 1); } return ""; }
-const DECORS = new Set([...body(rpgSrc, "function drawDecor(").matchAll(/decor === "(\w+)"/g)].map((m) => m[1]).concat(["lanterns"])); // "lanterns" is the final else
 
 /* ---------- 2. data tables in the browser ---------- */
 const TYPES = { ".html": "text/html", ".js": "text/javascript", ".json": "application/json", ".webmanifest": "application/manifest+json", ".png": "image/png", ".svg": "image/svg+xml" };
@@ -61,7 +58,7 @@ function serve() {
 function inPage(facts) {
   const out = { errors: [], warns: [] }, E = (m) => out.errors.push(m), W = (m) => out.warns.push(m), E_ = E;
   const D = EV.RPG.DATA, { CT, EVT, ZT, PMAP, TX, ZONES, MONS, CARDS } = D;
-  const decors = new Set(facts.decors), FX = D.EVENT_FX, lore = (window.EvoLore && window.EvoLore.LORE_EVENTS) || {};
+  const decors = new Set(Object.keys(D.DECOR)), FX = D.EVENT_FX, lore = (window.EvoLore && window.EvoLore.LORE_EVENTS) || {};
   // every key an effect may use (see the top of rpg/data-events.js); a typo would silently do nothing
   const FX_KEYS = new Set(["xp", "coins", "cost", "heal", "hurt", "foeBuff", "card", "fight", "flag", "escrito", "xpPerZone", "say", "sayE", "roll", "if", "then", "else"]);
   const checkFx = (f, where, E, lg) => {
@@ -112,6 +109,22 @@ function inPage(facts) {
     if (window.EVSCENE && !EVSCENE.IDS.includes(id)) E(`card ${id}: no lore scene in scenes.js`);
     if (window.EVS && owned) { if (!EVS.CARD[id]) E(`card ${id}: no art in EVS.CARD`); if (!EVS.ANIM[id] || !EVS.ANIM[id].style) E(`card ${id}: no animation style in EVS.ANIM`); }
   }
+  // registry: every zone, creature and card reads back as one entry
+  for (const id of Object.keys(ZONES)) { const z = EV.RPG.zone(id); if (!z.pos || !z.text.es || !z.text.en) E(`zone ${id}: incomplete registry entry`); }
+  for (const id of Object.keys(MONS)) if (!MONS[id].boss && !EV.RPG.creature(id).desc.en) E(`creature ${id}: no description`);
+  for (const id of Object.keys(CARDS)) if (!EV.RPG.card(id).text) E(`card ${id}: no text`);
+  // home maps: same size, every place stands on a free tile and has a name
+  if (EV.WORLD) {
+    const maps = Object.entries(EV.WORLD.MAPS), [w0, h0] = [maps[0][1].rows[0].length, maps[0][1].rows.length];
+    for (const [mid, m] of maps) {
+      if (m.rows.length !== h0 || m.rows.some((r) => r.length !== w0)) E(`map ${mid}: rows must all be ${w0} wide and ${h0} tall`);
+      for (const p of m.places) {
+        const [x, y] = p.stand || [], row = m.rows[y] || "";
+        if (!p.stand || "#~r".includes(row[x] || "#")) E(`map ${mid}: place ${p.id} stands on a wall or water`);
+        if (!p.go && !p.act && !EV.WORLD.ACT[p.id]) E(`map ${mid}: place ${p.id} does nothing when tapped`);
+      }
+    }
+  }
   // texts: the same keys in both languages
   const same = (a, b, what) => { for (const k of Object.keys(a)) if (!(k in b)) E(`${what}: "${k}" is in es but not en`); for (const k of Object.keys(b)) if (!(k in a)) E(`${what}: "${k}" is in en but not es`); };
   same(TX.es, TX.en, "rpg TX");
@@ -130,7 +143,7 @@ function inPage(facts) {
     page.on("pageerror", (e) => pageErrs.push(e.message));
     await page.goto(`http://127.0.0.1:${s.address().port}/`);
     await page.waitForFunction(() => window.EV && EV.RPG && EV.RPG.DATA, null, { timeout: 15000 });
-    const r = await page.evaluate(inPage, { decors: [...DECORS] });
+    const r = await page.evaluate(inPage, {});
     errors.push(...r.errors); warns.push(...r.warns);
     for (const m of pageErrs) err("page error: " + m);
     await b.close(); s.close();

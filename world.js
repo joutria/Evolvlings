@@ -106,7 +106,7 @@ function gainFromEnergy(energy) {
 }
 
 /* ---------- Maps: 15 x 11 tiles of 16 px ---------- */
-const TW = 16, MW = 15, MH = 11, W = TW * MW, H = TW * MH;
+const TW = 16;
 // . grass   , flowers   = path   ~ water   # trees (solid)   r rock (solid)   _ bridge
 const MAPS = {
   home: {
@@ -164,6 +164,8 @@ const MAPS = {
     start: [7, 1], deco: [["tree", 1, 1], ["tree", 13, 5], ["tree", 1, 9], ["lamp", 6, 6], ["lamp", 8, 3], ["flower", 13, 9]],
   },
 };
+// the map size comes from the rows (every map has the same size; tools/check.js checks it)
+const MW = MAPS.home.rows[0].length, MH = MAPS.home.rows.length, W = TW * MW, H = TW * MH;
 const SOLID = new Set(["#", "~", "r"]);
 function blocked(m, x, y) {
   if (x < 0 || y < 0 || x >= MW || y >= MH) return true;
@@ -404,7 +406,7 @@ function drawWorld(g, now) {
   const items = [];
   const deco = w.map === "home" ? m.deco.concat(homeExtras()) : m.deco;
   for (const [k, x, y] of deco) items.push({ y: y * TW + TW, draw: () => drawObj(g, k, x * TW + 8, y * TW + TW - 1, now) });
-  for (const p of placesNow()) if (p.obj) items.push({ y: p.y * TW + TW, draw: () => { drawObj(g, p.obj, p.x * TW + 8, p.y * TW + TW - 1, now); buildMarks(g, p); } });
+  for (const p of placesNow()) if (p.obj) items.push({ y: p.y * TW + TW, draw: () => { if (typeof p.obj === "function") p.obj(g, p.x * TW + 8, p.y * TW + TW - 1, now); else drawObj(g, p.obj, p.x * TW + 8, p.y * TW + TW - 1, now); buildMarks(g, p); } });
   const walking = w.path.length > 0;
   // asleep at home: curled up on the moss bed
   const bed = MAPS.home.places.find((p) => p.id === "bed");
@@ -609,28 +611,31 @@ function goMap(to) {
   EV.P.world = { map: w.map, x: inside[0], y: inside[1] };
   EV.sfx("chirp");
 }
+// what tapping each place does; a place added with EV.WORLD.addPlace can bring its own act(p)
+const ACT = {
+  bowl: () => { foodPick = true; },
+  bed: () => { if (!EV.S.sleeping && EV.S.stats.energy <= 85) summary(); else EV.toggleSleep(); },
+  pond: () => { EV.cleanUp(); },
+  lawn: () => { if (panelOpen()) EV.togglePanel("map"); menuOn = false; EV.startPlay(); },
+  board: () => { EV.togglePanel("daily", true); },
+  root: () => { rootTalk(); },
+  well: () => { if (EV.HOOKS.openWell) EV.HOOKS.openWell(); else EV.togglePanel("cards", true); },
+  pantry: () => { EV.togglePanel("daily", true); },
+  shop: () => { EV.togglePanel("shop", true); },
+  nest: () => { EV.togglePanel("refuge", true); },
+  tila: () => { dialog = { who: "tila", emo: "happy", pet: "happy", text: tx("tila.hi", { name: EV.S.name }), opts: ["tila.q1", "tila.q2", "tila.q3"] }; },
+  patch: () => { forage(); },
+  garden: () => { const r = EV.BUILD.harvest(); dialog = { who: "pet", emo: r.n ? "happy" : "normal", text: tx("garden.hi", { name: EV.S.name }) + " " + r.text, opts: ["build.open"] }; },
+  orders: () => { const r = EV.BUILD.ordersDialog(); dialog = { who: "orders", text: r.text, opts: r.opts.concat(["build.open"]) }; },
+  bottle: () => { openBottle(); },
+  trail: () => { dialog = { who: "trail", text: tx("trailAsk"), opts: ["trail.go", "trail.stay"] }; },
+};
 function act(p) {
-  const S = EV.S;
   if (p.go) { goMap(p.go); return; }
-  switch (p.id) {
-    case "bowl": foodPick = true; break;
-    case "bed": if (!S.sleeping && S.stats.energy <= 85) summary(); else EV.toggleSleep(); break;
-    case "pond": EV.cleanUp(); break;
-    case "lawn": if (panelOpen()) EV.togglePanel("map"); menuOn = false; EV.startPlay(); break;
-    case "board": EV.togglePanel("daily", true); break;
-    case "root": rootTalk(); break;
-    case "well": if (EV.HOOKS.openWell) EV.HOOKS.openWell(); else EV.togglePanel("cards", true); break;
-    case "pantry": EV.togglePanel("daily", true); break;
-    case "shop": EV.togglePanel("shop", true); break;
-    case "nest": EV.togglePanel("refuge", true); break;
-    case "tila": dialog = { who: "tila", emo: "happy", pet: "happy", text: tx("tila.hi", { name: S.name }), opts: ["tila.q1", "tila.q2", "tila.q3"] }; break;
-    case "patch": forage(); break;
-    case "garden": { const r = EV.BUILD.harvest(); dialog = { who: "pet", emo: r.n ? "happy" : "normal", text: tx("garden.hi", { name: S.name }) + " " + r.text, opts: ["build.open"] }; break; }
-    case "orders": { const r = EV.BUILD.ordersDialog(); dialog = { who: "orders", text: r.text, opts: r.opts.concat(["build.open"]) }; break; }
-    case "bottle": openBottle(); break;
-    case "trail": dialog = { who: "trail", text: tx("trailAsk"), opts: ["trail.go", "trail.stay"] }; break;
-  }
+  const f = p.act || ACT[p.id];
+  if (f) f(p);
 }
+
 const LORE = () => window.EvoLore || null;
 const quote = (r) => (L() === "es" ? "«" + r + "»" : "\u201c" + r + "\u201d");
 function rumour() { const Lr = LORE(); return Lr ? Lr.loadingLine(EV.P, L()) : ""; }
@@ -853,5 +858,18 @@ requestAnimationFrame(homeFrame);
 $("btnMap").addEventListener("click", () => { EV.sfx("tap"); toggleMenu(); });
 EV.every(5000, () => { refreshChip(); stageBits(); if (EV.S && EV.S.phase === "alive") dayBase(); });
 refreshChip(); if (EV.S && EV.S.phase === "alive") dayBase();
-EV.WORLD = { MAPS, STEPS, steps, spendSteps, gainFromEnergy, path, choose, render, refreshChip, careWalk, bedtime, topOn, homeExtras, circle, bottleHere, get state() { return ws(); }, get dialog() { return dialog; } };
+/* Add a place to a map from another module: { id, x, y, stand: [x, y], solid?, obj?: name or fn(g, x, y, now), cost?, when?, act?(p),
+   text: { es: [name, description], en: [...] } }. The stand tile must be walkable and free. */
+function addPlace(mapId, p) {
+  const m = MAPS[mapId];
+  if (!m) throw new Error("addPlace: no map " + mapId);
+  if (m.places.some((q) => q.id === p.id)) throw new Error("addPlace: " + p.id + " is already on " + mapId);
+  if (!p.text || !p.text.es || !p.text.en) throw new Error("addPlace: " + p.id + " needs es and en text");
+  if (!p.stand || blocked(m, p.stand[0], p.stand[1])) throw new Error("addPlace: " + p.id + " stands on a blocked tile");
+  for (const lg of ["es", "en"]) { TX[lg]["p." + p.id] = p.text[lg][0]; TX[lg]["p." + p.id + ".d"] = p.text[lg][1] || ""; }
+  m.places.push(p);
+  render();
+  return p;
+}
+EV.WORLD = { MAPS, addPlace, ACT, STEPS, steps, spendSteps, gainFromEnergy, path, choose, render, refreshChip, careWalk, bedtime, topOn, homeExtras, circle, bottleHere, get state() { return ws(); }, get dialog() { return dialog; } };
 })();
