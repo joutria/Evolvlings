@@ -72,6 +72,8 @@ const EVT = { es: RPG_ES.EVT, en: RPG_EN.EVT };
 const EVT_ALT = { es: RPG_ES.EVT_ALT, en: RPG_EN.EVT_ALT };
 // lore events share the encounter view
 if (LORE) for (const lg of ["es", "en"]) Object.assign(EVT[lg], LORE.LORE_EVT[lg]);
+// a short event shows its own scene when it has one, else the zone's path picture
+const shortScene = () => (window.EVSCENE && EVSCENE.EVNOTE && EVSCENE.EVNOTE[X.event] ? `<div class="talk-scene" data-evscene="${X.event}"></div>` : pauseBox("camino"));
 function eventHtml() {
   if (X.talk && X.talk.id === X.event) return talkHtml();
   const E = EVT[L()][X.event];
@@ -82,9 +84,9 @@ function eventHtml() {
       if (le && le.cNeed && le.cNeed[i] && !(EV.P.flags || {})[le.cNeed[i]]) return "";
       const poor = ((fx[i] || {}).cost || 0) > EV.P.coins;
       return `<button class="btn ghost" type="button" data-ev="${i}" ${poor ? "disabled" : ""}>${esc(c)}</button>`;
-    }).join("")}</div></div><div class="panel"><h3>${esc(tx("exp.party"))}</h3>${partyHtml()}</div>`.replace('<div class="panel"><div class="sub">', `<div class="panel">${pauseBox("camino")}<div class="sub">`);
+    }).join("")}</div></div><div class="panel"><h3>${esc(tx("exp.party"))}</h3>${partyHtml()}</div>`.replace('<div class="panel"><div class="sub">', `<div class="panel">${shortScene()}<div class="sub">`);
   }
-  return `<div class="panel"><div class="sub">${esc(tx("node.event"))}</div><p class="evt-text">${esc(X.eventOut)}</p><div class="bctl"><button class="btn" type="button" data-x="${X.eventFight ? "evfight" : "evnext"}">${esc(tx("r.continue"))}</button></div></div><div class="panel"><h3>${esc(tx("exp.party"))}</h3>${partyHtml()}${lootHtml()}</div>`;
+  return `<div class="panel">${shortScene()}<div class="sub">${esc(tx("node.event"))}</div><p class="evt-text">${esc(X.eventOut)}</p><div class="bctl"><button class="btn" type="button" data-x="${X.eventFight ? "evfight" : "evnext"}">${esc(tx("r.continue"))}</button></div></div><div class="panel"><h3>${esc(tx("exp.party"))}</h3>${partyHtml()}${lootHtml()}</div>`;
 }
 const hasLetter = () => !!(EV.P.flags && EV.P.flags.olaLetter && !EV.P.flags.olaDelivered);
 const hurtParty = (f) => { for (const m of X.party) if (m.hp > 0) m.hp = Math.max(0.05, m.hp - f); };

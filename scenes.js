@@ -2906,6 +2906,177 @@ EVSC.juramento = () => { const b = new Pic(EW, EH); OL = P.soil0;
   for (let i = 0; i < 12; i++) { b.p(34 + (i * 7) % 16, 44 + (i * 5) % 18, P.cream); b.p(78 + (i * 7) % 16, 44 + (i * 5) % 18, P.plum2); }
   b.layer((t) => { t.e(64, 70, 3, 3, SAP.s0); t.e(64, 70, 1.6, 1.6, mix(P.ember2, P.soil1, .4)); }, OL);
   return plate(b, (g) => { [[52, 34], [76, 30], [64, 22]].forEach(([x, y], i) => HD.stroke(g, (q) => { q.arc(x, y, 3 + i, Math.PI * 1.1, Math.PI * 1.9); }, [P.butter, P.plum2, P.cream][i], .3)); }); };
+/* ================= Scenes for the 28 short path events already in the game (rpg/data-events.js) ================= */
+const glassTube = (b, x0, y0, x1, y1) => { b.l(x0, y0, x1, y1, P.ink); b.l(x0 + 1, y0, x1 + 1, y1, mix(P.sea4, P.cream, .5)); b.l(x0 + 2, y0, x1 + 2, y1, P.ink); };
+const shovel = (q, x, y) => { HD.stroke(q, (z) => { z.moveTo(x, y - 6); z.lineTo(x + 1, y + 6); }, P.soil1, .6); HD.shape(q, (z) => HD.poly(z, [[x - .4, y + 6], [x + 2.6, y + 6], [x + 2, y + 9], [x, y + 9]]), { fill: P.mist, lw: .3 }); };
+const letter = (q, x, y) => HD.shape(q, (z) => z.rect(x - .4, y - 1, 2.6, 1.8), { fill: P.cream, lw: .3 });
+const cup = (b, x, y) => b.layer((t) => { t.r(x - 1, y - 3, 3, 3, P.mist); t.r(x, y, 1, 1, P.plum3); t.p(x, y - 3, P.sea4); }, OL);
+
+EVNOTE.farol = { scene: "Un farol del camino tirado en la hierba. De su base gotea savia negra y la llama tiembla como si tuviera frío." };
+EVSC.farol = () => { const b = new Pic(EW, EH); const gy = zoneBack(b, "aurora", { night: true });
+  b.layer((t) => { t.r(40, 78, 40, 3, P.plum1); t.r(78, 74, 8, 10, P.plum1); t.r(80, 76, 4, 6, P.ember3); t.r(30, 76, 10, 6, P.plum2); }, OL);
+  light(b, 82, 79, 20, 12, P.ember3, .4, 4);
+  b.e(34, 86, 10, 3, SAP.s1); b.p(30, 86, SAP.sheen); dropUp(b, 26, 80);
+  return plate(b, (g) => { HD.creature(g, "lumo", 104, 88, { s: 1.4, emo: "sad", dir: -1 }); }); };
+
+EVNOTE.patrol = { scene: "Dos guardas del Farol cortan el paso al caer la tarde. Detrás, la verja hacia el Envés." };
+EVSC.patrol = () => { const b = new Pic(EW, EH); const gy = zoneBack(b, "aurora", { night: true });
+  b.layer((t) => { for (let x = 30; x < 100; x += 6) t.r(x, gy - 30, 2, 30, P.plum1); t.r(28, gy - 30, 74, 3, P.plum1); t.r(28, gy - 16, 74, 2, P.plum1); }, OL);
+  lamp2(b, 22, gy + 4, 30, { r: 12, k: .35 });
+  return plate(b, (g) => { F(g, 52, 90, CAST.aurelia, { s: 1.8, hat: { k: "helmet", c: [P.butter, P.ember2] }, front: [60, 74], emo: "closed", hold: lanternHold });
+    F(g, 82, 90, CAST.aurelia, { s: 1.8, dir: -1, hat: { k: "helmet", c: [P.butter, P.ember2] }, front: [74, 74], emo: "o", hold: spear }); }); };
+
+EVNOTE.tila = { scene: "En una esquina, Tila rellena faroles con una aceitera casi vacía. En su calle hoy no habrá luz." };
+EVSC.tila = () => { const b = new Pic(EW, EH); barrio(b, { seed: 31 });
+  poorH(b, -4, 32, 46, 36, [[10, 8, 0], [28, 8, 0]], 18); poorH(b, 84, 30, 48, 38, [[8, 8, 0], [30, 8, 1]], null);
+  dirt(b, 68);
+  lamp2(b, 96, 86, 34, { r: 12, k: .3 }); lamp2(b, 34, 84, 30, { off: true });
+  return plate(b, (g) => { F(g, 70, 92, CAST.tila, { s: 1.8, front: [84, 64], emo: "sad", hold: (q, x, y) => HD.shape(q, (z) => z.roundRect(x - .6, y - .2, 2.6, 3, .4), { fill: P.mist, shade: P.plum3, lw: .3 }) }); }); };
+
+EVNOTE.well = { scene: "Entre las raíces de un roble, un pozo pequeño brilla desde dentro como un trozo de amanecer." };
+EVSC.well = () => { const b = new Pic(EW, EH); const gy = zoneBack(b, "forest");
+  bigTrunk(b, 44, 40, 0, 74);
+  b.layer((t) => { t.poly([[30, 80], [44, 66], [50, 80]], P.soil0); t.poly([[78, 80], [84, 66], [98, 82]], P.soil0); t.e(64, 82, 16, 6, P.plum2); t.e(64, 82, 12, 4, P.butter); t.e(64, 82, 7, 2, P.cream); }, OL);
+  light(b, 64, 78, 34, 20, P.butter, .45, 5);
+  return plate(b, (g) => { HD.creature(g, "brotin", 98, 90, { s: 1.3, emo: "surprised", dir: -1 }); }); };
+
+EVNOTE.dam = { scene: "Una presa de piedra y hierro corta el arroyo. Al otro lado la tierra está seca, con huellas de barcas en el barro." };
+EVSC.dam = () => { const b = new Pic(EW, EH); craterBack(b);
+  b.layer((t) => { t.r(0, 56, 50, 40, P.sea1); t.r(0, 56, 50, 2, P.sea3); t.r(48, 40, 22, 56, P.plum2); for (let y = 44; y < 96; y += 6) t.r(48, y, 22, 1, P.plum1); t.r(54, 50, 10, 14, P.soil0); t.e(59, 50, 7, 7, P.plum3); t.r(58, 44, 2, 12, P.plum3);
+    t.r(70, 70, 58, 26, mix(P.soil2, P.ember1, .2)); for (let i = 0; i < 6; i++) t.l(76 + i * 8, 80 + (i % 2) * 6, 82 + i * 8, 78 + (i % 2) * 6, P.soil0); }, OL);
+  return plate(b, (g) => { HD.creature(g, "pebb", 100, 90, { s: 1.4, emo: "o", dir: -1 }); }); };
+
+EVNOTE.apprentice = { scene: "Un aprendiz del Gremio de la Brasa aviva un fuelle que no para nunca, con las manos vendadas." };
+EVSC.apprentice = () => { const b = new Pic(EW, EH); forgeIn(b, 40);
+  b.layer((t) => { t.poly([[70, 72], [96, 64], [96, 84]], P.soil1); t.r(66, 70, 6, 8, P.soil2); }, OL);
+  return plate(b, (g) => { F(g, 100, 92, kid(CAST.tizon), { s: 1.7, dir: -1, front: [94, 68], back: [96, 80], emo: "sad" }); }); };
+
+EVNOTE.ola = { scene: "Ola, de las Mareas, carga carbón junto a las forjas. Lleva en el bolsillo una carta que nunca envió." };
+EVSC.ola = () => { const b = new Pic(EW, EH); const gy = zoneBack(b, "crater");
+  b.layer((t) => { t.e(30, 88, 18, 6, P.ink); t.e(28, 84, 12, 5, P.ink); t.p(24, 82, P.plum2); t.p(34, 86, P.plum2); }, OL);
+  return plate(b, (g) => { F(g, 72, 92, CAST.ola, { s: 1.85, front: [62, 76], back: [80, 78], emo: "closed", hold: letter }); }); };
+
+EVNOTE.liquen = { scene: "El Abuelo Liquen vigila un cofre de semillas antiguas a la entrada del bosque." };
+EVSC.liquen = () => { const b = new Pic(EW, EH); const gy = zoneBack(b, "forest");
+  chestProp(b, 84, 88, false, P.soil1);
+  return plate(b, (g) => { F(g, 46, 92, CAST.liquen, { s: 1.9, emo: "closed", front: [56, 76] }); }); };
+
+EVNOTE.vines = { scene: "Las enredaderas del camino se mueven solas. Por dentro son negras, como si bebieran savia." };
+EVSC.vines = () => { const b = new Pic(EW, EH); const gy = zoneBack(b, "forest", { night: true });
+  for (let k = 0; k < 5; k++) { const x0 = 8 + k * 26; for (let y = 0; y < 90; y++) { const x = Math.round(x0 + Math.sin(y / 7 + k) * 5); b.p(x, y, P.moss1); b.p(x + 1, y, SAP.s2); if (y % 9 === 0) { b.e(x + 3, y, 3, 1.6, P.moss2); } } }
+  [[30, 50], [82, 40], [104, 62]].forEach(([x, y]) => dropUp(b, x, y));
+  return plate(b, (g) => { HD.creature(g, "lumo", 64, 86, { s: 1.4, emo: "surprised" }); }); };
+
+EVNOTE.loggers = { scene: "Unos leñadores cargan troncos hacia el Cráter. Uno se ha torcido el tobillo." };
+EVSC.loggers = () => { const b = new Pic(EW, EH); const gy = zoneBack(b, "forest");
+  b.layer((t) => { for (let i = 0; i < 3; i++) { t.r(14, 78 - i * 5, 44, 5, P.soil1); t.e(14, 80 - i * 5, 3, 2.5, P.soil3); } }, OL);
+  return plate(b, (g) => { F(g, 76, 92, CAST.forest, { s: 1.6, pose: "sit", front: [84, 88], emo: "sad" }); F(g, 104, 92, CAST.forest, { s: 1.8, dir: -1, hat: { k: "cap", c: [P.moss2, P.moss1] }, front: [94, 76], emo: "o" }); }); };
+
+EVNOTE.court = { scene: "Una corte vacía en la niebla: sillas de piedra en círculo alrededor de un trono sin nadie, y una copa de agua junto a cada silla." };
+EVSC.court = () => { const b = new Pic(EW, EH); const gy = zoneBack(b, "hollow");
+  throneEv(b, 64, 76);
+  [[20, 86], [38, 80], [90, 80], [108, 86]].forEach(([x, y]) => { b.layer((t) => { t.r(x - 5, y - 12, 10, 3, P.plum2); t.r(x - 5, y - 9, 10, 9, P.plum3); t.r(x - 4, y - 18, 8, 6, P.plum2); }, OL); cup(b, x + 8, y); });
+  haze(b, 60, 90, P.mist, .35);
+  return plate(b, () => {}); };
+
+EVNOTE.dig = { scene: "Una familia de la Sombra cava un pozo hondo a escondidas en la niebla. Sobre la boca, una marca con forma de farol." };
+EVSC.dig = () => { const b = new Pic(EW, EH); const gy = zoneBack(b, "hollow");
+  b.layer((t) => { t.e(60, 84, 18, 6, P.ink); t.e(60, 84, 14, 4, SAP.s0); t.r(46, 72, 6, 6, P.plum3); t.r(48, 70, 2, 2, P.butter); t.e(90, 86, 12, 5, P.soil1); }, OL);
+  haze(b, 50, 80, P.mist, .3);
+  return plate(b, (g) => { F(g, 30, 90, CAST.night, { s: 1.8, front: [40, 76], emo: "closed", hold: shovel }); F(g, 96, 88, kid(CAST.night), { s: 1.6, dir: -1, emo: "o", front: [90, 76], hold: bucket }); }); };
+
+EVNOTE.whisper = { scene: "Dos Susurradores del Rey Lóbrego, con velos de niebla, te cierran el paso." };
+EVSC.whisper = () => { const b = new Pic(EW, EH); const gy = zoneBack(b, "hollow", { night: true });
+  haze(b, 30, 96, P.mist, .45);
+  return plate(b, (g) => { F(g, 48, 90, CAST.night, { s: 1.9, hat: { k: "hood", c: [P.mist, P.plum3] }, cloth: [P.plum3, P.plum2, P.mist], emo: "closed" }); F(g, 82, 90, CAST.night, { s: 1.9, dir: -1, hat: { k: "hood", c: [P.mist, P.plum3] }, cloth: [P.plum3, P.plum2, P.mist], emo: "closed" }); }); };
+
+EVNOTE.orilla = { scene: "Junto al agua, Orilla remienda redes. Lleva mucho tiempo buscando a su hermana." };
+EVSC.orilla = () => { const b = new Pic(EW, EH); const gy = zoneBack(b, "lake");
+  for (let i = 0; i < 10; i++) for (let j = 0; j < 4; j++) b.p(70 + i * 4 + (j % 2) * 2, 76 + j * 4, P.soil3);
+  b.l(70, 76, 108, 76, P.soil2); b.l(70, 88, 108, 88, P.soil2);
+  return plate(b, (g) => { F(g, 50, 90, CAST.orilla, { s: 1.8, pose: "sit", front: [70, 80], emo: "closed" }); }); };
+
+EVNOTE.reflection = { scene: "En el agua quieta ves a tu equipo reflejado. En el reflejo sois cuatro." };
+EVSC.reflection = () => { const b = new Pic(EW, EH); lakeBack(b, { water: 40, waterEnd: 96 });
+  b.layer((t) => t.r(0, 40, EW, 18, mix(P.soil1, P.sea1, .25)), OL);
+  return plate(b, (g) => { HD.creature(g, "lumo", 44, 54, { s: 1.3, emo: "o" }); HD.creature(g, "pebb", 64, 56, { s: 1.3, emo: "o" }); HD.creature(g, "fizz", 84, 54, { s: 1.3, emo: "o", dir: -1 });
+    g.save(); g.translate(0, 114); g.scale(1, -1); ["lumo", "pebb", "fizz", "nim"].forEach((c, i) => HD.creature(g, c, 44 + i * 20, 54 + (i % 2) * 2, { s: 1.3, emo: i === 3 ? "happy" : "o" })); g.restore(); }); };
+
+EVNOTE.boats = { scene: "Barcas varadas en el barro. El agua del Lago ha bajado desde que represaron el arroyo." };
+EVSC.boats = () => { const b = new Pic(EW, EH); lakeBack(b, { water: 44, waterEnd: 54 }); mudBank(b, 54);
+  [[24, 72, 30], [70, 80, 36], [104, 66, 22]].forEach(([x, y, w]) => b.layer((t) => { t.poly([[x - w / 2, y - 6], [x + w / 2, y - 6], [x + w / 2 - 5, y], [x - w / 2 + 5, y]], P.soil1); t.r(x - w / 2, y - 7, w, 2, P.soil2); }, OL));
+  return plate(b, (g) => { HD.creature(g, "pebb", 52, 90, { s: 1.3, emo: "sad" }); }); };
+
+EVNOTE.gravasong = { scene: "Por las cuevas llega una canción a trozos, como si la roca solo dejara pasar algunas palabras." };
+EVSC.gravasong = () => { const b = new Pic(EW, EH); const gy = zoneBack(b, "caves");
+  verses(b, 14, 14, 114, 60, { seed: 9 });
+  wallLamp(b, 20, 40); wallLamp(b, 108, 40);
+  return plate(b, (g) => { HD.creature(g, "fizz", 46, 84, { s: 1.4, emo: "happy" }); HD.creature(g, "ecolito", 82, 86, { s: 1.4, emo: "closed", dir: -1 });
+    [[60, 40], [72, 32], [84, 44]].forEach(([x, y]) => HD.shape(g, (q) => { q.ellipse(x, y, 1.4, 1, 0, 0, Math.PI * 2); }, { fill: P.cream, lw: .3 })); }); };
+
+EVNOTE.tunnels = { scene: "Un túnel nuevo, recto y liso, corta las cuevas viejas. En las paredes, marcas con forma de farol." };
+EVSC.tunnels = () => { const b = new Pic(EW, EH); const gy = zoneBack(b, "caves");
+  b.layer((t) => { t.r(40, 20, 48, 52, P.ink); t.r(44, 24, 40, 48, mix(P.ink, P.plum1, .3)); t.r(58, 34, 12, 38, P.ink); }, OL);
+  [[46, 30], [78, 30]].forEach(([x, y]) => { b.r(x, y, 3, 5, P.butter); b.r(x + 1, y - 1, 1, 1, P.butter); });
+  return plate(b, (g) => { HD.creature(g, "pebb", 24, 88, { s: 1.4, emo: "o" }); }); };
+
+EVNOTE.miners = { scene: "Mineros de la Hondura atrapados detrás de un derrumbe. Se les oye golpear la roca." };
+EVSC.miners = () => { const b = new Pic(EW, EH); const gy = zoneBack(b, "caves");
+  rock(b, 70, 66, 20, 10, P.plum2); rock(b, 94, 74, 16, 8, P.plum2); rock(b, 54, 78, 14, 8, P.plum3); rock(b, 84, 54, 12, 8, P.plum3);
+  b.l(66, 50, 70, 60, P.ember3); b.l(70, 60, 68, 62, P.ember3);
+  return plate(b, (g) => { F(g, 26, 92, CAST.miner, { s: 1.8, front: [40, 72], emo: "surprised", hold: pick }); }); };
+
+EVNOTE.coplo = { scene: "Coplo canta en un mirador de los Altos, con un sombrero lleno de monedas a los pies." };
+EVSC.coplo = () => { const b = new Pic(EW, EH); const gy = zoneBack(b, "heights");
+  b.layer((t) => { t.e(84, 88, 7, 3, P.soil1); t.e(84, 86, 5, 2, P.soil2); [[81, 85], [84, 84], [87, 85]].forEach(([x, y]) => t.p(x, y, P.butter)); }, OL);
+  return plate(b, (g) => { F(g, 58, 90, CAST.coplo, { s: 1.9, emo: "happy" }); }); };
+
+EVNOTE.news = { scene: "Un mensajero de la Aguja del Trueno vende noticias frescas en un cruce de caminos." };
+EVSC.news = () => { const b = new Pic(EW, EH); const gy = zoneBack(b, "heights");
+  signpost(b, 30, 88);
+  kite(b, 96, 18, [80, 50], P.rose1);
+  return plate(b, (g) => { F(g, 82, 92, CAST.heights, { s: 1.8, dir: -1, front: [72, 68], back: [90, 60], emo: "happy", hold: letter }); }); };
+
+EVNOTE.pass = { scene: "Los guardias de Céfira han cerrado el paso de montaña con una barrera." };
+EVSC.pass = () => { const b = new Pic(EW, EH); const gy = zoneBack(b, "heights");
+  b.layer((t) => { t.r(30, 66, 4, 22, P.soil1); t.r(30, 68, 70, 3, P.ember1); for (let x = 34; x < 100; x += 10) t.r(x, 68, 5, 3, P.cream); }, OL);
+  return plate(b, (g) => { F(g, 104, 92, CAST.heights, { s: 1.85, dir: -1, hat: { k: "hood", c: [P.plum2, P.plum1] }, front: [94, 72], emo: "closed", hold: spear }); }); };
+
+EVNOTE.esporina = { scene: "Esporina cultiva setas pálidas sobre un charco de savia negra en el Fondo Blanco." };
+EVSC.esporina = () => { const b = new Pic(EW, EH); iceCave(b, { warm: true });
+  b.e(46, 84, 22, 5, SAP.s1); b.e(46, 84, 16, 3, SAP.s2); b.p(40, 83, SAP.sheen);
+  glowShroom(b, 36, 82, 8, 4, mix(P.cream, SAP.sheen, .3)); glowShroom(b, 50, 84, 12, 5, mix(P.cream, SAP.sheen, .3)); glowShroom(b, 60, 82, 6, 3, P.cream);
+  return plate(b, (g) => { F(g, 92, 90, CAST.esporina, { s: 1.85, dir: -1, front: [80, 74], emo: "happy" }); }); };
+
+EVNOTE.tomb = { scene: "La puerta de la Tumba Helada gotea. A su lado, un gigante de hielo duerme de pie apoyado en su maza." };
+EVSC.tomb = () => { const b = new Pic(EW, EH); const gy = zoneBack(b, "deep");
+  b.layer((t) => { t.r(20, 26, 54, 50, mix(P.sea3, P.cream, .3)); t.r(38, 46, 18, 30, mix(P.sea2, P.sea1, .3)); t.e(47, 46, 9, 6, mix(P.sea2, P.sea1, .3)); }, OL);
+  for (let x = 24; x < 72; x += 6) b.p(x, 77 + (x % 3), mix(SAP.sheen, P.sea3, .6));
+  return plate(b, (g) => { HD.creature(g, "guardatumba", 98, 82, { s: 2, emo: "sleep", dir: -1 }); }); };
+
+EVNOTE.dreams = { scene: "Una familia de la casa del Sueño se acaba de despertar y se cuenta lo que ha soñado." };
+EVSC.dreams = () => { const b = new Pic(EW, EH); iceCave(b);
+  [[34, 86], [64, 88], [94, 86]].forEach(([x, y]) => b.layer((t) => { t.e(x, y, 13, 4, P.cream); t.e(x - 7, y - 2, 3, 2, P.fog); }, OL));
+  return plate(b, (g) => { F(g, 34, 86, CAST.frost, { s: 1.5, pose: "sit", hairStyle: "bun", hair: P.fog, emo: "o" }); F(g, 64, 88, kid(CAST.frost), { s: 1.3, pose: "sit", emo: "happy" }); F(g, 94, 86, CAST.frost, { s: 1.6, pose: "sit", dir: -1, emo: "closed" }); }); };
+
+EVNOTE.duo = { scene: "Tila y Nim esperan en la entrada del Tocón. Unísona dormita entre los dos." };
+EVSC.duo = () => { const b = new Pic(EW, EH); const gy = zoneBack(b, "heart");
+  return plate(b, (g) => { F(g, 38, 92, CAST.tila, { s: 1.8, emo: "o" }); HD.creature(g, "unisona", 64, 86, { s: 1.4, emo: "sleep" }); HD.creature(g, "nim", 92, 90, { s: 1.5, emo: "closed", dir: -1 }); }); };
+
+EVNOTE.albor = { scene: "Bajo el Tocón, tubos de cristal clavados en la Raíz con el sello de la Casa Albor. Por las grietas rezuma savia negra." };
+EVSC.albor = () => { const b = new Pic(EW, EH); OL = P.soil0;
+  band(b, 0, 0, EW, EH, P.soil1, P.soil0, 5);
+  b.layer((t) => { t.poly([[0, 70], [30, 58], [64, 62], [100, 54], [128, 60], [128, 84], [96, 76], [60, 82], [30, 78], [0, 90]], mix(P.cream, P.soil3, .4)); }, OL);
+  glassTube(b, 30, 64, 20, 0); glassTube(b, 62, 66, 60, 0); glassTube(b, 98, 60, 110, 0);
+  [[30, 64], [62, 66], [98, 60]].forEach(([x, y]) => { b.r(x - 2, y - 2, 6, 3, P.butter); b.e(x + 1, y + 6, 4, 2, SAP.s1); dropUp(b, x + 6, y + 4); });
+  light(b, 62, 30, 40, 30, P.butter, .2, 4);
+  return plate(b, (g) => { HD.creature(g, "lumo", 84, 92, { s: 1.3, emo: "surprised", dir: -1 }); }); };
+
+EVNOTE.cantora = { scene: "En medio del Claro, la estatua de la Primera Cantora, cubierta de musgo, con la boca abierta a mitad de una nota." };
+EVSC.cantora = () => { const b = new Pic(EW, EH); const gy = zoneBack(b, "heart");
+  b.layer((t) => { t.r(52, 84, 24, 6, P.plum2); t.r(56, 44, 16, 40, P.mist); t.e(64, 40, 7, 7, P.mist); t.e(64, 42, 1.4, 1.6, P.plum2); t.poly([[56, 48], [48, 64], [56, 64]], P.mist); t.poly([[72, 48], [80, 64], [72, 64]], P.mist);
+    t.e(60, 50, 5, 4, P.moss2); t.e(68, 70, 6, 5, P.moss2); t.e(62, 34, 5, 2, P.moss2); }, OL);
+  return plate(b, (g) => { HD.creature(g, "fizz", 30, 88, { s: 1.3, emo: "happy" }); HD.creature(g, "pebb", 100, 90, { s: 1.3, emo: "sleep", dir: -1 }); }); };
 const ART = {};
 function art(id) { if (!SCENE[id]) return null; return ART[id] || (ART[id] = SCENE[id]()); }
 
