@@ -68,6 +68,30 @@ function autoForm(units) {
   return units;
 }
 
+/* ---------- Card shapes: where an active card lands when you aim it ----------
+   one: the unit you pick · lane: Front and Back of a lane · row: the 3 cells of a row · cross: a cell and its neighbours
+   ally: the ally you pick · null: no aiming (self, all allies, random...).
+   Cards that hit every foe now hit a zone with +15 % power (ZONE_POW); a card can set its own with a.area. */
+const FOE_ONE = ["foe", "fastestFoe", "strongFoe", "fireFoe", "randFoe"];
+const ALLY_ONE = ["ally", "lowAlly", "lowDefAlly", "slowAlly", "allyOther", "fireAlly", "lowOther", "debuffedAlly"];
+const ZONE_POW = 1.15;
+function cardShape(a) {
+  if (!a || a.echoLast) return null;
+  if (a.area) return a.area;
+  if (a.tgt === "foes") return a.pow ? "lane" : "row";
+  if (FOE_ONE.includes(a.tgt)) return a.splash ? "cross" : "one";
+  if (ALLY_ONE.includes(a.tgt)) return "ally";
+  return null;
+}
+// the cells a shape covers around cell c (on the target's side)
+function shapeCells(shape, c) {
+  const lane = cellLane(c), row = cellRow(c);
+  if (shape === "lane") return [lane, lane + 3];
+  if (shape === "row") return [row * 3, row * 3 + 1, row * 3 + 2];
+  if (shape === "cross") return [c, row * 3 + lane - 1, row * 3 + lane + 1, (1 - row) * 3 + lane].filter((x, i) => i === 0 || i === 3 || (x >= row * 3 && x < row * 3 + 3 && Math.abs(cellLane(x) - lane) === 1));
+  return [c];
+}
+
 /* ====================================================================== */
 /* Battle engine                                                          */
 /* ====================================================================== */
@@ -267,6 +291,13 @@ B.targets = function (spec, src, ctx) {
   const allies = this.alive(src.side);
   const taunt = foes.filter((u) => u.st.taunt);
   if (taunt.length && ["foe", "rand", "randFoe", "fastestFoe", "fireFoe"].includes(spec)) foes = taunt;
+  // an aimed card (ctx.aim = a cell; ctx.shape from cardShape)
+  const sh = ctx && ctx.shape;
+  if (sh && ctx.aim != null) {
+    if (sh === "ally") { const a = allies.find((u) => u.pos === ctx.aim); if (a) return [a]; }
+    else if (sh === "one" || sh === "cross") { const f = foes.find((u) => u.pos === ctx.aim); if (f) return [f]; }
+    else { const cs = shapeCells(sh, ctx.aim); return this.alive(this.other(src.side)).filter((u) => !u.st.hidden && cs.includes(u.pos)); }
+  }
   const byHpPct = (a, b) => a.hp / a.maxHp - b.hp / b.maxHp;
   switch (spec) {
     case "foe": {
@@ -307,6 +338,24 @@ B.targets = function (spec, src, ctx) {
   return [];
 };
 
+// the units an aimed card would reach from cell c (for the preview while aiming)
+B.aimHits = function (u, c) {
+  const a = u.cards.a && u.cards.a.a, sh = cardShape(a); if (!sh) return [];
+  const side = sh === "ally" ? u.side : this.other(u.side);
+  const cs = sh === "one" || sh === "ally" ? [c] : shapeCells(sh, c);
+  return this.alive(side).filter((x) => cs.includes(x.pos) && (sh === "ally" || !x.st.hidden));
+};
+// the cell the AI aims a zone card at: most foes hit, weighted by type
+B.bestAim = function (u, shape, card) {
+  const ty = this.typeOf(u, card), foes = this.alive(this.other(u.side)).filter((x) => !x.st.hidden);
+  let best = null, bs = -1;
+  for (let c = 0; c < CELLS; c++) {
+    const cs = shapeCells(shape, c), hit = foes.filter((x) => cs.includes(x.pos));
+    const sc = hit.reduce((m, x) => m + x.types.reduce((k, d) => k * typeMult(ty, d), 1) * 10 - x.hp / x.maxHp, 0);
+    if (sc > bs) { bs = sc; best = c; }
+  }
+  return best;
+};
 // apply an effect spec (from an active or a support)
 B.apply = function (src, fx, card, ctx) {
   if (fx.nightOnly && this.day) return false;
@@ -320,6 +369,11 @@ B.apply = function (src, fx, card, ctx) {
     this.emit({ k: "echo", u: src.uid, card: last.id });
     return this.apply(src, copy, last, ctx);
   }
+  // an active card with a zone shape: aimed by the player, or by the AI here; zone cards hit +15 %
+  const isActive = card && card.a === fx, shape = isActive ? cardShape(fx) : null;
+  if (shape && shape !== "one" && shape !== "ally" && shape !== "cross" && (!ctx || ctx.aim == null)) ctx = Object.assign({}, ctx, { aim: this.bestAim(src, shape, card) });
+  if (shape) ctx = Object.assign({}, ctx, { shape });
+  const zoneF = shape === "lane" || shape === "row" ? ZONE_POW : 1;
   const list = this.targets(fx.tgt, src, Object.assign({ card }, ctx));
   if (fx.foresight) { this.side[src.side].foresight = (this.side[src.side].foresight || 0) + fx.foresight; this.emit({ k: "st", u: src.uid, st: "evade" }); }
   if (fx.cdDown) for (const u of this.alive(src.side)) u.cd = Math.max(0, u.cd - fx.cdDown);
@@ -332,10 +386,11 @@ B.apply = function (src, fx, card, ctx) {
       const tl = tg ? [tg] : list;
       for (const t of tl) {
         if (!t || t.hp <= 0) continue;
-        const d = this.hit(src, t, fx.pow, card, { breakShield: fx.breakShield, drain: fx.drain, trueHit: fx.trueHit, pierce: fx.pierce });
+        const d = this.hit(src, t, fx.pow * zoneF, card, { breakShield: fx.breakShield, drain: fx.drain, trueHit: fx.trueHit, pierce: fx.pierce });
         if (d > 0 && fx.st) this.addStatus(src, t, fx.st, ty);
         if (d > 0 && fx.st2) this.addStatus(src, t, fx.st2, ty);
-        if (fx.splash) for (const o of this.alive(this.other(src.side))) if (o !== t && !o.st.hidden) this.hit(src, o, fx.splash, card, {});
+        // splash reaches the cells next to the target (a cross), or everyone if there's no formation
+        if (fx.splash) { const near = t.pos == null ? null : shapeCells("cross", t.pos); for (const o of this.alive(this.other(src.side))) if (o !== t && !o.st.hidden && (!near || near.includes(o.pos))) this.hit(src, o, fx.splash, card, {}); }
         if (d > 0 && fx.teamDrain) { const al = this.alive(src.side), each = Math.round(d * fx.teamDrain / 100 / al.length); for (const a of al) if (each > 0 && a.hp < a.maxHp) { const bf = a.hp; a.hp = Math.min(a.maxHp, a.hp + each); this.emit({ k: "heal", u: a.uid, n: a.hp - bf }); } }
       }
       if (!tg) break;
@@ -404,6 +459,7 @@ B.turnStart = function (u) {
   return true;
 };
 B.turnEnd = function (u) {
+  u.g = -this.rnd() * 0.1; // a new turn bar, with a little random start
   for (const k of Object.keys(u.st)) { if (u.st[k].t >= 99) continue; u.st[k].t--; if (u.st[k].t <= 0) delete u.st[k]; }
   if (u.shieldT > 0) { u.shieldT--; if (u.shieldT <= 0) u.shield = 0; }
   this.checkOver();
@@ -421,12 +477,12 @@ B.wantPlay = function (u) {
   if (!a.pow && a.cleanse && !a.heal) return this.alive(u.side).some((x) => Object.keys(x.st).some((k) => STATUS[k].neg));
   return true;
 };
-B.act = function (u, useCard) {
+B.act = function (u, useCard, aim) {
   if (this.over || u.hp <= 0) return;
   if (useCard && this.canPlay(u)) {
     const c = u.cards.a;
     this.emit({ k: "act", u: u.uid, card: c.id });
-    this.apply(u, c.a, c, {});
+    this.apply(u, c.a, c, aim != null ? { aim } : {});
     u.cd = c.a.cd;
     if (!c.a.echoLast) this.side[u.side].lastActive = c;
   } else {
@@ -443,19 +499,51 @@ B.checkOver = function () {
   else if (!this.alive("ally").length) this.over = "lose";
   return this.over;
 };
+/* ---------- Flowing time ----------
+   Every unit fills a turn bar (u.g from 0 to 1) at its own pace; when full it takes its turn. One "round" is one unit of
+   battle time (round-based cards and passives still count in these). Pace = sqrt(speed / average speed), so the fast act
+   more often without running away with the battle. Cards are still on cooldowns counted in the unit's own turns. */
+B.rate = function (u) { return Math.max(0.3, Math.sqrt(this.eff(u, "spd") / (this.spdRef || 1))); };
+// moves time forward by up to dt; returns { k: "round" } or { k: "turn", u } when something happens, else null
+B.advance = function (dt) {
+  if (this.time == null) {
+    this.time = 0;
+    const al = this.units.filter((u) => u.hp > 0);
+    this.spdRef = al.reduce((s, u) => s + this.eff(u, "spd"), 0) / Math.max(1, al.length);
+    for (const u of this.units) u.g = this.rnd() * 0.3;
+  }
+  const al = this.units.filter((u) => u.hp > 0);
+  let best = null, bt = Infinity;
+  for (const u of al) { const t = Math.max(0, (1 - u.g) / this.rate(u)); if (t < bt) { bt = t; best = u; } }
+  const tr = Math.max(0, this.round - this.time);
+  const step = Math.min(dt, bt, tr);
+  for (const u of al) u.g = Math.min(1, u.g + this.rate(u) * step);
+  this.time += step;
+  if (tr <= step) { this.time = this.round; this.roundStart(); return { k: "round" }; }
+  if (best && bt <= step) { best.g = 1; return { k: "turn", u: best }; }
+  return null;
+};
+// can this unit play its card right now, out of its turn? (the player taps it)
+B.canCast = function (u) { return u.hp > 0 && !this.over && this.canPlay(u) && !u.st.stun && !u.st.trap && !u.skip; };
+// plays the card now: it takes the unit's turn (statuses tick, the turn bar starts over)
+B.castNow = function (u, aim) {
+  if (!this.canCast(u)) return false;
+  if (this.turnStart(u)) this.act(u, true, aim);
+  return true;
+};
 // synchronous full simulation (used by tests and auto-resolve)
 B.runAll = function (maxRounds) {
   this.start();
-  while (!this.checkOver() && this.round < (maxRounds || 40)) {
-    for (const u of this.roundStart()) {
-      if (this.over) break;
-      if (!this.turnStart(u)) { this.checkOver(); continue; }
-      this.act(u, this.wantPlay(u));
-    }
+  while (!this.checkOver() && this.round <= (maxRounds || 40)) {
+    const e = this.advance(Infinity);
+    if (!e || e.k !== "turn") continue;
+    const u = e.u;
+    if (!this.turnStart(u)) { this.checkOver(); continue; }
+    this.act(u, this.wantPlay(u));
   }
   return this.over || "lose";
 };
 
 
-const api = { CELLS, cellRow, cellLane, autoForm, GRADE_VIS, COMPAT, canUse, UPGRADE_N, TYPES, BEATS, OPPOSITE, typeMult, GRADES, rollGrade, STATUS, CARDS, DROP_POOL, scaled, MONS, makeUnit, Battle, lvlScale, xpNeed, SLOT_LVL, ZONES, EVENTS, isDayNow };
+const api = { CELLS, cellRow, cellLane, autoForm, cardShape, shapeCells, GRADE_VIS, COMPAT, canUse, UPGRADE_N, TYPES, BEATS, OPPOSITE, typeMult, GRADES, rollGrade, STATUS, CARDS, DROP_POOL, scaled, MONS, makeUnit, Battle, lvlScale, xpNeed, SLOT_LVL, ZONES, EVENTS, isDayNow };
 if (typeof window !== "undefined") window.EvoEngine = api;

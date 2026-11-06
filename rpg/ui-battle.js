@@ -16,7 +16,7 @@ function startBattle(boss) {
   const all = b.units;
   const anim = {};
   ["ally", "foe"].forEach((side) => all.filter((u) => u.side === side).forEach((u) => { const [x, y] = cellXY(side, u.pos); anim[u.uid] = { x, y, lunge: 0, flash: 0, shownHp: u.hp }; }));
-  battle = { b, boss, anim, floats: [], log: [], waiting: null, done: false, cv: null, c: null, raf: 0 };
+  battle = { b, boss, anim, floats: [], log: [], aim: null, queue: [], done: false, cv: null, c: null, raf: 0 };
   show("battle");
   runBattle();
 }
@@ -25,6 +25,8 @@ function battleMount() {
   battle.cv = cv; battle.c = EV.setupCanvas(cv, BW, BH);
   cv.style.aspectRatio = BW + " / " + BH;
   if (!battle.raf) battle.raf = requestAnimationFrame(drawBattle);
+  cv.addEventListener("pointerdown", aimTap);
+  cv.addEventListener("pointermove", aimHover);
   renderBLog(); renderTurn();
 }
 const speed = () => EV.P.rpgSpeed || 1;
@@ -75,40 +77,100 @@ function flushEvents() {
   }
   if (hitSfx) { EV.sfx(hitSfx); if (hitSfx === "crit") EV.buzz(25); }
 }
-function askPlayer(u) {
-  return new Promise((resolve) => { battle.waiting = { u, resolve }; renderTurn(); });
-}
+/* ---------- Your cards: tap a ready card, aim it with time stopped, let go ----------
+   Manual mode: your creatures still do their basic attacks on their own; their active cards wait for you.
+   Auto mode: everything is played by the game, as before. Time stops while aiming (or runs at 10 % with "Slow"). */
+const ROUND_MS = 1500; // one round of battle time at ×1
+const manual = () => EV.P.rpgMode === "manual";
+const aimSlow = () => EV.P.rpgAim === "slow";
 function renderTurn() {
   const el = $("bTurn"); if (!el || !battle) return;
-  const w = battle.waiting;
-  if (!w) { el.innerHTML = ""; return; }
-  const u = w.u, a = u.cards.a;
-  const can = battle.b.canPlay(u);
-  el.innerHTML = `<p class="bturn">${esc(tx("b.yourTurn", { name: u.name }))}</p><div class="bctl">
-    <button class="btn" type="button" data-b="card" ${can ? "" : "disabled"}>${a ? esc(tx("b.play", { card: cardName(a.id) })) + (can ? "" : " · " + esc(tx("b.cd", { n: u.cd }))) : esc(tx("b.noCard"))}</button>
-    <button class="btn ghost" type="button" data-b="basic">${esc(tx("b.basic"))}</button></div>`;
+  const b = battle.b, A = battle.aim;
+  if (!manual() || battle.done) { el.innerHTML = ""; return; }
+  if (A) {
+    const sh = cardShape(A.u.cards.a.a);
+    el.innerHTML = `<p class="bturn">${esc(tx(aimSlow() ? "b.aimSlow" : "b.aimStop"))} ${esc(tx("b.aim." + sh, { card: cardName(A.u.cards.a.id) }))}</p>
+      <div class="bctl"><button class="btn" type="button" data-b="fire" ${A.cell == null ? "disabled" : ""}>${esc(tx("b.fire", { card: cardName(A.u.cards.a.id) }))}</button><button class="btn ghost" type="button" data-b="cancel">${esc(tx("b.cancel"))}</button></div>`;
+    return;
+  }
+  const allies = b.units.filter((u) => u.side === "ally");
+  el.innerHTML = `<p class="muted bhint">${esc(tx("b.tapCard"))}</p><div class="bdock">${allies.map((u) => {
+    const a = u.cards.a, can = b.canCast(u), ko = u.hp <= 0;
+    const st = ko ? "KO" : !a ? tx("b.noCard") : can ? tx("b.ready") : u.cd > 0 ? tx("b.cd", { n: u.cd }) : tx("b.held");
+    return `<button type="button" class="bcard${can ? " ready" : ""}" data-bc="${u.uid}" ${can ? "" : "disabled"}><strong>${esc(u.name)}</strong><span>${a ? esc(cardName(a.id)) : "—"}</span><small>${esc(st)}</small></button>`;
+  }).join("")}</div><div class="seg baim">${["pause", "slow"].map((m) => `<button type="button" data-am="${m}" aria-pressed="${(EV.P.rpgAim || "pause") === m}">${esc(tx("b.am." + m))}</button>`).join("")}</div>`;
 }
+// tap a ready card in the dock
+function pickCard(uid) {
+  const b = battle.b, u = b.units.find((x) => x.uid === uid);
+  if (!u || !b.canCast(u)) return;
+  const sh = cardShape(u.cards.a.a);
+  if (!sh) { battle.queue.push({ u, aim: null }); EV.sfx("card"); return; } // nothing to aim: it goes at once
+  battle.aim = { u, shape: sh, cell: null, hover: null };
+  EV.sfx("tap"); renderTurn();
+}
+function fireAim() {
+  const A = battle && battle.aim; if (!A || A.cell == null) return;
+  battle.queue.push({ u: A.u, aim: A.cell }); battle.aim = null; EV.sfx("card"); renderTurn();
+}
+function cancelAim() { if (battle && battle.aim) { battle.aim = null; EV.sfx("tap"); renderTurn(); } }
+// which cell of the aimed side is under the pointer
+function cellAt(e) {
+  const A = battle.aim, cv = battle.cv, r = cv.getBoundingClientRect();
+  const x = (e.clientX - r.left) / r.width * BW, y = (e.clientY - r.top) / r.height * BH;
+  const side = A.shape === "ally" ? "ally" : "foe";
+  let best = null, bd = 36;
+  for (let c = 0; c < CELLS; c++) { const [cx, cy] = cellXY(side, c), d = Math.hypot(cx - x, cy - 6 - y); if (d < bd) { bd = d; best = c; } }
+  return best;
+}
+// a cell you can aim at: the zone cards take any cell, the others need someone standing there
+function aimOk(c) {
+  const A = battle.aim; if (c == null) return false;
+  if (A.shape === "lane" || A.shape === "row") return true;
+  return battle.b.aimHits(A.u, c).length > 0;
+}
+function aimTap(e) {
+  if (!battle || !battle.aim) return;
+  const c = cellAt(e);
+  if (!aimOk(c)) { EV.sfx("deny"); return; }
+  if (battle.aim.cell === c) { fireAim(); return; } // a second tap on the same cell lets go
+  battle.aim.cell = c; EV.sfx("tap"); renderTurn();
+}
+function aimHover(e) { if (battle && battle.aim) battle.aim.hover = cellAt(e); }
+const nextFrame = () => new Promise((r) => requestAnimationFrame(r));
 async function runBattle() {
   const bt = battle, b = bt.b;
   await wait(400);
   b.start(); flushEvents(); await wait(500);
-  while (!b.checkOver() && b.round < 40) {
-    const order = b.roundStart(); flushEvents();
-    for (const u of order) {
-      if (bt !== battle) return;
-      if (b.over) break;
-      if (!b.turnStart(u)) { flushEvents(); b.checkOver(); await wait(450); continue; }
-      flushEvents();
-      let use;
-      if (u.side === "ally" && EV.P.rpgMode === "manual") use = await askPlayer(u);
-      else use = b.wantPlay(u);
-      if (bt !== battle) return;
-      b.act(u, use); flushEvents();
-      await wait(use ? 900 : 700);
+  let last = performance.now();
+  while (!b.checkOver() && b.round <= 40) {
+    if (bt !== battle) return;
+    // a card you let go of: it takes its creature's turn right now
+    if (bt.queue.length) {
+      const { u, aim } = bt.queue.shift();
+      if (b.castNow(u, aim)) { flushEvents(); renderTurn(); await wait(900); }
+      last = performance.now(); continue;
     }
+    if (bt.aim && (bt.aim.u.hp <= 0 || !manual())) { bt.aim = null; renderTurn(); }
+    await nextFrame();
+    if (bt !== battle) return;
+    const now = performance.now();
+    let dt = Math.min(100, now - last) * speed() / ROUND_MS; last = now;
+    if (bt.aim) { if (!aimSlow()) continue; dt *= 0.1; } // time stops (or crawls) while you aim
+    const e = b.advance(dt);
+    if (!e) continue;
+    if (e.k === "round") { flushEvents(); continue; }
+    const u = e.u;
+    if (!b.turnStart(u)) { flushEvents(); b.checkOver(); renderTurn(); await wait(450); last = performance.now(); continue; }
+    flushEvents();
+    // your creatures play their card by themselves only in Auto; in Manual they wait for you and attack meanwhile
+    const use = u.side === "ally" && manual() ? false : b.wantPlay(u);
+    b.act(u, use); flushEvents(); renderTurn();
+    await wait(use ? 900 : 600);
+    last = performance.now();
   }
   const res = b.over || "lose";
-  bt.done = true;
+  bt.done = true; bt.aim = null; renderTurn();
   blog(res === "win" ? tx("b.win") : tx("b.lose"));
   if (res === "win") EV.sfx("win");
   await wait(1100);
@@ -292,6 +354,31 @@ function castPose(u, now) {
   }
   return p;
 }
+// while aiming: the cells you can pick, the zone under your finger and the type multiplier on each foe it reaches
+function drawAim(out, now) {
+  const A = battle.aim, b = battle.b, side = A.shape === "ally" ? "ally" : "foe", show = A.cell != null ? A.cell : A.hover;
+  out.save();
+  out.fillStyle = "rgba(29,22,38,.28)"; out.fillRect(0, 0, BW, BH);
+  const hitCells = show != null && aimOk(show) ? (A.shape === "lane" || A.shape === "row" || A.shape === "cross" ? shapeCells(A.shape, show) : [show]) : [];
+  for (let c = 0; c < CELLS; c++) {
+    const [x, y] = cellXY(side, c), on = hitCells.includes(c), ok = aimOk(c);
+    if (!on && !ok) continue;
+    out.strokeStyle = on ? (side === "ally" ? "#86b85a" : "#ffd57a") : "rgba(251,246,239,.5)"; out.lineWidth = on ? 3 : 1.5;
+    out.fillStyle = on ? (side === "ally" ? "rgba(134,184,90,.25)" : "rgba(255,213,122,.22)") : "transparent";
+    out.beginPath(); out.ellipse(x, y + 4, 30, 30, 0, 0, Math.PI * 2); out.fill(); out.stroke();
+  }
+  if (show != null && side === "foe") {
+    const card = A.u.cards.a, ty = b.typeOf(A.u, card);
+    for (const t of b.aimHits(A.u, show)) {
+      const m = t.types.reduce((k, d) => k * typeMult(ty, d), 1), a = battle.anim[t.uid]; if (!a || m === 1) continue;
+      out.font = '700 13px "EvNum", "Pixelify Sans", system-ui, sans-serif'; out.textAlign = "center"; out.lineWidth = 3; out.strokeStyle = "#1d1626";
+      const txt = "×" + (Math.round(m * 100) / 100); out.strokeText(txt, a.x, a.y - 40); out.fillStyle = m > 1 ? "#ffd57a" : "#9d93ad"; out.fillText(txt, a.x, a.y - 40);
+    }
+  }
+  out.font = '700 12px "EvNum", "Pixelify Sans", system-ui, sans-serif'; out.textAlign = "center"; out.fillStyle = "#fbf6ef";
+  out.fillText(aimSlow() ? "▷ ×0.1" : "❚❚", BW / 2, 18);
+  out.restore();
+}
 function drawBattle(now) {
   if (!battle || !battle.c) return;
   const out = battle.c, b = battle.b, t = now / 1000, z = ZONES[X.zone];
@@ -355,6 +442,8 @@ function drawBattle(now) {
     const pct = Math.max(0, a.shownHp / u.maxHp), col = pct > 0.5 ? "#86b85a" : pct > 0.25 ? "#ffd57a" : "#e0603f";
     c.fillStyle = col; const segs = Math.ceil((bw / 4) * pct); for (let k = 0; k < segs; k++) c.fillRect(-bw / 2 + k * 4, by, 2, 4);
     if (u.shield > 0) { c.fillStyle = "#c8eef5"; c.fillRect(-bw / 2, by, Math.min(bw, bw * u.shield / u.maxHp), 2); }
+    // turn bar: fills up until the creature acts
+    if (!ko && u.g != null) { c.fillStyle = "#1d1626"; c.fillRect(-bw / 2 - 2, by + 6, bw + 4, 4); c.fillStyle = "#b9a7ff"; c.fillRect(-bw / 2, by + 6, Math.round(bw * Math.max(0, Math.min(1, u.g)) / 2) * 2, 2); }
     if (u.cards.a && u.cd <= 0 && !ko) { c.fillStyle = "#ffd57a"; c.fillRect(bw / 2 + 4, by - 2, 4, 4); c.fillStyle = "#1d1626"; c.fillRect(bw / 2 + 4, by + 2, 4, 2); }
     c.restore();
   }
@@ -386,6 +475,7 @@ function drawBattle(now) {
     if (bad) out.fillText(bad, 0, by + 28);
     out.restore();
   }
+  if (battle.aim) drawAim(out, now);
   for (const f of battle.floats) {
     f.life -= 0.016; f.y -= f.vy == null ? 0.45 : f.vy;
     out.save(); out.globalAlpha = Math.max(0, Math.min(1, f.life)); out.textAlign = "center";
