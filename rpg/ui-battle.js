@@ -5,7 +5,9 @@
 
 /* ---------- Battle presentation ---------- */
 const BW = 360, BH = 240;
-const POS = { ally: [[96, 92], [56, 148], [116, 196]], foe: [[264, 92], [304, 148], [244, 196]] };
+// where a formation cell stands on the battle canvas: 3 lanes top to bottom, front row towards the middle
+const LANE_Y = [96, 148, 200], ROW_X = { ally: [128, 52], foe: [232, 308] };
+const cellXY = (side, c) => [ROW_X[side][cellRow(c)], LANE_Y[cellLane(c)]];
 function startBattle(boss) {
   const allies = partyUnits().filter((u) => u.hp > 0);
   const foes = foeUnits(boss);
@@ -13,7 +15,7 @@ function startBattle(boss) {
   const b = new Battle(allies, foes, { zone: X.duel ? null : ZONES[X.zone], day: isDayNow() });
   const all = b.units;
   const anim = {};
-  ["ally", "foe"].forEach((side) => all.filter((u) => u.side === side).forEach((u, i) => { anim[u.uid] = { x: POS[side][i][0], y: POS[side][i][1], lunge: 0, flash: 0, shownHp: u.hp }; }));
+  ["ally", "foe"].forEach((side) => all.filter((u) => u.side === side).forEach((u) => { const [x, y] = cellXY(side, u.pos); anim[u.uid] = { x, y, lunge: 0, flash: 0, shownHp: u.hp }; }));
   battle = { b, boss, anim, floats: [], log: [], waiting: null, done: false, cv: null, c: null, raf: 0 };
   show("battle");
   runBattle();
@@ -303,6 +305,9 @@ function drawBattle(now) {
   drawDecor(c, z.decor, t, day);
   c.fillStyle = day ? z.ground : z.groundN; c.beginPath(); c.moveTo(0, 70); c.quadraticCurveTo(BW / 2, 52, BW, 70); c.lineTo(BW, BH); c.lineTo(0, BH); c.fill();
   c.fillStyle = "#00000014"; for (let i = 0; i < 40; i++) { const x = (i * 97) % BW, y = 80 + ((i * 53) % 140); c.fillRect(x, y, 2, 5); }
+  // the 6 formation cells of each side, as soft patches on the ground
+  c.fillStyle = "#0000001c";
+  for (const side of ["ally", "foe"]) for (let k = 0; k < CELLS; k++) { const [x, y] = cellXY(side, k); EV.ell(c, x, y + 16, 26, 7); c.fill(); }
   if (BLOW) { c.setTransform(1, 0, 0, 1, 0, 0); PX.quantize(c, BW / 2, BH / 2, true); c.scale(0.5, 0.5); }
   // units
   const order = b.units.slice().sort((p, q) => battle.anim[p.uid].y - battle.anim[q.uid].y);
@@ -373,7 +378,8 @@ function drawBattle(now) {
     const bw = u.boss ? 80 : 56, by = u.boss ? 30 : 22;
     out.save(); out.translate(x, y);
     out.font = font(600, 10); out.textAlign = "center"; out.textBaseline = "alphabetic"; out.fillStyle = "#fbf6ef"; out.strokeStyle = "#1d1626"; out.lineWidth = 3; out.lineJoin = "round";
-    const label = u.name.length > 14 ? u.name.slice(0, 13) + "…" : u.name;
+    // front and back of a lane stand close, so long names get cut a little sooner
+    const label = u.name.length > 11 ? u.name.slice(0, 10) + "…" : u.name;
     out.strokeText(label + " · " + u.lvl, 0, by + 16); out.fillText(label + " · " + u.lvl, 0, by + 16);
     const ks = Object.keys(u.st), good = ks.filter((k) => !STATUS[k].neg).map((k) => STATUS[k].icon).join(""), bad = ks.filter((k) => STATUS[k].neg).map((k) => STATUS[k].icon).join("");
     out.font = "10px system-ui"; out.fillText(good + TYPES[u.types[0]].icon, 0, -(u.boss ? 56 : 30));

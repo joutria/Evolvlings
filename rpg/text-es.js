@@ -18,7 +18,7 @@ const RPG_ES = {
     "node.fight": "Combate", "node.event": "Encuentro", "node.chest": "Cofre", "node.rest": "Descanso", "node.boss": "Guardián",
     "node.fight.d": "Criaturas apagadas por la Savia Negra. XP y Chispas.", "node.event.d": "Algo pasa en el camino. Tú decides.",
     "node.chest.d": "Elige una carta de tres.", "node.rest.d": "El equipo recupera un 35 % de vida.", "node.boss.d": "El Gran Farol guarda el prado.",
-    "b.round": "Ronda {n}", "b.auto": "Auto", "b.manual": "Manual", "b.speed": "Velocidad",
+    "form.title": "Formación", "form.sub": "Toca a una criatura y luego una casilla para moverla. El Frente recibe los ataques básicos y pega +10 %; quien está en la Retaguardia no recibe básicos mientras alguien lo cubra en su carril, y sus curas y escudos dan +10 %.", "form.move": "Ahora toca la casilla a donde va (si hay alguien, se cambian de sitio).", "form.front": "Frente", "form.back": "Retaguardia", "form.auto": "Formación automática", "b.round": "Ronda {n}", "b.auto": "Auto", "b.manual": "Manual", "b.speed": "Velocidad",
     "b.yourTurn": "Turno de {name}. ¿Qué hace?", "b.play": "Jugar {card}", "b.basic": "Ataque básico", "b.cd": "lista en {n}",
     "b.noCard": "Sin carta activa",
     "b.win": "¡Victoria!", "b.lose": "El equipo se retira…",

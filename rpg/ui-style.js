@@ -16,6 +16,13 @@ const css = `
 .gr { font: 600 11px var(--font-mono); text-transform: uppercase; letter-spacing: .06em; color: var(--g); border: 1px solid var(--g); border-radius: 999px; padding: 1px 7px; white-space: nowrap; }
 .mons { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
 .mon { border: 2px solid var(--line); border-radius: 16px; background: var(--bg); padding: 8px; display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; cursor: pointer; font: inherit; color: inherit; }
+.fgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 120px)); gap: 6px; margin: 8px 0; text-align: center; }
+.fcell { min-height: 78px; border: 2px dashed var(--line); border-radius: 12px; background: var(--bg); padding: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font: inherit; color: inherit; cursor: pointer; }
+.fcell.back { background: color-mix(in srgb, var(--line) 18%, var(--bg)); }
+.fcell.on { border-style: solid; }
+.fcell canvas { width: 54px; height: 45px; image-rendering: pixelated; }
+.fcell small { font-size: 11px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fcell[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent); }
 .mon[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent); }
 .mon canvas { width: 96px; height: 80px; }
 .mon strong { font-family: var(--font-display); font-size: 16px; }

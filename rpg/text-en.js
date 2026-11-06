@@ -18,7 +18,7 @@ const RPG_EN = {
     "node.fight": "Battle", "node.event": "Encounter", "node.chest": "Chest", "node.rest": "Rest", "node.boss": "Guardian",
     "node.fight.d": "Creatures dimmed by the Black Sap. XP and Chispas.", "node.event.d": "Something happens on the path. You decide.",
     "node.chest.d": "Pick one card out of three.", "node.rest.d": "The team recovers 35% health.", "node.boss.d": "The Great Lantern guards the meadow.",
-    "b.round": "Round {n}", "b.auto": "Auto", "b.manual": "Manual", "b.speed": "Speed",
+    "form.title": "Formation", "form.sub": "Tap a creature, then a cell to move it. The Front takes the basic attacks and hits +10%; the Back can't be hit by basic attacks while someone covers it in its lane, and its heals and shields give +10%.", "form.move": "Now tap the cell it goes to (if someone is there, they swap).", "form.front": "Front", "form.back": "Back", "form.auto": "Auto formation", "b.round": "Round {n}", "b.auto": "Auto", "b.manual": "Manual", "b.speed": "Speed",
     "b.yourTurn": "{name}'s turn. What does it do?", "b.play": "Play {card}", "b.basic": "Basic attack", "b.cd": "ready in {n}",
     "b.noCard": "No active card",
     "b.win": "Victory!", "b.lose": "The team pulls back…",

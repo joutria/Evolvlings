@@ -37,8 +37,35 @@ function makeUnit(o) {
     mods: pm, cards: o.cards || {}, cd: 0, st: {}, shield: 0, shieldT: 0, hitOnce: false, skip: 0, sUsed: false, sCount: 0, hitsTaken: 0,
   };
   if (u.cards.a) u.cd = Math.ceil(u.cards.a.a.cd / 2);
+  if (Number.isInteger(o.pos) && o.pos >= 0 && o.pos < CELLS) u.pos = o.pos;
   if (o.hpPct === 0) { u.hp = 0; }
   return u;
+}
+
+/* ---------- Formation ----------
+   Each side has 6 cells: 3 lanes (0 top, 1 middle, 2 bottom) by 2 rows (front, back). cell = row * 3 + lane.
+   - The front row takes the basic attacks first, and its basic attacks hit +10 %.
+   - A back-row unit can't be reached by basic attacks while an ally stands in front of it in its lane;
+     its heals and shields give +10 %. Cards reach any cell. */
+const CELLS = 6;
+const cellRow = (c) => (c >= 3 ? 1 : 0), cellLane = (c) => c % 3;
+const FRONT_PREF = [1, 0, 2], BACK_PREF = [4, 3, 5];
+// a creature whose active card only heals or shields would rather stand at the back
+const isSupportUnit = (u) => { const a = u.cards && u.cards.a && u.cards.a.a; return !!(a && !a.pow && (a.heal || a.shield || a.cleanse)); };
+// gives a cell to every unit of the list without one: the sturdiest in front, the carers and the frailest behind it
+function autoForm(units) {
+  const used = new Set(units.filter((u) => u.pos != null).map((u) => u.pos));
+  const free = units.filter((u) => u.pos == null);
+  if (!free.length) return units;
+  const tank = (u) => u.maxHp * u.base.def;
+  const order = free.slice().sort((a, b) => tank(b) - tank(a));
+  const take = (pref) => { const c = pref.concat(FRONT_PREF, BACK_PREF).find((x) => !used.has(x)); used.add(c); return c; };
+  const n = units.length;
+  order.forEach((u, i) => {
+    const back = n > 1 && (isSupportUnit(u) || (i === order.length - 1 && i > 0 && used.has(1)));
+    u.pos = take(back ? BACK_PREF : FRONT_PREF);
+  });
+  return units;
 }
 
 /* ====================================================================== */
@@ -47,6 +74,7 @@ function makeUnit(o) {
 function Battle(allies, foes, opt) {
   opt = opt || {};
   this.units = allies.concat(foes);
+  autoForm(allies); autoForm(foes);
   this.round = 0;
   this.rnd = opt.rnd || Math.random;
   this.day = opt.day != null ? opt.day : isDayNow();
@@ -64,6 +92,11 @@ function Battle(allies, foes, opt) {
 }
 const B = Battle.prototype;
 B.alive = function (side) { return this.units.filter((u) => u.side === side && u.hp > 0); };
+// can basic attacks reach this unit? (front row, or nobody standing in front of it in its lane)
+B.exposed = function (u) {
+  if (u.pos == null || cellRow(u.pos) === 0) return true;
+  return !this.alive(u.side).some((x) => x.pos === u.pos - 3);
+};
 B.other = (side) => (side === "ally" ? "foe" : "ally");
 B.emit = function (e) { this.events.push(e); };
 B.stVal = function (u, name) { const s = u.st[name]; return s ? s.v : 0; };
@@ -127,7 +160,7 @@ B.cleanse = function (u, what) {
   return rm.length;
 };
 B.addShield = function (src, tgt, pct, turns) {
-  const amt = Math.round(tgt.maxHp * pct / 100);
+  const amt = Math.round(tgt.maxHp * pct / 100 * (src && src.pos != null && cellRow(src.pos) === 1 ? 1.1 : 1));
   tgt.shield = Math.max(tgt.shield, amt);
   tgt.shieldT = Math.max(tgt.shieldT, turns + (src.mods.shieldLong || 0));
   this.emit({ k: "shield", u: tgt.uid, n: amt });
@@ -137,7 +170,7 @@ B.addShield = function (src, tgt, pct, turns) {
 B.heal = function (src, tgt, pct) {
   if (tgt.hp <= 0) return 0;
   let amt = tgt.maxHp * pct / 100;
-  amt *= 1 + ((src && src.mods.healGive) || 0) / 100 + (tgt.mods.healRecv || 0) / 100;
+  amt *= 1 + ((src && src.mods.healGive) || 0) / 100 + (tgt.mods.healRecv || 0) / 100 + (src && src !== tgt && src.pos != null && cellRow(src.pos) === 1 ? 0.1 : 0);
   amt = Math.round(amt);
   const before = tgt.hp; tgt.hp = Math.min(tgt.maxHp, tgt.hp + amt);
   const got = tgt.hp - before;
@@ -241,6 +274,14 @@ B.targets = function (spec, src, ctx) {
       const ty = ctx && ctx.card ? this.typeOf(src, ctx.card) : this.typeOf(src, null);
       const score = (u) => u.types.reduce((m, d) => m * typeMult(ty, d), 1) * 10 - u.hp / u.maxHp;
       return [foes.slice().sort((a, b) => score(b) - score(a))[0]];
+    }
+    case "basic": {
+      // basic attacks: only the exposed cells; the same lane first, then the best type
+      const reach = foes.filter((u) => this.exposed(u)), l = reach.length ? reach : foes;
+      if (!l.length) return [];
+      const ty = this.typeOf(src, null), lane = src.pos == null ? -1 : cellLane(src.pos);
+      const score = (u) => u.types.reduce((m, d) => m * typeMult(ty, d), 1) * 10 + (u.pos != null && cellLane(u.pos) === lane ? 3 : 0) - u.hp / u.maxHp;
+      return [l.slice().sort((a, b) => score(b) - score(a))[0]];
     }
     case "foes": return foes;
     case "rand": case "randFoe": return foes.length ? [foes[Math.floor(this.rnd() * foes.length)]] : [];
@@ -389,9 +430,9 @@ B.act = function (u, useCard) {
     u.cd = c.a.cd;
     if (!c.a.echoLast) this.side[u.side].lastActive = c;
   } else {
-    const t = this.targets("foe", u)[0];
+    const t = this.targets("basic", u)[0];
     this.emit({ k: "act", u: u.uid, card: null });
-    if (t) this.hit(u, t, 80, null, {});
+    if (t) this.hit(u, t, u.pos != null && cellRow(u.pos) === 0 ? 88 : 80, null, {});
     else this.emit({ k: "lost", u: u.uid });
   }
   this.turnEnd(u);
@@ -416,5 +457,5 @@ B.runAll = function (maxRounds) {
 };
 
 
-const api = { GRADE_VIS, COMPAT, canUse, UPGRADE_N, TYPES, BEATS, OPPOSITE, typeMult, GRADES, rollGrade, STATUS, CARDS, DROP_POOL, scaled, MONS, makeUnit, Battle, lvlScale, xpNeed, SLOT_LVL, ZONES, EVENTS, isDayNow };
+const api = { CELLS, cellRow, cellLane, autoForm, GRADE_VIS, COMPAT, canUse, UPGRADE_N, TYPES, BEATS, OPPOSITE, typeMult, GRADES, rollGrade, STATUS, CARDS, DROP_POOL, scaled, MONS, makeUnit, Battle, lvlScale, xpNeed, SLOT_LVL, ZONES, EVENTS, isDayNow };
 if (typeof window !== "undefined") window.EvoEngine = api;
