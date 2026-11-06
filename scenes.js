@@ -2671,6 +2671,241 @@ function pauseScene(zone, kind, mode) {
 }
 const PAUSEART = {};
 function pauseArt(zone, kind, mode) { const k = zone + ":" + kind + ":" + (mode || ""); return PAUSEART[k] || (PAUSEART[k] = pauseScene(zone, kind, mode)); }
+/* ================= Event scenes: Los Altos ================= */
+function kite(b, x, y, tailTo, c = P.rose1, still) {
+  b.layer((t) => { t.poly([[x, y - 7], [x + 6, y], [x, y + 7], [x - 6, y]], c); t.l(x, y - 7, x, y + 7, P.cream); t.l(x - 6, y, x + 6, y, P.cream); }, OL);
+  const [tx, ty] = tailTo; for (let i = 0; i <= 20; i++) { const k = i / 20; const px = Math.round(x + (tx - x) * k + (still ? 0 : Math.sin(k * 9) * 2)), py = Math.round(y + 7 + (ty - y - 7) * k + (still ? k * k * 6 : 0)); b.p(px, py, P.soil1); if (i % 5 === 3) b.r(px - 1, py, 3, 2, [P.cream, P.butter, P.sea4][i % 3]); }
+}
+function bellTower(b, x, gy) { b.layer((t) => { t.r(x - 22, gy - 52, 3, 52, P.soil1); t.r(x + 19, gy - 52, 3, 52, P.soil1); t.poly([[x - 28, gy - 52], [x, gy - 66], [x + 28, gy - 52]], P.rose0); t.r(x - 22, gy - 50, 44, 3, P.soil1);
+  [[-12, 0], [0, 4], [12, 0]].forEach(([dx, dy]) => { t.poly([[x + dx - 5, gy - 34 + dy], [x + dx - 3, gy - 44 + dy], [x + dx + 3, gy - 44 + dy], [x + dx + 5, gy - 34 + dy]], P.ember3); t.r(x + dx - 1, gy - 47 + dy, 2, 3, P.soil0); }); }, OL);
+  [[-12, 0], [0, 4], [12, 0]].forEach(([dx, dy]) => b.l(x + dx, gy - 34 + dy, x - 2 + dx / 3, gy - 14, P.soil2)); }
+function ropeBridge(b, x0, x1, y, sag) { for (let x = x0; x <= x1; x++) { const k = (x - x0) / (x1 - x0), yy = Math.round(y + Math.sin(k * Math.PI) * sag); b.p(x, yy, P.soil0); b.p(x, yy - 9, P.soil1); if (x % 4 === 0) { b.r(x, yy - 1, 3, 2, P.soil2); b.l(x, yy - 9, x, yy, P.soil1); } } }
+
+EVNOTE.mensajero = { scene: "En un saliente azotado por el viento, Ráfaga sujeta una cometa con mensajes atados a la cola, lista para soltar uno al cambiar el viento.", hidden: "Hay un mensaje rojo atado a la cola que lleva días sin soltarse." };
+EVSC.mensajero = () => { const b = new Pic(EW, EH); peaksBack(b, { seed: 3 });
+  kite(b, 98, 18, [58, 66], P.rose1);
+  b.layer((t) => { t.poly([[0, 96], [0, 72], [30, 66], [70, 70], [84, 96]], mix(P.plum2, P.soil1, .3)); }, OL);
+  b.r(74, 34, 3, 2, P.ember1);
+  return plate(b, (g) => { F(g, 52, 78, CAST.heights, { s: 1.8, hat: { k: "scarf", c: [P.rose1, P.rose0] }, hairStyle: "long", hair: P.soil1, front: [58, 64], back: [46, 64], emo: "happy" }); }); };
+
+EVNOTE.cadenas = { scene: "Uno de los pasos de los Altos, cerrado con cadenas cubiertas de escarcha. Tormo vigila con una manta sobre los hombros; muy abajo se ven tiendas de campaña.", hidden: "Junto al poste hay un saco de pan, medio escondido bajo la nieve." };
+EVSC.cadenas = () => { const b = new Pic(EW, EH); peaksBack(b, { seed: 7 });
+  b.layer((t) => { t.poly([[0, 96], [0, 50], [40, 56], [48, 96]], mix(P.plum2, P.soil1, .25)); t.poly([[128, 96], [128, 46], [86, 54], [80, 96]], mix(P.plum2, P.soil1, .25)); }, OL);
+  [[60, 80], [66, 82], [72, 79]].forEach(([x, y]) => b.layer((t) => t.poly([[x - 3, y], [x, y - 4], [x + 3, y]], mix(P.ember3, P.fog, .4)), OL));
+  b.layer((t) => { t.r(40, 54, 4, 30, P.soil1); t.r(84, 52, 4, 30, P.soil1); }, OL);
+  for (let i = 0; i < 3; i++) for (let x = 44; x < 84; x += 3) { const y = 60 + i * 7 + Math.round(Math.sin((x - 44) / 40 * Math.PI) * 4); b.r(x, y, 2, 1, P.plum3); b.p(x + 1, y + 1, P.mist); }
+  b.layer((t) => { t.r(30, 84, 8, 6, P.soil2); }, OL);
+  return plate(b, (g) => { F(g, 100, 92, CAST.heights, { s: 1.8, dir: -1, hat: { k: "hood", c: [P.plum2, P.plum1] }, cloth: [P.plum2, P.plum1, P.plum3], hairStyle: "short", emo: "open" }); }); };
+
+EVNOTE.puente = { scene: "Un puente de cuerda une dos picos sobre un mar de nubes. A medio camino, unos Relampines se han posado en las cuerdas y saltan chispas.", hidden: "Muy abajo, entre las nubes, se adivina una mancha oscura donde debería estar el verde del Corazón." };
+EVSC.puente = () => { const b = new Pic(EW, EH); peaksBack(b, { seed: 11 });
+  band(b, 0, 56, EW, 40, mix(P.cream, P.sea4, .3), P.fog, 4);
+  for (let i = 0; i < 6; i++) b.e(10 + i * 24, 66 + (i % 2) * 6, 16, 4, P.cream);
+  b.e(70, 88, 6, 1.4, mix(P.plum1, P.fog, .4));
+  b.layer((t) => { t.poly([[0, 96], [0, 40], [18, 44], [22, 96]], mix(P.plum2, P.soil1, .25)); t.poly([[128, 96], [128, 38], [108, 44], [104, 96]], mix(P.plum2, P.soil1, .25)); }, OL);
+  ropeBridge(b, 20, 108, 50, 12);
+  [[56, 52], [76, 52]].forEach(([x, y]) => light(b, x, y, 10, 8, P.butter, .35, 3));
+  return plate(b, (g) => { HD.creature(g, "relampin", 56, 58, { s: 1.3, emo: "o" }); HD.creature(g, "relampin", 78, 58, { s: 1.2, emo: "o", dir: -1 }); }); };
+
+EVNOTE.campanas = { scene: "Un campanario sin paredes en lo alto de un pico. Tañido tira de varias cuerdas a la vez y las campanas suenan sin parar.", hidden: "Una de las campanas está rajada y la han atado con alambre para que siga sonando." };
+EVSC.campanas = () => { const b = new Pic(EW, EH); peaksBack(b, { seed: 15 });
+  bellTower(b, 70, 84);
+  b.layer((t) => t.r(40, 84, 60, 4, P.plum2), OL);
+  [[56, 28], [86, 30], [70, 22]].forEach(([x, y]) => { b.l(x - 6, y, x - 10, y - 2, P.cream); b.l(x + 6, y, x + 10, y - 2, P.cream); });
+  return plate(b, (g) => { F(g, 66, 84, CAST.heights, { s: 1.6, hairStyle: "none", beard: P.fog, hat: null, front: [62, 70], back: [70, 70], emo: "open" }); }); };
+
+EVNOTE.trinillas = { scene: "Una bandada de Trinillas posada en las rocas del camino canta una nana a medias, una y otra vez.", hidden: "Una de las rocas tiene grabadas dos notas, una de la Luz y otra de la Sombra, una encima de la otra." };
+EVSC.trinillas = () => { const b = new Pic(EW, EH); peaksBack(b, { seed: 19 });
+  rock(b, 34, 80, 18, 10, mix(P.plum2, P.soil1, .3)); rock(b, 90, 76, 22, 12, mix(P.plum2, P.soil1, .3));
+  [[48, 40], [56, 34], [64, 38], [76, 32]].forEach(([x, y]) => { b.p(x, y, P.cream); b.r(x, y - 4, 1, 4, P.cream); });
+  return plate(b, (g) => { HD.creature(g, "trinilla", 30, 74, { s: 1.4, emo: "happy" }); HD.creature(g, "trinilla", 84, 68, { s: 1.4, emo: "happy", dir: -1 }); HD.creature(g, "trinilla", 100, 70, { s: 1.2, emo: "o", dir: -1 }); HD.creature(g, "fizz", 60, 94, { s: 1.4, emo: "happy" }); }); };
+
+EVNOTE.archivo = { scene: "El archivo de la Casa del Trueno: estanterías llenas de rollos atados con cintas de colores. Glosa, la archivera, pega etiquetas: «verdad», «mentira», «no se sabe».", hidden: "En un estante alto hay un rollo sin ninguna cinta." };
+EVSC.archivo = () => { const b = new Pic(EW, EH); OL = P.ink;
+  b.r(0, 0, EW, EH, mix(P.soil0, P.plum1, .4));
+  b.layer((t) => { for (let s = 0; s < 3; s++) { const x = 4 + s * 42; t.r(x, 6, 38, 66, P.soil1); for (let y = 10; y < 70; y += 12) { t.r(x + 2, y + 9, 34, 2, P.soil2);
+    for (let i = 0; i < 7; i++) { t.e(x + 5 + i * 4.6, y + 6, 2, 3, P.cream); t.r(x + 4 + i * 4.6, y + 5, 2, 1, [P.moss3, P.ember2, P.sea3, P.butter, P.rose1][(i + s + y) % 5]); } } } }, OL);
+  b.r(104, 10, 2, 6, P.cream);
+  light(b, 64, 40, 50, 40, P.ember3, .2, 4);
+  b.r(0, 72, EW, 24, P.soil0); b.r(0, 72, EW, 1, P.ink);
+  b.layer((t) => { t.r(64, 74, 40, 4, P.soil2); t.r(66, 78, 2, 12, P.soil1); t.r(100, 78, 2, 12, P.soil1); t.r(72, 71, 12, 3, P.cream); t.r(88, 72, 8, 2, P.butter); }, OL);
+  return plate(b, (g) => { F(g, 48, 92, CAST.heights, { s: 1.75, hat: null, hairStyle: "bun", hair: P.soil1, cloth: [P.sea2, P.sea1, P.sea3], front: [58, 68], emo: "open" });
+    HD.stroke(g, (q) => { q.moveTo(46, 66.6); q.lineTo(50, 66.6); }, P.ink, .5); }); };
+
+EVNOTE.aguja = { scene: "En lo alto de la Aguja del Trueno, Centella mira el cielo con un catalejo de cobre. El pararrayos zumba sobre su cabeza.", hidden: "Muy al fondo hay una sola nube, negra y quieta, justo encima del Corazón del Claro." };
+EVSC.aguja = () => { const b = new Pic(EW, EH); peaksBack(b, { seed: 23 });
+  b.e(108, 30, 8, 3, P.ink); b.e(104, 31, 5, 2, P.plum1);
+  b.layer((t) => { t.r(36, 60, 56, 36, mix(P.plum2, P.soil1, .3)); t.r(32, 56, 64, 6, P.plum3); t.r(62, 10, 2, 46, P.ember1); t.poly([[60, 10], [63, 2], [66, 10]], P.ember3); }, OL);
+  for (let y = 66; y < 96; y += 6) b.r(36, y, 56, 1, mix(P.plum1, P.soil0, .3));
+  [[60, 18], [68, 14], [58, 8]].forEach(([x, y]) => b.l(x, y, x + (x < 63 ? -4 : 4), y - 2, P.butter));
+  light(b, 63, 4, 14, 10, P.butter, .35, 3);
+  return plate(b, (g) => { F(g, 76, 56, CAST.heights, { s: 1.7, hat: null, hairStyle: "long", hair: P.butter, cloth: [P.ember1, P.ember0, P.ember3], front: [86, 40], back: [84, 42], emo: "open",
+    hold: (q, x, y) => HD.shape(q, (z) => HD.poly(z, [[x - 1, y], [x + 7, y - 2.4], [x + 7.4, y - .8], [x - .6, y + 1.2]]), { fill: P.ember3, shade: P.ember1, lw: .3 }) }); }); };
+
+EVNOTE.arpegio = { scene: "En el mirador del Coro, Arpegio está sentado descalzo con las palmas apoyadas en la piedra, escuchando con las manos.", hidden: "Sus zapatos están colocados con cuidado a su lado, con los cordones atados entre sí." };
+EVSC.arpegio = () => { const b = new Pic(EW, EH); peaksBack(b, { seed: 27 });
+  b.layer((t) => { t.r(0, 74, EW, 22, P.plum3); for (let x = 0; x < EW; x += 16) t.r(x, 74, 1, 22, P.plum2); t.r(0, 74, EW, 1, P.fog); t.r(0, 66, EW, 3, P.soil1); for (let x = 4; x < EW; x += 12) t.r(x, 66, 2, 8, P.soil1); }, OL);
+  b.layer((t) => { t.r(80, 84, 5, 3, P.soil1); t.r(86, 84, 5, 3, P.soil1); }, OL);
+  return plate(b, (g) => { F(g, 60, 88, CAST.heights, { s: 1.9, pose: "sit", hat: null, hairStyle: "none", beard: P.fog, cloth: [P.rose1, P.rose0, P.rose2], front: [48, 86], back: [72, 86], emo: "closed" });
+    for (let i = 1; i <= 3; i++) HD.stroke(g, (q) => { q.ellipse(48, 87, 3 + i * 3, 1 + i, 0, 0, Math.PI * 2); }, mix(P.fog, P.plum3, .4), .3); }); };
+
+EVNOTE.muda = { scene: "En el mirador de los Altos ha dejado de soplar el viento: las cometas cuelgan quietas. Céfira, del Coro, te espera sonriendo.", hidden: "Entre las cometas caídas hay una con un mensaje rojo que por fin nadie retiene." };
+EVSC.muda = () => { const b = new Pic(EW, EH); peaksBack(b, { seed: 31 });
+  kite(b, 22, 30, [26, 70], P.sea2, true); kite(b, 104, 24, [100, 70], P.butter, true); kite(b, 70, 40, [72, 72], P.rose1, true);
+  b.layer((t) => { t.r(0, 74, EW, 22, P.plum3); t.r(0, 74, EW, 1, P.fog); }, OL);
+  return plate(b, (g) => { F(g, 50, 92, CAST.heights, { s: 1.9, hat: null, robe: true, hairStyle: "long", hair: P.cream, cloth: [P.sea3, P.sea2, P.sea4], front: [58, 76], emo: "happy" }); }); };
+/* ================= Event scenes: El Fondo Blanco ================= */
+function iceCave(b, o = {}) { // inside the ice: pale blue walls in flat bands, a warm floor glow optional
+  OL = mix(P.sea1, P.plum1, .4);
+  b.r(0, 0, EW, EH, P.sea3);
+  band(b, 0, 0, EW, 72, o.warm ? mix(P.sea1, P.plum2, .4) : P.sea2, o.warm ? mix(P.rose0, P.plum2, .3) : mix(P.sea3, P.fog, .4), 6, o.warm ? P.rose1 : P.fog);
+  for (let x = 0; x < EW; x += 8) b.poly([[x, 0], [x + 6, 0], [x + 3, 6 + (x * 5) % 8]], mix(P.sea3, P.cream, .4));
+  b.poly([[0, 0], [16, 0], [10, 40], [16, 72], [0, 72]], mix(P.sea2, P.sea1, .4)); b.poly([[128, 0], [112, 0], [118, 36], [110, 72], [128, 72]], mix(P.sea2, P.sea1, .4));
+  band(b, 0, 72, EW, 24, o.warm ? mix(P.soil1, P.plum2, .3) : P.fog, o.warm ? P.soil0 : mix(P.sea3, P.fog, .4), 4);
+}
+function glowShroom(b, x, gy, h, w, c) { b.layer((t) => { t.r(x - 1, gy - h, 2, h, P.cream); t.e(x, gy - h, w, w * .5, c); t.r(x - w, gy - h, w * 2, 1, mix(c, P.ink, .25)); }, OL); light(b, x, gy - h, w * 2.4, w * 1.6, c, .3, 3); }
+
+EVNOTE.vela = { scene: "La sala del Turno de Vela: camas de piel blanca en círculo, cada una con un soñador. Nevisca se despierta y apunta en una tablilla de hielo.", hidden: "La tablilla de Nevisca está en blanco." };
+EVSC.vela = () => { const b = new Pic(EW, EH); iceCave(b);
+  [[20, 84], [44, 88], [84, 88], [108, 84], [64, 78]].forEach(([x, y]) => b.layer((t) => { t.e(x, y, 12, 4, P.cream); t.e(x - 6, y - 2, 3, 2, P.fog); t.e(x + 2, y - 1, 7, 2.4, mix(P.sea3, P.fog, .3)); }, OL));
+  light(b, 64, 40, 40, 30, P.sea4, .2, 4);
+  return plate(b, (g) => { F(g, 64, 80, CAST.frost, { s: 1.6, pose: "sit", hat: null, hairStyle: "long", hair: P.fog, front: [72, 70], emo: "open",
+    hold: (q, x, y) => HD.shape(q, (z) => z.rect(x - .4, y - 2, 3, 3.6), { fill: P.sea4, shade: P.sea3, lw: .3 }) }); }); };
+
+EVNOTE.setas = { scene: "Una caverna tibia bajo el hielo, llena de setas que brillan de colores. Yesca, del pueblo Seta, las riega con un cazo de agua caliente.", hidden: "En un rincón crecen unas setas con un brillo verde que no es de seta." };
+EVSC.setas = () => { const b = new Pic(EW, EH); iceCave(b, { warm: true });
+  glowShroom(b, 22, 76, 18, 8, P.rose2); glowShroom(b, 40, 80, 10, 5, P.butter); glowShroom(b, 96, 78, 22, 10, P.sea4); glowShroom(b, 112, 82, 8, 4, P.rose2); glowShroom(b, 8, 86, 6, 3, SAP.sheen);
+  return plate(b, (g) => { F(g, 66, 90, CAST.esporina, { s: 1.6, hat: { k: "wide", c: [P.butter, P.ember3, P.cream] }, cloth: [P.soil2, P.soil1, P.soil3], front: [76, 76], emo: "happy",
+    hold: (q, x, y) => HD.shape(q, (z) => HD.E(z, x + 1, y, 1.8, 1.2), { fill: P.plum3, shade: P.plum2, lw: .3 }) }); }); };
+
+EVNOTE.paso = { scene: "El paso de la nieve, casi cerrado. Carrasca cava sola un túnel hacia fuera; por un agujero pequeño empieza a entrar el sol.", hidden: "Junto a la pala hay una carta doblada, sin enviar, para su madre." };
+EVSC.paso = () => { const b = new Pic(EW, EH); frostBack(b);
+  b.layer((t) => { t.poly([[0, 96], [0, 20], [40, 10], [90, 14], [128, 24], [128, 96]], P.cream); t.e(84, 56, 18, 22, mix(P.sea3, P.fog, .3)); t.e(84, 56, 14, 18, mix(P.sea2, P.sea3, .4)); t.e(88, 44, 3, 3, P.butter); }, OL);
+  light(b, 88, 44, 26, 30, P.butter, .4, 4);
+  for (let i = 0; i < 6; i++) b.e(60 + i * 3, 84 - i, 4, 2, P.fog);
+  return plate(b, (g) => { F(g, 74, 84, CAST.frost, { s: 1.8, dir: 1, hairStyle: "bun", hair: P.fog, front: [86, 62], back: [80, 64], emo: "closed",
+    hold: (q, x, y) => { HD.stroke(q, (z) => { z.moveTo(x - 6, y + 8); z.lineTo(x + 2, y - 2); }, P.soil1, .6); HD.shape(q, (z) => HD.poly(z, [[x + 1, y - 4], [x + 5, y - 6], [x + 4, y - 1]]), { fill: P.soil2, lw: .3 }); } }); }); };
+
+EVNOTE.carambanos = { scene: "Una galería de hielo con el techo lleno de carámbanos enormes que gotean. Algunos tienen ojos.", hidden: "Las gotas tienen un brillo verde muy débil." };
+EVSC.carambanos = () => { const b = new Pic(EW, EH); iceCave(b);
+  for (let x = 14; x < 116; x += 11) { const h = 18 + (x * 7) % 22; b.layer((t) => t.poly([[x - 4, 0], [x + 4, 0], [x, h]], mix(P.sea3, P.cream, .4)), OL); b.p(x, h + 4, mix(SAP.sheen, P.sea4, .5)); }
+  return plate(b, (g) => { HD.creature(g, "carambano", 46, 42, { s: 1.3, emo: "o" }); HD.creature(g, "carambano", 90, 38, { s: 1.2, emo: "o", dir: -1 }); HD.creature(g, "lumo", 60, 92, { s: 1.5, emo: "o" }); }); };
+
+EVNOTE.hielo = { scene: "Dos niños del Hielo patinan sobre un lago helado con huesos atados a las botas. Bajo el hielo, muy al fondo, hay una sombra pálida y enorme.", hidden: "La sombra de debajo del hielo no está donde estaba ayer." };
+EVSC.hielo = () => { const b = new Pic(EW, EH); frostBack(b);
+  b.layer((t) => { t.e(64, 84, 70, 14, mix(P.sea3, P.cream, .4)); }, OL);
+  b.e(70, 86, 30, 6, mix(P.sea3, P.fog, .1)); b.e(70, 86, 22, 4, mix(P.sea2, P.fog, .5));
+  for (let i = 0; i < 5; i++) b.l(30 + i * 16, 80 + (i % 2) * 6, 40 + i * 16, 82 + (i % 2) * 6, P.cream);
+  return plate(b, (g) => { F(g, 44, 86, kid(CAST.frost), { s: 1.5, pose: "run", emo: "happy" }); F(g, 92, 84, kid(CAST.frost), { s: 1.4, pose: "run", dir: -1, hat: { k: "scarf", c: [P.sea2, P.sea1] }, emo: "happy" }); }); };
+
+EVNOTE.sueno = { scene: "Una cueva de setas cálida y quieta. Unos Capuchones se mecen soltando un polvo brillante que da sueño.", hidden: "En el suelo hay huellas de alguien que se durmió aquí y se despertó horas después." };
+EVSC.sueno = () => { const b = new Pic(EW, EH); iceCave(b, { warm: true });
+  glowShroom(b, 30, 80, 24, 12, P.rose2); glowShroom(b, 100, 82, 28, 14, mix(P.rose2, P.butter, .4));
+  const r = rng(5); for (let i = 0; i < 40; i++) b.p(Math.floor(r() * EW), Math.floor(r() * 70), i % 2 ? P.butter : P.cream);
+  return plate(b, (g) => { HD.creature(g, "capuchon", 50, 90, { s: 1.6, emo: "sleep" }); HD.creature(g, "capuchon", 78, 88, { s: 1.4, emo: "sleep", dir: -1 }); HD.creature(g, "bostezo", 64, 94, { s: 1.3, emo: "sleep" }); }); };
+
+EVNOTE.tumba = { scene: "La Tumba Helada, un bloque de hielo del tamaño de una casa que gotea por todas partes. Una guardia con lanza de cristal la vigila con los pies en un charco.", hidden: "A un lado hay botas viejas apiladas, podridas por el agua de la tumba." };
+EVSC.tumba = () => { const b = new Pic(EW, EH); frostBack(b);
+  b.layer((t) => { t.r(30, 24, 62, 52, mix(P.sea3, P.cream, .3)); t.poly([[26, 24], [61, 10], [96, 24]], mix(P.sea3, P.cream, .4)); t.r(52, 44, 18, 32, mix(P.sea2, P.sea1, .3)); t.e(61, 44, 9, 6, mix(P.sea2, P.sea1, .3)); t.l(48, 30, 52, 60, P.sea2); }, OL);
+  for (let x = 32; x < 92; x += 7) b.p(x, 77 + (x % 3), mix(SAP.sheen, P.sea3, .6));
+  b.e(64, 82, 34, 4, mix(P.sea3, P.fog, .3));
+  b.layer((t) => { t.r(16, 80, 4, 4, P.soil1); t.r(20, 81, 4, 3, P.soil0); }, OL);
+  return plate(b, (g) => { F(g, 100, 90, CAST.frost, { s: 1.8, dir: -1, hat: { k: "helmet", c: [P.sea3, P.sea2] }, front: [94, 66], back: [106, 70], emo: "closed",
+    hold: (q, x, y) => { HD.stroke(q, (z) => { z.moveTo(x, y + 10); z.lineTo(x, y - 12); }, P.ink, .9); HD.stroke(q, (z) => { z.moveTo(x, y + 10); z.lineTo(x, y - 12); }, P.sea2, .45); HD.shape(q, (z) => HD.poly(z, [[x - 1, y - 12], [x, y - 17], [x + 1, y - 12]]), { fill: P.cream, lw: .3 }); } }); }); };
+
+EVNOTE.albina = { scene: "Un salón de hielo tallado. La Regente Albina, alta y con corona de cristal, despide a sus súbditos con un gesto para hablar contigo.", hidden: "Junto al trono hay un sombrerito de seta de niña, guardado bajo una campana de hielo." };
+EVSC.albina = () => { const b = new Pic(EW, EH); iceCave(b);
+  b.layer((t) => { t.r(48, 30, 32, 44, mix(P.sea3, P.cream, .4)); t.poly([[44, 30], [64, 16], [84, 30]], mix(P.sea3, P.cream, .5)); t.r(54, 46, 20, 28, mix(P.sea2, P.sea3, .4)); }, OL);
+  b.layer((t) => { t.e(96, 70, 5, 6, mix(P.fog, P.sea4, .4)); t.e(96, 72, 3, 1.4, P.rose1); t.r(95, 72, 2, 3, P.cream); t.r(90, 76, 12, 2, P.sea2); }, OL);
+  light(b, 64, 40, 34, 30, P.sea4, .3, 4);
+  return plate(b, (g) => { F(g, 64, 84, CAST.albina, { s: 2, emo: "closed" }); }); };
+
+EVNOTE.despierta = { scene: "El hielo del Fondo Blanco ha dejado de gotear. En la entrada de las cavernas, Esporina cuenta monedas sobre un tonel.", hidden: "Lleva colgado del cuello un trozo de hielo que no se derrite, con letras grabadas." };
+EVSC.despierta = () => { const b = new Pic(EW, EH); frostBack(b);
+  b.layer((t) => { t.e(28, 60, 24, 28, mix(P.sea1, P.plum1, .4)); t.e(28, 64, 18, 22, mix(P.rose0, P.plum2, .4)); }, OL);
+  light(b, 28, 64, 22, 20, P.rose2, .3, 4);
+  b.layer((t) => { t.r(74, 70, 18, 16, P.soil1); t.r(74, 74, 18, 1, P.soil0); t.r(74, 80, 18, 1, P.soil0); t.e(80, 69, 2, 1, P.ember4); t.e(85, 69, 2, 1, P.ember4); }, OL);
+  return plate(b, (g) => { F(g, 100, 90, CAST.esporina, { s: 1.85, dir: -1, front: [92, 70], emo: "happy" }); }); };
+/* ================= Event scenes: Corazón del Claro ================= */
+function stumpFront(b, x0, x1, gy) { // the great stump filling the frame, bark in vertical grooves
+  b.layer((t) => { t.r(x0, 0, x1 - x0, gy, P.soil1); for (let x = x0 + 4; x < x1; x += 7) t.r(x, 0, 1, gy, P.soil0); for (let x = x0 + 2; x < x1; x += 11) t.r(x, 0, 2, gy, P.soil2); }, OL);
+}
+function offerings(b, x, gy) { // oil jar, coal, shells, seeds, mushrooms
+  b.layer((t) => { t.r(x, gy - 6, 4, 6, P.butter); t.r(x + 1, gy - 7, 2, 1, P.soil2);
+    t.e(x + 9, gy - 1, 4, 2, P.ink); t.p(x + 8, gy - 3, P.plum2);
+    t.e(x + 17, gy - 1, 2.4, 1.6, P.sea4); t.e(x + 22, gy - 1, 2.4, 1.6, mix(P.sea3, P.cream, .5));
+    t.r(x + 27, gy - 2, 5, 2, P.moss3); t.p(x + 28, gy - 3, P.moss4); t.p(x + 30, gy - 3, P.moss4);
+    t.r(x + 36, gy - 4, 1, 4, P.cream); t.e(x + 36, gy - 4, 2.4, 1.4, P.rose2); }, OL);
+  b.e(x + 2, gy, 5, 1, mix(SAP.s1, P.butter, .3));
+}
+function moths(b, cx, cy, n, r) { for (let i = 0; i < n; i++) { const a = i * 2.4, rr = r * (.5 + (i * 7 % 5) / 8), x = Math.round(cx + Math.cos(a) * rr), y = Math.round(cy + Math.sin(a) * rr * .6);
+  b.p(x - 1, y, P.fog); b.p(x + 1, y, P.fog); b.p(x, y, P.plum2); b.p(x - 1, y - 1, mix(P.fog, P.cream, .5)); } }
+
+EVNOTE.ofrendas = { scene: "El Tocón, en el centro del valle, rodeado de ofrendas de todos los pueblos. Brezo las ordena con mucho cuidado.", hidden: "El aceite de farol ha bajado un dedo desde anoche, y nadie lo ha tocado." };
+EVSC.ofrendas = () => { const b = new Pic(EW, EH); heartBack(b);
+  offerings(b, 30, 74); offerings(b, 60, 80);
+  light(b, 64, 72, 40, 10, P.butter, .2, 3);
+  return plate(b, (g) => { F(g, 104, 90, CAST.miner, { s: 1.8, dir: -1, hat: { k: "scarf", c: [P.rose1, P.rose0] }, hairStyle: "bun", hair: P.fog, cloth: [P.soil2, P.soil1, P.soil3], front: [94, 80], emo: "closed",
+    hold: (q, x, y) => HD.shape(q, (z) => HD.E(z, x, y + 1, 1.6, 1.1), { fill: P.sea4, shade: P.sea3, lw: .3 }) }); }); };
+
+EVNOTE.estatuas = { scene: "Un anillo de estatuas antiguas, de espaldas al Tocón y sin manos. Cincel, un escultor viejo, les repasa la cara.", hidden: "Las roturas de las muñecas casan entre una estatua y la de al lado." };
+EVSC.estatuas = () => { const b = new Pic(EW, EH); heartBack(b);
+  const big = (x, gy, c) => b.layer((t) => { t.r(x - 8, gy - 6, 16, 6, P.plum2); t.r(x - 6, gy - 40, 12, 34, c); t.e(x, gy - 44, 5, 5, c);
+    t.r(x - 9, gy - 34, 3, 10, c); t.r(x + 6, gy - 34, 3, 10, c); t.r(x - 9, gy - 24, 3, 1, P.plum2); t.r(x + 6, gy - 24, 3, 1, P.plum2);
+    t.r(x - 6, gy - 30, 12, 1, mix(c, P.plum2, .4)); }, OL);
+  big(28, 86, P.mist); big(62, 84, mix(P.mist, P.fog, .4));
+  for (let i = 0; i < 6; i++) b.p(70 + i * 2, 86 + (i % 2), P.mist);
+  return plate(b, (g) => { F(g, 98, 92, CAST.miner, { s: 1.8, dir: -1, hat: null, hairStyle: "none", beard: P.fog, cloth: [P.fog, P.mist, P.cream], front: [78, 62], back: [104, 74], emo: "o",
+    hold: (q, x, y) => { HD.stroke(q, (z) => { z.moveTo(x + 2, y + 2); z.lineTo(x - 2, y - 1); }, P.ink, .7); HD.stroke(q, (z) => { z.moveTo(x + 2, y + 2); z.lineTo(x - 2, y - 1); }, P.mist, .35); } }); }); };
+
+EVNOTE.latido = { scene: "Al pie del Tocón la tierra está tibia y late. Gotas negras suben del suelo. Tus criaturas no quieren acercarse.", hidden: "Los latidos no van al mismo ritmo: son muchos, a destiempo." };
+EVSC.latido = () => { const b = new Pic(EW, EH); heartBack(b, { night: true });
+  for (let i = 1; i <= 3; i++) b.layer((t) => { const rx = 10 + i * 12, ry = 3 + i * 2; for (let a = 0; a < 6.28; a += .12) t.p(Math.round(64 + Math.cos(a) * rx), Math.round(76 + Math.sin(a) * ry), mix(P.plum2, P.butter, .3 - i * .06)); }, OL);
+  [[56, 70], [62, 62], [70, 66], [66, 54], [52, 58], [74, 50]].forEach(([x, y]) => dropUp(b, x, y));
+  light(b, 64, 76, 22, 6, P.ember2, .3, 3);
+  return plate(b, (g) => { HD.creature(g, "lumo", 18, 74, { s: 1.4, emo: "surprised" }); HD.creature(g, "pebb", 30, 88, { s: 1.3, emo: "sad" }); HD.creature(g, "fizz", 106, 84, { s: 1.3, emo: "o", dir: -1 }); }); };
+
+EVNOTE.peregrina = { scene: "Antífona, con un manto mitad blanco y mitad negro, cose una bota sentada en una raíz. Canta una nana que se corta siempre en el mismo sitio.", hidden: "En el forro del manto hay dos escudos descosidos: el de la Luz y el de la Sombra." };
+EVSC.peregrina = () => { const b = new Pic(EW, EH); heartBack(b);
+  b.layer((t) => { t.poly([[20, 96], [30, 80], [60, 76], [100, 78], [128, 70], [128, 82], [96, 86], [64, 84], [38, 90], [30, 96]], P.soil1); t.poly([[40, 84], [64, 80], [92, 82]], P.soil2); }, OL);
+  b.layer((t) => { t.r(36, 86, 6, 5, P.soil2); t.r(36, 85, 3, 1, P.soil3); }, OL);
+  return plate(b, (g) => { F(g, 64, 84, CAST.night, { s: 1.8, pose: "sit", hat: { k: "hood", c: [P.cream, P.ink] }, hairStyle: "long", hair: P.plum1, cloth: [P.cream, P.ink, P.plum1], front: [52, 82], back: [74, 80], emo: "closed",
+    hold: (q, x, y) => HD.stroke(q, (z) => { z.moveTo(x, y); z.lineTo(x - 3, y - 2); }, P.mist, .3) });
+    for (let i = 0; i < 3; i++) HD.shape(g, (q) => { q.ellipse(80 + i * 8, 60 - i * 6, 1.2, .9, 0, 0, Math.PI * 2); q.moveTo(81.2 + i * 8, 60 - i * 6); q.lineTo(81.2 + i * 8, 56 - i * 6); }, { fill: i % 2 ? P.ink : P.cream, lw: .3 }); }); };
+
+EVNOTE.negra = { scene: "Una grieta larga y caliente por la que sube Savia Negra. Unas criaturas beben de ella con los ojos demasiado abiertos.", hidden: "Muy al fondo se ve una raíz pálida llena de agujeros redondos, como de taladro." };
+EVSC.negra = () => { const b = new Pic(EW, EH); heartBack(b, { night: true });
+  b.layer((t) => { t.poly([[6, 96], [30, 82], [48, 80], [66, 74], [86, 76], [110, 70], [122, 72], [100, 80], [74, 82], [54, 88], [34, 92], [20, 96]], SAP.s0);
+    t.poly([[30, 88], [50, 84], [70, 78], [96, 76], [76, 80], [54, 86]], SAP.s2); }, OL);
+  for (let x = 30; x < 110; x += 9) b.p(x, 92 - Math.round((x - 30) / 4.6), SAP.sheen);
+  [[40, 74], [58, 66], [84, 64], [100, 58], [70, 54]].forEach(([x, y]) => dropUp(b, x, y));
+  light(b, 64, 80, 50, 10, SAP.sheen, .16, 3);
+  return plate(b, (g) => { HD.creature(g, "vidriela", 30, 72, { s: 1.3, emo: "surprised" }); HD.creature(g, "capuchon", 70, 70, { s: 1.3, emo: "surprised" }); HD.creature(g, "relampin", 104, 60, { s: 1.3, emo: "surprised", dir: -1 }); }); };
+
+EVNOTE.bomba = { scene: "Un pozo nuevo tapado con tablones junto a una estatua, y una bomba de hierro. Barrena, de los Pozos, bombea despacio con las mangas negras.", hidden: "El cubo que llena no es aceite: es negro y brilla." };
+EVSC.bomba = () => { const b = new Pic(EW, EH); heartBack(b);
+  b.layer((t) => { t.e(54, 84, 20, 6, P.soil0); for (let i = 0; i < 5; i++) t.r(36 + i * 8, 80, 7, 7, mix(P.soil2, P.soil3, i % 2 ? .3 : 0)); }, OL);
+  b.layer((t) => { t.r(62, 50, 4, 32, P.plum1); t.r(58, 50, 12, 4, P.plum1); t.r(56, 46, 3, 4, P.plum2); t.l(66, 52, 86, 70, P.plum1); t.l(66, 53, 86, 71, P.plum1); t.r(60, 60, 8, 3, P.plum2); }, OL);
+  b.layer((t) => { t.r(24, 80, 8, 8, P.plum2); t.r(24, 80, 8, 2, SAP.s1); t.p(26, 80, SAP.sheen); }, OL);
+  for (let i = 0; i < 4; i++) b.p(57 - i, 54 + i * 2, SAP.s1);
+  return plate(b, (g) => { F(g, 98, 92, CAST.night, { s: 1.85, dir: -1, hat: { k: "cap", c: [P.plum1, P.ink] }, cloth: [P.plum2, P.plum1, P.plum3], front: [88, 72], back: [90, 74], emo: "closed" }); }); };
+
+EVNOTE.hollin = { scene: "Hollín, farolero del Prado, sentado junto a un farol enorme apagado. Una nube de polillas grises le da vueltas aunque no haya luz.", hidden: "La mecha del farol está doblada hacia el suelo." };
+EVSC.hollin = () => { const b = new Pic(EW, EH); heartBack(b, { night: true });
+  b.layer((t) => { t.r(28, 84, 20, 4, P.plum1); t.r(30, 46, 16, 38, mix(P.sea2, P.plum1, .5)); t.r(32, 48, 12, 34, mix(P.plum2, P.sea1, .4)); t.poly([[26, 46], [38, 34], [50, 46]], P.plum1); t.r(36, 30, 4, 4, P.plum1);
+    t.r(37, 66, 2, 10, P.soil0); t.l(38, 66, 35, 72, P.ink); }, OL);
+  moths(b, 64, 54, 18, 26);
+  return plate(b, (g) => { F(g, 80, 88, CAST.albor, { s: 1.8, pose: "sit", dir: -1, hat: { k: "cap", c: [P.soil1, P.ink] }, cloth: [mix(P.butter, P.soil0, .6), P.soil0, mix(P.ember2, P.soil0, .5)], hairStyle: "short", hair: P.ink, front: [68, 82], back: [90, 82], emo: "sad" }); }); };
+
+EVNOTE.juramento = { scene: "En la corteza del Tocón hay dos huellas de mano grabadas, una con polvo dorado y otra con ceniza. Al acercar la mano se oyen voces antiguas.", hidden: "Entre las dos huellas hay un agujero redondo y muy hondo, tapado con resina." };
+EVSC.juramento = () => { const b = new Pic(EW, EH); OL = P.soil0;
+  b.r(0, 0, EW, EH, P.soil1); stumpFront(b, 0, EW, 96);
+  light(b, 64, 40, 60, 40, P.butter, .2, 4);
+  const hand = (x, y, c, d) => b.layer((t) => { t.e(x, y, 7, 8, c); for (let i = 0; i < 4; i++) t.r(x - 6 + i * 4, y - 17 + Math.abs(i - 1.5) * 2, 3, 10, c); t.r(x + d * 7, y - 6, 4, 3, c); t.e(x, y, 5, 6, mix(c, P.soil0, .35)); }, OL);
+  hand(42, 54, P.butter, -1); hand(86, 54, P.mist, 1);
+  for (let i = 0; i < 12; i++) { b.p(34 + (i * 7) % 16, 44 + (i * 5) % 18, P.cream); b.p(78 + (i * 7) % 16, 44 + (i * 5) % 18, P.plum2); }
+  b.layer((t) => { t.e(64, 70, 3, 3, SAP.s0); t.e(64, 70, 1.6, 1.6, mix(P.ember2, P.soil1, .4)); }, OL);
+  return plate(b, (g) => { [[52, 34], [76, 30], [64, 22]].forEach(([x, y], i) => HD.stroke(g, (q) => { q.arc(x, y, 3 + i, Math.PI * 1.1, Math.PI * 1.9); }, [P.butter, P.plum2, P.cream][i], .3)); }); };
 const ART = {};
 function art(id) { if (!SCENE[id]) return null; return ART[id] || (ART[id] = SCENE[id]()); }
 
