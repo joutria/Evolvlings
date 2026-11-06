@@ -97,7 +97,7 @@ Card art is now a lore scene for every card (`scenes.js`, built from the card-sc
 
 ## Builds (upgradable places, delivery 1)
 
-- New **Builds** menu. Each place goes from level 1 to 5 for Chispas plus **Wood** (a new resource from the Garden and from expeditions: 3–4 per win, 1 per loss). Only one build runs at a time, and each finished expedition brings it 1 h closer. There's no real money and no paid speed-up.
+- New **Builds** menu. Each place goes from level 1 to 5 for Chispas plus **Wood** (a new resource from the Garden and from expeditions: 3–4 per win, 1 per loss). Only one build runs at a time, and each finished expedition brings it 2 h closer. Every finished expedition also moves Refuge jobs 1 h, the garden 3 h and incubating eggs 3 h forward: anything that takes time can be sped up by playing. There's no real money and no paid speed-up.
 - Builds take their final times (2 h to 24 h). For testing, set `FAST = true` in `build.js` to make them short (15 min to 4 h) and Refuge jobs six times faster.
 - **Garden** (home, next to the bowl): basic food (berries, honey buns) is no longer unlimited. It grows in the Garden while you're away: 3 meals a day at level 1, up to 8 at level 5. It holds up to 12 meals, and later levels also grow melon and stew, plus a little Wood. Harvest it by walking there or from the Builds menu. The Garden drawing grows with its level.
 - **Incubator**: eggs hatch 6% to 25% faster, and level 5 adds a 4th slot on top of the Keeper Level slots.
@@ -223,6 +223,10 @@ Every Refuge companion is born with one small trait of its own (the second MiniT
 - **El Vado's ladder**: every week four neighbours bring a team built around one type circle: Ruda (Sun), Bruno (Lake), Esporina (Frost) and Mirlo (Sky). Their teams are seeded by the week, so they stay the same until Monday, and they are your level −1, +0, +1 and +2. Beat one to unlock the next. First wins pay ✦ 15 / 20 / 25 / 30, a little Stardust, and Mirlo also gives a Song Note.
 - **Friends' codes**: "Your team code" turns your creature and your saved team's companions (cards, talents, birth traits, stars, Bond) into a `EVO1-…` text code. Pasting a friend's code saves their team (up to 6) to fight against, played by the AI. The first win against each code gives ✦ 20 and ∴ 5, at most 3 times a week, so made-up codes can't be farmed. Pasted codes are fully validated (known creatures and cards, level and grade ranges, a short plain-text name).
 - Saved in `P.duel` (`EV.slice("duel")`). The duel reuses the expedition pick screen and battle (`X.duel`), with no zone bonus.
+
+## A picture for every pause
+
+Every stop on an expedition shows a picture of its zone, drawn by `EVSCENE.pause(zone, kind, mode)` in `scenes.js`: the path choice (`camino`, or `jefe` before the guardian), a short look before each fight (`pelea` / `jefe`, which moves on by itself after 1.6 s or with a tap), the rest (`descanso`), the chest (`cofre`), the reward after a win (`victoria`) and the way home (`regreso`). Savia and Echo runs get their own tint. Old short events show the path picture; conversations keep their own scene. Duels keep the battle snapshot.
 
 ## Illustrated path conversations
 

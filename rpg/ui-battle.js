@@ -239,7 +239,7 @@ function endBattle(res) {
     const w = escritoFor("guardian", X.zone); if (w) giveEscrito(w);
     EV.save();
   }
-  X.reward = { xp, coins, offer, guard, after: boss || X.deep ? "win" : "next" };
+  X.reward = { xp, coins, offer, guard, after: boss || X.deep ? "win" : "next", kind: "victoria" };
   EV.checkAch();
   show("reward");
 }
@@ -271,6 +271,7 @@ function rewardHtml() {
     html += `<h3>${esc(tx("r.pick"))}</h3><div class="bminis">${r.offer.map((o, i) => miniCardHtml(o, `<button class="btn" type="button" data-take="${i}">${esc(tx("r.pick"))}</button>`)).join("")}</div>
       <div class="bctl"><button class="btn ghost" type="button" data-take="-1">${esc(tx("r.skip"))}</button>${home}</div>`;
   } else html += `<div class="bctl"><button class="btn" type="button" data-x="continue">${esc(tx("r.continue"))}</button>${home}</div>`;
+  if (r.kind && pauseBox(r.kind)) return `<div class="panel">${pauseBox(r.kind)}${html}</div><div class="panel"><h3>${esc(tx("exp.party"))}</h3>${partyHtml()}${lootHtml()}</div>`;
   return (fromFight ? sceneCard(html) : `<div class="panel">${html}</div>`) + `<div class="panel"><h3>${esc(tx("exp.party"))}</h3>${partyHtml()}${lootHtml()}</div>`;
 }
 function afterReward() {

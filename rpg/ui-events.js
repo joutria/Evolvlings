@@ -82,7 +82,7 @@ function eventHtml() {
       if (le && le.cNeed && le.cNeed[i] && !(EV.P.flags || {})[le.cNeed[i]]) return "";
       const poor = ((fx[i] || {}).cost || 0) > EV.P.coins;
       return `<button class="btn ghost" type="button" data-ev="${i}" ${poor ? "disabled" : ""}>${esc(c)}</button>`;
-    }).join("")}</div></div><div class="panel"><h3>${esc(tx("exp.party"))}</h3>${partyHtml()}</div>`;
+    }).join("")}</div></div><div class="panel"><h3>${esc(tx("exp.party"))}</h3>${partyHtml()}</div>`.replace('<div class="panel"><div class="sub">', `<div class="panel">${pauseBox("camino")}<div class="sub">`);
   }
   return `<div class="panel"><div class="sub">${esc(tx("node.event"))}</div><p class="evt-text">${esc(X.eventOut)}</p><div class="bctl"><button class="btn" type="button" data-x="${X.eventFight ? "evfight" : "evnext"}">${esc(tx("r.continue"))}</button></div></div><div class="panel"><h3>${esc(tx("exp.party"))}</h3>${partyHtml()}${lootHtml()}</div>`;
 }
@@ -221,7 +221,7 @@ function endHtml() {
   if (e.lvlPick) {
     html += `<h3>${esc(tx("end.lvlPick"))}</h3><div class="bminis">${e.lvlPick.map((o, i) => miniCardHtml(o, `<button class="btn" type="button" data-lvlpick="${i}">${esc(tx("r.pick"))}</button>`)).join("")}</div>`;
   } else html += `<div class="bctl"><button class="btn" type="button" data-x="home">${esc(tx("end.home"))}</button></div>`;
-  return sceneCard(html);
+  return pauseBox("regreso") ? `<div class="panel">${pauseBox("regreso")}${html}</div>` : sceneCard(html);
 }
 function goHome() {
   if (battle) { cancelAnimationFrame(battle.raf); battle = null; }
@@ -248,10 +248,10 @@ function onExpClick(e) {
   if (d.node) {
     EV.sfx("tap");
     const n = d.node;
-    if (n === "fight") startBattle(false);
-    else if (n === "boss") startBattle(true);
-    else if (n === "rest") { healParty(0.35); for (const m of X.party) if (m.hp <= 0) m.hp = 0.2; EV.sfx("heal"); X.reward = { title: tx("node.rest"), text: tx("node.rest.d"), after: "next" }; show("reward"); }
-    else if (n === "chest") { const w = rnd() < 0.35 ? escritoFor("chest", X.zone) : null; if (w) giveEscrito(w); X.reward = { title: tx("node.chest"), offer: offerCards(3, 0), after: "next" }; show("reward"); }
+    if (n === "fight") preFight(false);
+    else if (n === "boss") preFight(true);
+    else if (n === "rest") { healParty(0.35); for (const m of X.party) if (m.hp <= 0) m.hp = 0.2; EV.sfx("heal"); X.reward = { title: tx("node.rest"), text: tx("node.rest.d"), after: "next", kind: "descanso" }; show("reward"); }
+    else if (n === "chest") { const w = rnd() < 0.35 ? escritoFor("chest", X.zone) : null; if (w) giveEscrito(w); X.reward = { title: tx("node.chest"), offer: offerCards(3, 0), after: "next", kind: "cofre" }; show("reward"); }
     else if (n === "event") { X.event = rollEvent(); X.eventOut = null; X.talk = null; if (talkEv(X.event)) talkStart(X.event); show("event"); }
     return;
   }
@@ -277,10 +277,11 @@ function onExpClick(e) {
     case "continue": afterReward(); break;
     case "evnext":
       X.talk = null;
-      if (X.eventCard) { X.eventCard = null; X.reward = { title: tx("node.chest"), offer: offerCards(3, 0), after: "next" }; show("reward"); }
+      if (X.eventCard) { X.eventCard = null; X.reward = { title: tx("node.chest"), offer: offerCards(3, 0), after: "next", kind: "cofre" }; show("reward"); }
       else nextSection();
       break;
-    case "evfight": X.talk = null; X.eventFight = false; startBattle(false); break;
+    case "evfight": X.talk = null; X.eventFight = false; preFight(false); break;
+    case "prego": goFight(); break;
     case "home": goHome(); break;
   }
 }

@@ -2524,6 +2524,153 @@ EVSC.brillo = () => { const b = new Pic(EW, EH); trailBack(b, { path: false, see
   b.poly([[62, 92], [64, 58], [68, 58], [70, 92]], P.ink);
   b.p(66, 80, P.cream); b.p(65, 80, P.butter); b.p(67, 80, P.butter); b.p(66, 79, P.butter); b.p(66, 81, P.butter); light(b, 66, 80, 8, 6, P.butter, .4, 3);
   return plate(b, (g) => { HD.creature(g, "fizz", 24, 92, { s: 1.3, emo: "o" }); }); };
+/* ================= Expedition pause scenes: one picture per zone × pause kind =================
+   EVSCENE.pause(zone, kind, mode) → canvas. kind: camino | pelea | cofre | descanso | jefe | victoria | regreso.
+   mode: undefined | "savia" | "echo". Reuses the zone backdrops of the event scenes. */
+const PZ_FOES = { aurora: ["lumo", "fuellito", "brotin"], crater: ["fuellito", "yunqueron", "mecha"], forest: ["brotin", "espinardo", "fuellito"],
+  hollow: ["nim", "centinela", "ecolito"], lake: ["remolin", "vidriela", "nim"], caves: ["pebb", "ecolito", "remolin"],
+  heights: ["relampin", "trinilla", "fizz"], deep: ["carambano", "capuchon", "bostezo"], heart: ["vidriela", "relampin", "capuchon"] };
+const PZ_TEAM = ["lumo", "fizz", "pebb"];
+
+// --- backdrops for the three far zones ---
+function peaksBack(b, o = {}) { // Los Altos: thin cold air, snow peaks, prayer-flag ropes
+  OL = P.plum1; const n = o.night;
+  b.r(0, 0, EW, EH, P.plum2);
+  band(b, 0, 0, EW, 60, n ? P.ink : mix(P.sea3, P.cream, .1), n ? P.sea0 : P.sea4, 7, n ? P.sea1 : P.cream);
+  if (n) b.stars(0, 0, EW, 30, 30, 9);
+  b.poly([[0, 60], [0, 36], [18, 20], [30, 30], [52, 8], [70, 28], [86, 18], [104, 32], [118, 22], [128, 28], [128, 60]], n ? mix(P.plum1, P.sea0, .4) : mix(P.plum3, P.sea3, .4));
+  b.poly([[44, 16], [52, 8], [60, 18], [55, 16], [52, 20], [48, 16]], P.cream); b.poly([[82, 22], [86, 18], [91, 24], [86, 23]], P.cream);
+  haze(b, 30, 60, n ? P.sea1 : P.cream, .4);
+  b.poly([[0, 66], [0, 48], [40, 42], [80, 50], [128, 44], [128, 66]], n ? P.plum1 : mix(P.plum2, P.sea2, .3));
+  band(b, 0, 64, EW, 32, n ? mix(P.plum1, P.moss0, .3) : mix(P.plum3, P.moss2, .3), n ? P.plum1 : P.plum2, 4);
+  const r = rng(o.seed || 81); for (let i = 0; i < 18; i++) b.r(Math.floor(r() * EW), 66 + Math.floor(r() * 28), 3, 1, mix(P.plum3, P.fog, .4));
+  // a rope of little flags across the sky
+  for (let x = 0; x < EW; x++) { const y = 26 + Math.round(Math.sin(x / EW * Math.PI) * 8); b.p(x, y, P.soil1); if (x % 9 === 0) b.poly([[x, y], [x + 4, y], [x + 2, y + 4]], [P.rose1, P.sea2, P.butter, P.moss2][(x / 9) % 4]); }
+}
+function frostBack(b, o = {}) { // El Fondo Blanco: a white cavern of ice and tall pale mushrooms
+  OL = mix(P.sea1, P.plum1, .4); const n = o.night;
+  b.r(0, 0, EW, EH, P.fog);
+  band(b, 0, 0, EW, 66, n ? mix(P.sea0, P.plum1, .5) : mix(P.sea2, P.fog, .4), n ? P.sea1 : P.cream, 7, n ? mix(P.sea2, P.fog, .3) : P.cream);
+  for (let x = 0; x < EW; x += 9) b.poly([[x, 0], [x + 6, 0], [x + 3, 8 + (x * 7) % 9]], n ? P.sea1 : mix(P.sea3, P.cream, .4));
+  const shroom = (x, gy, h, w, c) => b.layer((t) => { t.r(x - 2, gy - h, 4, h, mix(P.cream, P.fog, .3)); t.e(x, gy - h, w, w * .45, c); t.r(x - w, gy - h, w * 2, 1, mix(c, P.ink, .2)); }, OL);
+  shroom(16, 70, 34, 14, mix(P.rose2, P.cream, .5)); shroom(108, 70, 42, 18, mix(P.sea3, P.cream, .4)); shroom(84, 70, 20, 8, mix(P.rose2, P.cream, .6));
+  haze(b, 36, 68, n ? P.sea2 : P.cream, .45);
+  band(b, 0, 68, EW, 28, n ? mix(P.sea2, P.fog, .3) : P.cream, n ? P.sea1 : mix(P.fog, P.sea3, .3), 4);
+  for (let i = 0; i < 16; i++) b.r((i * 37) % EW, 70 + (i * 13) % 24, 5, 1, mix(P.sea3, P.cream, .5));
+  [[30, 40], [58, 30], [96, 50]].forEach(([x, y]) => { b.p(x, y, P.cream); light(b, x, y, 6, 6, P.sea4, .3, 3); });
+}
+function heartBack(b, o = {}) { // Corazón del Claro: a ring of old statues around the great stump, warm light from above
+  OL = P.soil0; const n = o.night;
+  b.r(0, 0, EW, EH, P.moss1);
+  band(b, 0, 0, EW, 62, n ? P.ink : mix(P.cream, P.butter, .2), n ? P.plum1 : mix(P.plum3, P.fog, .4), 7, n ? P.plum2 : P.fog);
+  if (n) b.stars(0, 0, EW, 34, 30, 12);
+  for (let x = -4; x < EW + 4; x += 10) b.e(x, 4 + (x % 3), 10, 7, n ? P.moss0 : mix(P.moss1, P.moss0, .3));
+  b.layer((t) => { t.r(42, 28, 44, 40, P.soil1); t.r(42, 28, 6, 40, P.soil2); t.e(64, 28, 22, 5, P.soil2); t.e(64, 28, 18, 3.4, mix(P.soil3, P.butter, .3));
+    for (let i = 0; i < 4; i++) t.r(48 + i * 9, 34, 1, 32, P.soil0); t.poly([[36, 68], [44, 56], [50, 68]], P.soil1); t.poly([[78, 68], [84, 56], [92, 68]], P.soil1); }, OL);
+  const statue = (x, gy, faceless) => b.layer((t) => { t.r(x - 4, gy - 4, 8, 4, P.plum2); t.r(x - 3, gy - 20, 6, 16, P.mist); t.e(x, gy - 22, 2.4, 2.4, faceless ? P.plum3 : P.mist); t.poly([[x - 3, gy - 18], [x, gy - 26], [x + 3, gy - 18]], P.mist); }, OL);
+  statue(14, 66); statue(30, 62); statue(98, 62); statue(114, 66);
+  b.r(110, 64, 8, 2, P.plum1);
+  haze(b, 40, 66, n ? P.plum2 : P.cream, .3);
+  band(b, 0, 66, EW, 30, n ? mix(P.moss0, P.plum1, .3) : P.moss2, n ? P.moss0 : P.moss1, 4);
+  light(b, 64, 26, 30, 16, P.butter, n ? .2 : .35, 4);
+}
+function auroraBack(b, o = {}) { // Prado Aurora seen from the trail: meadow, lanterns, the Alba tower far away
+  OL = mix(P.ink, P.plum1, .4); const n = o.night;
+  b.r(0, 0, EW, EH, P.moss1);
+  if (n) band(b, 0, 0, EW, 60, P.ink, P.plum1, 7, mix(P.plum2, P.rose0, .35));
+  else band(b, 0, 0, EW, 60, mix(P.sea2, P.rose0, .4), P.ember3, 8, P.butter);
+  towerAlba(b, 98, 18, 9, 54, { wall: n ? mix(P.plum2, P.plum3, .3) : mix(P.plum3, P.rose0, .3), dark: P.plum2, trim: P.plum3, lit: true });
+  skyline(b, 52, n ? mix(P.plum1, P.plum2, .5) : mix(P.rose0, P.ember1, .35), 7, P.ember4);
+  haze(b, 40, 60, n ? mix(P.plum2, P.rose0, .4) : P.ember3, .35);
+  band(b, 0, 58, EW, 38, n ? mix(P.moss0, P.plum1, .3) : P.moss2, n ? P.moss0 : P.moss1, 4);
+  whiteFlowers(b, 0, EW, 62, 94, 5);
+  [[24, 70, 18], [110, 76, 24]].forEach(([x, gy, h]) => lamp2(b, x, gy, h, { r: 14, k: n ? .45 : .2 }));
+}
+// one backdrop per zone; returns the ground line y
+function zoneBack(b, zone, o = {}) {
+  switch (zone) {
+    case "aurora": auroraBack(b, o); return 64;
+    case "crater": craterBack(b, o); warmGround(b, 62); return 62;
+    case "forest": forestBack(b, o); forestFloor(b, 70, o); return 70;
+    case "hollow": hollowBack(b, o); hollowGround(b, 68, o); return 68;
+    case "lake": lakeBack(b, Object.assign({ water: 44, waterEnd: 66 }, o)); mudBank(b, 66, o); return 66;
+    case "caves": caveBack(b, o); caveFloor(b, 72, o); return 72;
+    case "heights": peaksBack(b, o); return 66;
+    case "deep": frostBack(b, o); return 70;
+    case "heart": heartBack(b, o); return 68;
+    default: trailBack(b, o); return 60;
+  }
+}
+// --- props ---
+function signpost(b, x, gy) { b.layer((t) => { t.r(x - 2, gy - 38, 4, 38, P.soil1); t.poly([[x - 22, gy - 36], [x - 2, gy - 36], [x - 2, gy - 28], [x - 22, gy - 28], [x - 26, gy - 32]], P.soil2); t.poly([[x + 2, gy - 25], [x + 22, gy - 25], [x + 26, gy - 21], [x + 22, gy - 17], [x + 2, gy - 17]], P.soil2);
+  t.r(x - 19, gy - 33, 12, 1, P.soil0); t.r(x - 19, gy - 31, 8, 1, P.soil0); t.r(x + 6, gy - 22, 12, 1, P.soil0); t.r(x + 6, gy - 20, 9, 1, P.soil0); }, OL); }
+function forkPath(b, gy, col) { b.poly([[56, gy], [72, gy], [80, EH], [48, EH]], col); b.poly([[56, gy + 2], [40, gy], [26, gy + 4], [50, gy + 10]], col); b.poly([[72, gy + 2], [88, gy], [104, gy + 4], [78, gy + 10]], col); }
+function chestProp(b, x, gy, open, col = P.soil1) {
+  b.e(x, gy, 26, 3, mix(P.ink, P.soil0, .5));
+  b.layer((t) => { t.r(x - 20, gy - 18, 40, 18, col); t.r(x - 20, gy - 18, 3, 18, P.plum2); t.r(x + 17, gy - 18, 3, 18, P.plum2); t.r(x - 20, gy - 10, 40, 2, P.plum2); t.r(x - 18, gy - 16, 34, 1, mix(col, P.cream, .25));
+    if (open) { t.poly([[x - 20, gy - 18], [x + 20, gy - 18], [x + 16, gy - 34], [x - 16, gy - 34]], mix(col, P.soil2, .4)); t.r(x - 16, gy - 32, 32, 1, P.plum2); t.r(x - 17, gy - 20, 34, 3, P.butter); }
+    else { t.r(x - 20, gy - 25, 40, 7, mix(col, P.soil2, .4)); t.r(x - 20, gy - 25, 40, 1, mix(col, P.cream, .3)); t.r(x - 3, gy - 15, 6, 6, P.ember3); t.r(x - 1, gy - 13, 2, 3, P.ink); } }, OL);
+  if (open) { light(b, x, gy - 24, 30, 22, P.butter, .55, 5); [[x - 9, gy - 38], [x + 6, gy - 44], [x + 13, gy - 34], [x - 1, gy - 50], [x - 14, gy - 30]].forEach(([px, py]) => { b.p(px, py, P.cream); b.p(px - 1, py, P.butter); b.p(px + 1, py, P.butter); b.p(px, py - 1, P.butter); b.p(px, py + 1, P.butter); }); }
+}
+function bigFire(b, x, y) {
+  b.e(x, y + 1, 18, 3, mix(P.ink, P.soil0, .4));
+  b.layer((t) => { for (let i = 0; i < 7; i++) t.e(x - 12 + i * 4, y, 2.6, 2, P.plum2); t.l(x - 10, y - 1, x + 10, y - 6, P.soil1); t.l(x - 10, y - 6, x + 10, y - 1, P.soil0); t.r(x - 10, y - 2, 20, 2, P.soil0); }, OL);
+  b.poly([[x - 8, y - 3], [x - 3, y - 18], [x, y - 12], [x + 3, y - 22], [x + 8, y - 3]], P.ember1); b.poly([[x - 5, y - 3], [x, y - 16], [x + 5, y - 3]], P.ember3); b.poly([[x - 2, y - 3], [x, y - 9], [x + 2, y - 3]], P.butter);
+  light(b, x, y - 8, 54, 30, P.ember3, .45, 5);
+}
+function bossLight(b, zone) { // a dark vignette with the zone colour bleeding in
+  const c = { aurora: P.butter, crater: P.ember2, forest: P.moss3, hollow: P.plum3, lake: P.sea3, caves: P.soil2, heights: P.sea4, deep: P.rose2, heart: P.butter }[zone] || P.fog;
+  for (let y = 0; y < EH; y++) for (let x = 0; x < EW; x++) { const d = Math.hypot((x - 64) / 64, (y - 52) / 52); const k = Math.min(.7, Math.max(0, d - .55)) ; if (k > 0) { const cc = b.g(x, y); if (cc) b.p(x, y, mix(cc, P.ink, Math.ceil(k * 4) / 4 * .9)); } }
+  light(b, 64, 50, 34, 30, c, .25, 4);
+}
+function bossFig(g, zone, x, y) {
+  const s = 2.3;
+  switch (zone) {
+    case "aurora": BOSS.farol(g, x, y, { s }); break;
+    case "crater": BOSS.forja(g, x, y, { s, hammer: true }); break;
+    case "forest": BOSS.seto(g, x, y, { s: 2 }); break;
+    case "hollow": throne(g, x, y, 2.4); break;
+    case "lake": BOSS.eye(g, x, y - 24, 7); break;
+    case "caves": F(g, x, y, CAST.grava, { s: 3.4, emo: "closed", rim: P.glim1 }); break;
+    case "heights": BOSS.veleta(g, x, y, { s: 1.9, rot: -.2 }); break;
+    case "deep": BOSS.micelio(g, x, y, { s: 2.1 }); break;
+    case "heart": BOSS.root(g, [[x - 34, y + 4], [x - 20, y - 6], [x - 8, y - 22], [x + 2, y - 40], [x + 16, y - 50]], 11, { rim: SAP.sheen, rimA: .7 }); BOSS.root(g, [[x + 30, y + 4], [x + 18, y - 10], [x + 14, y - 26]], 6, { rim: SAP.sheen }); break;
+  }
+}
+// savia: dark purple tint + drops rising; echo: cold, washed-out with faint ghost bands
+function modeFx(b, mode) {
+  if (mode === "savia") { tint(b, 0, 0, EW, EH, SAP.s2, .28); const r = rng(99); for (let i = 0; i < 14; i++) { const x = Math.floor(r() * EW), y = 20 + Math.floor(r() * 70); dropUp(b, x, y); } }
+  if (mode === "echo") { for (let y = 0; y < EH; y++) for (let x = 0; x < EW; x++) { const c = b.g(x, y); if (!c) continue; const [R, G, B] = hx(c), l = Math.round((R + G + B) / 3); b.p(x, y, mix(c, mix("#" + [l, l, l].map((v) => v.toString(16).padStart(2, "0")).join(""), P.sea3, .3), .55)); } }
+}
+const PAUSE_KINDS = ["camino", "pelea", "cofre", "descanso", "jefe", "victoria", "regreso"];
+function pauseScene(zone, kind, mode) {
+  const b = new Pic(EW, EH);
+  const night = kind === "descanso" || kind === "regreso" ? true : undefined;
+  const gy = zoneBack(b, zone, { night, seed: 7 });
+  const foes = PZ_FOES[zone] || PZ_FOES.aurora;
+  const ground = mix(b.g(64, Math.min(EH - 2, gy + 8)) || P.soil1, P.soil3, .35);
+  let figs;
+  if (kind === "camino") { forkPath(b, gy, ground); signpost(b, 64, 86);
+    figs = (g) => { HD.creature(g, PZ_TEAM[0], 30, 94, { s: 2.3, emo: "o" }); HD.creature(g, PZ_TEAM[1], 100, 94, { s: 2.1, emo: "happy", dir: -1 }); }; }
+  if (kind === "pelea") { light(b, 98, 78, 34, 22, P.rose1, .3, 4);
+    figs = (g) => { HD.creature(g, PZ_TEAM[0], 20, 94, { s: 2.3, emo: "o" }); HD.creature(g, PZ_TEAM[2], 42, 90, { s: 1.9, emo: "o" });
+      HD.creature(g, foes[0], 86, 94, { s: 2.6, dir: -1, emo: "surprised" }); HD.creature(g, foes[1], 116, 90, { s: 2.1, dir: -1, emo: "surprised" });
+      HD.stroke(g, (q) => { q.moveTo(60, 76); q.lineTo(68, 68); q.moveTo(62, 84); q.lineTo(72, 80); q.moveTo(58, 66); q.lineTo(61, 58); }, P.cream, .7); }; }
+  if (kind === "cofre") { chestProp(b, 64, 90, false, zone === "deep" ? P.sea2 : zone === "heart" ? mix(P.butter, P.soil2, .4) : P.soil1);
+    figs = (g) => { HD.creature(g, PZ_TEAM[1], 24, 94, { s: 2.1, emo: "o" }); HD.creature(g, PZ_TEAM[0], 106, 94, { s: 2.2, emo: "happy", dir: -1 }); }; }
+  if (kind === "descanso") { bigFire(b, 64, 86);
+    figs = (g) => { HD.creature(g, PZ_TEAM[0], 30, 94, { s: 2.1, emo: "sleep" }); HD.creature(g, PZ_TEAM[1], 98, 94, { s: 2, emo: "sleep", dir: -1 }); HD.creature(g, PZ_TEAM[2], 118, 90, { s: 1.6, emo: "happy", dir: -1 }); }; }
+  if (kind === "jefe") { bossLight(b, zone); if (zone === "heart") [[50, 60], [58, 48], [70, 40], [44, 70], [76, 30]].forEach(([x, y]) => dropUp(b, x, y));
+    figs = (g) => { bossFig(g, zone, 64, 86); HD.creature(g, PZ_TEAM[0], 16, 95, { s: 1.9, emo: "o" }); HD.creature(g, PZ_TEAM[2], 112, 95, { s: 1.8, emo: "o", dir: -1 }); }; }
+  if (kind === "victoria") { chestProp(b, 64, 92, true, P.soil1);
+    figs = (g) => { HD.creature(g, PZ_TEAM[0], 22, 92, { s: 2.2, emo: "happy" }); HD.creature(g, PZ_TEAM[1], 104, 92, { s: 2, emo: "happy", dir: -1 }); HD.creature(g, PZ_TEAM[2], 120, 95, { s: 1.5, emo: "happy", dir: -1 }); }; }
+  if (kind === "regreso") { b.poly([[60, gy], [68, gy], [90, EH], [38, EH]], ground);
+    figs = (g) => { F(g, 62, 90, cuidador, { s: 2.2, dir: -1, emo: "closed", hold: lanternHold }); HD.creature(g, PZ_TEAM[0], 80, 92, { s: 1.5, emo: "sleep", dir: -1 }); HD.creature(g, PZ_TEAM[1], 44, 94, { s: 1.6, emo: "happy", dir: -1 }); }; }
+  modeFx(b, mode);
+  return plate(b, figs || (() => {}));
+}
+const PAUSEART = {};
+function pauseArt(zone, kind, mode) { const k = zone + ":" + kind + ":" + (mode || ""); return PAUSEART[k] || (PAUSEART[k] = pauseScene(zone, kind, mode)); }
 const ART = {};
 function art(id) { if (!SCENE[id]) return null; return ART[id] || (ART[id] = SCENE[id]()); }
 
@@ -2571,5 +2718,5 @@ function card(id, gi = 0, o = {}) {
   return big;
 }
 
-root.EVSCENE = { event: evArt, EVIDS: Object.keys(EVSC), EVNOTE, art, card, IDS: Object.keys(SCENE), AW, AH, CW, CH, K, Pic, SAP, HD, PL, hd, NOTE };
+root.EVSCENE = { event: evArt, EVIDS: Object.keys(EVSC), EVNOTE, pause: pauseArt, PAUSE_KINDS, art, card, IDS: Object.keys(SCENE), AW, AH, CW, CH, K, Pic, SAP, HD, PL, hd, NOTE };
 })(typeof window !== "undefined" ? window : globalThis);

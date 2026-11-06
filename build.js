@@ -37,7 +37,7 @@ const TX = {
     "trade": "Cambia ✦ {c} por ∴ {d} de Polvo. Quedan {n} cambios hoy.", "trade.btn": "Cambiar ✦ {c} → ∴ {d}", "trade.done": "Tienes ∴ {d} de Polvo más.", "toast.poorC": "No tienes Chispas suficientes.",
     "store": "En el huerto: {f} comidas · 🪵 {w}", "harvest": "Cosechar", "harvestNone": "Todavía no hay nada que cosechar.",
     "harvested": "Cosechas: {what}.", "full": "El huerto está lleno: cosecha para que siga creciendo.",
-    "tripWood": "🪵 +{n} Madera del viaje", "tripCut": "La obra avanza 1 h.",
+    "tripWood": "🪵 +{n} Madera del viaje", "tripCut": "La obra avanza {n} h.", "tripJobs": "Los trabajos del Refugio avanzan {n} h.", "tripGarden": "El huerto crece {n} h más.",
     "welcome": "La comida gratis ahora crece en el Huerto, junto al comedero. Te dejo {n} bayas para empezar.",
     "jobs": "Trabajos del Refugio", "jobs.sub": "Manda a un compañero a trabajar en un lugar. Rinde más si su tipo encaja y si el lugar está mejorado. Mientras trabaja no puede ir de expedición. Hasta {n} a la vez.",
     "jobs.none": "Todavía no hay nadie en el Refugio.", "job.idle": "Descansando en el Refugio", "job.send": "Mandar a trabajar", "job.cancel": "Cancelar",
@@ -79,7 +79,7 @@ const TX = {
     "trade": "Trade ✦ {c} for ∴ {d} Stardust. {n} trades left today.", "trade.btn": "Trade ✦ {c} → ∴ {d}", "trade.done": "You got ∴ {d} more Stardust.", "toast.poorC": "Not enough Chispas.",
     "store": "In the garden: {f} meals · 🪵 {w}", "harvest": "Harvest", "harvestNone": "Nothing to harvest yet.",
     "harvested": "You harvest: {what}.", "full": "The garden is full: harvest so it keeps growing.",
-    "tripWood": "🪵 +{n} Wood from the trip", "tripCut": "The build moves 1 h closer.",
+    "tripWood": "🪵 +{n} Wood from the trip", "tripCut": "The build moves {n} h closer.", "tripJobs": "Refuge jobs move {n} h closer.", "tripGarden": "The garden grows {n} h more.",
     "welcome": "Free food now grows in the Garden, next to the bowl. Here are {n} berries to start.",
     "jobs": "Refuge jobs", "jobs.sub": "Send a companion to work at a place. It earns more when its type fits and when the place is upgraded. While it works it can't go on expeditions. Up to {n} at a time.",
     "jobs.none": "Nobody lives in the Refuge yet.", "job.idle": "Resting in the Refuge", "job.send": "Send to work", "job.cancel": "Cancel",
@@ -402,7 +402,9 @@ const ordLabel = (i) => { const o = orders()[i]; return tx("ord.giveTo", { n: tx
 if (EV.EGGS && EV.EGGS.offer) { const prevOffer = EV.EGGS.offer; EV.EGGS.offer = function () { return prevOffer.apply(this, arguments).filter((k) => !working(k)); }; }
 // basic food (price 0) now comes from the Garden and is counted in the bag
 EV.HOOKS.gardenOn = () => true;
-// expeditions bring wood and move the build forward
+// expeditions bring wood and move every waiting timer forward (Jose: anything that takes time can be sped up by
+// going on expeditions). Eggs move TRIP_CUT in eggs.js; here the build, the Refuge jobs and the garden.
+const TRIP_H = { build: 2, job: 1, garden: 3 };
 if (EV.EGGS && EV.EGGS.afterTrip) {
   const prev = EV.EGGS.afterTrip;
   EV.EGGS.afterTrip = function (res) {
@@ -410,7 +412,12 @@ if (EV.EGGS && EV.EGGS.afterTrip) {
     if (res === "win" || res === "lose") {
       const b = B(), n = res === "win" ? 3 + (Math.random() < 0.5 ? 1 : 0) : 1;
       b.wood += n; out.push(tx("tripWood", { n }));
-      if (b.job) { b.job.cut = (b.job.cut || 0) + HOUR; out.push(tx("tripCut")); }
+      if (b.job) { b.job.cut = (b.job.cut || 0) + TRIP_H.build * HOUR; out.push(tx("tripCut", { n: TRIP_H.build })); }
+      const now = Date.now(), run = Object.values(J()).filter((j) => j.end > now);
+      for (const j of run) j.end = Math.max(now, j.end - TRIP_H.job * HOUR);
+      if (run.length) out.push(tx("tripJobs", { n: TRIP_H.job }));
+      grow(); const g = b.gar, G = GARDEN[lvl("garden")];
+      if (g.f < G.cap || g.w < WOOD_CAP) { g.t -= TRIP_H.garden * HOUR; grow(); out.push(tx("tripGarden", { n: TRIP_H.garden })); }
       save(); setTimeout(tick, 0);
     }
     return out;
