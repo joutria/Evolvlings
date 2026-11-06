@@ -33,6 +33,7 @@ const N_PLACES = ((build.match(/const PLACES = \[(.*?)\]/) || ["", ""])[1].match
 const JOB_COINS = num(build, /pantry: \{ fit: \[.*?\], per: \{ coins: (\d+) \}/, 6);
 const PACK = { price: num(core, /PACK = \{ price: (\d+)/, 60), perDay: num(core, /perDay: (\d+) \}/, 3) };
 const RECHARGE = num(hooks, /RECHARGE = \{ amount: \d+, price: (\d+)/, 12);
+const TRADE_C = num(build, /TRADE = \{ c: (\d+)/, 0);
 const BOSS = num(battle, /boss \? (\d+) : 3/, 30);
 const SECTIONS = 4;
 const FOOD = Object.fromEntries([...idx.matchAll(/^\s+(\w+): \{ cat: "(food|med)", price: (\d+)/gm)].map((m) => [m[1], +m[3]]));
@@ -40,9 +41,9 @@ const shopAvg = (() => { const v = Object.values(FOOD).filter((p) => p > 0); ret
 
 /* ---------- what each profile does on a typical day (assumptions) ---------- */
 const PROFILES = {
-  new: { label: "nuevo (día 1-7)", absences: 2, care: 0.7, tasksExp: false, tasks: 3, week: 2, orders: 1, trips: 2, fights: 3, events: 1, jobs: 0, jobH: 0, buys: 3, pulls: 0, packs: 0, recharges: 0 },
-  mid: { label: "medio (semana 2-4)", absences: 2, care: 1, tasksExp: true, tasks: 4, week: 4, orders: 2, trips: 3, fights: 3, events: 1, jobs: 2, jobH: 8, buys: 3, pulls: 1, packs: 1, recharges: 1 },
-  adv: { label: "avanzado (mes 2+)", absences: 2, care: 1, tasksExp: true, tasks: 4, week: 6, orders: 2, trips: 4, fights: 3, events: 1, jobs: 3, jobH: 8, buys: 2, pulls: 2, packs: 3, recharges: 1 },
+  new: { label: "nuevo (día 1-7)", absences: 2, care: 0.7, tasksExp: false, tasks: 3, week: 2, orders: 1, trips: 2, fights: 3, events: 1, jobs: 0, jobH: 0, buys: 3, pulls: 0, packs: 0, recharges: 0, trades: 0 },
+  mid: { label: "medio (semana 2-4)", absences: 2, care: 1, tasksExp: true, tasks: 4, week: 4, orders: 2, trips: 3, fights: 3, events: 1, jobs: 2, jobH: 8, buys: 3, pulls: 1, packs: 1, recharges: 1, trades: 1 },
+  adv: { label: "avanzado (mes 2+)", absences: 2, care: 1, tasksExp: true, tasks: 4, week: 6, orders: 2, trips: 4, fights: 3, events: 1, jobs: 3, jobH: 8, buys: 2, pulls: 2, packs: 3, recharges: 1, trades: 3 },
 };
 function day(p) {
   const fightC = 3 + 1.5 + 2; // 3 + random 0..3 + about 2 foes
@@ -63,6 +64,7 @@ function day(p) {
     despensa: p.pulls * PANTRY_COST,
     sobres: p.packs * PACK.price,
     recargas: p.recharges * RECHARGE,
+    taller: p.trades * TRADE_C,
   };
   const sum = (o) => Object.values(o).reduce((a, b) => a + b, 0);
   return { inc, out, in: sum(inc), spend: sum(out), net: sum(inc) - sum(out) };
@@ -70,8 +72,10 @@ function day(p) {
 const totalBuild = N_PLACES * COST.reduce((a, c) => a + c.c, 0);
 const totalWood = N_PLACES * COST.reduce((a, c) => a + num(build, new RegExp(c.lv + ": \\{ c: " + c.c + ", w: (\\d+)"), 0), 0);
 const buildHours = N_PLACES * COST.reduce((a, c) => a + (FAST ? c.fh : c.h), 0);
-// wood: garden (1-2 a day), 2.5 per trip, neighbour pay 1-3, the garden job 0.4 an hour
-const woodDay = (p) => 1.5 + p.trips * 2.5 + p.orders * 2 + (p.jobs ? (FAST ? Math.min(6, Math.floor(16 / (p.jobH / 6))) : 1) * Math.round(0.4 * p.jobH * 1.2) : 0);
+// wood: the garden (middle level), a won trip (base + a coin flip), neighbour pay 1-3, the garden job 0.4 an hour
+const GARDEN_W = [...build.matchAll(/\{ f: \d+, cap: \d+, w: ([\d.]+),/g)].map((m) => +m[1]);
+const TRIP_W = num(build, /res === "win" \? (\d+) \+/, 2) + 0.5;
+const woodDay = (p) => (GARDEN_W[2] || 1.5) + p.trips * TRIP_W + p.orders * 2 + (p.jobs ? (FAST ? Math.min(6, Math.floor(16 / (p.jobH / 6))) : 1) * Math.round(0.4 * p.jobH * 1.2) : 0);
 const result = { FAST, places: N_PLACES, totalBuild, totalWood, buildHours, exchange: EX_COST, profiles: {} };
 for (const [k, p] of Object.entries(PROFILES)) {
   const d = day(p);
