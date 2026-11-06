@@ -249,7 +249,8 @@ function setOut() {
   const S = EV.S;
   if (!X.duel) S.stats.energy = Math.max(0, S.stats.energy - (X.deep ? DEEP_COST : 25));
   const R = rpgState();
-  X.party = [{ own: true, kind: S.species, hp: 1 }].concat(X.chosen.map((k) => { const r = refOf(k); return { own: false, kind: k, hp: 1, lvl: r ? r.lvl : R.lvl, bond: r ? r.bond : 0, star: r ? r.star : 0, roster: !!r }; }));
+  const fm = formOf(formKeys());
+  X.party = [{ own: true, kind: S.species, hp: 1, pos: fm.own }].concat(X.chosen.map((k) => { const r = refOf(k); return { own: false, kind: k, hp: 1, lvl: r ? r.lvl : R.lvl, bond: r ? r.bond : 0, star: r ? r.star : 0, roster: !!r, pos: fm[k] }; }));
   if (X.echo) { echoInfo(); EV.P.echo.tries++; if (X.echo === "tired") for (const m of X.party) m.hp = 0.8; }
   if (X.deep && X.deepRule === "tired") for (const m of X.party) m.hp = 0.8;
   // a team from three different type circles (for the Types achievements)
@@ -276,21 +277,21 @@ function nextSection() {
 }
 // a creature from your Refuge: { lvl, bond, grade } or null
 const refOf = (k) => (EV.EGGS ? EV.EGGS.unitOf(k) : null);
-function partyUnits() {
-  return X.party.map((m) => {
-    if (m.own) return makeUnit(ownUnitOpts(m.hp));
-    // Unísona uses your best copy of each of its cards, so it grows as you fuse them
-    // Refuge companions' cards grow with Bond
-    const rg = m.roster && refOf(m.kind) ? refOf(m.kind).grade : 0;
-    const gr = (id) => (m.kind === "unisona" ? Math.max(0, ...EV.P.cards.filter((c) => c.id === id).map((c) => c.g)) : rg);
-    const mc = MONS[m.kind].cards;
-    const cards = { a: scaled(mc[0], gr(mc[0])), p: scaled(mc[1], gr(mc[1])) };
-    if (m.lvl >= SLOT_LVL.s || m.kind === "unisona") cards.s = scaled(mc[2], gr(mc[2]));
-    // a Refuge companion carries the cards you gave it; empty slots keep its usual ones
-    if (m.roster) for (const k of ["a", "p", "s"]) { const c = compCard(m.kind, k); if (c) cards[k] = scaled(c.id, c.g); }
-    const ro = m.roster && EV.P.eg && EV.P.eg.roster[m.kind];
-    return makeUnit({ kind: m.kind, lvl: m.lvl, side: "ally", name: monName(m.kind), wild: true, cards, hpPct: m.hp, stage: 1, form: "bright", bond: m.bond || 0, star: m.star || 0, tal: ro ? companionTal(m.kind, m.lvl, ro) : [] });
-  });
+function partyUnits() { return X.party.map(memberUnit); }
+// one party member as a battle unit (also used to suggest a formation before the trip)
+function memberUnit(m) {
+  if (m.own) return makeUnit(Object.assign(ownUnitOpts(m.hp), { pos: m.pos }));
+  // Unísona uses your best copy of each of its cards, so it grows as you fuse them
+  // Refuge companions' cards grow with Bond
+  const rg = m.roster && refOf(m.kind) ? refOf(m.kind).grade : 0;
+  const gr = (id) => (m.kind === "unisona" ? Math.max(0, ...EV.P.cards.filter((c) => c.id === id).map((c) => c.g)) : rg);
+  const mc = MONS[m.kind].cards;
+  const cards = { a: scaled(mc[0], gr(mc[0])), p: scaled(mc[1], gr(mc[1])) };
+  if (m.lvl >= SLOT_LVL.s || m.kind === "unisona") cards.s = scaled(mc[2], gr(mc[2]));
+  // a Refuge companion carries the cards you gave it; empty slots keep its usual ones
+  if (m.roster) for (const k of ["a", "p", "s"]) { const c = compCard(m.kind, k); if (c) cards[k] = scaled(c.id, c.g); }
+  const ro = m.roster && EV.P.eg && EV.P.eg.roster[m.kind];
+  return makeUnit({ kind: m.kind, lvl: m.lvl, side: "ally", name: monName(m.kind), wild: true, cards, hpPct: m.hp, stage: 1, form: "bright", bond: m.bond || 0, star: m.star || 0, tal: ro ? companionTal(m.kind, m.lvl, ro) : [], pos: m.pos });
 }
 // Above a zone's level its foes only grow by a share of your extra levels (Jose's rule): in the first zone 50 % for one
 // level more, 33 % for two, 25 % for three... never below 10 %; later zones keep a bigger share (rank = the zone's level).
@@ -383,7 +384,7 @@ function render() {
     body = `<div class="panel"><p class="lead">${esc(X.duel ? tx("duel.desc") : zt("desc"))}</p>
       ${setBarHtml()}<h3>${esc(tx("exp.pick"))}</h3><p class="muted" style="margin:0">${esc(tx("exp.pickSub"))}</p>
       <div class="mons">${X.offer.map((k) => `<button type="button" class="mon" data-pick="${k}" aria-pressed="${X.chosen.includes(k)}"><canvas width="96" height="80" data-mon="${k}"></canvas><strong>${esc(monName(k))}</strong>${typeChip(MONS[k].types[0])}<small>${esc(MON_DESC[L()][k])}</small>${refOf(k) ? `<span class="mref">${esc(EV.EGGS.badge(k))}</span>` : ""}${pickStats(k)}</button>`).join("")}</div>
-      </div>${loadoutHtml()}${X.chosen.filter((k) => refOf(k)).map(compLoadHtml).join("")}${X.chosen.some((k) => !refOf(k) && k !== "unisona") ? `<p class="muted cload-wild">${esc(tx("cload.wild"))}</p>` : ""}<div class="panel">
+      </div>${loadoutHtml()}${X.chosen.filter((k) => refOf(k)).map(compLoadHtml).join("")}${X.chosen.some((k) => !refOf(k) && k !== "unisona") ? `<p class="muted cload-wild">${esc(tx("cload.wild"))}</p>` : ""}${formHtml()}<div class="panel">
       <div class="bctl"><button class="btn" type="button" data-x="go" ${X.chosen.length === 2 ? "" : "disabled"}>${esc(X.duel ? tx("duel.go") : tx("exp.go") + " · " + tx("exp.cost"))}</button><button class="btn ghost" type="button" data-x="cancel">${esc(tx("exp.cancel"))}</button></div></div>`;
   } else if (view === "map") {
     const icons = { fight: "⚔️", event: "❓", chest: "🎁", rest: "🔥", boss: "🏮" };
@@ -393,7 +394,7 @@ function render() {
       <div class="panel"><h3>${esc(tx("exp.party"))}</h3>${partyHtml()}${lootHtml()}</div>`;
   } else if (view === "battle") {
     body = `<div class="panel"><div class="bbar"><span class="sub grow" id="bRound"></span>
-        <div class="seg" id="bMode"><button type="button" data-m="auto" aria-pressed="${EV.P.rpgMode === "auto"}">${esc(tx("b.auto"))}</button><button type="button" data-m="manual" aria-pressed="${EV.P.rpgMode === "manual"}">${esc(tx("b.manual"))}</button></div>
+        <div class="seg" id="bMode">${["auto", "semi", "manual"].map((m) => `<button type="button" data-m="${m}" aria-pressed="${EV.P.rpgMode === m}" title="${esc(tx("b.modeT." + m))}">${esc(tx("b." + m))}</button>`).join("")}</div>
         <div class="seg" id="bSpeed">${[1, 2, 4].map((s) => `<button type="button" data-s="${s}" aria-pressed="${(EV.P.rpgSpeed || 1) === s}">×${s}</button>`).join("")}</div></div>
       <div class="bstage"><canvas id="bCanvas" role="img" aria-label="${esc(view === "zones" ? tx("zones.title") : zt("name"))}"></canvas></div>
       <div id="bTurn"></div>
@@ -601,7 +602,7 @@ function saveSet(i) {
   const ids = (eq) => { const o = {}; for (const k of ["a", "p", "s"]) { const c = eq[k] && cardByUid(eq[k]); if (c) o[k] = c.id; } return o; };
   const ce = {}; for (const k of T.comp) ce[k] = ids((rosterOf(k) || {}).eq || {});
   const old = T.sets[i];
-  T.sets[i] = { n: old ? old.n : tx("team.setN", { n: i + 1 }), comp: T.comp.slice(), own: ids(R.eq), ce };
+  T.sets[i] = { n: old ? old.n : tx("team.setN", { n: i + 1 }), comp: T.comp.slice(), own: ids(R.eq), ce, fm: Object.assign({}, T.form || {}) };
   EV.toast(tx("team.saved", { n: T.sets[i].n })); EV.sfx("card"); EV.save();
 }
 // load a set: move the cards where the set says; missing copies fall back to the empty slot or the usual card
@@ -629,6 +630,7 @@ function loadSet(i, offer) {
     }
   }
   T.comp = comp.slice(0, 2);
+  if (st.fm) T.form = Object.assign({}, T.form || {}, st.fm);
   if (X && view === "pick") X.chosen = T.comp.filter((k) => X.offer.includes(k));
   EV.save(); EV.sfx("card");
   const parts = []; if (miss.length) parts.push(tx("team.missMon", { list: miss.join(", ") })); if (lost) parts.push(tx("team.missCards", { n: lost }));
@@ -652,6 +654,49 @@ function onTeamsClick(e) {
     else if (a === "ok") { const inp = $("teamsPanel").querySelector("input[data-tname]"), v = inp && inp.value.trim(); if (v && T.sets[i]) T.sets[i].n = v.slice(0, 18); teamEdit = -1; EV.save(); }
     renderTeams();
   }
+}
+/* ---------- Formation: where each member stands, 3 lanes by front/back (rules in rpg/engine.js) ----------
+   Keys: "own" for your creature, the kind for a companion. P.team.form keeps the last place of each one. */
+const formKeys = () => ["own"].concat(X.chosen);
+function formOf(keys) {
+  const T = teamState(), f = T.form || {}, out = {}, used = new Set();
+  for (const k of keys) { const c = f[k]; if (Number.isInteger(c) && c >= 0 && c < CELLS && !used.has(c)) { out[k] = c; used.add(c); } }
+  if (keys.some((k) => out[k] == null)) {
+    // the rest: the engine's suggestion (sturdiest in front, carers behind)
+    const R = rpgState();
+    const us = keys.map((k) => { const r = refOf(k), u = memberUnit(k === "own" ? { own: true, hp: 1 } : { kind: k, hp: 1, lvl: r ? r.lvl : R.lvl, bond: r ? r.bond : 0, star: r ? r.star : 0, roster: !!r }); u.pos = out[k]; u.key = k; return u; });
+    autoForm(us); for (const u of us) out[u.key] = u.pos;
+  }
+  return out;
+}
+let formSel = null;
+function formHtml() {
+  if (!X || X.chosen.length !== 2) return "";
+  const keys = formKeys(), fm = formOf(keys), at = {};
+  for (const k of keys) at[fm[k]] = k;
+  const nameOf = (k) => (k === "own" ? EV.S.name : monName(k)), kindOf = (k) => (k === "own" ? EV.S.species : k);
+  let cells = "";
+  for (let lane = 0; lane < 3; lane++) for (const row of [1, 0]) {
+    const c = row * 3 + lane, k = at[c];
+    cells += `<button type="button" class="fcell${k ? " on" : ""}${row ? " back" : ""}" data-fcell="${c}" aria-pressed="${!!k && formSel === k}" aria-label="${esc(tx(row ? "form.back" : "form.front") + " " + (lane + 1) + (k ? ": " + nameOf(k) : ""))}">${k ? `<canvas width="96" height="80" data-mon="${kindOf(k)}"></canvas><small>${esc(nameOf(k))}</small>` : ""}</button>`;
+  }
+  return `<div class="panel"><h3>${esc(tx("form.title"))}</h3><p class="muted" style="margin:0">${esc(tx(formSel ? "form.move" : "form.sub"))}</p>
+    <div class="fgrid"><span class="sub">${esc(tx("form.back"))}</span><span class="sub">${esc(tx("form.front"))}</span>${cells}</div>
+    <div class="bctl"><button class="btn ghost" type="button" data-fauto="1">${esc(tx("form.auto"))}</button></div></div>`;
+}
+// tap a member, then a cell: it moves there (swapping with whoever stands there)
+function formTap(t) {
+  const T = teamState(), keys = formKeys(), fm = formOf(keys);
+  if (t.dataset.fauto) { T.form = Object.assign({}, T.form); for (const k of keys) delete T.form[k]; formSel = null; EV.sfx("tap"); EV.save(); render(); return true; }
+  if (t.dataset.fcell == null) return false;
+  const c = +t.dataset.fcell, here = keys.find((k) => fm[k] === c);
+  if (formSel && !keys.includes(formSel)) formSel = null;
+  if (!formSel) { if (here) { formSel = here; EV.sfx("tap"); render(); } return true; }
+  if (here && here !== formSel) fm[here] = fm[formSel];
+  fm[formSel] = c; formSel = null;
+  T.form = Object.assign({}, T.form, fm);
+  EV.sfx("card"); EV.save(); render();
+  return true;
 }
 function lootHtml() {
   const l = X.loot;

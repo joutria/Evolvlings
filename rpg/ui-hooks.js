@@ -71,6 +71,7 @@ $("scrExp").addEventListener("click", (e) => {
   const t = e.target.closest("button"); if (!t || !X || view !== "pick") return;
   if (t.dataset.chg) { EV.sfx("tap"); const [w, sl] = t.dataset.chg.split(":"); openPick(w, sl); }
   if (t.dataset.xset) { loadSet(+t.dataset.xset, X.offer); render(); }
+  formTap(t);
 });
 $("teamsPanel").addEventListener("click", onTeamsClick);
 $("teamsPanel").addEventListener("keydown", (e) => { if (e.key === "Enter" && e.target.dataset.tname) { const b = $("teamsPanel").querySelector('button[data-tset^="ok:"]'); if (b) b.click(); } });

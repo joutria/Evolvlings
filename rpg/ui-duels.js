@@ -6,7 +6,8 @@
    Duels are free: no energy, no wounds, and losing costs nothing. Only the first win against each team gives a reward
    (neighbours once a week, friends' codes once per team, up to DUEL_PAID_MAX a week). Saved in P.duel. */
 "use strict";
-const DUEL_PREFIX = "EVO1-", DUEL_RIVALS_MAX = 6, DUEL_PAID_MAX = 3, DUEL_FRIEND_REW = { c: 20, d: 5 };
+// EVO2 codes add each member's cell in the formation (p); EVO1 codes still load, with the auto formation
+const DUEL_PREFIX = "EVO2-", DUEL_OLD = ["EVO1-"], DUEL_RIVALS_MAX = 6, DUEL_PAID_MAX = 3, DUEL_FRIEND_REW = { c: 20, d: 5 };
 const NEIGHBOURS = [
   { id: "ruda", circle: "sol", d: -1, g: 0, rew: { c: 15, d: 3 } },
   { id: "bruno", circle: "lake", d: 0, g: 0, rew: { c: 20, d: 4 } },
@@ -57,6 +58,9 @@ function myTeam() {
     const ro = rosterOf(k); if (!ro || !MONS[k]) continue;
     t.push({ k, l: ro.lvl, c: compCardsOf(k, ro.lvl), t: ro.tal || "", b: birthKey(k, ro), st: ro.st || 0, bo: refOf(k) ? refOf(k).bond : 0 });
   }
+  // where each one stands (see Formation in ui-expedition.js)
+  const fm = formOf(["own"].concat(t.slice(1).map((m) => m.k)));
+  t[0].p = fm.own; for (const m of t.slice(1)) m.p = fm[m.k];
   return { n: S.name || monName(S.species), t };
 }
 const b64 = (s) => btoa(unescape(encodeURIComponent(s))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
@@ -67,8 +71,9 @@ function teamCode() {
 // reads a pasted code; returns a clean team or null. Everything is checked, since the text comes from outside the game.
 function parseCode(raw) {
   const s = String(raw || "").replace(/\s+/g, "");
-  if (!s.startsWith(DUEL_PREFIX) || s.length > 4000) return null;
-  let o; try { o = JSON.parse(unb64(s.slice(DUEL_PREFIX.length))); } catch (e) { return null; }
+  const pre = [DUEL_PREFIX].concat(DUEL_OLD).find((x) => s.startsWith(x));
+  if (!pre || s.length > 4000) return null;
+  let o; try { o = JSON.parse(unb64(s.slice(pre.length))); } catch (e) { return null; }
   if (!o || typeof o !== "object" || !Array.isArray(o.t) || !o.t.length || o.t.length > 3) return null;
   const int = (v, lo, hi) => (Number.isInteger(v) && v >= lo && v <= hi ? v : null);
   const t = [];
@@ -85,6 +90,7 @@ function parseCode(raw) {
     if (m.s != null) { if (int(m.s, 1, 2) == null) return null; mm.s = m.s; mm.f = m.f === "scruffy" ? "scruffy" : "bright"; }
     if (m.b != null) { if (!BIRTH[m.b]) return null; mm.b = m.b; }
     mm.st = int(m.st, 0, 5) || 0; mm.bo = int(m.bo, 0, 10) || 0;
+    const p = int(m.p, 0, CELLS - 1); if (p != null && !t.some((x) => x.p === p)) mm.p = p;
     t.push(mm);
   }
   const n = typeof o.n === "string" ? o.n.replace(/[\u0000-\u001f<>]/g, "").trim().slice(0, 20) : "";
@@ -113,7 +119,7 @@ function duelFoes() {
   const f = duelFoe(X.duel); if (!f) return [];
   return f.t.map((m) => {
     const cards = {}; for (const k in m.c) cards[k] = scaled(m.c[k][0], m.c[k][1]);
-    return makeUnit({ kind: m.k, lvl: m.l, side: "foe", name: monName(m.k), cards, stage: m.s || 1, form: m.f || "bright", bond: m.bo || 0, star: m.st || 0, wild: !m.s, tal: companionTal(m.k, m.l, { tal: m.t, bt: m.b, at: 0 }) });
+    return makeUnit({ kind: m.k, lvl: m.l, side: "foe", name: monName(m.k), cards, stage: m.s || 1, form: m.f || "bright", bond: m.bo || 0, star: m.st || 0, wild: !m.s, tal: companionTal(m.k, m.l, { tal: m.t, bt: m.b, at: 0 }), pos: m.p });
   });
 }
 // the end of a duel: no wounds, no experience; a reward only the first time you beat this team
