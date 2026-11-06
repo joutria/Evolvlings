@@ -222,6 +222,10 @@ Every Refuge companion is born with one small trait of its own (the second MiniT
 - **Friends' codes**: "Your team code" turns your creature and your saved team's companions (cards, talents, birth traits, stars, Bond) into a `EVO1-…` text code. Pasting a friend's code saves their team (up to 6) to fight against, played by the AI. The first win against each code gives ✦ 20 and ∴ 5, at most 3 times a week, so made-up codes can't be farmed. Pasted codes are fully validated (known creatures and cards, level and grade ranges, a short plain-text name).
 - Saved in `P.duel` (`EV.slice("duel")`). The duel reuses the expedition pick screen and battle (`X.duel`), with no zone bonus.
 
+## A picture for every pause
+
+Every stop on an expedition shows a picture of its zone, drawn by `EVSCENE.pause(zone, kind, mode)` in `scenes.js`: the path choice (`camino`, or `jefe` before the guardian), a short look before each fight (`pelea` / `jefe`, which moves on by itself after 1.6 s or with a tap), the rest (`descanso`), the chest (`cofre`), the reward after a win (`victoria`) and the way home (`regreso`). Savia and Echo runs get their own tint. Old short events show the path picture; conversations keep their own scene. Duels keep the battle snapshot.
+
 ## Illustrated path conversations
 
 The path events now include illustrated conversations, in the style of Life in Adventure. They were written in the thread "Crear eventos ilustrados por etapa", and Jose approved them. There are 12 in the Prado Aurora and 9 in each of the Cráter, Bosque, Hondonada, Lago and Cuevas, plus 10 common ones (campfires, springs, chests...) that can come up anywhere.
