@@ -28,6 +28,7 @@ function battleMount() {
   cv.addEventListener("pointerdown", aimTap);
   cv.addEventListener("pointermove", aimHover);
   renderBLog(); renderTurn();
+  if (EV.GUIDE) EV.GUIDE.showTip("battle");
 }
 const speed = () => EV.P.rpgSpeed || 1;
 const wait = (ms) => new Promise((r) => setTimeout(r, ms / speed()));
@@ -164,7 +165,7 @@ async function runBattle() {
     // a card you let go of: it takes its creature's turn right now
     if (bt.queue.length) {
       const { u, aim } = bt.queue.shift();
-      if (b.castNow(u, aim)) { flushEvents(); renderTurn(); await wait(900); }
+      if (b.castNow(u, aim)) { EV.P.c.aimed = (EV.P.c.aimed || 0) + 1; flushEvents(); renderTurn(); await wait(900); }
       last = performance.now(); continue;
     }
     if (bt.aim && (bt.aim.u.hp <= 0 || !manual())) { bt.aim = null; renderTurn(); }
