@@ -376,7 +376,7 @@ function render() {
       <div class="panel"><h3>${esc(tx("exp.party"))}</h3>${partyHtml()}${lootHtml()}</div>`;
   } else if (view === "battle") {
     body = `<div class="panel"><div class="bbar"><span class="sub grow" id="bRound"></span>
-        <div class="seg" id="bMode"><button type="button" data-m="auto" aria-pressed="${EV.P.rpgMode === "auto"}">${esc(tx("b.auto"))}</button><button type="button" data-m="manual" aria-pressed="${EV.P.rpgMode === "manual"}">${esc(tx("b.manual"))}</button></div>
+        <div class="seg" id="bMode">${["auto", "semi", "manual"].map((m) => `<button type="button" data-m="${m}" aria-pressed="${EV.P.rpgMode === m}" title="${esc(tx("b.modeT." + m))}">${esc(tx("b." + m))}</button>`).join("")}</div>
         <div class="seg" id="bSpeed">${[1, 2, 4].map((s) => `<button type="button" data-s="${s}" aria-pressed="${(EV.P.rpgSpeed || 1) === s}">×${s}</button>`).join("")}</div></div>
       <div class="bstage"><canvas id="bCanvas" role="img" aria-label="${esc(view === "zones" ? tx("zones.title") : zt("name"))}"></canvas></div>
       <div id="bTurn"></div>

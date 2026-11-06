@@ -72,6 +72,9 @@ function flushEvents() {
       case "cdup": blog(tx("log.cdup", { name: uName(e.u), n: e.n })); break;
       case "lost": blog(tx("log.lost", { name: uName(e.u) })); break;
       case "echo": blog(tx("log.echo", { name: uName(e.u) })); if (a) battle.floats.push({ x: a.x, y: a.y - 50, text: "≋", col: "#d8c8a8", life: 1 }); break;
+      case "warn": { const u = b.units.find((x) => x.uid === e.u); blog(tx("log.warn", { name: u.name, card: cardName(e.card) })); if (a) battle.floats.push({ x: a.x, y: a.y - 52, text: "! " + cardName(e.card), col: "#ff8f6b", life: 1.6, small: true }); EV.sfx("deny"); EV.buzz(20); break; }
+      case "move": blog(tx("log.move", { name: uName(e.u) })); break;
+      case "dodged": blog(tx("log.dodged")); EV.P.c.dodged = (EV.P.c.dodged || 0) + (b.units.some((x) => x.uid === e.u && x.side === "foe") ? 1 : 0); break;
       case "revive": blog(tx("log.revive", { name: uName(e.u), n: e.n })); if (a) battle.floats.push({ x: a.x, y: a.y - 40, text: "↑ " + e.n, col: "#8fe08a", life: 1.3 }); EV.sfx("heal"); break;
     }
   }
@@ -81,7 +84,10 @@ function flushEvents() {
    Manual mode: your creatures still do their basic attacks on their own; their active cards wait for you.
    Auto mode: everything is played by the game, as before. Time stops while aiming (or runs at 10 % with "Slow"). */
 const ROUND_MS = 1500; // one round of battle time at ×1
-const manual = () => EV.P.rpgMode === "manual";
+// Auto: the game does everything. Semi: you play the cards, your creatures dodge marked threats on their own.
+// Manual: you also move them (tap one of yours, then a free cell next to it).
+const manual = () => EV.P.rpgMode === "manual" || EV.P.rpgMode === "semi";
+const handMove = () => EV.P.rpgMode === "manual";
 const aimSlow = () => EV.P.rpgAim === "slow";
 function renderTurn() {
   const el = $("bTurn"); if (!el || !battle) return;
@@ -94,7 +100,7 @@ function renderTurn() {
     return;
   }
   const allies = b.units.filter((u) => u.side === "ally");
-  el.innerHTML = `<p class="muted bhint">${esc(tx("b.tapCard"))}</p><div class="bdock">${allies.map((u) => {
+  el.innerHTML = `<p class="muted bhint">${esc(tx(handMove() ? (battle.moveSel ? "b.moveTo" : "b.tapMove") : "b.tapCard"))}</p><div class="bdock">${allies.map((u) => {
     const a = u.cards.a, can = b.canCast(u), ko = u.hp <= 0;
     const st = ko ? "KO" : !a ? tx("b.noCard") : can ? tx("b.ready") : u.cd > 0 ? tx("b.cd", { n: u.cd }) : tx("b.held");
     return `<button type="button" class="bcard${can ? " ready" : ""}" data-bc="${u.uid}" ${can ? "" : "disabled"}><strong>${esc(u.name)}</strong><span>${a ? esc(cardName(a.id)) : "—"}</span><small>${esc(st)}</small></button>`;
@@ -115,10 +121,10 @@ function fireAim() {
 }
 function cancelAim() { if (battle && battle.aim) { battle.aim = null; EV.sfx("tap"); renderTurn(); } }
 // which cell of the aimed side is under the pointer
-function cellAt(e) {
+function cellAt(e, side) {
   const A = battle.aim, cv = battle.cv, r = cv.getBoundingClientRect();
   const x = (e.clientX - r.left) / r.width * BW, y = (e.clientY - r.top) / r.height * BH;
-  const side = A.shape === "ally" ? "ally" : "foe";
+  side = side || (A.shape === "ally" ? "ally" : "foe");
   let best = null, bd = 36;
   for (let c = 0; c < CELLS; c++) { const [cx, cy] = cellXY(side, c), d = Math.hypot(cx - x, cy - 6 - y); if (d < bd) { bd = d; best = c; } }
   return best;
@@ -130,11 +136,21 @@ function aimOk(c) {
   return battle.b.aimHits(A.u, c).length > 0;
 }
 function aimTap(e) {
+  if (battle && !battle.aim && handMove() && !battle.done) { moveTap(e); return; }
   if (!battle || !battle.aim) return;
   const c = cellAt(e);
   if (!aimOk(c)) { EV.sfx("deny"); return; }
   if (battle.aim.cell === c) { fireAim(); return; } // a second tap on the same cell lets go
   battle.aim.cell = c; EV.sfx("tap"); renderTurn();
+}
+// Manual: tap one of your creatures, then a free cell next to it; it steps there (30 % of its turn bar)
+function moveTap(e) {
+  const b = battle.b, c = cellAt(e, "ally"); if (c == null) return;
+  const here = b.units.find((u) => u.side === "ally" && u.hp > 0 && u.pos === c);
+  const sel = battle.moveSel && b.units.find((u) => u.uid === battle.moveSel);
+  if (here) { battle.moveSel = here === sel ? null : here.uid; EV.sfx("tap"); renderTurn(); return; }
+  if (!sel) return;
+  if (b.move(sel, c)) { battle.moveSel = null; flushEvents(); EV.sfx("tap"); renderTurn(); } else EV.sfx("deny");
 }
 function aimHover(e) { if (battle && battle.aim) battle.aim.hover = cellAt(e); }
 const nextFrame = () => new Promise((r) => requestAnimationFrame(r));
@@ -152,6 +168,7 @@ async function runBattle() {
       last = performance.now(); continue;
     }
     if (bt.aim && (bt.aim.u.hp <= 0 || !manual())) { bt.aim = null; renderTurn(); }
+    b.dodge = { ally: handMove() ? 0 : AUTO_DODGE };
     await nextFrame();
     if (bt !== battle) return;
     const now = performance.now();
@@ -354,6 +371,30 @@ function castPose(u, now) {
   }
   return p;
 }
+// marked threats: red cells that pulse until the card lands; your selected creature and where it can step
+function drawThreats(out, now) {
+  const b = battle.b, pulse = 0.55 + 0.35 * Math.sin(now / 160);
+  out.save();
+  for (const u of b.units) {
+    if (!u.windup || u.hp <= 0) continue;
+    const side = b.other(u.side);
+    for (const c of u.windup.cells) {
+      const [x, y] = cellXY(side, c);
+      out.fillStyle = `rgba(224,96,63,${0.25 * pulse})`; out.strokeStyle = `rgba(224,96,63,${pulse})`; out.lineWidth = 2;
+      out.beginPath(); out.ellipse(x, y + 12, 30, 12, 0, 0, Math.PI * 2); out.fill(); out.stroke();
+    }
+    const a = battle.anim[u.uid]; if (a) { out.font = '700 16px "EvNum", "Pixelify Sans", system-ui, sans-serif'; out.textAlign = "center"; out.lineWidth = 3; out.strokeStyle = "#1d1626"; out.strokeText("!", a.x, a.y - (u.boss ? 64 : 44)); out.fillStyle = "#ff8f6b"; out.fillText("!", a.x, a.y - (u.boss ? 64 : 44)); }
+  }
+  const sel = battle.moveSel && b.units.find((u) => u.uid === battle.moveSel && u.hp > 0);
+  if (sel && handMove()) {
+    const [x, y] = cellXY("ally", sel.pos);
+    out.strokeStyle = "#b9a7ff"; out.lineWidth = 2.5; out.beginPath(); out.ellipse(x, y + 12, 30, 12, 0, 0, Math.PI * 2); out.stroke();
+    out.setLineDash([4, 3]); out.strokeStyle = "rgba(251,246,239,.8)"; out.lineWidth = 1.5;
+    for (const c of nearCells(sel.pos)) if (b.cellFree("ally", c)) { const [cx, cy] = cellXY("ally", c); out.beginPath(); out.ellipse(cx, cy + 12, 26, 10, 0, 0, Math.PI * 2); out.stroke(); }
+    out.setLineDash([]);
+  } else if (battle.moveSel) battle.moveSel = null;
+  out.restore();
+}
 // while aiming: the cells you can pick, the zone under your finger and the type multiplier on each foe it reaches
 function drawAim(out, now) {
   const A = battle.aim, b = battle.b, side = A.shape === "ally" ? "ally" : "foe", show = A.cell != null ? A.cell : A.hover;
@@ -401,6 +442,7 @@ function drawBattle(now) {
   const place = [];
   for (const u of order) {
     const a = battle.anim[u.uid];
+    if (u.pos != null) { const [tx, ty] = cellXY(u.side, u.pos); a.x += (tx - a.x) * 0.2; a.y += (ty - a.y) * 0.2; if (Math.abs(tx - a.x) < 0.5) a.x = tx; if (Math.abs(ty - a.y) < 0.5) a.y = ty; }
     a.lunge = Math.max(0, a.lunge - 0.06); a.flash = Math.max(0, a.flash - 0.07);
     a.shownHp += (u.hp - a.shownHp) * 0.15;
     const dir = u.side === "ally" ? 1 : -1;
@@ -475,6 +517,7 @@ function drawBattle(now) {
     if (bad) out.fillText(bad, 0, by + 28);
     out.restore();
   }
+  drawThreats(out, now);
   if (battle.aim) drawAim(out, now);
   for (const f of battle.floats) {
     f.life -= 0.016; f.y -= f.vy == null ? 0.45 : f.vy;
