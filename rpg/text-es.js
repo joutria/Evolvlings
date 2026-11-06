@@ -15,7 +15,7 @@ const RPG_ES = {
     "load.title": "Tu mazo para el viaje", "load.sub": "Llevas como máximo 3 cartas, una por hueco. Elige cuál va en cada uno: el mismo efecto cambia según el hueco. Durante la expedición no se puede cambiar.", "load.lock": "Se desbloquea en el nivel {n}",
     "exp.go": "Partir", "exp.cancel": "Volver a casa", "exp.party": "Tu equipo",
     "exp.section": "Tramo {n} de {m}", "exp.choose": "¿Por dónde sigues?", "exp.bossNext": "Al final del camino te espera el guardián. El equipo toma aire antes de acercarse (+30 % de vida).",
-    "node.fight": "Combate", "node.event": "Encuentro", "node.chest": "Cofre", "node.rest": "Descanso", "node.boss": "Guardián",
+    "pre.fight": "Algo se mueve delante del grupo…", "pre.go": "¡A luchar!", "node.fight": "Combate", "node.event": "Encuentro", "node.chest": "Cofre", "node.rest": "Descanso", "node.boss": "Guardián",
     "node.fight.d": "Criaturas apagadas por la Savia Negra. XP y Chispas.", "node.event.d": "Algo pasa en el camino. Tú decides.",
     "node.chest.d": "Elige una carta de tres.", "node.rest.d": "El equipo recupera un 35 % de vida.", "node.boss.d": "El Gran Farol guarda el prado.",
     "b.round": "Ronda {n}", "b.auto": "Auto", "b.manual": "Manual", "b.speed": "Velocidad",

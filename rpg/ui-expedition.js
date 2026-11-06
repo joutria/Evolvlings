@@ -352,6 +352,24 @@ function trailHtml() {
   for (let i = 1; i <= z.sections + 1; i++) out.push(`<i class="${i < X.section ? "done" : i === X.section ? "now" : ""}"></i>`);
   return `<div class="trail" aria-hidden="true">${out.join("")}</div>`;
 }
+/* ---------- a picture for every pause (EVSCENE.pause, drawn by zone, kind and Savia/Echo mode) ---------- */
+const pauseMode = () => (X.savia ? "savia" : X.echo ? "echo" : undefined);
+const pauseBox = (kind) => (window.EVSCENE && EVSCENE.pause && X && !X.duel ? `<div class="talk-scene pause-scene" data-pause="${kind}"></div>` : "");
+function pauseMount(root) {
+  root.querySelectorAll("[data-pause]").forEach((box) => {
+    let cv = null; try { cv = EVSCENE.pause(X.zone, box.dataset.pause, pauseMode()); } catch (e) { /* art is decoration */ }
+    if (!cv) { box.remove(); return; }
+    cv.setAttribute("role", "img"); cv.setAttribute("aria-label", zt("name")); box.appendChild(cv);
+  });
+}
+// a short look at the zone before each fight; it moves on by itself, or with a tap
+let preTimer = 0;
+function preFight(boss) {
+  if (!pauseBox("pelea")) { startBattle(boss); return; }
+  X.pre = { boss }; show("prefight");
+  clearTimeout(preTimer); preTimer = setTimeout(() => { if (X && view === "prefight") goFight(); }, 1600);
+}
+function goFight() { clearTimeout(preTimer); if (!X || !X.pre) return; const b = X.pre.boss; X.pre = null; startBattle(b); }
 function render() {
   const el = $("scrExp"); if (!el) return;
   if (!X) { el.innerHTML = ""; return; }
@@ -369,7 +387,7 @@ function render() {
       <div class="bctl"><button class="btn" type="button" data-x="go" ${X.chosen.length === 2 ? "" : "disabled"}>${esc(X.duel ? tx("duel.go") : tx("exp.go") + " · " + tx("exp.cost"))}</button><button class="btn ghost" type="button" data-x="cancel">${esc(tx("exp.cancel"))}</button></div></div>`;
   } else if (view === "map") {
     const icons = { fight: "⚔️", event: "❓", chest: "🎁", rest: "🔥", boss: "🏮" };
-    body = `<div class="panel"><div class="sub">${esc(X.nodes[0] === "boss" ? tx("node.boss") : tx("exp.section", { n: X.section, m: z.sections }))}</div>
+    body = `<div class="panel">${pauseBox(X.nodes[0] === "boss" ? "jefe" : "camino")}<div class="sub">${esc(X.nodes[0] === "boss" ? tx("node.boss") : tx("exp.section", { n: X.section, m: z.sections }))}</div>
       <h3>${esc(X.nodes[0] === "boss" ? tx("exp.bossNext") : tx("exp.choose"))}</h3>
       <div class="nodes">${X.nodes.map((n) => `<button type="button" class="node${n === "boss" ? " boss" : ""}" data-node="${n}"><span class="ic" aria-hidden="true">${n === "event" ? '<i class="evd"></i>' : icons[n]}</span><strong>${esc(tx("node." + n))}</strong><small>${esc((n === "boss" ? zt("bossD") : tx("node." + n + ".d")))}</small></button>`).join("")}</div></div>
       <div class="panel"><h3>${esc(tx("exp.party"))}</h3>${partyHtml()}${lootHtml()}</div>`;
@@ -380,6 +398,9 @@ function render() {
       <div class="bstage"><canvas id="bCanvas" role="img" aria-label="${esc(view === "zones" ? tx("zones.title") : zt("name"))}"></canvas></div>
       <div id="bTurn"></div>
       <ul class="blog" id="bLog" aria-live="polite"></ul></div>`;
+  } else if (view === "prefight") {
+    const bo = X.pre && X.pre.boss;
+    body = `<div class="panel">${pauseBox(bo ? "jefe" : "pelea")}<div class="sub">${esc(tx(bo ? "node.boss" : "node.fight"))}</div><h3>${esc(bo ? zt("bossD") : tx("pre.fight"))}</h3><div class="bctl"><button class="btn" type="button" data-x="prego">${esc(tx("pre.go"))}</button></div></div>`;
   } else if (view === "event") {
     body = eventHtml();
   } else if (view === "reward") {
@@ -391,6 +412,7 @@ function render() {
   if (view === "pick") el.querySelectorAll("canvas[data-mon]").forEach(paintMon);
   if (view === "battle") battleMount();
   if (view === "event" && X.talk) talkMount(el);
+  pauseMount(el);
   if (view === "zones") pmapMount();
   el.querySelectorAll("canvas[data-key]").forEach((c) => drawKeyIcon(c.getContext("2d"), c.dataset.key, 8, 8, true));
 }

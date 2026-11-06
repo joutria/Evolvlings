@@ -15,7 +15,7 @@ const RPG_EN = {
     "load.title": "Your deck for the trip", "load.sub": "You carry up to 3 cards, one per slot. Choose which goes where: the same card does something different in each slot. It can't be changed during the expedition.", "load.lock": "Unlocks at level {n}",
     "exp.go": "Set out", "exp.cancel": "Back home", "exp.party": "Your team",
     "exp.section": "Leg {n} of {m}", "exp.choose": "Which way now?", "exp.bossNext": "The guardian waits at the end of the path. The team catches its breath before going closer (+30% health).",
-    "node.fight": "Battle", "node.event": "Encounter", "node.chest": "Chest", "node.rest": "Rest", "node.boss": "Guardian",
+    "pre.fight": "Something stirs ahead of the party…", "pre.go": "Fight!", "node.fight": "Battle", "node.event": "Encounter", "node.chest": "Chest", "node.rest": "Rest", "node.boss": "Guardian",
     "node.fight.d": "Creatures dimmed by the Black Sap. XP and Chispas.", "node.event.d": "Something happens on the path. You decide.",
     "node.chest.d": "Pick one card out of three.", "node.rest.d": "The team recovers 35% health.", "node.boss.d": "The Great Lantern guards the meadow.",
     "b.round": "Round {n}", "b.auto": "Auto", "b.manual": "Manual", "b.speed": "Speed",
