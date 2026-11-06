@@ -95,7 +95,7 @@ Card art is now a lore scene for every card (`scenes.js`, built from the card-sc
 
 ## Builds (upgradable places, delivery 1)
 
-- New **Builds** menu. Each place goes from level 1 to 5 for Chispas plus **Wood** (a new resource from the Garden and from expeditions: 3–4 per win, 1 per loss). Only one build runs at a time, and each finished expedition brings it 1 h closer. There's no real money and no paid speed-up.
+- New **Builds** menu. Each place goes from level 1 to 5 for Chispas plus **Wood** (a new resource from the Garden and from expeditions: 3–4 per win, 1 per loss). Only one build runs at a time, and each finished expedition brings it 2 h closer. Every finished expedition also moves Refuge jobs 1 h, the garden 3 h and incubating eggs 3 h forward: anything that takes time can be sped up by playing. There's no real money and no paid speed-up.
 - Builds take their final times (2 h to 24 h). For testing, set `FAST = true` in `build.js` to make them short (15 min to 4 h) and Refuge jobs six times faster.
 - **Garden** (home, next to the bowl): basic food (berries, honey buns) is no longer unlimited. It grows in the Garden while you're away: 3 meals a day at level 1, up to 8 at level 5. It holds up to 12 meals, and later levels also grow melon and stew, plus a little Wood. Harvest it by walking there or from the Builds menu. The Garden drawing grows with its level.
 - **Incubator**: eggs hatch 6% to 25% faster, and level 5 adds a 4th slot on top of the Keeper Level slots.
