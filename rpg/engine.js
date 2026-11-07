@@ -37,8 +37,59 @@ function makeUnit(o) {
     mods: pm, cards: o.cards || {}, cd: 0, st: {}, shield: 0, shieldT: 0, hitOnce: false, skip: 0, sUsed: false, sCount: 0, hitsTaken: 0,
   };
   if (u.cards.a) u.cd = Math.ceil(u.cards.a.a.cd / 2);
+  if (Number.isInteger(o.pos) && o.pos >= 0 && o.pos < CELLS) u.pos = o.pos;
   if (o.hpPct === 0) { u.hp = 0; }
   return u;
+}
+
+/* ---------- Formation ----------
+   Each side has 6 cells: 3 lanes (0 top, 1 middle, 2 bottom) by 2 rows (front, back). cell = row * 3 + lane.
+   - The front row takes the basic attacks first, and its basic attacks hit +10 %.
+   - A back-row unit can't be reached by basic attacks while an ally stands in front of it in its lane;
+     its heals and shields give +10 %. Cards reach any cell. */
+const CELLS = 6;
+const cellRow = (c) => (c >= 3 ? 1 : 0), cellLane = (c) => c % 3;
+const FRONT_PREF = [1, 0, 2], BACK_PREF = [4, 3, 5];
+// a creature whose active card only heals or shields would rather stand at the back
+const isSupportUnit = (u) => { const a = u.cards && u.cards.a && u.cards.a.a; return !!(a && !a.pow && (a.heal || a.shield || a.cleanse)); };
+// gives a cell to every unit of the list without one: the sturdiest in front, the carers and the frailest behind it
+function autoForm(units) {
+  const used = new Set(units.filter((u) => u.pos != null).map((u) => u.pos));
+  const free = units.filter((u) => u.pos == null);
+  if (!free.length) return units;
+  const tank = (u) => u.maxHp * u.base.def;
+  const order = free.slice().sort((a, b) => tank(b) - tank(a));
+  const take = (pref) => { const c = pref.concat(FRONT_PREF, BACK_PREF).find((x) => !used.has(x)); used.add(c); return c; };
+  const n = units.length;
+  order.forEach((u, i) => {
+    const back = n > 1 && (isSupportUnit(u) || (i === order.length - 1 && i > 0 && used.has(1)));
+    u.pos = take(back ? BACK_PREF : FRONT_PREF);
+  });
+  return units;
+}
+
+/* ---------- Card shapes: where an active card lands when you aim it ----------
+   one: the unit you pick · lane: Front and Back of a lane · row: the 3 cells of a row · cross: a cell and its neighbours
+   ally: the ally you pick · null: no aiming (self, all allies, random...).
+   Cards that hit every foe now hit a zone with +15 % power (ZONE_POW); a card can set its own with a.area. */
+const FOE_ONE = ["foe", "fastestFoe", "strongFoe", "fireFoe", "randFoe"];
+const ALLY_ONE = ["ally", "lowAlly", "lowDefAlly", "slowAlly", "allyOther", "fireAlly", "lowOther", "debuffedAlly"];
+const ZONE_POW = 1.15;
+function cardShape(a) {
+  if (!a || a.echoLast) return null;
+  if (a.area) return a.area;
+  if (a.tgt === "foes") return a.pow ? "lane" : "row";
+  if (FOE_ONE.includes(a.tgt)) return a.splash ? "cross" : "one";
+  if (ALLY_ONE.includes(a.tgt)) return "ally";
+  return null;
+}
+// the cells a shape covers around cell c (on the target's side)
+function shapeCells(shape, c) {
+  const lane = cellLane(c), row = cellRow(c);
+  if (shape === "lane") return [lane, lane + 3];
+  if (shape === "row") return [row * 3, row * 3 + 1, row * 3 + 2];
+  if (shape === "cross") return [c, row * 3 + lane - 1, row * 3 + lane + 1, (1 - row) * 3 + lane].filter((x, i) => i === 0 || i === 3 || (x >= row * 3 && x < row * 3 + 3 && Math.abs(cellLane(x) - lane) === 1));
+  return [c];
 }
 
 /* ====================================================================== */
@@ -47,10 +98,14 @@ function makeUnit(o) {
 function Battle(allies, foes, opt) {
   opt = opt || {};
   this.units = allies.concat(foes);
+  autoForm(allies); autoForm(foes);
+  // expedition foes hit a little harder to make up for the formation, zones and dodging (balanced with tools/check.js sims)
   this.round = 0;
   this.rnd = opt.rnd || Math.random;
   this.day = opt.day != null ? opt.day : isDayNow();
   this.zone = opt.zone || null;
+  // expedition foes hit a little harder to make up for the formation, zones and dodging (balanced with tools/check.js sims)
+  if (this.zone) for (const u of foes) u.base.str *= u.boss ? TUNE.boss : TUNE.foe;
   this.events = [];          // presentation queue: {k:'act'|'dmg'|'heal'|'miss'|'st'|'log'|'ko'|'shield'|'cleanse', ...}
   this.side = { ally: { lastType: null, spark: 0, breakNext: false, cloud: 0, vessel: 0, vesselV: 0 }, foe: { lastType: null, spark: 0, breakNext: false, cloud: 0, vessel: 0, vesselV: 0 } };
   for (const u of this.units) if (u.mods.sight) this.side[u.side].sight = Math.max(this.side[u.side].sight || 0, u.mods.sight);
@@ -64,6 +119,11 @@ function Battle(allies, foes, opt) {
 }
 const B = Battle.prototype;
 B.alive = function (side) { return this.units.filter((u) => u.side === side && u.hp > 0); };
+// can basic attacks reach this unit? (front row, or nobody standing in front of it in its lane)
+B.exposed = function (u) {
+  if (u.pos == null || cellRow(u.pos) === 0) return true;
+  return !this.alive(u.side).some((x) => x.pos === u.pos - 3);
+};
 B.other = (side) => (side === "ally" ? "foe" : "ally");
 B.emit = function (e) { this.events.push(e); };
 B.stVal = function (u, name) { const s = u.st[name]; return s ? s.v : 0; };
@@ -127,7 +187,7 @@ B.cleanse = function (u, what) {
   return rm.length;
 };
 B.addShield = function (src, tgt, pct, turns) {
-  const amt = Math.round(tgt.maxHp * pct / 100);
+  const amt = Math.round(tgt.maxHp * pct / 100 * (src && src.pos != null && cellRow(src.pos) === 1 ? 1.1 : 1));
   tgt.shield = Math.max(tgt.shield, amt);
   tgt.shieldT = Math.max(tgt.shieldT, turns + (src.mods.shieldLong || 0));
   this.emit({ k: "shield", u: tgt.uid, n: amt });
@@ -137,7 +197,7 @@ B.addShield = function (src, tgt, pct, turns) {
 B.heal = function (src, tgt, pct) {
   if (tgt.hp <= 0) return 0;
   let amt = tgt.maxHp * pct / 100;
-  amt *= 1 + ((src && src.mods.healGive) || 0) / 100 + (tgt.mods.healRecv || 0) / 100;
+  amt *= 1 + ((src && src.mods.healGive) || 0) / 100 + (tgt.mods.healRecv || 0) / 100 + (src && src !== tgt && src.pos != null && cellRow(src.pos) === 1 ? 0.1 : 0);
   amt = Math.round(amt);
   const before = tgt.hp; tgt.hp = Math.min(tgt.maxHp, tgt.hp + amt);
   const got = tgt.hp - before;
@@ -234,6 +294,13 @@ B.targets = function (spec, src, ctx) {
   const allies = this.alive(src.side);
   const taunt = foes.filter((u) => u.st.taunt);
   if (taunt.length && ["foe", "rand", "randFoe", "fastestFoe", "fireFoe"].includes(spec)) foes = taunt;
+  // an aimed card (ctx.aim = a cell; ctx.shape from cardShape)
+  const sh = ctx && ctx.shape;
+  if (sh && ctx.aim != null) {
+    if (sh === "ally") { const a = allies.find((u) => u.pos === ctx.aim); if (a) return [a]; if (ctx.strict) return []; }
+    else if (sh === "one" || sh === "cross") { const f = foes.find((u) => u.pos === ctx.aim); if (f) return [f]; if (ctx.strict) return []; }
+    else { const cs = shapeCells(sh, ctx.aim); return this.alive(this.other(src.side)).filter((u) => !u.st.hidden && cs.includes(u.pos)); }
+  }
   const byHpPct = (a, b) => a.hp / a.maxHp - b.hp / b.maxHp;
   switch (spec) {
     case "foe": {
@@ -241,6 +308,14 @@ B.targets = function (spec, src, ctx) {
       const ty = ctx && ctx.card ? this.typeOf(src, ctx.card) : this.typeOf(src, null);
       const score = (u) => u.types.reduce((m, d) => m * typeMult(ty, d), 1) * 10 - u.hp / u.maxHp;
       return [foes.slice().sort((a, b) => score(b) - score(a))[0]];
+    }
+    case "basic": {
+      // basic attacks: only the exposed cells; the same lane first, then the best type
+      const reach = foes.filter((u) => this.exposed(u)), l = reach.length ? reach : foes;
+      if (!l.length) return [];
+      const ty = this.typeOf(src, null), lane = src.pos == null ? -1 : cellLane(src.pos);
+      const score = (u) => u.types.reduce((m, d) => m * typeMult(ty, d), 1) * 10 + (u.pos != null && cellLane(u.pos) === lane ? 3 : 0) - u.hp / u.maxHp;
+      return [l.slice().sort((a, b) => score(b) - score(a))[0]];
     }
     case "foes": return foes;
     case "rand": case "randFoe": return foes.length ? [foes[Math.floor(this.rnd() * foes.length)]] : [];
@@ -266,6 +341,24 @@ B.targets = function (spec, src, ctx) {
   return [];
 };
 
+// the units an aimed card would reach from cell c (for the preview while aiming)
+B.aimHits = function (u, c) {
+  const a = u.cards.a && u.cards.a.a, sh = cardShape(a); if (!sh) return [];
+  const side = sh === "ally" ? u.side : this.other(u.side);
+  const cs = sh === "one" || sh === "ally" ? [c] : shapeCells(sh, c);
+  return this.alive(side).filter((x) => cs.includes(x.pos) && (sh === "ally" || !x.st.hidden));
+};
+// the cell the AI aims a zone card at: most foes hit, weighted by type
+B.bestAim = function (u, shape, card) {
+  const ty = this.typeOf(u, card), foes = this.alive(this.other(u.side)).filter((x) => !x.st.hidden);
+  let best = null, bs = -1;
+  for (let c = 0; c < CELLS; c++) {
+    const cs = shapeCells(shape, c), hit = foes.filter((x) => cs.includes(x.pos));
+    const sc = hit.reduce((m, x) => m + x.types.reduce((k, d) => k * typeMult(ty, d), 1) * 10 - x.hp / x.maxHp, 0);
+    if (sc > bs) { bs = sc; best = c; }
+  }
+  return best;
+};
 // apply an effect spec (from an active or a support)
 B.apply = function (src, fx, card, ctx) {
   if (fx.nightOnly && this.day) return false;
@@ -279,6 +372,11 @@ B.apply = function (src, fx, card, ctx) {
     this.emit({ k: "echo", u: src.uid, card: last.id });
     return this.apply(src, copy, last, ctx);
   }
+  // an active card with a zone shape: aimed by the player, or by the AI here; zone cards hit +15 %
+  const isActive = card && card.a === fx, shape = isActive ? cardShape(fx) : null;
+  if (shape && shape !== "one" && shape !== "ally" && shape !== "cross" && (!ctx || ctx.aim == null)) ctx = Object.assign({}, ctx, { aim: this.bestAim(src, shape, card) });
+  if (shape) ctx = Object.assign({}, ctx, { shape });
+  const zoneF = (shape === "lane" || shape === "row" ? ZONE_POW : 1) * ((ctx && ctx.charged) || 1);
   const list = this.targets(fx.tgt, src, Object.assign({ card }, ctx));
   if (fx.foresight) { this.side[src.side].foresight = (this.side[src.side].foresight || 0) + fx.foresight; this.emit({ k: "st", u: src.uid, st: "evade" }); }
   if (fx.cdDown) for (const u of this.alive(src.side)) u.cd = Math.max(0, u.cd - fx.cdDown);
@@ -291,10 +389,11 @@ B.apply = function (src, fx, card, ctx) {
       const tl = tg ? [tg] : list;
       for (const t of tl) {
         if (!t || t.hp <= 0) continue;
-        const d = this.hit(src, t, fx.pow, card, { breakShield: fx.breakShield, drain: fx.drain, trueHit: fx.trueHit, pierce: fx.pierce });
+        const d = this.hit(src, t, fx.pow * zoneF, card, { breakShield: fx.breakShield, drain: fx.drain, trueHit: fx.trueHit, pierce: fx.pierce });
         if (d > 0 && fx.st) this.addStatus(src, t, fx.st, ty);
         if (d > 0 && fx.st2) this.addStatus(src, t, fx.st2, ty);
-        if (fx.splash) for (const o of this.alive(this.other(src.side))) if (o !== t && !o.st.hidden) this.hit(src, o, fx.splash, card, {});
+        // splash reaches the cells next to the target (a cross), or everyone if there's no formation
+        if (fx.splash) { const near = t.pos == null ? null : shapeCells("cross", t.pos); for (const o of this.alive(this.other(src.side))) if (o !== t && !o.st.hidden && (!near || near.includes(o.pos))) this.hit(src, o, fx.splash, card, {}); }
         if (d > 0 && fx.teamDrain) { const al = this.alive(src.side), each = Math.round(d * fx.teamDrain / 100 / al.length); for (const a of al) if (each > 0 && a.hp < a.maxHp) { const bf = a.hp; a.hp = Math.min(a.maxHp, a.hp + each); this.emit({ k: "heal", u: a.uid, n: a.hp - bf }); } }
       }
       if (!tg) break;
@@ -363,6 +462,7 @@ B.turnStart = function (u) {
   return true;
 };
 B.turnEnd = function (u) {
+  u.g = -this.rnd() * 0.1; // a new turn bar, with a little random start
   for (const k of Object.keys(u.st)) { if (u.st[k].t >= 99) continue; u.st[k].t--; if (u.st[k].t <= 0) delete u.st[k]; }
   if (u.shieldT > 0) { u.shieldT--; if (u.shieldT <= 0) u.shield = 0; }
   this.checkOver();
@@ -380,18 +480,28 @@ B.wantPlay = function (u) {
   if (!a.pow && a.cleanse && !a.heal) return this.alive(u.side).some((x) => Object.keys(x.st).some((k) => STATUS[k].neg));
   return true;
 };
-B.act = function (u, useCard) {
+B.act = function (u, useCard, aim) {
   if (this.over || u.hp <= 0) return;
+  // a marked threat lands now on the cells it marked, whoever stands there (charged: +20 %)
+  if (u.windup) {
+    const w = u.windup, c = u.cards.a; u.windup = null;
+    this.emit({ k: "act", u: u.uid, card: c.id });
+    const hit = this.apply(u, c.a, c, { aim: w.aim, strict: true, charged: THREAT_POW });
+    if (!this.alive(this.other(u.side)).some((x) => w.cells.includes(x.pos))) this.emit({ k: "dodged", u: u.uid });
+    u.cd = Math.max(1, c.a.cd - 1); this.side[u.side].lastActive = c; // the marking turn counts towards the cooldown
+    void hit; this.turnEnd(u); return;
+  }
+  if (useCard && this.canPlay(u) && this.wantThreat(u)) { this.markThreat(u); useCard = false; }
   if (useCard && this.canPlay(u)) {
     const c = u.cards.a;
     this.emit({ k: "act", u: u.uid, card: c.id });
-    this.apply(u, c.a, c, {});
+    this.apply(u, c.a, c, aim != null ? { aim } : {});
     u.cd = c.a.cd;
     if (!c.a.echoLast) this.side[u.side].lastActive = c;
   } else {
-    const t = this.targets("foe", u)[0];
+    const t = this.targets("basic", u)[0];
     this.emit({ k: "act", u: u.uid, card: null });
-    if (t) this.hit(u, t, 80, null, {});
+    if (t) this.hit(u, t, u.pos != null && cellRow(u.pos) === 0 ? 88 : 80, null, {});
     else this.emit({ k: "lost", u: u.uid });
   }
   this.turnEnd(u);
@@ -402,19 +512,94 @@ B.checkOver = function () {
   else if (!this.alive("ally").length) this.over = "lose";
   return this.over;
 };
+/* ---------- Marked threats ----------
+   Guardians and foes with a strong card (power 100 or more) don't play it at once: they mark the cells it will hit
+   (shown in red), do a basic attack, and on their next turn the card lands there, charged +20 %. Moving out dodges it.
+   Only one threat is marked at a time. Your creatures can't be told apart from foes here: the rule is for the foe side. */
+const THREAT_POW = 1.2, AUTO_DODGE = 0.6;
+const TUNE = { foe: 1.15, boss: 1.55 };
+B.wantThreat = function (u) {
+  if (u.side !== "foe" || this.units.some((x) => x.windup && x.hp > 0)) return false;
+  const a = u.cards.a && u.cards.a.a, sh = cardShape(a);
+  if (!sh || sh === "ally" || !(u.boss || (a.pow || 0) >= 100)) return false;
+  return true;
+};
+B.markThreat = function (u) {
+  const c = u.cards.a, sh = cardShape(c.a);
+  let aim;
+  if (sh === "one" || sh === "cross") { const t = this.targets(c.a.tgt, u, { card: c })[0]; aim = t ? t.pos : null; }
+  else aim = this.bestAim(u, sh, c);
+  if (aim == null) return;
+  const cells = sh === "one" ? [aim] : shapeCells(sh, aim);
+  u.windup = { aim, cells, shape: sh };
+  this.emit({ k: "warn", u: u.uid, card: c.id, cells });
+  if (this.dodge && this.dodge[this.other(u.side)]) this.autoDodge(this.other(u.side), cells, this.dodge[this.other(u.side)]);
+};
+// is a cell of this side free to step into?
+B.cellFree = function (side, c) { return c >= 0 && c < CELLS && !this.units.some((x) => x.side === side && x.hp > 0 && x.pos === c); };
+const nearCells = (c) => [c - 3, c + 3, cellLane(c) > 0 ? c - 1 : -1, cellLane(c) < 2 ? c + 1 : -1].filter((x) => x >= 0 && x < CELLS);
+// step to a free cell next to it; costs 30 % of the turn bar
+B.move = function (u, c) {
+  if (u.hp <= 0 || this.over || u.st.stun || u.st.trap || u.pos == null || !nearCells(u.pos).includes(c) || !this.cellFree(u.side, c)) return false;
+  u.pos = c; u.g = Math.max(-0.3, (u.g || 0) - 0.3);
+  this.emit({ k: "move", u: u.uid, to: c });
+  return true;
+};
+// Auto and Semi: each creature standing in a marked cell steps out (chance: how often the AI notices)
+B.autoDodge = function (side, cells, chance) {
+  for (const u of this.alive(side)) {
+    if (!cells.includes(u.pos) || this.rnd() > chance) continue;
+    const to = nearCells(u.pos).filter((c) => !cells.includes(c) && this.cellFree(side, c));
+    if (to.length) this.move(u, to.sort((a, b) => cellRow(b) - cellRow(a))[0]);
+  }
+};
+
+/* ---------- Flowing time ----------
+   Every unit fills a turn bar (u.g from 0 to 1) at its own pace; when full it takes its turn. One "round" is one unit of
+   battle time (round-based cards and passives still count in these). Pace = sqrt(speed / average speed), so the fast act
+   more often without running away with the battle. Cards are still on cooldowns counted in the unit's own turns. */
+B.rate = function (u) { return Math.max(0.3, Math.sqrt(this.eff(u, "spd") / (this.spdRef || 1))); };
+// moves time forward by up to dt; returns { k: "round" } or { k: "turn", u } when something happens, else null
+B.advance = function (dt) {
+  if (this.time == null) {
+    this.time = 0;
+    const al = this.units.filter((u) => u.hp > 0);
+    this.spdRef = al.reduce((s, u) => s + this.eff(u, "spd"), 0) / Math.max(1, al.length);
+    for (const u of this.units) u.g = this.rnd() * 0.3;
+  }
+  const al = this.units.filter((u) => u.hp > 0);
+  let best = null, bt = Infinity;
+  for (const u of al) { const t = Math.max(0, (1 - u.g) / this.rate(u)); if (t < bt) { bt = t; best = u; } }
+  const tr = Math.max(0, this.round - this.time);
+  const step = Math.min(dt, bt, tr);
+  for (const u of al) u.g = Math.min(1, u.g + this.rate(u) * step);
+  this.time += step;
+  if (tr <= step) { this.time = this.round; this.roundStart(); return { k: "round" }; }
+  if (best && bt <= step) { best.g = 1; return { k: "turn", u: best }; }
+  return null;
+};
+// can this unit play its card right now, out of its turn? (the player taps it)
+B.canCast = function (u) { return u.hp > 0 && !this.over && this.canPlay(u) && !u.st.stun && !u.st.trap && !u.skip; };
+// plays the card now: it takes the unit's turn (statuses tick, the turn bar starts over)
+B.castNow = function (u, aim) {
+  if (!this.canCast(u)) return false;
+  if (this.turnStart(u)) this.act(u, true, aim);
+  return true;
+};
 // synchronous full simulation (used by tests and auto-resolve)
 B.runAll = function (maxRounds) {
+  if (!this.dodge) this.dodge = { ally: AUTO_DODGE };
   this.start();
-  while (!this.checkOver() && this.round < (maxRounds || 40)) {
-    for (const u of this.roundStart()) {
-      if (this.over) break;
-      if (!this.turnStart(u)) { this.checkOver(); continue; }
-      this.act(u, this.wantPlay(u));
-    }
+  while (!this.checkOver() && this.round <= (maxRounds || 40)) {
+    const e = this.advance(Infinity);
+    if (!e || e.k !== "turn") continue;
+    const u = e.u;
+    if (!this.turnStart(u)) { this.checkOver(); continue; }
+    this.act(u, this.wantPlay(u));
   }
   return this.over || "lose";
 };
 
 
-const api = { GRADE_VIS, COMPAT, canUse, UPGRADE_N, TYPES, BEATS, OPPOSITE, typeMult, GRADES, rollGrade, STATUS, CARDS, DROP_POOL, scaled, MONS, makeUnit, Battle, lvlScale, xpNeed, SLOT_LVL, ZONES, EVENTS, isDayNow };
+const api = { CELLS, cellRow, cellLane, autoForm, cardShape, shapeCells, nearCells, AUTO_DODGE, GRADE_VIS, COMPAT, canUse, UPGRADE_N, TYPES, BEATS, OPPOSITE, typeMult, GRADES, rollGrade, STATUS, CARDS, DROP_POOL, scaled, MONS, makeUnit, Battle, lvlScale, xpNeed, SLOT_LVL, ZONES, EVENTS, isDayNow };
 if (typeof window !== "undefined") window.EvoEngine = api;

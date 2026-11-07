@@ -23,6 +23,7 @@ const TIPS = {
     ach: ["Logros", "Cada logro da Chispas una sola vez. No hace falta perseguirlos: la mayoría llegan solos jugando."],
     journal: ["Recuerdos", "Aquí quedan las criaturas que criaste y lo que les pasó. Es solo para recordar."],
     talents: ["Talentos", "Cada 3 niveles tu criatura y cada compañero eligen un talento entre dos: uno ofensivo y otro defensivo, del tipo de la criatura. Nada es definitivo: puedes cambiarlos cuando quieras con ∴ Polvo de Estrella."],
+    battle: ["Combate táctico", "Cada criatura llena su barra según su velocidad y ataca sola. En Semi y Manual, toca una carta lista: el tiempo se detiene y eliges a quién o a qué casilla apuntar. Las casillas rojas marcan el golpe fuerte de un enemigo; en Manual toca a tu criatura y luego una casilla libre a su lado para esquivar. Auto lo hace todo por ti y da lo mismo."],
     exp: ["Expediciones", "Elige una zona, dos compañeros y tus cartas. Si superas el nivel de una zona, sus enemigos suben poco, así que puedes volver más fuerte a por las 3 ★. Perder solo acorta el viaje: no pierdes cartas ni niveles. En la pestaña Duelos puedes retar gratis a los vecinos del Vado o al equipo de un amigo."],
   },
   en: {
@@ -37,6 +38,7 @@ const TIPS = {
     ach: ["Achievements", "Each achievement gives Chispas once. No need to chase them: most come on their own as you play."],
     journal: ["Memories", "The creatures you raised and what became of them. It's only for remembering."],
     talents: ["Talents", "Every 3 levels your creature and each companion choose one of two talents: one offensive, one defensive, from the creature's type. Nothing is final: change them any time with ∴ Stardust."],
+    battle: ["Tactical battles", "Each creature fills its bar at its own speed and attacks on its own. In Semi and Manual, tap a ready card: time stops and you choose who or which cell to aim at. Red cells mark a foe's strong blow; in Manual, tap your creature and then a free cell next to it to dodge. Auto does it all for you and gives the same rewards."],
     exp: ["Expeditions", "Pick a zone, two companions and your cards. Above a zone's level its foes grow only a little, so you can come back stronger for 3 ★. Losing only cuts the trip short: you keep your cards and levels. The Duels tab lets you challenge El Vado's neighbours or a friend's team for free."],
   },
 };

@@ -267,8 +267,10 @@ function onExpClick(e) {
   if (d.bview) { const [id, g] = d.bview.split(":"); EV.sfx("tap"); openCardView(id, cardHtml(id, +g)); return; }
   if (d.ztab) { ztab = d.ztab; EV.sfx("tap"); render(); return; }
   if (d.lvlpick != null) { const o = X.end.lvlPick[+d.lvlpick]; giveCard(o.id, o.g); X.end.cards.push(o); X.end.lvlPick = null; EV.toast(tx("r.card", { card: cardName(o.id) }), GRADES[o.g][L()]); EV.sfx("card"); EV.save(); EV.checkAch(); render(); return; }
-  if (d.b) { if (battle && battle.waiting) { const w = battle.waiting; battle.waiting = null; renderTurn(); EV.sfx("tap"); w.resolve(d.b === "card"); } return; }
-  if (d.m) { EV.P.rpgMode = d.m; EV.saveProfile(); t.parentNode.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === t))); if (d.m === "auto" && battle && battle.waiting) { const w = battle.waiting; battle.waiting = null; renderTurn(); w.resolve(battle.b.wantPlay(w.u)); } return; }
+  if (d.b) { if (d.b === "fire") fireAim(); else if (d.b === "cancel") cancelAim(); return; }
+  if (d.bc) { if (battle) pickCard(d.bc); return; }
+  if (d.am) { EV.P.rpgAim = d.am; EV.saveProfile(); renderTurn(); return; }
+  if (d.m) { EV.P.rpgMode = d.m; EV.saveProfile(); t.parentNode.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === t))); if (battle) { if (d.m === "auto") battle.aim = null; renderTurn(); } return; }
   if (d.s) { EV.P.rpgSpeed = +d.s; EV.saveProfile(); t.parentNode.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === t))); return; }
   switch (d.x) {
     case "go": EV.sfx("tap"); setOut(); break;
