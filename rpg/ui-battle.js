@@ -361,6 +361,23 @@ function drawDecor(c, decor, t, day) { (DECOR[decor] || DECOR.lanterns)(c, t, da
 // Battles are drawn at half resolution, snapped to the Glimmer-32 palette and blown up x2; names and numbers stay sharp on top.
 const BLOW = typeof PX !== "undefined" ? PX.layer(BW / 2, BH / 2) : null;
 const REDUCE = typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+// PNG art (art.js): a zone background replaces the drawn sky and ground, creature and guardian sheets replace the
+// procedural sprites. Both draw straight onto the full-size canvas (1 art pixel = 1 battle unit) so no detail is lost.
+const HAS_ART = typeof EVART !== "undefined";
+const artBg = (zone, day) => (HAS_ART && (EVART.image("battle/" + zone + (day ? "-day" : "-night") + ".png") || EVART.image("battle/" + zone + (day ? "-night" : "-day") + ".png"))) || null;
+function artUnit(u, sq, emo) {
+  if (!HAS_ART) return null;
+  const dir = emo === "normal" ? "side" : null, st = u.own ? Math.max(0, Math.min(2, u.stage)) : 1;
+  return (u.boss && EVART.guardian(u.kind, sq, emo, dir)) || EVART.creature(u.kind, st, sq, emo, dir);
+}
+const hollowArt = new WeakMap();
+function artHollow(cv) {
+  // hollowed foes: the same picture, dimmed towards plum
+  let h = hollowArt.get(cv); if (h) return h;
+  h = document.createElement("canvas"); h.width = cv.width; h.height = cv.height;
+  const g = h.getContext("2d"); g.drawImage(cv, 0, 0); g.globalCompositeOperation = "source-atop"; g.globalAlpha = 0.45; g.fillStyle = "#2a1c38"; g.fillRect(0, 0, h.width, h.height);
+  hollowArt.set(cv, h); return h;
+}
 // how the caster moves while its card plays (low-res pixels), or null
 function castPose(u, now) {
   const cs = battle.cast; if (!cs || cs.uid !== u.uid) return null;
@@ -427,7 +444,11 @@ function drawBattle(now) {
   const out = battle.c, b = battle.b, t = now / 1000, z = ZONES[X.zone];
   const c = BLOW ? BLOW.g : out;
   if (BLOW) { c.setTransform(1, 0, 0, 1, 0, 0); c.imageSmoothingEnabled = false; c.scale(0.5, 0.5); }
-  const day = b.day;
+  const day = b.day, bg = BLOW && artBg(X.zone, day);
+  // with any PNG art the ground layer is blitted first and the units layer is cleared, so art sprites can sit between them
+  const hi = BLOW && HAS_ART && (bg || b.units.some((u) => artUnit(u, 0, "normal")));
+  if (bg) { c.clearRect(0, 0, BW, BH); out.clearRect(0, 0, BW, BH); out.save(); out.imageSmoothingEnabled = false; out.drawImage(bg, 0, 0, BW, BH); out.restore(); }
+  else {
   const sky = c.createLinearGradient(0, 0, 0, BH);
   const sk = day ? z.sky : z.skyN;
   sky.addColorStop(0, sk[1]); sky.addColorStop(0.6, sk[0]); sky.addColorStop(1, sk[0]);
@@ -435,11 +456,17 @@ function drawBattle(now) {
   drawDecor(c, z.decor, t, day);
   c.fillStyle = day ? z.ground : z.groundN; c.beginPath(); c.moveTo(0, 70); c.quadraticCurveTo(BW / 2, 52, BW, 70); c.lineTo(BW, BH); c.lineTo(0, BH); c.fill();
   c.fillStyle = "#00000014"; for (let i = 0; i < 40; i++) { const x = (i * 97) % BW, y = 80 + ((i * 53) % 140); c.fillRect(x, y, 2, 5); }
+  }
   if (!X.duel && !X.deep) drawSap(c, battle.boss || X.savia || X.echo ? 3 : saviaLvl(X.zone), REDUCE ? 0 : t, BW, BH);
   // the 6 formation cells of each side, as soft patches on the ground
   c.fillStyle = "#0000001c";
   for (const side of ["ally", "foe"]) for (let k = 0; k < CELLS; k++) { const [x, y] = cellXY(side, k); EV.ell(c, x, y + 16, 26, 7); c.fill(); }
-  if (BLOW) { c.setTransform(1, 0, 0, 1, 0, 0); PX.quantize(c, BW / 2, BH / 2, true); c.scale(0.5, 0.5); }
+  if (BLOW) { c.setTransform(1, 0, 0, 1, 0, 0); PX.quantize(c, BW / 2, BH / 2, !bg); c.scale(0.5, 0.5); }
+  if (hi) {
+    if (!bg) out.clearRect(0, 0, BW, BH);
+    PX.blit(out, BLOW, BW, BH);
+    c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, BW / 2, BH / 2); c.scale(0.5, 0.5);
+  }
   // units
   const order = b.units.slice().sort((p, q) => battle.anim[p.uid].y - battle.anim[q.uid].y);
   const place = [];
@@ -449,14 +476,30 @@ function drawBattle(now) {
     a.lunge = Math.max(0, a.lunge - 0.06); a.flash = Math.max(0, a.flash - 0.07);
     a.shownHp += (u.hp - a.shownHp) * 0.15;
     const dir = u.side === "ally" ? 1 : -1;
-    const spr = BLOW && evsKind(u.kind), cp = spr ? castPose(u, now) : null;
+    const art = hi && artUnit(u, 0, "normal"), spr = BLOW && !art && evsKind(u.kind), cp = (spr || (art && HAS_EVS)) ? castPose(u, now) : null;
     if (cp) a.lunge = 0;
     const lx = Math.round(Math.sin(a.lunge * Math.PI) * 9 * dir) * 2;
     const ko = u.hp <= 0;
     const x = Math.round((a.x + lx) / 2) * 2, y = a.y + (ko ? 8 : 0);
     place.push({ u, a, x, y, ko });
     c.save(); c.translate(x, y);
-    if (spr) {
+    if (art) {
+      // PNG cell straight onto the full-size canvas: feet stand on the cell's y = n - 4
+      const emo = ko ? "sad" : a.flash > 0.5 ? "surprised" : cp ? "happy" : u.hp / u.maxHp < 0.3 ? "sad" : "normal";
+      const sq = cp && cp.sq != null ? cp.sq : REDUCE ? 0 : Math.floor(t * 2 + a.x / 50) % 2;
+      let im = artUnit(u, sq, emo) || art;
+      if (u.hollow) im = artHollow(im);
+      if (cp && cp.flash && HAS_EVS) im = EVS.silhouette(im);
+      const n = im.width, feet = u.boss ? 24 : 16;
+      const hov = !REDUCE && HAS_EVS && EVS.hovers(u.kind) ? Math.round(Math.sin(t * 2 + a.x)) * 2 - 4 : 0;
+      out.save(); out.translate(x, y); out.imageSmoothingEnabled = false;
+      out.fillStyle = "rgba(29,22,38,.35)"; out.fillRect(-Math.round(n * 0.2), feet - 2, Math.round(n * 0.4), 4);
+      if (ko) out.globalAlpha = 0.35; else if (cp && cp.alpha != null) out.globalAlpha = cp.alpha;
+      out.translate(cp ? cp.dx * 2 : 0, (cp ? cp.dy * 2 : 0) + hov);
+      if (u.side === "foe") out.scale(-1, 1);
+      out.drawImage(im, -n / 2, feet - (n - 4));
+      out.restore();
+    } else if (spr) {
       // pixel sprite: 1 sprite pixel = 2 battle units (the layer is drawn at half size)
       const n = u.boss ? 32 : 24, emo = ko ? "sad" : a.flash > 0.5 ? "surprised" : cp ? "happy" : u.hp / u.maxHp < 0.3 ? "sad" : "normal";
       const frame = cp && cp.sq != null ? cp.sq : REDUCE ? 0 : Math.floor(t * 2 + a.x / 50) % 2;
@@ -505,7 +548,7 @@ function drawBattle(now) {
       c.restore();
     }
   }
-  if (BLOW) { c.setTransform(1, 0, 0, 1, 0, 0); PX.quantize(c, BW / 2, BH / 2, false); out.clearRect(0, 0, BW, BH); PX.blit(out, BLOW, BW, BH); }
+  if (BLOW) { c.setTransform(1, 0, 0, 1, 0, 0); PX.quantize(c, BW / 2, BH / 2, false); if (!hi) out.clearRect(0, 0, BW, BH); PX.blit(out, BLOW, BW, BH); }
   // names, status icons and floating numbers stay sharp
   const font = (w, px) => `${w} ${px}px "EvNum", "Pixelify Sans", system-ui, sans-serif`;
   for (const { u, x, y } of place) {
