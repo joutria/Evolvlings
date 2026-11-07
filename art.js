@@ -67,8 +67,59 @@ A.scene = (path) => {
   const g = cv.getContext("2d"); g.imageSmoothingEnabled = false; g.drawImage(im, 0, 0, 512, 384);
   return (scenes[path] = cv);
 };
+// A sheet cell as a small sprite about n px tall, for the places that ask the drawn sprite libraries (cards, Refuge,
+// eggs, portraits...): find the cell's own pixel size (pack art is 16 px sprites at 2-4x), read it back at 1 pixel per
+// pixel, then scale by a whole number so it stays crisp. The box is square, (n + 2) or bigger, feet on the bottom row.
+const smalls = new WeakMap();
+function pixelSize(d, w, x0, y0, bw, bh) {
+  for (const S of [4, 3, 2]) {
+    if (bw % S || bh % S) continue;
+    let ok = true;
+    for (let y = 0; y < bh && ok; y++) for (let x = 0; x < bw; x++) {
+      const i = ((y0 + y) * w + x0 + x) * 4, j = ((y0 + y - (y % S)) * w + x0 + x - (x % S)) * 4;
+      if (d[i] !== d[j] || d[i + 1] !== d[j + 1] || d[i + 2] !== d[j + 2] || d[i + 3] !== d[j + 3]) { ok = false; break; }
+    }
+    if (ok) return S;
+  }
+  return 1;
+}
+function small(cv, n, dull) {
+  let per = smalls.get(cv); if (!per) smalls.set(cv, (per = {}));
+  const key = n + (dull ? "d" : ""); if (per[key]) return per[key];
+  const w = cv.width, h = cv.height, d = cv.getContext("2d").getImageData(0, 0, w, h).data;
+  let x0 = w, y0 = h, x1 = -1, y1 = -1;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (d[(y * w + x) * 4 + 3]) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+  if (x1 < 0) return null;
+  const bw = x1 - x0 + 1, bh = y1 - y0 + 1, S = pixelSize(d, w, x0, y0, bw, bh), sw = Math.ceil(bw / S), sh = Math.ceil(bh / S);
+  const k = Math.max(1, Math.round(n / sh)), box = Math.max(n + 2, sw * k + 2, sh * k + 2);
+  const out = document.createElement("canvas"); out.width = box; out.height = box;
+  const g = out.getContext("2d"); g.imageSmoothingEnabled = false;
+  g.drawImage(cv, x0, y0, sw * S, sh * S, Math.floor((box - sw * k) / 2), box - 1 - sh * k, sw * k, sh * k);
+  if (dull) { g.globalCompositeOperation = "source-atop"; g.globalAlpha = 0.45; g.fillStyle = "#2a1c38"; g.fillRect(0, 0, box, box); }
+  return (per[key] = out);
+}
+A.small = small;
 root.EVART = A;
 load();
+
+/* ---------- Sprites: the drawn sprite libraries take the sheet when there is one ---------- */
+// EVS.sprite(kind, n, st, sq, emo, dull, dir) and PX.sprite(kind, n, st, sq, emo, dull) answer with the PNG creature
+const ES = root.EVS;
+if (ES && ES.sprite) {
+  const orig = ES.sprite;
+  ES.sprite = function (kind, n = 24, st = 1, sq = 0, emo = "normal", dull = false, dir = "front") {
+    const c = A.creature(kind, st, sq, emo, dir), s = c && small(c, n, dull);
+    return s || orig.apply(this, arguments);
+  };
+}
+const PXL = root.PX;
+if (PXL && PXL.sprite) {
+  const orig = PXL.sprite;
+  PXL.sprite = function (kind, n, st = 0, sq = 0, emo = "normal", dull = false) {
+    const c = A.creature(kind, st, sq, emo, "front"), s = c && small(c, n, dull);
+    return s || orig.apply(this, arguments);
+  };
+}
 
 /* ---------- Scenes: events, endings, pauses and card art take the PNG when there is one ---------- */
 const S = root.EVSCENE;

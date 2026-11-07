@@ -1,5 +1,5 @@
 {
- "v": 3293930924,
+ "v": 1547429469,
  "files": [
   {
    "path": "creatures/ajolin.png",
@@ -7,9 +7,34 @@
    "h": 64
   },
   {
+   "path": "creatures/bostezo.png",
+   "w": 640,
+   "h": 192
+  },
+  {
+   "path": "creatures/brotin.png",
+   "w": 640,
+   "h": 192
+  },
+  {
    "path": "creatures/canin.png",
    "w": 640,
    "h": 64
+  },
+  {
+   "path": "creatures/capuchon.png",
+   "w": 640,
+   "h": 192
+  },
+  {
+   "path": "creatures/carambano.png",
+   "w": 640,
+   "h": 192
+  },
+  {
+   "path": "creatures/centinela.png",
+   "w": 640,
+   "h": 192
   },
   {
    "path": "creatures/chisporro.png",
@@ -17,14 +42,69 @@
    "h": 64
   },
   {
+   "path": "creatures/ecolito.png",
+   "w": 640,
+   "h": 192
+  },
+  {
+   "path": "creatures/espinardo.png",
+   "w": 640,
+   "h": 192
+  },
+  {
+   "path": "creatures/fizz.png",
+   "w": 640,
+   "h": 192
+  },
+  {
+   "path": "creatures/fuellito.png",
+   "w": 640,
+   "h": 192
+  },
+  {
    "path": "creatures/fulgor.png",
    "w": 640,
    "h": 64
   },
   {
+   "path": "creatures/guardatumba.png",
+   "w": 640,
+   "h": 192
+  },
+  {
+   "path": "creatures/lumo.png",
+   "w": 640,
+   "h": 192
+  },
+  {
+   "path": "creatures/mecha.png",
+   "w": 640,
+   "h": 192
+  },
+  {
+   "path": "creatures/nim.png",
+   "w": 640,
+   "h": 192
+  },
+  {
    "path": "creatures/ojuelo.png",
    "w": 640,
    "h": 64
+  },
+  {
+   "path": "creatures/pebb.png",
+   "w": 640,
+   "h": 192
+  },
+  {
+   "path": "creatures/relampin.png",
+   "w": 640,
+   "h": 192
+  },
+  {
+   "path": "creatures/remolin.png",
+   "w": 640,
+   "h": 192
   },
   {
    "path": "creatures/sombrerin.png",
@@ -37,9 +117,29 @@
    "h": 64
   },
   {
+   "path": "creatures/trinilla.png",
+   "w": 640,
+   "h": 192
+  },
+  {
    "path": "creatures/ululu.png",
    "w": 640,
    "h": 64
+  },
+  {
+   "path": "creatures/unisona.png",
+   "w": 640,
+   "h": 192
+  },
+  {
+   "path": "creatures/vidriela.png",
+   "w": 640,
+   "h": 192
+  },
+  {
+   "path": "creatures/yunqueron.png",
+   "w": 640,
+   "h": 192
   },
   {
    "path": "faces/tila.png",
@@ -57,9 +157,59 @@
    "h": 528
   },
   {
+   "path": "objects/bed.png",
+   "w": 14,
+   "h": 14
+  },
+  {
+   "path": "objects/board.png",
+   "w": 13,
+   "h": 11
+  },
+  {
+   "path": "objects/bowl.png",
+   "w": 14,
+   "h": 14
+  },
+  {
    "path": "objects/flower.png",
    "w": 16,
    "h": 16
+  },
+  {
+   "path": "objects/lamp.png",
+   "w": 14,
+   "h": 29
+  },
+  {
+   "path": "objects/lectern.png",
+   "w": 14,
+   "h": 30
+  },
+  {
+   "path": "objects/nest.png",
+   "w": 13,
+   "h": 12
+  },
+  {
+   "path": "objects/nestOld.png",
+   "w": 14,
+   "h": 11
+  },
+  {
+   "path": "objects/shop.png",
+   "w": 48,
+   "h": 48
+  },
+  {
+   "path": "objects/sign.png",
+   "w": 11,
+   "h": 14
+  },
+  {
+   "path": "objects/stall.png",
+   "w": 27,
+   "h": 27
   },
   {
    "path": "objects/tila.png",
