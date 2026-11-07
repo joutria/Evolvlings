@@ -225,6 +225,10 @@ Every Refuge companion is born with one small trait of its own (the second MiniT
 - **Friends' codes**: "Your team code" turns your creature and your saved team's companions (cards, talents, birth traits, stars, Bond) into a `EVO1-…` text code. Pasting a friend's code saves their team (up to 6) to fight against, played by the AI. The first win against each code gives ✦ 20 and ∴ 5, at most 3 times a week, so made-up codes can't be farmed. Pasted codes are fully validated (known creatures and cards, level and grade ranges, a short plain-text name).
 - Saved in `P.duel` (`EV.slice("duel")`). The duel reuses the expedition pick screen and battle (`X.duel`), with no zone bonus.
 
+## Savia levels per zone
+
+Every zone shows how much Black Sap is left in it (visual language guide, section 8): a zone you have never calmed is dripping (2), calming its guardian leaves veins (1), and three stars clean it (0). The guardian's fight, the Guardian's Echo and Savia Mode always show the Root (3). The level appears as dark drops on the parchment map and a line in the zone list, and battles paint it over the zone background: veins in the ground, puddles dripping upward with less colour, and a vignette of veins for the Root. The end-of-trip card says when the Sap pulls back. It only changes how things look (`saviaLvl(id)` and `drawSap` in `rpg/ui-expedition.js`).
+
 ## Gentle weather
 
 `weather.js` gives the Glade and El Vado rain, fog or snow. The weather changes every 6 hours and is picked from the date, so every device shows the same sky and nothing is saved. It follows the season (northern calendar): snow only in winter, more rain in spring and autumn, mostly clear in summer. It only ever helps (design rule 2): rain makes the garden grow 25% faster, fog makes your creature tire 15% more slowly, snow makes it get bored 20% more slowly; effects apply only while the game is open. The window shows the weather and its effect, the map draws the drops, flakes or fog banks, and the Guide explains it the first time. For tests: `EV.WEATHER.force("rain")`.

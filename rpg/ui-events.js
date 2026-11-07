@@ -135,6 +135,7 @@ function finish(res) {
   const coins = res === "win" ? l.coins : Math.floor(l.coins / 2);
   const before = R ? R.lvl : 1;
   const unlocked = [];
+  const sap0 = X.deep || X.echo || X.savia ? 0 : saviaLvl(X.zone);
   if (R) {
     R.xp += xp;
     while (R.xp >= xpNeed(R.lvl)) { R.xp -= xpNeed(R.lvl); R.lvl++; for (const k of ["p", "s"]) if (SLOT_LVL[k] === R.lvl) unlocked.push(k); }
@@ -171,6 +172,8 @@ function finish(res) {
     if (X.stars === 3 && !P[S3][X.zone]) { P[S3][X.zone] = 1; P.notes = (P.notes || 0) + 3; bonus = true; }
     X.starInfo = { n: X.stars, best: gained > 0, bonus };
   }
+  // the Savia drains from the zone when you calm it or reach three stars
+  X.sapDrop = sap0 && saviaLvl(X.zone) < sap0 ? saviaLvl(X.zone) + 1 : 0;
   if (S && S.phase === "alive") {
     S.stats.fun = Math.min(100, S.stats.fun + 10); S.stats.full = Math.max(0, S.stats.full - 15); S.stats.clean = Math.max(0, S.stats.clean - 20);
     // wounds: the more health the creature lost on the trip, the more energy and health it loses at home
@@ -216,6 +219,7 @@ function endHtml() {
   if (X.keyGot) html += `<p class="evt-out key-got"><canvas class="key-ic" width="16" height="16" data-key="${X.keyGot}" aria-hidden="true"></canvas> <b>${esc(tx("key." + X.keyGot))}</b> · ${esc(tx("key.got." + X.keyGot, { to: zt("to", null, KEYS[X.keyGot].opens) }))}</p>`;
   if (X.echoRew) html += `<p class="evt-out">∴ ${esc(tx("end.echo", X.echoRew))}</p>`;
   else if (X.echo && EV.P.echo) html += `<p class="evt-out">${esc(tx("end.echoLose", { n: Math.max(0, ECHO_TRIES - EV.P.echo.tries) }))}</p>`;
+  if (X.sapDrop) html += `<p class="evt-out end-sap">${esc(tx("sap.drop" + (X.sapDrop - 1), { z: zt("name", null, X.zone) }))}</p>`;
   if (X.starInfo) html += `<p class="evt-out end-stars"><b>${esc(tx("end.stars", { s: starStr(X.starInfo.n) }))}</b>${X.starInfo.best ? " · " + esc(tx("end.starsNew")) : ""}${X.starInfo.bonus ? "<br>♪ " + esc(tx("end.star3")) : ""}<br><small>${esc(tx("end.starsWhy"))}</small></p>`;
   if (e.after > e.before) html += `<p class="evt-out">${esc(tx("end.lvl", { name: nm, n: e.after }))}</p>`;
   for (const k of e.unlocked) html += `<p class="evt-out">${esc(tx("end.slot", { slot: tx("slot." + k) }))}</p>`;
