@@ -435,6 +435,7 @@ function drawBattle(now) {
   drawDecor(c, z.decor, t, day);
   c.fillStyle = day ? z.ground : z.groundN; c.beginPath(); c.moveTo(0, 70); c.quadraticCurveTo(BW / 2, 52, BW, 70); c.lineTo(BW, BH); c.lineTo(0, BH); c.fill();
   c.fillStyle = "#00000014"; for (let i = 0; i < 40; i++) { const x = (i * 97) % BW, y = 80 + ((i * 53) % 140); c.fillRect(x, y, 2, 5); }
+  if (!X.duel && !X.deep) drawSap(c, battle.boss || X.savia || X.echo ? 3 : saviaLvl(X.zone), REDUCE ? 0 : t, BW, BH);
   // the 6 formation cells of each side, as soft patches on the ground
   c.fillStyle = "#0000001c";
   for (const side of ["ally", "foe"]) for (let k = 0; k < CELLS; k++) { const [x, y] = cellXY(side, k); EV.ell(c, x, y + 16, 26, 7); c.fill(); }

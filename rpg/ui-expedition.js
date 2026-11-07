@@ -179,6 +179,51 @@ function saviaHtml() {
   if (sav.length) h += `<div class="nodes zones">${sav.map((id) => `<button type="button" class="node zone savia" data-zone="${id}" data-savia="1"><span class="ic" aria-hidden="true">${tyIcon(ZONES[id].type)}</span><strong>${esc(zt("name", null, id))}</strong><small>${esc(tx("zones.lvlS", { n: ZONES[id].min + 2 }))}</small><small class="ok">${starStr(sS[id] || 0)}</small></button>`).join("")}</div>`;
   return h;
 }
+/* ---------- Savia levels per zone (visual language guide, section 8) ----------
+   0 clean, 1 veins, 2 dripping, 3 the Root. A zone you have never calmed drips (2), calming its guardian leaves veins (1),
+   three stars clean it (0). The guardian's fight and Savia Mode always show the Root (3). It only changes how things look. */
+function saviaLvl(id) {
+  const P = EV.P, z = ZONES[id]; if (!z) return 0;
+  if (!(P.cleared || {})[id]) return 2;
+  return ((P.stars || {})[id] || 0) >= 3 ? 0 : 1;
+}
+function sapDrops(n, max) { let s = ""; for (let i = 0; i < (max || 3); i++) s += i < n ? "●" : "○"; return s; }
+// the Savia painted over a battle background (BW x BH units), by level
+function drawSap(c, lv, t, W, H) {
+  if (!lv) return;
+  c.save();
+  // 1+: thin black veins in the cracks of the ground
+  c.strokeStyle = SAP.c0; c.lineWidth = 2;
+  const veins = lv >= 2 ? 7 : 4;
+  for (let i = 0; i < veins; i++) {
+    const x = (i * 131 + 40) % W, y = 86 + ((i * 47) % 120);
+    c.beginPath(); c.moveTo(x, y); c.lineTo(x + 10, y - 4); c.lineTo(x + 18, y + 2); c.lineTo(x + 30, y - 3); c.stroke();
+    c.fillStyle = SAP.sheen; c.fillRect(x + 10, y - 5, 1, 1);
+  }
+  if (lv >= 2) {
+    // 2+: the zone loses some colour, puddles let drops fall upward
+    c.fillStyle = "rgba(36,16,48,.16)"; c.fillRect(0, 0, W, H);
+    for (let i = 0; i < 3; i++) { const x = 60 + i * ((W - 120) / 2), y = 120 + (i % 2) * 50; c.fillStyle = SAP.c1; EV.ell(c, x, y, 16, 4); c.fill(); }
+    for (let i = 0; i < 9; i++) {
+      const px = 60 + (i % 3) * ((W - 120) / 2) - 8 + ((i * 7) % 16), base = 120 + ((i % 3) % 2) * 50;
+      const k = ((t * 0.35 + i * 0.37) % 1), y = base - k * 70;
+      c.globalAlpha = 1 - k; c.fillStyle = SAP.c0; c.fillRect(Math.round(px), Math.round(y), 2, 4); c.fillStyle = SAP.sheen; c.fillRect(Math.round(px), Math.round(y), 1, 1);
+    }
+    c.globalAlpha = 1;
+  }
+  if (lv >= 3) {
+    // 3: a vignette of veins round the edge of the screen
+    const gr = c.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.35, W / 2, H / 2, Math.max(W, H) * 0.7);
+    gr.addColorStop(0, "rgba(14,8,20,0)"); gr.addColorStop(1, "rgba(14,8,20,.55)");
+    c.fillStyle = gr; c.fillRect(0, 0, W, H);
+    c.strokeStyle = SAP.c0; c.lineWidth = 3;
+    for (const [x0, y0, dx, dy] of [[0, 0, 1, 1], [W, 0, -1, 1], [0, H, 1, -1], [W, H, -1, -1]]) {
+      c.beginPath(); c.moveTo(x0, y0); c.quadraticCurveTo(x0 + dx * 30, y0 + dy * 6, x0 + dx * 52, y0 + dy * 26); c.stroke();
+      c.beginPath(); c.moveTo(x0, y0); c.quadraticCurveTo(x0 + dx * 8, y0 + dy * 26, x0 + dx * 22, y0 + dy * 48); c.stroke();
+    }
+  }
+  c.restore();
+}
 /* ---------- The parchment map of the valley ---------- */
 // Dayside above the stream, the Underside below it; the Ford (home) sits on the stream. Coordinates in a 240 x 152 sheet.
 const PMAP = { heights: [120, 17], crater: [50, 44], aurora: [120, 42], forest: [190, 44], heart: [120, 68], vado: [120, 88], hollow: [52, 108], lake: [120, 114], caves: [188, 108], deep: [120, 138] };
@@ -234,6 +279,10 @@ function pmapDraw(now) {
     else if (cl[id]) { // a gold stamp per star
       const n = st[id] || 0; g.fillStyle = "#e2ae2e"; for (let i = 0; i < n; i++) g.fillRect(x - 5 + i * 4, y + 9, 3, 3);
     }
+    if (o) { // its Savia level: dark drops on the right of the circle
+      const sl = saviaLvl(id);
+      for (let i = 0; i < sl; i++) { g.fillStyle = SAP.c0; g.fillRect(x + 9, y + 3 - i * 4, 2, 3); g.fillStyle = SAP.sheen; g.fillRect(x + 9, y + 3 - i * 4, 1, 1); }
+    }
     g.fillStyle = o ? "#241030" : "#a8977a"; g.fillText(zt("name", null, id), x, y - 10);
   }
   // your creature as a little token, walking along the path you picked
@@ -261,12 +310,14 @@ function pmapTap(e) {
 }
 function zonesHtml() {
   const cl = EV.P.cleared || {};
+  if (EV.GUIDE) setTimeout(() => EV.GUIDE.showTip("savia"), 0);
   return `<div class="nodes zones">${Object.keys(ZONES).map((id) => {
     const z = ZONES[id], open = zoneOpen(id);
     const done = cl[id] || 0;
     return `<button type="button" class="node zone" data-zone="${id}" ${open ? "" : "disabled"}><span class="ic" aria-hidden="true">${tyIcon(z.type)}</span>
       <strong>${esc(zt("name", null, id))}</strong><small>${esc(zt("sub", null, id))}</small>
       <small>${open ? esc(tx("zones.lvl", { n: z.min, m: zoneLvl(z, (rpgState() || { lvl: 1 }).lvl) })) : "🔒 " + esc(keyLock(id) || tx(z.unlockAll ? "zones.lockHeart" : Array.isArray(z.unlock) ? (z.unlock.includes("hollow") ? "zones.lockHigh" : "zones.lockEnv") : "zones.lock"))}</small>
+      ${open ? `<small class="sap-lv" title="${esc(tx("sap.t"))}">${esc(tx("sap.lv", { d: sapDrops(saviaLvl(id)), name: tx("sap." + saviaLvl(id)) }))}</small>` : ""}
       ${done ? `<small class="ok">✓ ${esc(tx("zones.done", { n: done }))} · ${starStr((EV.P.stars || {})[id] || 0)}<br>${esc(tx("zones.verse", { v: zt("verse", null, id) }))}</small>` : ""}</button>`;
   }).join("")}</div>`;
 }
