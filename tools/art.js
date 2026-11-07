@@ -19,7 +19,7 @@ const bosses = [...zonesSrc.matchAll(/boss: "(\w+)"/g)].map((m) => m[1]);
 const pauseKinds = ["camino", "pelea", "cofre", "descanso", "jefe", "victoria", "regreso"];
 const maps = ["home", "vado"];
 // the things world.js draws on the maps (drawObj kinds named in MAPS deco and places)
-const objKinds = [...new Set([...read("world.js").matchAll(/(?:obj: |\[)"(\w+)"/g)].map((m) => m[1]))];
+const objKinds = [...new Set([...read("world.js").matchAll(/(?:obj: |\[)"(\w+)"/g)].map((m) => m[1]).concat(["lectern", "scrolls", "scrolls2"]))];
 
 // PNG header: width, height, colour type; alpha check for creature sheets (decodes 8-bit RGBA, non-interlaced)
 function png(file) {

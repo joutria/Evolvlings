@@ -8,7 +8,7 @@ It reads the 15 x 11 rows of every map in world.js and paints them tile by tile 
 with autotiled edges, trees on the border (#), rocks (r). Ponds and paths pick each 8 px quarter from the pack's
 autotile block by looking at the neighbours. Out come art/maps/<map>.png (720 x 528, the 16 px tiles at 3x) and
 art/objects/tree.png, flower.png, well.png and tila.png, which replace the drawn ones, and art/faces/tila.png, Tila's
-face in conversations (the pack's Woman), and art/creatures/<id>.png for the wild foes in rpg/data-wild.js."""
+face in conversations (the pack's Woman), and art/creatures/<id>.png for every creature (story, common and the wild foes in rpg/data-wild.js)."""
 import sys, os, re
 from PIL import Image
 
@@ -56,24 +56,65 @@ def main(pack):
     ch = lambda n, f: Image.open(os.path.join(pack, "Actor", "Characters", n, f)).convert("RGBA")
     ch("Woman", os.path.join("SeparateAnim", "Idle.png")).crop((0, 0, 16, 16)).save(os.path.join(ob, "tila.png"))
     fc = os.path.join(ROOT, "art", "faces"); os.makedirs(fc, exist_ok=True); ch("Woman", "Faceset.png").save(os.path.join(fc, "tila.png"))
-    print("ok objects tree, flower, well, tila; face tila")
-    # wild creatures (rpg/data-wild.js): the pack's 16 px monsters at 3x in 64 px cells, feet on y = 60.
-    # Their sheet is 4 columns (front, back, left, right) by 4 walking frames; we keep two frames of front, back and right.
-    # The emotion cells stay empty, so the game falls back to the front frames.
-    wild = {"fulgor": "Spirit", "chisporro": "Flam", "canin": "Bamboo", "ojuelo": "Eye", "ajolin": "Axolot", "topacio": "Mole", "ululu": "Owl", "sombrerin": "Mushroom"}
+    # the places drawn on the maps, cut from the pack's element and house tilesets (trimmed to what is drawn)
+    house = ts("TilesetHouse")
+    cuts = {"bed": (el, 160, 16, 176, 32), "bowl": (el, 32, 144, 48, 160), "board": (el, 0, 32, 16, 48), "sign": (el, 48, 32, 64, 48),
+            "lamp": (el, 96, 48, 112, 80), "stall": (el, 0, 48, 32, 80), "nest": (el, 128, 48, 144, 64), "nestOld": (el, 112, 60, 128, 76),
+            "lectern": (el, 0, 80, 16, 112), "shop": (house, 256, 0, 304, 48)}
+    for k, (im, *b) in cuts.items():
+        o = im.crop(tuple(b)); bb = o.getbbox()
+        if bb: o.crop(bb).save(os.path.join(ob, k + ".png"))
+    print("ok objects tree, flower, well, tila,", ", ".join(cuts), "; face tila")
+    # creatures: every creature in the game is a monster of the pack (Jose, 2026-11-07). One row per stage: baby at 2x,
+    # young at 3x, adult at 4x (3x if it would not fit) in the pack's second colour when it has one. Wild foes have one row.
+    # The pack sheet is 4 columns (front, back, left, right) by 4 walking frames; we keep two frames of front, back and right
+    # in 64 px cells with the feet on y = 60. The emotion cells stay empty, so the game falls back to the front frames.
+    sheets = {
+        "lumo": ("Spirit", "Spirit2"), "fizz": ("Slime", "Slime2"), "pebb": ("Mole2", "Mole"), "unisona": ("GoldRacoon",),
+        "fuellito": ("DragonYellow", "Dragon"), "brotin": ("KappaGreen", "KappaRed"), "remolin": ("Reptile", "Reptile2"),
+        "bostezo": ("ButterflyBlue", "Butterfly"), "mecha": ("LanternRed", "LanternGreen"), "yunqueron": ("Beast", "Beast2"),
+        "espinardo": ("Larva", "Larva2"), "nim": ("SpiderRed", "SpiderYellow"), "centinela": ("SkullBlue", "Skull"),
+        "vidriela": ("Fish", "FishRed"), "ecolito": ("Mollusc2", "Mollusc"), "relampin": ("Mouse", "MouseBlack"),
+        "trinilla": ("HeartRed", "HeartGreen"), "carambano": ("Slime3", "Slime4"), "capuchon": ("Octopus2", "Octopus"),
+        "guardatumba": ("Cyclope", "Cyclope2"),
+    }
+    wild = {"fulgor": "Flam2", "chisporro": "Flam", "canin": "Bamboo", "ojuelo": "Eye", "ajolin": "Axolot", "topacio": "Racoon", "ululu": "Owl", "sombrerin": "Mushroom"}
     cr = os.path.join(ROOT, "art", "creatures"); os.makedirs(cr, exist_ok=True)
-    for id_, mon in wild.items():
+    def frames(mon):
         d = os.path.join(pack, "Actor", "Monsters", mon)
         f = next(n for n in sorted(os.listdir(d)) if n.lower().endswith(".png") and n != "Faceset.png")  # SpriteSheet.png or <Name>.png
         sh = Image.open(os.path.join(d, f)).convert("RGBA")
-        out = Image.new("RGBA", (640, 64))
-        for cell, (col, row) in enumerate([(0, 0), (0, 1), (1, 0), (1, 1), (3, 0), (3, 1)]):
-            fr = sh.crop((col * 16, row * 16, col * 16 + 16, row * 16 + 16)); bb = fr.getbbox()
+        return [sh.crop((c * 16, r * 16, c * 16 + 16, r * 16 + 16)) for c, r in [(0, 0), (0, 1), (1, 0), (1, 1), (3, 0), (3, 1)]]
+    def row(out, y, mon, k):
+        for cell, fr in enumerate(frames(mon)):
+            bb = fr.getbbox()
             if not bb: continue
-            fr = fr.crop(bb); fr = fr.resize((fr.width * 3, fr.height * 3), Image.NEAREST)
-            out.alpha_composite(fr, (cell * 64 + (64 - fr.width) // 2, 60 - fr.height))
+            fr = fr.crop(bb); kk = k if fr.height * k <= 60 and fr.width * k <= 64 else 3
+            fr = fr.resize((fr.width * kk, fr.height * kk), Image.NEAREST)
+            out.alpha_composite(fr, (cell * 64 + (64 - fr.width) // 2, y + 60 - fr.height))
+    for id_, mons in sheets.items():
+        out = Image.new("RGBA", (640, 192))
+        for st, (mon, k) in enumerate([(mons[0], 2), (mons[0], 3), (mons[-1], 4)]): row(out, st * 64, mon, k)
         out.save(os.path.join(cr, id_ + ".png"))
-    print("ok wild creatures", ", ".join(wild))
+    for id_, mon in wild.items():
+        out = Image.new("RGBA", (640, 64)); row(out, 0, mon, 3); out.save(os.path.join(cr, id_ + ".png"))
+    print("ok creatures", len(sheets), "+ wild", len(wild))
+    # guardians: the pack's bosses, two idle frames as front A and B in 96 px cells (2x when that still fits)
+    bosses = {"farol": "GiantSpirit", "forja": "GiantFlam", "seto": "GiantFrog", "mira": "DemonCyclop2", "grava": "GiantRacoon",
+              "trono": "TenguRed", "veleta": "TenguBlue", "micelio": "GiantFrog2", "raiz": "DemonCyclop"}
+    gd = os.path.join(ROOT, "art", "guardians"); os.makedirs(gd, exist_ok=True)
+    for id_, boss in bosses.items():
+        d = os.path.join(pack, "Actor", "Boss", boss)
+        idle = Image.open(os.path.join(d, next(n for n in sorted(os.listdir(d)) if n.lower().startswith("idle")))).convert("RGBA")
+        fh = idle.height; out = Image.new("RGBA", (192, 96))
+        for cell, i in enumerate((0, 2)):
+            fr = idle.crop((i * fh, 0, i * fh + fh, fh)); bb = fr.getbbox()
+            if not bb: continue
+            fr = fr.crop(bb); k = 2 if fr.height * 2 <= 94 and fr.width * 2 <= 96 else 1
+            fr = fr.resize((fr.width * k, fr.height * k), Image.NEAREST)
+            out.alpha_composite(fr, (cell * 96 + (96 - fr.width) // 2, max(0, 92 - fr.height)))
+        out.save(os.path.join(gd, id_ + ".png"))
+    print("ok guardians", ", ".join(bosses))
 
 def paste_clip(dst, im, x, y):
     # alpha_composite refuses negative offsets: crop what falls outside first

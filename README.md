@@ -240,9 +240,15 @@ Images generated elsewhere (Gemini prompts: one image per stage with the 10 pose
 
 After adding files run `node tools/art.js`: it writes the manifest and warns about wrong sizes, unknown names and semi-transparent creature edges. `tools/build-single.py` inlines the art into the one-file build.
 
+## Creatures from the pack
+
+Since 2026-11-07 every creature, story ones included, is a monster of the CC0 Ninja Adventure pack (Jose's call, for one consistent look). `tools/ninja-maps.py` lists which monster each creature is; its stages are the monster at 2x and 3x, and the adult at 4x in the pack's second colour when it has one. `art.js` also answers `EVS.sprite` and `PX.sprite` with the sheet (read back at its own pixel size and scaled by a whole number), so cards, the Refuge, eggs and portraits show the same pictures as battles and the home. The nine guardians are the pack's bosses (two idle frames in 96 px cells, at 2x when that fits; mapping in the same tool). The places on the maps (bed, bowl, boards, signs, lamps, stall, nests, shop, lectern) come from the same pack; the Root, the garden and the foraging nook are still drawn.
+
 ## Wild creatures
 
 `rpg/data-wild.js` adds eight filler foes, one per zone: Fulgor (Aurora), Chisporro (Crater), Cañín (Forest), Ojuelo (Hollow), Ajolín (Lake), Topacio (Caves), Ululú (Heights) and Sombrerín (Deep). Their pictures are monsters from the CC0 Ninja Adventure pack (`tools/ninja-maps.py` builds `art/creatures/<id>.png`), their names and lines are ours, and they borrow the cards of a creature of their type. `wild: true` keeps them out of eggs, duels and the card owner lists, so they only show up as foes; each joins its zone's foe list once, so about one fight in five meets one. The story creatures stay original art.
+
+Some conversations start on a picture composed from the same pack: `tools/ninja-scenes.py` paints a small 8 × 6 tile scene (tiles, houses, props, the pack's people standing in for ours), lights it (night with lantern glows, dusk) and writes `art/events/<id>.png` at 2x. So far: `farolero` (Pabilo lighting the Meadow street; the lanterns burn Savia, so their light is cold) and `fuera` (Bruma's family outside the Hedge at dusk). Events without a PNG keep their drawn picture.
 
 ## Savia levels per zone
 
