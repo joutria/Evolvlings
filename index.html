@@ -1123,10 +1123,12 @@ function step(dt, offline, away) {
   const s = S.stats, r = SPECIES[S.species].rates, sl = S.sleeping;
   const before = away && !P.hard ? { full: s.full, fun: s.fun, energy: s.energy, clean: s.clean, health: s.health } : null;
   s.full = clamp(s.full - PER_MIN.full * r.full * dt * (sl ? 0.5 : 1));
-  s.fun = clamp(s.fun - PER_MIN.fun * r.fun * dt * (sl ? 0.3 : 1) * (S.sick ? 1.5 : 1));
+  // the weather only ever slows the decline (weather.js; design rule 2)
+  const wm = (k) => (!offline && window.EV && window.EV.WEATHER ? window.EV.WEATHER.mul(k) : 1);
+  s.fun = clamp(s.fun - PER_MIN.fun * r.fun * dt * (sl ? 0.3 : 1) * (S.sick ? 1.5 : 1) * wm("fun"));
   s.clean = clamp(s.clean - (PER_MIN.clean * r.clean + S.messes.length * 0.12) * dt);
   if (sl) s.energy = clamp(s.energy + 0.55 * dt);
-  else s.energy = clamp(s.energy - PER_MIN.energy * r.energy * dt);
+  else s.energy = clamp(s.energy - PER_MIN.energy * r.energy * dt * wm("energy"));
 
   // messes after meals
   for (const p of S.pendingMess) p.in -= dt;
@@ -2196,6 +2198,7 @@ requestAnimationFrame(frame);
 <script src="build.js"></script>
 <script src="seasons.js"></script>
 <script src="ach.js"></script>
+<script src="weather.js"></script>
 <script src="world.js"></script>
 <script src="guide.js"></script>
 </body>

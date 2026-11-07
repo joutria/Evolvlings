@@ -154,7 +154,8 @@ function fmt(ms) {
 // grows by real time, up to what it can hold
 function grow() {
   const b = B(), g = b.gar, G = GARDEN[lvl("garden")], now = Date.now();
-  const dt = Math.max(0, now - (g.t || now)) / (24 * HOUR);
+  // rain waters the garden (weather.js): what grew since the last look counts a quarter more
+  const dt = Math.max(0, now - (g.t || now)) / (24 * HOUR) * (EV.WEATHER ? EV.WEATHER.mul("garden") : 1);
   g.f = Math.min(G.cap, (g.f || 0) + G.f * dt);
   g.w = Math.min(WOOD_CAP, (g.w || 0) + G.w * dt);
   g.t = now;
