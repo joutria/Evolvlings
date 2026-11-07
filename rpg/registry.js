@@ -38,7 +38,7 @@ function cardEntry(id) {
   const c = CARDS[id]; if (!c) return null;
   return {
     id, card: c, text: CT[id] || null, drop: DROP_POOL.includes(id),
-    owners: Object.keys(MONS).filter((k) => MONS[k].cards.includes(id)),
+    owners: Object.keys(MONS).filter((k) => !MONS[k].wild && MONS[k].cards.includes(id)),
     art: !!(typeof EVS !== "undefined" && EVS.CARD[id]), scene: !!(typeof EVSCENE !== "undefined" && EVSCENE.IDS.includes(id)),
   };
 }

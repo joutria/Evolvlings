@@ -240,6 +240,10 @@ Images generated elsewhere (Gemini prompts: one image per stage with the 10 pose
 
 After adding files run `node tools/art.js`: it writes the manifest and warns about wrong sizes, unknown names and semi-transparent creature edges. `tools/build-single.py` inlines the art into the one-file build.
 
+## Wild creatures
+
+`rpg/data-wild.js` adds eight filler foes, one per zone: Fulgor (Aurora), Chisporro (Crater), Cañín (Forest), Ojuelo (Hollow), Ajolín (Lake), Topacio (Caves), Ululú (Heights) and Sombrerín (Deep). Their pictures are monsters from the CC0 Ninja Adventure pack (`tools/ninja-maps.py` builds `art/creatures/<id>.png`), their names and lines are ours, and they borrow the cards of a creature of their type. `wild: true` keeps them out of eggs, duels and the card owner lists, so they only show up as foes; each joins its zone's foe list once, so about one fight in five meets one. The story creatures stay original art.
+
 ## Savia levels per zone
 
 Every zone shows how much Black Sap is left in it (visual language guide, section 8): a zone you have never calmed is dripping (2), calming its guardian leaves veins (1), and three stars clean it (0). The guardian's fight, the Guardian's Echo and Savia Mode always show the Root (3). The level appears as dark drops on the parchment map and a line in the zone list, and battles paint it over the zone background: veins in the ground, puddles dripping upward with less colour, and a vignette of veins for the Root. The end-of-trip card says when the Sap pulls back. It only changes how things look (`saviaLvl(id)` and `drawSap` in `rpg/ui-expedition.js`).

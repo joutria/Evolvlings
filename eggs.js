@@ -127,7 +127,7 @@ const tx = (k, v) => { let s = TX[L()][k]; if (s == null) s = TX.en[k]; if (s ==
 const HOUR = 3600e3;
 const STORY = ["lumo", "fizz", "pebb", "unisona"];
 // creatures that can hatch, by tier (the creature's rarity)
-const TIERS = [0, 1, 2, 3, 4].map((t) => Object.keys(RPG.MONS).filter((k) => { const m = RPG.MONS[k]; return !m.boss && !m.story && !STORY.includes(k) && m.rar === t; }));
+const TIERS = [0, 1, 2, 3, 4].map((t) => Object.keys(RPG.MONS).filter((k) => { const m = RPG.MONS[k]; return !m.boss && !m.story && !m.wild && !STORY.includes(k) && m.rar === t; }));
 const ODDS = [50, 30, 14.3, 5.1, 0.6]; // % per pull by tier: bark, moss, sky, lilac, golden
 const TOP = 4, GOOD = 3, FLOOR = 10, SOFT = 70, HARD = 90, HIST = 100;
 const BANNERS = { s1: { featured: "mecha", cost10: 10 }, new: { featured: null, cost10: 8, max: 20 } };

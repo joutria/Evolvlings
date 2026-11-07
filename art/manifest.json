@@ -1,6 +1,46 @@
 {
- "v": 4044696525,
+ "v": 3293930924,
  "files": [
+  {
+   "path": "creatures/ajolin.png",
+   "w": 640,
+   "h": 64
+  },
+  {
+   "path": "creatures/canin.png",
+   "w": 640,
+   "h": 64
+  },
+  {
+   "path": "creatures/chisporro.png",
+   "w": 640,
+   "h": 64
+  },
+  {
+   "path": "creatures/fulgor.png",
+   "w": 640,
+   "h": 64
+  },
+  {
+   "path": "creatures/ojuelo.png",
+   "w": 640,
+   "h": 64
+  },
+  {
+   "path": "creatures/sombrerin.png",
+   "w": 640,
+   "h": 64
+  },
+  {
+   "path": "creatures/topacio.png",
+   "w": 640,
+   "h": 64
+  },
+  {
+   "path": "creatures/ululu.png",
+   "w": 640,
+   "h": 64
+  },
   {
    "path": "faces/tila.png",
    "w": 38,

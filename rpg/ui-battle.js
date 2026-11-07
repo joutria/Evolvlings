@@ -491,7 +491,7 @@ function drawBattle(now) {
       if (u.hollow) im = artHollow(im);
       if (cp && cp.flash && HAS_EVS) im = EVS.silhouette(im);
       const n = im.width, feet = u.boss ? 24 : 16;
-      const hov = !REDUCE && HAS_EVS && EVS.hovers(u.kind) ? Math.round(Math.sin(t * 2 + a.x)) * 2 - 4 : 0;
+      const hov = !REDUCE && evsKind(u.kind) && EVS.hovers(u.kind) ? Math.round(Math.sin(t * 2 + a.x)) * 2 - 4 : 0;
       out.save(); out.translate(x, y); out.imageSmoothingEnabled = false;
       out.fillStyle = "rgba(29,22,38,.35)"; out.fillRect(-Math.round(n * 0.2), feet - 2, Math.round(n * 0.4), 4);
       if (ko) out.globalAlpha = 0.35; else if (cp && cp.alpha != null) out.globalAlpha = cp.alpha;

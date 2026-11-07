@@ -8,7 +8,7 @@ It reads the 15 x 11 rows of every map in world.js and paints them tile by tile 
 with autotiled edges, trees on the border (#), rocks (r). Ponds and paths pick each 8 px quarter from the pack's
 autotile block by looking at the neighbours. Out come art/maps/<map>.png (720 x 528, the 16 px tiles at 3x) and
 art/objects/tree.png, flower.png, well.png and tila.png, which replace the drawn ones, and art/faces/tila.png, Tila's
-face in conversations (the pack's Woman)."""
+face in conversations (the pack's Woman), and art/creatures/<id>.png for the wild foes in rpg/data-wild.js."""
 import sys, os, re
 from PIL import Image
 
@@ -57,6 +57,23 @@ def main(pack):
     ch("Woman", os.path.join("SeparateAnim", "Idle.png")).crop((0, 0, 16, 16)).save(os.path.join(ob, "tila.png"))
     fc = os.path.join(ROOT, "art", "faces"); os.makedirs(fc, exist_ok=True); ch("Woman", "Faceset.png").save(os.path.join(fc, "tila.png"))
     print("ok objects tree, flower, well, tila; face tila")
+    # wild creatures (rpg/data-wild.js): the pack's 16 px monsters at 3x in 64 px cells, feet on y = 60.
+    # Their sheet is 4 columns (front, back, left, right) by 4 walking frames; we keep two frames of front, back and right.
+    # The emotion cells stay empty, so the game falls back to the front frames.
+    wild = {"fulgor": "Spirit", "chisporro": "Flam", "canin": "Bamboo", "ojuelo": "Eye", "ajolin": "Axolot", "topacio": "Mole", "ululu": "Owl", "sombrerin": "Mushroom"}
+    cr = os.path.join(ROOT, "art", "creatures"); os.makedirs(cr, exist_ok=True)
+    for id_, mon in wild.items():
+        d = os.path.join(pack, "Actor", "Monsters", mon)
+        f = next(n for n in sorted(os.listdir(d)) if n.lower().endswith(".png") and n != "Faceset.png")  # SpriteSheet.png or <Name>.png
+        sh = Image.open(os.path.join(d, f)).convert("RGBA")
+        out = Image.new("RGBA", (640, 64))
+        for cell, (col, row) in enumerate([(0, 0), (0, 1), (1, 0), (1, 1), (3, 0), (3, 1)]):
+            fr = sh.crop((col * 16, row * 16, col * 16 + 16, row * 16 + 16)); bb = fr.getbbox()
+            if not bb: continue
+            fr = fr.crop(bb); fr = fr.resize((fr.width * 3, fr.height * 3), Image.NEAREST)
+            out.alpha_composite(fr, (cell * 64 + (64 - fr.width) // 2, 60 - fr.height))
+        out.save(os.path.join(cr, id_ + ".png"))
+    print("ok wild creatures", ", ".join(wild))
 
 def paste_clip(dst, im, x, y):
     # alpha_composite refuses negative offsets: crop what falls outside first
