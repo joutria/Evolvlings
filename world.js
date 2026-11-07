@@ -225,6 +225,9 @@ function drawGround(id) {
 }
 // things with height, drawn from the front; (bx, by) is the bottom-centre of their base tile
 function drawObj(c, kind, bx, by, t) {
+  // PNG art (art.js): art/objects/<kind>.png at map scale (16 px a tile), standing on the base tile
+  const oim = typeof EVART !== "undefined" && EVART.image("objects/" + kind + ".png");
+  if (oim) { c.drawImage(oim, Math.round(bx - oim.width / 2), by + 1 - oim.height); return; }
   const sh = (w) => { c.fillStyle = C.shadow; c.beginPath(); c.ellipse(bx + 1, by - 1, w, 2.5, 0, 0, Math.PI * 2); c.fill(); };
   if (kind === "board" && boardNew()) {
     // something new on the board: a soft gold glow and a pin

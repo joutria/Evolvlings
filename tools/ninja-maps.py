@@ -1,0 +1,82 @@
+#!/usr/bin/env python3
+"""Build the home and El Vado map PNGs from the Ninja Adventure tiles (CC0, https://pixel-boy.itch.io/ninja-adventure-asset-pack).
+Needs Pillow. Run from the repo root with the pack's folder (the one holding Backgrounds/ and Actor/), then `node tools/art.js`:
+
+  python3 tools/ninja-maps.py ~/Downloads/NinjaAdventure
+
+It reads the 15 x 11 rows of every map in world.js and paints them tile by tile at 16 px: grass, dirt paths and ponds
+with autotiled edges, trees on the border (#), rocks (r). Ponds and paths pick each 8 px quarter from the pack's
+autotile block by looking at the neighbours. Out come art/maps/<map>.png (720 x 528, the 16 px tiles at 3x) and
+art/objects/tree.png and flower.png, which replace the drawn trees and flowers."""
+import sys, os, re
+from PIL import Image
+
+ROOT = os.path.join(os.path.dirname(__file__), "..")
+T = 16
+
+def main(pack):
+    ts = lambda n: Image.open(os.path.join(pack, "Backgrounds", "Tilesets", n + ".png")).convert("RGBA")
+    floor, water, nature = ts("TilesetFloor"), ts("TilesetWater"), ts("TilesetNature")
+    tile = lambda im, c, r, w=1, h=1: im.crop((c * T, r * T, (c + w) * T, (r + h) * T))
+    grass = [tile(floor, 0, 12)] * 5 + [tile(floor, c, 12) for c in (1, 2, 3, 4)] + [tile(floor, 2, 11), tile(floor, 3, 11)]
+    # autotile blocks (4 x 4: corners, edges, and a 2 x 2 island in the middle): dirt on grass, water on grass
+    blocks = {"=": (floor, 4, 7), "~": (water, 4, 6)}
+    trees = [tile(nature, 0, 0, 2, 2), tile(nature, 16, 0, 2, 2), tile(nature, 18, 0, 2, 2)]
+    rock = tile(nature, 18, 9)
+
+    src = open(os.path.join(ROOT, "world.js"), encoding="utf8").read()
+    maps = {m.group(1): re.findall(r'"([^"]{15})"', m.group(2)) for m in re.finditer(r"\n  (\w+): \{\n    rows: \[(.*?)\]", src, re.S)}
+    for name, rows in maps.items():
+        H, W = len(rows), len(rows[0])
+        at = lambda x, y, ch: rows[min(H - 1, max(0, y))][min(W - 1, max(0, x))] == ch or (ch == "=" and rows[min(H - 1, max(0, y))][min(W - 1, max(0, x))] == "_")
+        g = Image.new("RGBA", (W * T, H * T))
+        seed = 7
+        for y in range(H):
+            for x in range(W):
+                seed = (seed * 9301 + 49297) % 233280
+                g.alpha_composite(grass[seed % len(grass)], (x * T, y * T))
+                ch = rows[y][x]
+                if ch in blocks: g.alpha_composite(auto(blocks[ch], lambda dx, dy: at(x + dx, y + dy, ch)), (x * T, y * T))
+                if ch == "r": g.alpha_composite(rock, (x * T, y * T))
+        # border trees, back to front
+        for y in range(H):
+            for x in range(W):
+                if rows[y][x] != "#": continue
+                tr = trees[(x * 7 + y * 3) % len(trees)]
+                # the bottom row sits low so its canopy never hides what stands on the row above
+                paste_clip(g, tr, x * T - 8, y * T - (4 if y == H - 1 else 14))
+        out = os.path.join(ROOT, "art", "maps"); os.makedirs(out, exist_ok=True)
+        g.resize((W * T * 3, H * T * 3), Image.NEAREST).save(os.path.join(out, name + ".png"))
+        print("ok", name, (W * T * 3, H * T * 3))
+    ob = os.path.join(ROOT, "art", "objects"); os.makedirs(ob, exist_ok=True)
+    trees[1].save(os.path.join(ob, "tree.png")); tile(nature, 6, 11).save(os.path.join(ob, "flower.png"))
+    print("ok objects tree, flower")
+
+def paste_clip(dst, im, x, y):
+    # alpha_composite refuses negative offsets: crop what falls outside first
+    cx, cy = max(0, -x), max(0, -y)
+    part = im.crop((cx, cy, min(im.width, dst.width - x), min(im.height, dst.height - y)))
+    if part.width > 0 and part.height > 0: dst.alpha_composite(part, (x + cx, y + cy))
+
+def auto(block, same):
+    """One 16 px tile from 8 px quarters of a 4 x 4 autotile block, chosen by the 8 neighbours."""
+    im, c0, r0 = block
+    q = lambda c, r, qx, qy: im.crop(((c0 + c) * T + qx * 8, (r0 + r) * T + qy * 8, (c0 + c) * T + qx * 8 + 8, (r0 + r) * T + qy * 8 + 8))
+    out = Image.new("RGBA", (T, T))
+    for qx in (0, 1):
+        for qy in (0, 1):
+            sx, sy = (1 if qx else -1), (1 if qy else -1)
+            h, v, d = same(sx, 0), same(0, sy), same(sx, sy)
+            ex, ey = (3 if qx else 0), (3 if qy else 0)       # the block's outer column / row on this side
+            ix, iy = (1 if qx else 2), (1 if qy else 2)       # the island tile whose quarter on this side is solid
+            if h and v and d: piece = q(2 if qx else 1, 2 if qy else 1, qx, qy)            # solid: the island tile on the far side
+            elif h and v: piece = q(ix, iy, qx, qy)                                        # inner corner
+            elif h: piece = q(1 + qx, ey, qx, qy)                                          # top or bottom edge
+            elif v: piece = q(ex, 1 + qy, qx, qy)                                          # left or right edge
+            else: piece = q(ex, ey, qx, qy)                                                # outer corner
+            out.alpha_composite(piece, (qx * 8, qy * 8))
+    return out
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2: print(__doc__)
+    else: main(sys.argv[1])

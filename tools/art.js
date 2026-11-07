@@ -16,6 +16,8 @@ const zones = [...zonesSrc.matchAll(/^  (\w+): \{/gm)].map((m) => m[1]);
 const bosses = [...zonesSrc.matchAll(/boss: "(\w+)"/g)].map((m) => m[1]);
 const pauseKinds = ["camino", "pelea", "cofre", "descanso", "jefe", "victoria", "regreso"];
 const maps = ["home", "vado"];
+// the things world.js draws on the maps (drawObj kinds named in MAPS deco and places)
+const objKinds = [...new Set([...read("world.js").matchAll(/(?:obj: |\[)"(\w+)"/g)].map((m) => m[1]))];
 
 // PNG header: width, height, colour type; alpha check for creature sheets (decodes 8-bit RGBA, non-interlaced)
 function png(file) {
@@ -49,6 +51,7 @@ const RULES = {
   maps: { ids: maps.flatMap((m) => [m, m + "-front"]), check: (p) => p.w === 720 && p.h === 528, size: "720 × 528" },
   battle: { ids: zones.flatMap((z) => [z + "-day", z + "-night"]), check: (p) => p.w === 360 && p.h === 240, size: "360 × 240" },
   pause: { ids: zones.flatMap((z) => pauseKinds.map((k) => z + "-" + k)), check: (p) => p.w === 256 && p.h === 192, size: "256 × 192" },
+  objects: { ids: objKinds, check: (p) => p.w <= 64 && p.h <= 64, size: "hasta 64 × 64 (16 px por casilla)" },
   events: { ids: null, check: (p) => p.w === 256 && p.h === 192, size: "256 × 192" },
   cards: { ids: null, check: (p) => p.w === 256 && p.h === 192, size: "256 × 192" },
 };
@@ -70,7 +73,7 @@ fs.mkdirSync(dir, { recursive: true });
 const v = files.reduce((h, f) => (h * 31 + [...(f.path + f.w + f.h + fs.statSync(path.join(dir, f.path)).size)].reduce((a, c) => a + c.charCodeAt(0), 0)) >>> 0, 7);
 fs.writeFileSync(path.join(dir, "manifest.json"), JSON.stringify({ v, files }, null, 1) + "\n");
 const have = (folder, id) => files.some((f) => f.path === `${folder}/${id}.png`);
-const batch1 = ["lumo", "fizz", "pebb"].filter((k) => !have("creatures", k)).map((k) => "creatures/" + k).concat(["home", "home-front", "vado", "vado-front"].filter((m) => !have("maps", m)).map((m) => "maps/" + m));
+const batch1 = ["lumo", "fizz", "pebb"].filter((k) => !have("creatures", k)).map((k) => "creatures/" + k).concat(["home", "vado"].filter((m) => !have("maps", m)).map((m) => "maps/" + m));
 console.log(`Arte PNG: ${files.length} archivos en art/ (manifest escrito).`);
 console.log(`Lote 1 pendiente: ${batch1.length ? batch1.join(", ") : "completo"}`);
 console.log(`Criaturas ${kinds.filter((k) => have("creatures", k)).length}/${kinds.length} · guardianes ${bosses.filter((k) => have("guardians", k)).length}/${bosses.length} · combate ${zones.filter((z) => have("battle", z + "-day")).length}/${zones.length}`);
