@@ -57,6 +57,13 @@ const MONCOL = {
 };
 function drawMon(c, kind, o) {
   const ell = EV.ell;
+  // PNG art (art.js) wins: a 64 px cell drawn at 1.5x, feet (cell y = 60) on the line the drawn creatures stand on
+  const art = typeof EVART !== "undefined" && EVART.creature(kind, o.stage == null ? 1 : o.stage, Math.floor((o.t || 0) * 2) % 2, o.ko ? "sad" : o.hp < 0.35 ? "sad" : "normal", "front");
+  if (art) {
+    c.save(); c.imageSmoothingEnabled = false; c.globalAlpha *= 0.25; c.fillStyle = "#1d1626"; c.fillRect(-30, 40, 60, 5); c.restore();
+    c.save(); c.imageSmoothingEnabled = false; c.drawImage(art, -48, 44 - 90, 96, 96); c.restore();
+    return;
+  }
   if ((kind === "lumo" || kind === "fizz" || kind === "pebb") && typeof PX !== "undefined") {
     const st = o.stage == null ? 1 : o.stage, n = [12, 16, 20][st];
     const sp = PX.sprite(kind, n, st, Math.floor(o.t * 2) % 2, o.ko ? "sleep" : o.hp < 0.35 ? "sad" : "normal", o.hollow || o.form === "scruffy");

@@ -10,7 +10,9 @@ const read = (f) => fs.readFileSync(path.join(root, f), "utf8");
 const warns = [];
 
 // the ids the game knows
-const kinds = ((read("sprites.js").match(/const KINDS = \[([^\]]*)\]/) || ["", ""])[1].match(/"(\w+)"/g) || []).map((s) => s.slice(1, -1));
+const wild = [...read("rpg/data-wild.js").matchAll(/^    \["(\w+)", "/gm)].map((m) => m[1]);
+const kinds0 = ((read("sprites.js").match(/const KINDS = \[([^\]]*)\]/) || ["", ""])[1].match(/"(\w+)"/g) || []).map((s) => s.slice(1, -1));
+const kinds = kinds0.concat(wild);
 const zonesSrc = read("rpg/data-zones.js");
 const zones = [...zonesSrc.matchAll(/^  (\w+): \{/gm)].map((m) => m[1]);
 const bosses = [...zonesSrc.matchAll(/boss: "(\w+)"/g)].map((m) => m[1]);
@@ -77,5 +79,5 @@ const have = (folder, id) => files.some((f) => f.path === `${folder}/${id}.png`)
 const batch1 = ["lumo", "fizz", "pebb"].filter((k) => !have("creatures", k)).map((k) => "creatures/" + k).concat(["home", "vado"].filter((m) => !have("maps", m)).map((m) => "maps/" + m));
 console.log(`Arte PNG: ${files.length} archivos en art/ (manifest escrito).`);
 console.log(`Lote 1 pendiente: ${batch1.length ? batch1.join(", ") : "completo"}`);
-console.log(`Criaturas ${kinds.filter((k) => have("creatures", k)).length}/${kinds.length} · guardianes ${bosses.filter((k) => have("guardians", k)).length}/${bosses.length} · combate ${zones.filter((z) => have("battle", z + "-day")).length}/${zones.length}`);
+console.log(`Criaturas ${kinds0.filter((k) => have("creatures", k)).length}/${kinds0.length} · guardianes ${bosses.filter((k) => have("guardians", k)).length}/${bosses.length} · combate ${zones.filter((z) => have("battle", z + "-day")).length}/${zones.length}`);
 for (const w of warns) console.log("! " + w);

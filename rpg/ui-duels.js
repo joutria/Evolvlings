@@ -24,7 +24,7 @@ const duelOpen = () => Object.values(EV.P.cleared || {}).some((n) => n > 0);
 // a small seeded random so a neighbour's team stays the same all week
 function seeded(str) { let h = 2166136261; for (const ch of str) h = Math.imul(h ^ ch.charCodeAt(0), 16777619) >>> 0; return () => { h = Math.imul(h ^ (h >>> 15), 2246822507) >>> 0; h = Math.imul(h ^ (h >>> 13), 3266489909) >>> 0; h ^= h >>> 16; return (h >>> 0) / 4294967296; }; }
 const STORY_KINDS = ["lumo", "fizz", "pebb", "unisona"];
-const duelKinds = (circle) => Object.keys(MONS).filter((k) => !MONS[k].boss && !MONS[k].story && !STORY_KINDS.includes(k) && CIRCLE[MONS[k].types[0]] === circle);
+const duelKinds = (circle) => Object.keys(MONS).filter((k) => !MONS[k].boss && !MONS[k].story && !MONS[k].wild && !STORY_KINDS.includes(k) && CIRCLE[MONS[k].types[0]] === circle);
 // a neighbour's team this week, as members in the same shape as a team code
 function neighbourTeam(n) {
   const R = rpgState(), r = seeded(duelState().wk + ":" + n.id), pool = duelKinds(n.circle), out = [];

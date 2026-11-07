@@ -149,7 +149,7 @@ function inPage(facts) {
     for (const c of m.cards) if (!CARDS[c]) E(`creature ${k}: card "${c}" is not in CARDS`);
     if (EV.RPG.monName(k) === k) E(`creature ${k}: no display name`);
     const boss = Object.values(ZONES).some((z) => z.boss === k);
-    if (!boss && window.EVS && EVS.KINDS && !EVS.KINDS.includes(k)) W(`creature ${k}: no sprite in sprites.js`); // bosses are drawn by rpg/ui-art.js
+    if (!boss && !m.wild && window.EVS && EVS.KINDS && !EVS.KINDS.includes(k)) W(`creature ${k}: no sprite in sprites.js`); // bosses are drawn by rpg/ui-art.js
   }
   // cards
   for (const id of Object.keys(CARDS)) {
