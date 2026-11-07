@@ -428,6 +428,7 @@ function drawWorld(g, now) {
     } else { g.fillStyle = C.gold; g.beginPath(); g.arc(bx, by - 7 - bob, 6, 0, Math.PI * 2); g.fill(); }
   } });
   items.sort((a, b) => a.y - b.y).forEach((it) => it.draw());
+  if (EV.WEATHER) EV.WEATHER.draw(g, now, W, H);
   if (!isDay()) { g.fillStyle = "rgba(31,47,92,.32)"; g.fillRect(0, 0, W, H); }
   if (S && S.sleeping) { g.fillStyle = "rgba(14,8,20,.35)"; g.fillRect(0, 0, W, H); }
   return pos;
@@ -755,7 +756,9 @@ function stageBits(on, talking) {
     mn.hidden = !show;
   }
   if (tag) {
-    const s = steps(), th = on && !menuOn && w.map !== "home" ? `${esc(tx("map." + w.map))} · 👣 ${s ? s.n : 0}` : "";
+    const s = steps(), Wt = EV.WEATHER, wx = Wt && Wt.now() !== "clear" ? Wt.label() : "";
+    const th = !on || menuOn ? "" : w.map !== "home" ? `${esc(tx("map." + w.map))} · 👣 ${s ? s.n : 0}${wx ? " · " + esc(Wt.icon()) : ""}` : wx ? esc(wx) : "";
+    if (on && wx) Wt.maybeTip();
     if (tag.innerHTML !== th) tag.innerHTML = th;
     tag.hidden = !th;
   }
@@ -877,5 +880,5 @@ function addPlace(mapId, p) {
   render();
   return p;
 }
-EV.WORLD = { MAPS, addPlace, ACT, STEPS, steps, spendSteps, gainFromEnergy, path, choose, render, refreshChip, careWalk, bedtime, topOn, homeExtras, circle, bottleHere, get state() { return ws(); }, get dialog() { return dialog; } };
+EV.WORLD = { MAPS, addPlace, stageBits, ACT, STEPS, steps, spendSteps, gainFromEnergy, path, choose, render, refreshChip, careWalk, bedtime, topOn, homeExtras, circle, bottleHere, get state() { return ws(); }, get dialog() { return dialog; } };
 })();

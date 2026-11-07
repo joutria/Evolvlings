@@ -225,6 +225,10 @@ Every Refuge companion is born with one small trait of its own (the second MiniT
 - **Friends' codes**: "Your team code" turns your creature and your saved team's companions (cards, talents, birth traits, stars, Bond) into a `EVO1-…` text code. Pasting a friend's code saves their team (up to 6) to fight against, played by the AI. The first win against each code gives ✦ 20 and ∴ 5, at most 3 times a week, so made-up codes can't be farmed. Pasted codes are fully validated (known creatures and cards, level and grade ranges, a short plain-text name).
 - Saved in `P.duel` (`EV.slice("duel")`). The duel reuses the expedition pick screen and battle (`X.duel`), with no zone bonus.
 
+## Gentle weather
+
+`weather.js` gives the Glade and El Vado rain, fog or snow. The weather changes every 6 hours and is picked from the date, so every device shows the same sky and nothing is saved. It follows the season (northern calendar): snow only in winter, more rain in spring and autumn, mostly clear in summer. It only ever helps (design rule 2): rain makes the garden grow 25% faster, fog makes your creature tire 15% more slowly, snow makes it get bored 20% more slowly; effects apply only while the game is open. The window shows the weather and its effect, the map draws the drops, flakes or fog banks, and the Guide explains it the first time. For tests: `EV.WEATHER.force("rain")`.
+
 ## Expeditions left halfway are kept
 
 Closing the game in the middle of an expedition loses nothing (design rule 3). The trip is saved at every stop: the path choice, an event, a reward and the look before a fight. The home button then reads "Resume the expedition" and takes you back to that stop, without spending energy again. A fight in progress starts again from its beginning, with the health the party had before it. Duels are not kept. The saved trip lives in `P.run`, and it is forgotten when the trip ends or when you raise a different creature.
