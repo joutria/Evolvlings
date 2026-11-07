@@ -7,7 +7,8 @@ Needs Pillow. Run from the repo root with the pack's folder (the one holding Bac
 It reads the 15 x 11 rows of every map in world.js and paints them tile by tile at 16 px: grass, dirt paths and ponds
 with autotiled edges, trees on the border (#), rocks (r). Ponds and paths pick each 8 px quarter from the pack's
 autotile block by looking at the neighbours. Out come art/maps/<map>.png (720 x 528, the 16 px tiles at 3x) and
-art/objects/tree.png and flower.png, which replace the drawn trees and flowers."""
+art/objects/tree.png, flower.png, well.png and tila.png, which replace the drawn ones, and art/faces/tila.png, Tila's
+face in conversations (the pack's Woman)."""
 import sys, os, re
 from PIL import Image
 
@@ -50,7 +51,12 @@ def main(pack):
         print("ok", name, (W * T * 3, H * T * 3))
     ob = os.path.join(ROOT, "art", "objects"); os.makedirs(ob, exist_ok=True)
     trees[1].save(os.path.join(ob, "tree.png")); tile(nature, 6, 11).save(os.path.join(ob, "flower.png"))
-    print("ok objects tree, flower")
+    # the Vado well (roofed) and Tila: the pack's Woman, standing facing us, with her face for the conversations
+    el = ts("TilesetElement"); well = el.crop((112, 16, 128, 64)); well.crop(well.getbbox()).save(os.path.join(ob, "well.png"))
+    ch = lambda n, f: Image.open(os.path.join(pack, "Actor", "Characters", n, f)).convert("RGBA")
+    ch("Woman", os.path.join("SeparateAnim", "Idle.png")).crop((0, 0, 16, 16)).save(os.path.join(ob, "tila.png"))
+    fc = os.path.join(ROOT, "art", "faces"); os.makedirs(fc, exist_ok=True); ch("Woman", "Faceset.png").save(os.path.join(fc, "tila.png"))
+    print("ok objects tree, flower, well, tila; face tila")
 
 def paste_clip(dst, im, x, y):
     # alpha_composite refuses negative offsets: crop what falls outside first

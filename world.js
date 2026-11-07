@@ -723,7 +723,7 @@ function portrait(who, emo) {
   g.fillStyle = "#e9d8b4"; g.fillRect(0, 0, 40, 40);
   g.save();
   if (who === "root") drawObj(g, "root", 20, 34, performance.now());
-  else if (who === "tila") tilaBust(g, emo);
+  else if (who === "tila") { const f = typeof EVART !== "undefined" && EVART.image("faces/tila.png"); if (f) g.drawImage(f, Math.floor((40 - f.width) / 2), Math.floor((40 - f.height) / 2)); else tilaBust(g, emo); }
   else if (who === "pet") petPortrait(g, emo);
   else { g.scale(2, 2); drawObj(g, who === "bed" ? "bed" : who === "bottle" ? "bottle" : who === "orders" ? "board" : "sign", 10, who === "bed" ? 21 : 19, 0); }
   g.restore();

@@ -52,6 +52,7 @@ const RULES = {
   battle: { ids: zones.flatMap((z) => [z + "-day", z + "-night"]), check: (p) => p.w === 360 && p.h === 240, size: "360 × 240" },
   pause: { ids: zones.flatMap((z) => pauseKinds.map((k) => z + "-" + k)), check: (p) => p.w === 256 && p.h === 192, size: "256 × 192" },
   objects: { ids: objKinds, check: (p) => p.w <= 64 && p.h <= 64, size: "hasta 64 × 64 (16 px por casilla)" },
+  faces: { ids: ["tila"], check: (p) => p.w <= 40 && p.h <= 40, size: "hasta 40 × 40" },
   events: { ids: null, check: (p) => p.w === 256 && p.h === 192, size: "256 × 192" },
   cards: { ids: null, check: (p) => p.w === 256 && p.h === 192, size: "256 × 192" },
 };
