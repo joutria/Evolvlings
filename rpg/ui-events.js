@@ -228,6 +228,7 @@ function endHtml() {
 }
 function goHome() {
   if (battle) { cancelAnimationFrame(battle.raf); battle = null; }
+  clearRun();
   X = null; view = null;
   EV.showScreen(); EV.renderAll();
   window.scrollTo({ top: 0, behavior: "smooth" });
