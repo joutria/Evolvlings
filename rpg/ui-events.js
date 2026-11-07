@@ -73,7 +73,8 @@ const EVT_ALT = { es: RPG_ES.EVT_ALT, en: RPG_EN.EVT_ALT };
 // lore events share the encounter view
 if (LORE) for (const lg of ["es", "en"]) Object.assign(EVT[lg], LORE.LORE_EVT[lg]);
 // a short event shows its own scene when it has one, else the zone's path picture
-const shortScene = () => (window.EVSCENE && EVSCENE.EVNOTE && EVSCENE.EVNOTE[X.event] ? `<div class="talk-scene" data-evscene="${X.event}"></div>` : pauseBox("camino"));
+// after a choice it asks for that outcome's picture (EVSCENE.end(id, choice)), keeping the event's own picture until one exists
+const shortScene = () => (window.EVSCENE && EVSCENE.EVNOTE && EVSCENE.EVNOTE[X.event] ? `<div class="talk-scene" data-evscene="${X.event}"${X.eventOut != null && X.eventPick != null ? ` data-evend="${X.eventPick}"` : ""}></div>` : pauseBox("camino"));
 function eventHtml() {
   if (X.talk && X.talk.id === X.event) return talkHtml();
   const E = EVT[L()][X.event];
@@ -120,7 +121,7 @@ function chooseEvent(i) {
   const out = runFx(fxOf(X.event)[i] || {}, E, E.o[i]);
   if (out == null) return;
   if (le) { (EV.P.loreSeen = EV.P.loreSeen || {})[X.event] = 1; EV.save(); }
-  X.eventOut = out;
+  X.eventOut = out; X.eventPick = i;
   EV.sfx("tap");
   render();
 }
