@@ -242,7 +242,7 @@ After adding files run `node tools/art.js`: it writes the manifest and warns abo
 
 ## Creatures from the pack
 
-Since 2026-11-07 every creature, story ones included, is a monster of the CC0 Ninja Adventure pack (Jose's call, for one consistent look). `tools/ninja-maps.py` lists which monster each creature is; its stages are the monster at 2x and 3x, and the adult at 4x in the pack's second colour when it has one. `art.js` also answers `EVS.sprite` and `PX.sprite` with the sheet (read back at its own pixel size and scaled by a whole number), so cards, the Refuge, eggs and portraits show the same pictures as battles and the home. The places on the maps (bed, bowl, boards, signs, lamps, stall, nests, shop, lectern) come from the same pack; the Root, the garden and the foraging nook are still drawn.
+Since 2026-11-07 every creature, story ones included, is a monster of the CC0 Ninja Adventure pack (Jose's call, for one consistent look). `tools/ninja-maps.py` lists which monster each creature is; its stages are the monster at 2x and 3x, and the adult at 4x in the pack's second colour when it has one. `art.js` also answers `EVS.sprite` and `PX.sprite` with the sheet (read back at its own pixel size and scaled by a whole number), so cards, the Refuge, eggs and portraits show the same pictures as battles and the home. The nine guardians are the pack's bosses (two idle frames in 96 px cells, at 2x when that fits; mapping in the same tool). The places on the maps (bed, bowl, boards, signs, lamps, stall, nests, shop, lectern) come from the same pack; the Root, the garden and the foraging nook are still drawn.
 
 ## Wild creatures
 

@@ -99,6 +99,22 @@ def main(pack):
     for id_, mon in wild.items():
         out = Image.new("RGBA", (640, 64)); row(out, 0, mon, 3); out.save(os.path.join(cr, id_ + ".png"))
     print("ok creatures", len(sheets), "+ wild", len(wild))
+    # guardians: the pack's bosses, two idle frames as front A and B in 96 px cells (2x when that still fits)
+    bosses = {"farol": "GiantSpirit", "forja": "GiantFlam", "seto": "GiantFrog", "mira": "DemonCyclop2", "grava": "GiantRacoon",
+              "trono": "TenguRed", "veleta": "TenguBlue", "micelio": "GiantFrog2", "raiz": "DemonCyclop"}
+    gd = os.path.join(ROOT, "art", "guardians"); os.makedirs(gd, exist_ok=True)
+    for id_, boss in bosses.items():
+        d = os.path.join(pack, "Actor", "Boss", boss)
+        idle = Image.open(os.path.join(d, next(n for n in sorted(os.listdir(d)) if n.lower().startswith("idle")))).convert("RGBA")
+        fh = idle.height; out = Image.new("RGBA", (192, 96))
+        for cell, i in enumerate((0, 2)):
+            fr = idle.crop((i * fh, 0, i * fh + fh, fh)); bb = fr.getbbox()
+            if not bb: continue
+            fr = fr.crop(bb); k = 2 if fr.height * 2 <= 94 and fr.width * 2 <= 96 else 1
+            fr = fr.resize((fr.width * k, fr.height * k), Image.NEAREST)
+            out.alpha_composite(fr, (cell * 96 + (96 - fr.width) // 2, max(0, 92 - fr.height)))
+        out.save(os.path.join(gd, id_ + ".png"))
+    print("ok guardians", ", ".join(bosses))
 
 def paste_clip(dst, im, x, y):
     # alpha_composite refuses negative offsets: crop what falls outside first

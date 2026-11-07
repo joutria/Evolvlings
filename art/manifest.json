@@ -1,5 +1,5 @@
 {
- "v": 1547429469,
+ "v": 334547215,
  "files": [
   {
    "path": "creatures/ajolin.png",
@@ -145,6 +145,51 @@
    "path": "faces/tila.png",
    "w": 38,
    "h": 38
+  },
+  {
+   "path": "guardians/farol.png",
+   "w": 192,
+   "h": 96
+  },
+  {
+   "path": "guardians/forja.png",
+   "w": 192,
+   "h": 96
+  },
+  {
+   "path": "guardians/grava.png",
+   "w": 192,
+   "h": 96
+  },
+  {
+   "path": "guardians/micelio.png",
+   "w": 192,
+   "h": 96
+  },
+  {
+   "path": "guardians/mira.png",
+   "w": 192,
+   "h": 96
+  },
+  {
+   "path": "guardians/raiz.png",
+   "w": 192,
+   "h": 96
+  },
+  {
+   "path": "guardians/seto.png",
+   "w": 192,
+   "h": 96
+  },
+  {
+   "path": "guardians/trono.png",
+   "w": 192,
+   "h": 96
+  },
+  {
+   "path": "guardians/veleta.png",
+   "w": 192,
+   "h": 96
   },
   {
    "path": "maps/home.png",
