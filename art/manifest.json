@@ -1,6 +1,11 @@
 {
- "v": 63218961,
+ "v": 4044696525,
  "files": [
+  {
+   "path": "faces/tila.png",
+   "w": 38,
+   "h": 38
+  },
   {
    "path": "maps/home.png",
    "w": 720,
@@ -17,9 +22,19 @@
    "h": 16
   },
   {
+   "path": "objects/tila.png",
+   "w": 16,
+   "h": 16
+  },
+  {
    "path": "objects/tree.png",
    "w": 32,
    "h": 32
+  },
+  {
+   "path": "objects/well.png",
+   "w": 16,
+   "h": 21
   }
  ]
 }
