@@ -234,6 +234,8 @@ The drawn creatures and scenes are placeholders. Final art comes as PNG files in
 - `art/events/<id>.png`, `art/events/<id>--<ending>.png`, `art/pause/<zone>-<kind>.png`, `art/cards/<card>.png`: 256 × 192, shown at 2x.
 - `art/battle/<zone>-day.png` and `-night.png` (360 × 240): format fixed, wiring comes with the battle delivery.
 
+Images generated elsewhere (Gemini prompts: one image per stage with the 10 poses in a 5 × 2 grid on flat #00FF00 green) go through `python3 tools/art-import.py` first (needs Pillow): it keys out the green, finds each pose, scales every pose of a sheet by the same factor, stands them on the cell floor, and reduces the colours to one shared palette with hard edges. Run it with no arguments for the modes (creature, guardian, scene, map, battle).
+
 After adding files run `node tools/art.js`: it writes the manifest and warns about wrong sizes, unknown names and semi-transparent creature edges. `tools/build-single.py` inlines the art into the one-file build.
 
 ## Savia levels per zone
