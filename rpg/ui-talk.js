@@ -104,12 +104,16 @@ function talkHtml() {
     return `<button class="btn ghost${o.cNeed ? " talk-new" : ""}" type="button" data-tk="${i}" ${poor ? "disabled" : ""}>${esc(W.opt(T.hub, i))}${o.fx && o.fx.cost ? ` <small>(✦ ${o.fx.cost})</small>` : ""}${o.cNeed ? `<small class="talk-why">${esc(tx("talk.new"))}</small>` : ""}</button>`;
   }).join("")}</div>`;
   const scene = window.EVSCENE && EVSCENE.event && EVSCENE.EVNOTE && EVSCENE.EVNOTE[T.id];
-  return `<div class="panel talk"><div class="sub">${esc(tx("node.event"))} · ${esc(tx("talk.k." + ev.kind))}</div>${scene ? `<div class="talk-scene" data-evscene="${T.id}"></div>` : ""}<div class="talk-log" id="talkLog" aria-live="polite">${lines}</div>${foot}</div><div class="panel"><h3>${esc(tx("exp.party"))}</h3>${partyHtml()}</div>`;
+  return `<div class="panel talk"><div class="sub">${esc(tx("node.event"))} · ${esc(tx("talk.k." + ev.kind))}</div>${scene ? `<div class="talk-scene" data-evscene="${T.id}"${T.end ? ` data-evend="${T.end}"` : ""}></div>` : ""}<div class="talk-log" id="talkLog" aria-live="polite">${lines}</div>${foot}</div><div class="panel"><h3>${esc(tx("exp.party"))}</h3>${partyHtml()}</div>`;
 }
-// puts the event's picture in place after a render (the canvas is drawn once and reused)
+// puts the event's picture in place after a render (the canvas is drawn once and reused). At an ending it shows that
+// ending's own picture (EVSCENE.end(id, end node or choice index)) when the scenes module has one.
 function talkMount(root) {
   root.querySelectorAll("[data-evscene]").forEach((box) => {
-    const cv = EVSCENE.event(box.dataset.evscene); if (!cv) return;
+    const id = box.dataset.evscene, end = box.dataset.evend;
+    let cv = null;
+    if (end != null && EVSCENE.end) { try { cv = EVSCENE.end(id, /^\d+$/.test(end) ? +end : end); } catch (e) { /* art is decoration */ } }
+    if (!cv) cv = EVSCENE.event(id); if (!cv) return;
     const n = EVSCENE.EVNOTE[box.dataset.evscene];
     cv.setAttribute("role", "img"); if (n && n.scene) cv.setAttribute("aria-label", n.scene);
     box.appendChild(cv);

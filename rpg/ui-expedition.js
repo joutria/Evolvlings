@@ -412,7 +412,7 @@ function render() {
   el.innerHTML = head + body;
   if (view === "pick") el.querySelectorAll("canvas[data-mon]").forEach(paintMon);
   if (view === "battle") battleMount();
-  if (view === "event" && X.talk) talkMount(el);
+  if (view === "event") talkMount(el);
   pauseMount(el);
   if (view === "zones") pmapMount();
   el.querySelectorAll("canvas[data-key]").forEach((c) => drawKeyIcon(c.getContext("2d"), c.dataset.key, 8, 8, true));
