@@ -1,5 +1,5 @@
 {
- "v": 334547215,
+ "v": 3514142865,
  "files": [
   {
    "path": "creatures/ajolin.png",
@@ -139,6 +139,16 @@
   {
    "path": "creatures/yunqueron.png",
    "w": 640,
+   "h": 192
+  },
+  {
+   "path": "events/farolero.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/fuera.png",
+   "w": 256,
    "h": 192
   },
   {
