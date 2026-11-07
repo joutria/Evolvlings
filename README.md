@@ -232,7 +232,7 @@ The drawn creatures and scenes are placeholders. Final art comes as PNG files in
 - `art/creatures/<kind>.png`: 64 px cells, 10 columns (front A/B, back A/B, side facing right A/B, happy, sad, surprised, asleep) and one row per stage. `art/guardians/<kind>.png`: the same in 96 px cells.
 - `art/maps/home.png` and `home-front.png` (720 × 528, the 15 × 11 grid at 48 px; front holds what covers the creature). The home is drawn at 3x when there is PNG art for it, so every pixel shows.
 - `art/events/<id>.png`, `art/events/<id>--<ending>.png`, `art/pause/<zone>-<kind>.png`, `art/cards/<card>.png`: 256 × 192, shown at 2x.
-- `art/battle/<zone>-day.png` and `-night.png` (360 × 240): format fixed, wiring comes with the battle delivery.
+- `art/battle/<zone>-day.png` and `-night.png` (360 × 240) replace the drawn battle sky and ground (if only one exists it is used for both). In battle, creature and guardian sheets are drawn 1:1 on the full-size canvas, facing sideways when calm and using the emotion frames when hit, casting or weak; hollowed foes are dimmed towards plum. Savia, formation patches, bars and card effects keep drawing on top.
 
 Images generated elsewhere (Gemini prompts: one image per stage with the 10 poses in a 5 × 2 grid on flat #00FF00 green) go through `python3 tools/art-import.py` first (needs Pillow): it keys out the green, finds each pose, scales every pose of a sheet by the same factor, stands them on the cell floor, and reduces the colours to one shared palette with hard edges. Run it with no arguments for the modes (creature, guardian, scene, map, battle).
 
