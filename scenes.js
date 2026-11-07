@@ -1460,7 +1460,9 @@ function pixFig(fn, res = 2) {
   for (let i = 0; i < d.length; i += 4) { if (d[i + 3] < 165) { d[i + 3] = 0; continue; } d[i + 3] = 255; }
   g.putImageData(im, 0, 0); return c;
 }
+let PLATECAP = null; // set by the ending composer to grab a scene's backdrop and figures instead of rendering
 function plate(b, figs, res = 2) {
+  if (PLATECAP) { PLATECAP.b = b; PLATECAP.figs = figs; PLATECAP.res = res; return null; }
   const c = canvas(EW * EK, EH * EK), g = c.getContext("2d"), s = canvas(EW, EH); b.draw(s.getContext("2d"));
   g.imageSmoothingEnabled = false; g.drawImage(s, 0, 0, EW * EK, EH * EK);
   if (figs) g.drawImage(pixFig(figs, res), 0, 0, EW * EK, EH * EK); return c;
@@ -3077,6 +3079,256 @@ EVSC.cantora = () => { const b = new Pic(EW, EH); const gy = zoneBack(b, "heart"
   b.layer((t) => { t.r(52, 84, 24, 6, P.plum2); t.r(56, 44, 16, 40, P.mist); t.e(64, 40, 7, 7, P.mist); t.e(64, 42, 1.4, 1.6, P.plum2); t.poly([[56, 48], [48, 64], [56, 64]], P.mist); t.poly([[72, 48], [80, 64], [72, 64]], P.mist);
     t.e(60, 50, 5, 4, P.moss2); t.e(68, 70, 6, 5, P.moss2); t.e(62, 34, 5, 2, P.moss2); }, OL);
   return plate(b, (g) => { HD.creature(g, "fizz", 30, 88, { s: 1.3, emo: "happy" }); HD.creature(g, "pebb", 100, 90, { s: 1.3, emo: "sleep", dir: -1 }); }); };
+/* ================= Scenes for the 6 lore events (lore.js LORE_EVENTS) ================= */
+EVNOTE.lowlight = { scene: "De noche en el Vado. Tila mira su aceitera vacía bajo el único farol que queda encendido en su calle." };
+EVSC.lowlight = () => { const b = new Pic(EW, EH); barrio(b, { seed: 47 });
+  poorH(b, -6, 30, 50, 38, [[10, 8, 0], [30, 8, 0]], 20); poorH(b, 82, 32, 52, 36, [[10, 8, 0], [32, 8, 0]], null);
+  dirt(b, 68);
+  lamp2(b, 70, 86, 34, { r: 13, k: .32 });
+  b.layer((t) => { for (let x = 0; x < EW; x += 9) t.r(x + ((x / 9) % 2) * 4, 90, 6, 1, P.plum2); }, OL);
+  return plate(b, (g) => { F(g, 50, 92, CAST.tila, { s: 1.85, emo: "sad", front: [58, 72], hold: (q, x, y) => HD.shape(q, (z) => z.roundRect(x - .6, y - .2, 2.6, 3, .4), { fill: P.mist, shade: P.plum3, lw: .3 }) }); }); };
+
+EVNOTE.nightshift = { scene: "Una sombra cubierta de polvo dorado camina de noche hacia las afueras del Prado, donde no hay nada." };
+EVSC.nightshift = () => { const b = new Pic(EW, EH); const gy = zoneBack(b, "aurora", { night: true });
+  tint(b, 0, 0, EW, EH, P.ink, .25);
+  for (let i = 0; i < 14; i++) b.p(70 + (i * 7) % 20, 50 + (i * 11) % 34, P.butter);
+  return plate(b, (g) => { F(g, 78, 90, CAST.night, { s: 1.9, dir: 1, cloth: [mix(P.plum1, P.butter, .25), P.plum1, P.butter], hat: { k: "hood", c: [P.plum2, P.plum1] }, emo: "closed" }); }); };
+
+EVNOTE.seer = { scene: "Orilla, arrodillada junto a un charco del Arroyo, ofrece mirar el agua por ti. Madre Marejada se interpone." };
+EVSC.seer = () => { const b = new Pic(EW, EH); const gy = zoneBack(b, "lake");
+  b.layer((t) => { t.e(52, 84, 18, 5, P.sea1); t.e(52, 84, 14, 3, mix(P.sea2, P.cream, .25)); }, OL);
+  return plate(b, (g) => { F(g, 40, 90, CAST.orilla, { s: 1.75, pose: "kneel", front: [50, 84], emo: "o" }); F(g, 92, 92, CAST.marejada, { s: 1.9, dir: -1, front: [80, 72], emo: "closed" }); }); };
+
+EVNOTE.lena = { scene: "En la forja, Maese Tizón se limpia las manos. Detrás, una enfriadora de las Mareas se venda las manos en silencio." };
+EVSC.lena = () => { const b = new Pic(EW, EH); forgeIn(b, 64);
+  anvil(b, 40, 88);
+  return plate(b, (g) => { F(g, 80, 92, CAST.tizon, { s: 2, dir: -1, front: [70, 70], emo: "happy" }); F(g, 112, 90, CAST.ola, { s: 1.55, pose: "sit", dir: -1, front: [104, 84], back: [108, 84], emo: "sad" }); }); };
+
+EVNOTE.echo = { scene: "Grabado en la roca de la cueva, con letra temblorosa: «Aquí sigue Grava». Del fondo llega media canción." };
+EVSC.echo = () => { const b = new Pic(EW, EH); const gy = zoneBack(b, "caves");
+  b.layer((t) => { t.r(30, 30, 50, 22, mix(P.soil1, P.plum2, .4)); }, OL);
+  for (let i = 0; i < 5; i++) b.r(34 + i * 9, 38 + (i % 2), 6, 1, P.cream); for (let i = 0; i < 3; i++) b.r(40 + i * 10, 44, 7, 1, P.cream);
+  wallLamp(b, 98, 40);
+  return plate(b, (g) => { HD.creature(g, "unisona", 96, 84, { s: 1.3, emo: "closed", dir: -1 }); HD.creature(g, "ecolito", 22, 88, { s: 1.2, emo: "o" });
+    [[86, 44], [92, 36], [100, 30]].forEach(([x, y]) => HD.shape(g, (q) => q.ellipse(x, y, 1.3, 1, 0, 0, Math.PI * 2), { fill: P.cream, lw: .3 })); }); };
+
+EVNOTE.skylog = { scene: "Coplo espera en un mirador de los Altos con el registro del tiempo de la Casa del Trueno abierto en las manos." };
+EVSC.skylog = () => { const b = new Pic(EW, EH); const gy = zoneBack(b, "heights");
+  return plate(b, (g) => { F(g, 62, 90, CAST.coplo, { s: 1.95, emo: "o", front: [72, 70], back: [56, 70],
+    hold: (q, x, y) => HD.shape(q, (z) => z.rect(x - 2, y - 2, 6, 4), { fill: P.cream, lw: .3 }) }); }); };
+/* ================= One picture per resolution =================
+   EVSCENE.end(id, key) → 512x384 canvas (null = keep the start picture).
+   Conversations (window.EVEVENTS): key = end node id. Short events (rpg/data-events.js) and lore events: key = choice index.
+   Each ending is drawn from the event's own scene: its backdrop and people, re-lit for the outcome, sometimes seen up close,
+   with your team and what the outcome brings (foes, a card, a fire, Chispas, a letter...). END_SPEC adds hand-picked details. */
+
+// zone of each short / lore event, and what each choice does (copied from rpg/data-events.js and lore.js, rolls and ifs folded)
+const SHORT_ZONE = { farol: "aurora", patrol: "aurora", tila: "aurora", well: "forest", dam: "crater", apprentice: "crater", ola: "crater", liquen: "forest", vines: "forest", loggers: "forest",
+  court: "hollow", dig: "hollow", whisper: "hollow", orilla: "lake", reflection: "lake", boats: "lake", gravasong: "caves", tunnels: "caves", miners: "caves",
+  coplo: "heights", news: "heights", pass: "heights", esporina: "deep", tomb: "deep", dreams: "deep", duo: "heart", albor: "heart", cantora: "heart",
+  lowlight: "aurora", nightshift: "aurora", seer: "lake", lena: "crater", echo: "caves", skylog: "heights" };
+const SHORT_FX = {
+  farol: [{ hurt: .1, xp: 15 }, { coins: 12, foeBuff: 15 }, {}], patrol: [{ xp: 8 }, { fight: true, card: true }, { cost: 8 }], tila: [{ cost: 10, heal: .4 }, { xp: 12 }, {}],
+  well: [{ heal: .5 }, { xp: 14 }, { card: true }], dam: [{ hurt: .08, xp: 16 }, { card: true }, {}], apprentice: [{ hurt: .1, coins: 10 }, { xp: 12 }, {}],
+  ola: [{ xp: 15 }, { heal: .3 }, {}], liquen: [{ cost: 10, card: true }, { xp: 12 }, {}], vines: [{ fight: true }, { hurt: .15 }, {}], loggers: [{ coins: 8, heal: .1 }, { xp: 12 }, {}],
+  court: [{ fight: true }, { heal: .3 }, { xp: 12 }], dig: [{ xp: 14 }, { hurt: .1, coins: 10 }, { card: true }], whisper: [{ xp: 12 }, { cost: 10 }, { fight: true }],
+  orilla: [{ heal: .4, coins: 6 }, { xp: 14 }, {}], reflection: [{ fight: true }, { xp: 14 }, { heal: .2 }], boats: [{ heal: .3, xp: 14 }, { card: true }, {}],
+  gravasong: [{ xp: 16 }, { card: true }, { heal: .15 }], tunnels: [{ coins: 12, foeBuff: 15 }, { hurt: .1, xp: 16 }, {}], miners: [{ hurt: .15, coins: 10 }, { xp: 8 }, {}],
+  coplo: [{ cost: 8, heal: .3 }, { xp: 14 }, { card: true }], news: [{ cost: 6 }, { coins: 10 }, {}], pass: [{ cost: 10 }, { hurt: .15, xp: 18 }, { heal: .3, foeBuff: 15 }],
+  esporina: [{ heal: .5 }, { xp: 16 }, {}], tomb: [{ card: true }, { hurt: .1, xp: 16 }, {}], dreams: [{ xp: 14 }, { heal: .25 }, {}],
+  duo: [{ heal: .45 }, { xp: 20 }, { card: true }], albor: [{ hurt: .15, xp: 28 }, { coins: 18 }, { foeBuff: -15 }], cantora: [{ xp: 12 }, { card: true }, { heal: .35 }],
+  lowlight: [{ cost: 30, heal: .2 }, { xp: 10 }, { xp: 4 }], nightshift: [{ fight: true }, { card: true }, { coins: 50 }], seer: [{ xp: 16 }, { foeBuff: -15 }, { card: true }],
+  lena: [{ coins: 20, xp: 10 }, { xp: 12 }, { xp: 8 }], echo: [{ foeBuff: -25, xp: 10 }, { xp: 10 }, { xp: 14 }], skylog: [{ xp: 18 }, { coins: 40 }, { xp: 6 }] };
+
+// verbs in end-node ids that tell what the moment looks like
+const END_VERB = [
+  [/^(adios|irse|irte|seguir|alejar|vuelta|volver|salir|pasar|rodeo|rodear|cruzar|despacio|correr|dejar\d?|no|fin|espalda|apartar)$/, "leave"],
+  [/^(comer|comida|cenar|brindar|aceite|agua)$/, "meal"],
+  [/^(dormir|descansar|sueno|silencio)$/, "sleep"],
+  [/^(cantar|ensenar|tocar|terminar|trinillas|jugar|patinar|rezar)$/, "song"],
+  [/^(ayudar|ayuda|cavar|ordenar|cargar|empujar|apuntalar|sujetar|fuelle|rueda|lavar|plantar|enterrar|escribir|llevar|dar|prestar|ofrenda)$/, "help"],
+  [/^(pelea|pelear|luchar|romper|sigilo|espantar|forzar|robar|cortar|tirar|quemar|palo)$/, "fight"],
+];
+const verbOf = (k) => { for (const [re, v] of END_VERB) if (re.test(k)) return v; return null; };
+
+// hand-picked details per ending: m mood, team emo/pose, p props, z close-up, npc false = people gone
+const L = { team: "away", m: "dusk" }, Z = { z: 1 }, SONG = { m: "bright", team: "happy", p: ["notes"] };
+const END_SPEC = {
+  // lore events
+  lowlight: { 0: { m: "warm", p: ["lamp", "eyes"] }, 1: { z: 1, p: ["letter"] }, 2: { m: "night", npc: false, team: "sad" } },
+  nightshift: { 0: { m: "night", p: ["gate"] }, 1: { z: 1, p: ["stone"] }, 2: { m: "dusk", p: ["coins"], team: "sad" } },
+  seer: { 0: { z: 1, m: "cold" }, 1: { p: ["drops-blue"], team: "closed" }, 2: { npc: false, m: "sap", p: ["rootlamp"] } },
+  lena: { 0: { z: 1, p: ["coins"], m: "warm" }, 1: { z: 1, team: "sad" }, 2: { m: "red", team: "sad" } },
+  echo: { 0: { m: "bright", p: ["notes"], team: "happy" }, 1: { m: "night", team: "away" }, 2: { m: "cold", team: "closed" } },
+  skylog: { 0: { z: 1, m: "dusk", team: "sad" }, 1: { p: ["coins"], m: "cold" }, 2: { p: ["scroll"], npc: false } },
+  // short events
+  farol: { 0: { m: "warm", p: ["lamp", "scratch"], team: "happy" }, 1: { p: ["coins"], m: "night" } },
+  patrol: { 0: Z, 2: { p: ["coins"], team: "closed" } },
+  tila: { 0: { m: "warm", p: ["cup"], team: "happy" }, 1: Z, 2: { team: "away", m: "night" } },
+  dam: { 0: { m: "bright", p: ["drops-blue", "scratch"] } },
+  apprentice: { 1: Z }, ola: { 0: { z: 1, p: ["letter"] }, 1: { m: "warm", team: "happy" } },
+  liquen: { 1: Z }, loggers: { 0: { p: ["coins", "bread"], team: "happy" }, 1: Z }, dig: { 0: Z }, whisper: { 0: Z, 1: { p: ["coins", "calm"] } },
+  orilla: { 0: { m: "warm", p: ["coins"], team: "happy" }, 1: { z: 1, m: "sap" } }, reflection: { 1: { z: 1, team: "o" } }, boats: { 0: { m: "bright", team: "happy" } },
+  gravasong: { 0: SONG }, tunnels: { 0: { p: ["coins"], m: "night" } }, miners: { 0: { p: ["coins", "scratch"], team: "happy" }, 1: Z },
+  coplo: { 0: SONG, 1: Z }, news: { 0: { p: ["letter", "calm"] }, 1: { p: ["coins"] } }, pass: { 0: { p: ["coins"] }, 1: { m: "cold", team: "sad" }, 2: { m: "warm", p: ["fire"], team: "sleep" } },
+  esporina: { 0: { m: "warm", p: ["cup"], team: "happy" }, 1: Z }, tomb: { 1: { m: "cold", team: "closed", p: ["calm"] } }, dreams: { 0: Z, 1: { m: "warm", team: "sleep", p: ["zzz"] } },
+  duo: { 0: { m: "bright", p: ["notes"], team: "happy" }, 1: Z }, cantora: { 0: { m: "bright", p: ["notes"] }, 2: { m: "warm", team: "sleep" } },
+  albor: { 1: { npc: false, m: "night", p: ["lamp"] }, 2: { p: ["tube"], team: "closed" } },
+  // conversations
+  farolero: { ayuda: { m: "warm", p: ["lamp"] } }, alvar: { casa: Z, chicos: SONG, vuelta: { team: "away", m: "night" } },
+  verja: { tapar: { m: "night", z: 1 }, guarda: { m: "red", team: "sad" } }, multa: { delatar: { m: "cold", p: ["coins"], team: "sad" }, pagar: Z },
+  penumbra: { forro: { z: 1, p: ["letter"] } }, enredado: { luz: { m: "bright", team: "happy" } }, farolera: { ayudar: { m: "warm", p: ["lamp"] } },
+  prestamo: { prestar: { m: "night", p: ["lamp"] }, no: { m: "night", team: "sad" } }, devuelta: { fin: { m: "bright", p: ["lamp"], team: "happy" } },
+  jardinero: { plantar: { p: ["sprout"], team: "happy" }, flor: { z: 1, p: ["flower"] } }, nana: { cantar: { m: "night", p: ["notes"], team: "sleep" } },
+  compuerta: { abrir: { m: "bright", p: ["drops-blue"] } }, carbon: { fuego: { p: ["fire"], m: "warm" } }, pan: { comer: { m: "warm", p: ["bread"], team: "happy" }, comprar: { p: ["bread", "coins"] } },
+  almacen: { contar: { z: 1, p: ["scroll"] } }, escoria: { agua: { p: ["drops-blue"], team: "happy" } }, tizon: { brindar: { m: "warm", p: ["cup"], team: "happy" } },
+  abrojo: { paso: L }, llovizna: { plantar: { p: ["sprout"], m: "bright" } }, agalla: { escuchar: { z: 1, team: "closed" } }, cripta: { comida: { m: "warm", p: ["bowl"] } },
+  silencio: { cantar: SONG }, fuera: { dar: { p: ["bread"], team: "happy" }, ramas: { p: ["fire"], m: "warm" } }, espinas: { liberar: { m: "bright", team: "happy" } },
+  faroles: { tapar: { m: "night", z: 1 } }, velo: { tirar: { m: "bright", npc: false } }, cartas: { llevar: { p: ["letter"] } }, juego: { acercar: Z },
+  noctua: { salir: { m: "night", team: "away" } }, acta: { guardar: { p: ["scroll"] }, quemar: { p: ["fire"], m: "warm", team: "closed" } }, regreso: { volver: { m: "warm", z: 1 } },
+  bajada: { rezar: { p: ["drops-blue"], team: "closed" } }, espejismo: { hablar: Z }, pez: { llevar: { p: ["drops-blue"], team: "happy" } },
+  aguador: { pagar: { p: ["drops-blue", "coins"] } }, diario: { si: { p: ["scroll"] }, hablar: Z }, flotan: { madre: { m: "bright", z: 1 } },
+  ramo: { dejar: { p: ["flower"], team: "closed" } }, lamparas: { aceite: { p: ["lamp"], m: "warm" } }, grieta: { entrar: { m: "sap" } },
+  nombres: { escribir: { p: ["scroll"] } }, mapas: { robar: { p: ["scroll"], m: "night" } }, semillas: { ayudar: { p: ["sprout"], m: "bright" } }, tercero: { seguir: { m: "night", team: "away" } },
+  tormenta: { tapar: { m: "cold", team: "closed" } }, altar: { silencio: { team: "closed", m: "night" } }, herido: { hablar: Z },
+  mensajero: { ayudar: { p: ["letter"], m: "bright" } }, cadenas: { abrir: { p: ["bread"], team: "happy" } }, puente: { correr: { m: "red", team: "surprised" } },
+  campanas: { tocar: SONG }, trinillas: { terminar: { m: "bright", p: ["notes", "glint"] } }, archivo: { ayudar: { p: ["scroll"] } },
+  aguja: { catalejo: { z: 1, m: "sap" } }, muda: { contar: { z: 1, m: "dusk" } },
+  paso: { cavar: { m: "bright", z: 1 } }, hielo: { centro: { m: "warm", team: "surprised" } }, tumba: { grieta: { z: 1, m: "cold", npc: false } }, albina: { adios: { z: 1, m: "cold" } }, despierta: { adios: { z: 1, m: "dusk" } },
+  estatuas: { pacto: Z }, latido: { arpegio: { m: "sap", team: "closed" } }, peregrina: { trinillas: SONG }, bomba: { tumba: { z: 1, m: "dusk" } },
+  hollin: { barrena: { p: ["lamp"], m: "night" }, encender: { p: ["lamp", "scratch"], m: "sap" } }, juramento: { ambas: { m: "bright", z: 1 } },
+};
+
+function endList() { // every ending the game can ask for: [id, key]
+  const out = []; const E = (typeof window !== "undefined" && window.EVEVENTS) || {};
+  Object.values(E).forEach((zone) => Object.entries(zone).forEach(([id, ev]) => Object.entries(ev.nodes).forEach(([k, n]) => { if (n.end) out.push([id, k]); })));
+  Object.entries(SHORT_FX).forEach(([id, l]) => l.forEach((_, i) => out.push([id, i])));
+  return out;
+}
+function convOf(id) { const E = (typeof window !== "undefined" && window.EVEVENTS) || {}; for (const z in E) if (E[z][id]) return [z, E[z][id]]; return null; }
+
+// siblings must not look alike: if an earlier ending of the same event has the same picture, vary this one
+const SIG = (s) => JSON.stringify([s.m, s.team, s.p, s.z, s.npc, s.foes]);
+const VARY = [(s) => { s.z = s.z ? 0 : 1; }, (s) => { s.m = s.m === "night" ? "dusk" : "night"; }, (s) => { s.team = s.team === "away" ? "closed" : "away"; }, (s) => { s.m = "cold"; s.z = s.z ? 0 : 1; }];
+function endKeys(id) { if (SHORT_FX[id]) return SHORT_FX[id].map((_, i) => i); const c = convOf(id); return c ? Object.keys(c[1].nodes).filter((k) => c[1].nodes[k].end) : []; }
+function endSpec(id, key) {
+  const keys = endKeys(id), seen = new Set();
+  for (const k of keys) { const s = endSpec1(id, k); if (!s) return null; let i = 0; while (seen.has(SIG(s)) && i < VARY.length) VARY[i++](s); seen.add(SIG(s)); if (String(k) === String(key)) return s; }
+  return null;
+}
+function endSpec1(id, key) {
+  let fx, zone, verb = null, ev = null;
+  if (SHORT_FX[id]) { fx = SHORT_FX[id][key]; zone = SHORT_ZONE[id]; if (!fx) return null; }
+  else { const c = convOf(id); if (!c) return null; [zone, ev] = c; const n = ev.nodes[key]; if (!n || !n.end) return null; fx = n.end; verb = verbOf(String(key)); }
+  if (zone === "common") zone = null;
+  const s = { m: null, team: "o", p: [], z: 0, npc: true, foes: null, zone };
+  if (fx.fight) { s.foes = fx.foes || (PZ_FOES[zone] || PZ_FOES.forest).filter((f) => !PZ_TEAM.includes(f)).concat(["nim"]).slice(0, 2); s.m = "tense"; s.team = "ready"; }
+  else if (verb === "leave") { s.m = "dusk"; s.team = "away"; }
+  else if (verb === "meal") { s.m = "warm"; s.team = "happy"; s.p.push("bowl"); }
+  else if (verb === "sleep") { s.m = "night"; s.team = "sleep"; s.p.push("zzz"); }
+  else if (verb === "song") { s.m = "bright"; s.team = "happy"; s.p.push("notes"); }
+  else if (verb === "help") { s.team = "happy"; s.z = 1; }
+  else if (fx.hurt) { s.m = "red"; s.team = "sad"; }
+  else if (fx.heal >= .3) { s.m = "warm"; s.team = "sleep"; s.p.push("fire"); }
+  else if (fx.flag && !fx.card) { s.z = 1; s.team = "closed"; }
+  else if (!fx.card && !fx.coins) { s.m = "dusk"; s.team = "away"; }
+  if (fx.card) s.p.push(fx.fight ? "glint" : "card");
+  if (fx.coins) s.p.push("coins");
+  if (fx.hurt && !fx.fight && s.m !== "red") s.p.push("scratch");
+  if (fx.foeBuff < 0 && !fx.fight) s.p.push("calm");
+  const o = END_SPEC[id] && END_SPEC[id][key];
+  if (o) Object.assign(s, o, o.p ? { p: o.p } : {});
+  return s;
+}
+
+// ---- mood: re-light the event's own backdrop (pixel buffer, flat tones) ----
+function endMood(b, m) {
+  if (!m) return;
+  if (m === "dusk") { tint(b, 0, 0, EW, EH, P.plum1, .3); tint(b, 0, 0, EW, 30, P.ember1, .12); }
+  else if (m === "night") { tint(b, 0, 0, EW, EH, P.ink, .45); }
+  else if (m === "warm") { light(b, 64, 76, 70, 34, P.ember3, .32, 4); }
+  else if (m === "bright") { light(b, 64, 30, 74, 46, P.butter, .3, 4); }
+  else if (m === "cold") { tint(b, 0, 0, EW, EH, P.sea1, .3); }
+  else if (m === "red") { tint(b, 0, 0, EW, EH, P.rose0, .22); }
+  else if (m === "sap") { tint(b, 0, 0, EW, EH, SAP.s2, .3); [[20, 70], [44, 60], [70, 66], [96, 56], [112, 74]].forEach(([x, y]) => dropUp(b, x, y)); }
+  else if (m === "tense") { tint(b, 0, 0, EW, EH, P.plum1, .2); tint(b, 0, 0, 14, EH, P.ink, .4); tint(b, EW - 14, 0, 14, EH, P.ink, .4); tint(b, 0, 0, EW, 8, P.ink, .4); }
+}
+
+// ---- foreground: your team and what the outcome brings (vector figures snapped to the pixel grid) ----
+const TEAM_AT = [["lumo", 14, 86, 1.35], ["pebb", 30, 93, 1.35], ["fizz", 46, 84, 1.3]];
+function endFront(g, s) {
+  const away = s.team === "away", ready = s.team === "ready", R = s.side === "right";
+  if (!s.hideTeam) TEAM_AT.forEach(([c, x, y, k], i) => {
+    if (away) HD.creature(g, c, R ? 100 + i * 9 : 28 - i * 9, 86 + (i % 2) * 3, { s: .9, emo: "o", dir: R ? 1 : -1 });
+    else HD.creature(g, c, R ? EW - x : x, y, { s: k, emo: ready ? "o" : s.team, dir: R ? -1 : 1 });
+  });
+  if (s.foes) s.foes.forEach((f, i) => HD.creature(g, f, 90 + i * 20, 86 + (i % 2) * 6, { s: 1.6, emo: "surprised", dir: -1 }));
+  const P2 = s.p || [];
+  const card = (x, y) => { [[0, -10], [7, -7], [-7, -7], [9, 0], [-9, 0]].forEach(([dx, dy]) => HD.stroke(g, (q) => { q.moveTo(x + dx * .7, y + dy * .7); q.lineTo(x + dx, y + dy); }, P.butter, .5));
+    HD.shape(g, (q) => q.roundRect(x - 4, y - 5.5, 8, 11, 1), { fill: P.cream, lw: .5 }); HD.shape(g, (q) => q.roundRect(x - 3, y - 4.5, 6, 6, .6), { fill: P.sea3, lw: .3 });
+    HD.shape(g, (q) => HD.poly(q, [[x, y - 3.6], [x + .8, y - 2], [x + 2.2, y - 1.8], [x + 1.1, y - .8], [x + 1.4, y + .8], [x, y], [x - 1.4, y + .8], [x - 1.1, y - .8], [x - 2.2, y - 1.8], [x - .8, y - 2]]), { fill: P.butter, lw: .25 }); };
+  if (P2.includes("card")) card(64, 52);
+  if (P2.includes("glint")) card(64, 30);
+  if (P2.includes("coins")) [[56, 92], [60, 91], [64, 92], [58, 89], [62, 88], [60, 85]].forEach(([x, y]) => HD.shape(g, (q) => HD.E(q, x, y, 2.2, 1.2), { fill: P.butter, shade: P.ember2, lw: .3 }));
+  if (P2.includes("letter")) { HD.shape(g, (q) => q.rect(58, 78, 12, 8), { fill: P.cream, lw: .5 }); HD.stroke(g, (q) => { q.moveTo(58, 78); q.lineTo(64, 83); q.lineTo(70, 78); }, P.plum2, .4); }
+  if (P2.includes("scroll")) { HD.shape(g, (q) => q.rect(56, 80, 16, 8), { fill: P.cream, lw: .5 }); HD.shape(g, (q) => q.roundRect(54, 79, 3, 10, 1), { fill: P.soil2, lw: .4 }); HD.shape(g, (q) => q.roundRect(71, 79, 3, 10, 1), { fill: P.soil2, lw: .4 }); }
+  if (P2.includes("stone")) { HD.shape(g, (q) => HD.E(q, 64, 84, 4, 3), { fill: SAP.s2, lw: .5 }); HD.shape(g, (q) => HD.E(q, 63, 83, 1.6, 1.2), { fill: SAP.sheen, lw: .2 }); }
+  if (P2.includes("bread")) { HD.shape(g, (q) => HD.E(q, 64, 88, 6, 3), { fill: P.soil3, shade: P.soil2, lw: .5 }); [[61, 87], [64, 86.5], [67, 87]].forEach(([x, y]) => HD.stroke(g, (q) => { q.moveTo(x - 1, y + 1); q.lineTo(x + 1, y - 1); }, P.soil1, .4)); }
+  if (P2.includes("sprout")) { HD.shape(g, (q) => HD.E(q, 64, 90, 6, 2), { fill: P.soil1, lw: .4 }); HD.stroke(g, (q) => { q.moveTo(64, 90); q.lineTo(64, 82); }, P.moss2, .6); HD.shape(g, (q) => HD.E(q, 61.5, 82, 2.6, 1.4), { fill: P.moss3, lw: .3 }); HD.shape(g, (q) => HD.E(q, 66.5, 80.5, 2.6, 1.4), { fill: P.moss3, lw: .3 }); }
+  if (P2.includes("flower")) [[60, 90], [64, 88], [68, 90]].forEach(([x, y], i) => { HD.stroke(g, (q) => { q.moveTo(x, y + 4); q.lineTo(x, y); }, P.moss2, .5); HD.shape(g, (q) => HD.E(q, x, y, 1.8, 1.8), { fill: i === 1 ? P.cream : P.rose2, lw: .3 }); HD.shape(g, (q) => HD.E(q, x, y, .6, .6), { fill: P.butter, lw: 0 }); });
+  if (P2.includes("cup")) HD.shape(g, (q) => q.roundRect(60, 84, 6, 6, 1), { fill: P.mist, shade: P.plum3, lw: .4 });
+  if (P2.includes("bowl")) { HD.shape(g, (q) => HD.E(q, 64, 88, 7, 3), { fill: P.soil2, shade: P.soil1, lw: .5 }); [[61, 85], [64, 84], [67, 85]].forEach(([x, y]) => HD.stroke(g, (q) => { q.moveTo(x, y); q.quadraticCurveTo(x + 1.5, y - 3, x, y - 6); }, P.cream, .35)); }
+  if (P2.includes("tube")) { HD.shape(g, (q) => q.roundRect(60, 72, 4, 18, 1.4), { fill: P.sea4, lw: .5 }); HD.shape(g, (q) => q.rect(60.6, 82, 2.8, 7), { fill: P.butter, lw: 0 }); }
+  if (P2.includes("zzz")) [[56, 70, 1.6], [62, 64, 2.2], [69, 57, 2.8]].forEach(([x, y, r]) => HD.stroke(g, (q) => { q.moveTo(x - r, y - r); q.lineTo(x + r, y - r); q.lineTo(x - r, y + r); q.lineTo(x + r, y + r); }, P.cream, .5));
+  if (P2.includes("notes")) [[52, 50], [62, 42], [74, 48], [84, 38]].forEach(([x, y], i) => { HD.shape(g, (q) => HD.E(q, x, y, 1.6, 1.2), { fill: i % 2 ? P.butter : P.cream, lw: .35 }); HD.stroke(g, (q) => { q.moveTo(x + 1.4, y); q.lineTo(x + 1.4, y - 5); }, P.ink, .4); });
+  if (P2.includes("scratch")) [[24, 70], [27, 68], [30, 66]].forEach(([x, y]) => HD.stroke(g, (q) => { q.moveTo(x, y); q.lineTo(x + 5, y - 6); }, P.rose2, .6));
+  if (P2.includes("calm")) [[18, 74], [40, 70]].forEach(([x, y]) => HD.stroke(g, (q) => { q.arc(x, y, 5, Math.PI * 1.15, Math.PI * 1.85); }, P.sea4, .5));
+  if (P2.includes("eyes")) [[90, 92], [94, 92]].forEach(([x, y]) => HD.shape(g, (q) => HD.E(q, x, y, 1.2, 1), { fill: P.butter, lw: .3 }));
+}
+// props that belong to the scenery go into the pixel buffer (they get re-lit with it)
+function endBack(b, s) {
+  const P2 = s.p || [];
+  if (P2.includes("fire")) { fire(b, 64, 90); light(b, 64, 84, 34, 18, P.ember3, .4, 4); }
+  if (P2.includes("lamp")) lamp2(b, 96, 88, 30, { r: 14, k: .4 });
+  if (P2.includes("gate")) b.layer((t) => { for (let x = 50; x < 120; x += 6) t.r(x, 54, 2, 34, P.plum1); t.r(48, 54, 74, 3, P.plum1); t.e(86, 66, 5, 5, P.butter); }, P.ink);
+  if (P2.includes("rootlamp")) b.layer((t) => { t.r(62, 40, 6, 8, P.butter); t.r(64, 48, 2, 22, P.plum1); [[-8, 8], [-4, 10], [4, 10], [8, 8]].forEach(([dx, dy]) => t.l(65, 70, 65 + dx, 70 + dy, SAP.s1)); }, P.ink);
+  if (P2.includes("drops-blue")) [[30, 60], [52, 52], [78, 58]].forEach(([x, y]) => { b.r(x, y, 2, 2, P.sea3); b.p(x, y, P.cream); });
+}
+
+// figures' centre on the 128x96 grid, from the opaque pixels of the drawn people
+function figCentre(cv) { const g = cv.getContext("2d"), d = g.getImageData(0, 0, cv.width, cv.height).data, w = cv.width; let sx = 0, sy = 0, n = 0;
+  for (let i = 3; i < d.length; i += 16) if (d[i]) { const p = (i - 3) / 4; sx += p % w; sy += Math.floor(p / w); n++; }
+  return n ? [sx / n / (cv.width / EW), sy / n / (cv.height / EH)] : [EW / 2, EH / 2]; }
+
+const ENDART = {};
+function endArt(id, key) {
+  const k = id + ":" + key; if (k in ENDART) return ENDART[k];
+  const s = endSpec(id, key); if (!s || !EVSC[id]) return (ENDART[k] = null);
+  PLATECAP = {}; let cap; try { EVSC[id](); cap = PLATECAP; } finally { PLATECAP = null; }
+  if (!cap || !cap.b) return (ENDART[k] = null);
+  // who is in the start picture: if your team already is, don't draw it twice; creatures-only scenes make way for the foes
+  const seen = []; const hc = HD.creature; let probe = null;
+  if (cap.figs) { HD.creature = function (g2, c2) { seen.push(c2); return hc.apply(this, arguments); }; try { probe = pixFig(cap.figs, cap.res); } finally { HD.creature = hc; } }
+  const hasTeam = seen.some((c2) => PZ_TEAM.includes(c2)), onlyCreatures = seen.length > 0 && cap.figs && !/\bF\(/.test(String(cap.figs));
+  if (s.foes && onlyCreatures) s.npc = false;
+  if (hasTeam && s.npc !== false) s.hideTeam = true;
+  const ctr = probe ? figCentre(probe) : [EW / 2, EH / 2];
+  if (!s.side) s.side = s.foes ? "left" : (ctr[0] < EW / 2 ? "right" : "left");
+  if (s.foes) s.side = "left";
+  const b = cap.b, front = s.z ? new Pic(EW, EH) : b; endBack(front, s); endMood(b, s.m);
+  const W = EW * EK, H = EH * EK, c = canvas(W, H), g = c.getContext("2d"); g.imageSmoothingEnabled = false;
+  const sc = canvas(EW, EH); b.draw(sc.getContext("2d"));
+  const scene = canvas(W, H), sg = scene.getContext("2d"); sg.imageSmoothingEnabled = false; sg.drawImage(sc, 0, 0, W, H);
+  let figCv = null; if (s.npc !== false && probe) { figCv = probe; sg.drawImage(figCv, 0, 0, W, H); }
+  if (s.z) { // close-up: twice as near, centred on the people
+    let [cx, cy] = figCv ? figCentre(figCv) : [EW / 2, EH / 2]; cy -= 8;
+    const x0 = Math.max(0, Math.min(EW / 2, cx - EW / 4)), y0 = Math.max(0, Math.min(EH / 2, cy - EH / 4));
+    g.drawImage(scene, Math.round(x0) * EK, Math.round(y0) * EK, W / 2, H / 2, 0, 0, W, H);
+  } else g.drawImage(scene, 0, 0);
+  if (front !== b) { const fc = canvas(EW, EH); front.draw(fc.getContext("2d")); g.drawImage(fc, 0, 0, W, H); }
+  g.drawImage(pixFig((q) => endFront(q, s), 2), 0, 0, W, H);
+  return (ENDART[k] = c);
+}
 const ART = {};
 function art(id) { if (!SCENE[id]) return null; return ART[id] || (ART[id] = SCENE[id]()); }
 
@@ -3124,5 +3376,5 @@ function card(id, gi = 0, o = {}) {
   return big;
 }
 
-root.EVSCENE = { event: evArt, EVIDS: Object.keys(EVSC), EVNOTE, pause: pauseArt, PAUSE_KINDS, art, card, IDS: Object.keys(SCENE), AW, AH, CW, CH, K, Pic, SAP, HD, PL, hd, NOTE };
+root.EVSCENE = { event: evArt, end: endArt, ENDS: endList, EVIDS: Object.keys(EVSC), EVNOTE, pause: pauseArt, PAUSE_KINDS, art, card, IDS: Object.keys(SCENE), AW, AH, CW, CH, K, Pic, SAP, HD, PL, hd, NOTE };
 })(typeof window !== "undefined" ? window : globalThis);
