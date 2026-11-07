@@ -225,6 +225,19 @@ Every Refuge companion is born with one small trait of its own (the second MiniT
 - **Friends' codes**: "Your team code" turns your creature and your saved team's companions (cards, talents, birth traits, stars, Bond) into a `EVO1-…` text code. Pasting a friend's code saves their team (up to 6) to fight against, played by the AI. The first win against each code gives ✦ 20 and ∴ 5, at most 3 times a week, so made-up codes can't be farmed. Pasted codes are fully validated (known creatures and cards, level and grade ranges, a short plain-text name).
 - Saved in `P.duel` (`EV.slice("duel")`). The duel reuses the expedition pick screen and battle (`X.duel`), with no zone bonus.
 
+## PNG art
+
+The drawn creatures and scenes are placeholders. Final art comes as PNG files in `art/` (format and list of images: https://claude.ai/artifact/9UqayD6TF3MiAmNBX3XTCh). `art.js` loads every file listed in `art/manifest.json` and each one replaces the placeholder it names; anything missing keeps the placeholder, so art can arrive a few files at a time.
+
+- `art/creatures/<kind>.png`: 64 px cells, 10 columns (front A/B, back A/B, side facing right A/B, happy, sad, surprised, asleep) and one row per stage. `art/guardians/<kind>.png`: the same in 96 px cells.
+- `art/maps/home.png` and `home-front.png` (720 × 528, the 15 × 11 grid at 48 px; front holds what covers the creature). The home is drawn at 3x when there is PNG art for it, so every pixel shows.
+- `art/events/<id>.png`, `art/events/<id>--<ending>.png`, `art/pause/<zone>-<kind>.png`, `art/cards/<card>.png`: 256 × 192, shown at 2x.
+- `art/battle/<zone>-day.png` and `-night.png` (360 × 240): format fixed, wiring comes with the battle delivery.
+
+Images generated elsewhere (Gemini prompts: one image per stage with the 10 poses in a 5 × 2 grid on flat #00FF00 green) go through `python3 tools/art-import.py` first (needs Pillow): it keys out the green, finds each pose, scales every pose of a sheet by the same factor, stands them on the cell floor, and reduces the colours to one shared palette with hard edges. Run it with no arguments for the modes (creature, guardian, scene, map, battle).
+
+After adding files run `node tools/art.js`: it writes the manifest and warns about wrong sizes, unknown names and semi-transparent creature edges. `tools/build-single.py` inlines the art into the one-file build.
+
 ## Savia levels per zone
 
 Every zone shows how much Black Sap is left in it (visual language guide, section 8): a zone you have never calmed is dripping (2), calming its guardian leaves veins (1), and three stars clean it (0). The guardian's fight, the Guardian's Echo and Savia Mode always show the Root (3). The level appears as dark drops on the parchment map and a line in the zone list, and battles paint it over the zone background: veins in the ground, puddles dripping upward with less colour, and a vignette of veins for the Root. The end-of-trip card says when the Sap pulls back. It only changes how things look (`saviaLvl(id)` and `drawSap` in `rpg/ui-expedition.js`).

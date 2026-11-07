@@ -342,6 +342,13 @@ function homeExtras() {
 function mood() { const s = EV.S.stats; return (s.full + s.fun + s.energy + s.clean) / 4; }
 function petSprite(dir, sq) {
   const S = EV.S; if (!S) return null;
+  // PNG art (art.js) wins over the drawn placeholder; it is drawn at a third of its size on the 3x home
+  if (typeof EVART !== "undefined") {
+    const m = mood(), fx = EV.FX || {};
+    const emo = S.sleeping ? "sleep" : fx.foodAnim ? "surprised" : S.sick || m < 35 ? "sad" : m > 70 ? "happy" : "normal";
+    const cv = EVART.creature(S.species, Math.max(0, Math.min(2, S.stage || 0)), sq || 0, (dir || "front") === "front" ? emo : "normal", dir || "front");
+    if (cv) return cv;
+  }
   if (typeof EVS !== "undefined" && EVS.KINDS && EVS.KINDS.includes(S.species)) {
     const st = Math.max(0, Math.min(2, S.stage || 0)), n = [14, 18, 24][st];
     const fx = EV.FX || {}, m = mood();
@@ -399,7 +406,8 @@ function buildMarks(g, p) {
 function drawWorld(g, now) {
   const w = ws(), m = curMap(), S = EV.S;
   g.imageSmoothingEnabled = false;
-  g.drawImage(drawGround(w.map), 0, 0);
+  const art = typeof EVART !== "undefined" ? EVART : null, bg = art && art.image("maps/" + w.map + ".png");
+  g.drawImage(bg || drawGround(w.map), 0, 0, W, H);
   if (w.map === "home" && S && S.messes) for (const ms of S.messes) {
     const [mx, my] = messTile(ms), x = mx * TW + 8, y = my * TW + 10;
     rect(g, x - 4, y - 2, 8, 4, "#7a5a3a"); rect(g, x - 2, y - 4, 4, 2, "#8f6c46"); rect(g, x + 3, y - 3, 2, 2, "#7a5a3a");
@@ -415,7 +423,8 @@ function drawWorld(g, now) {
   const inBed = S && S.sleeping && w.map === "home" && !walking;
   const img = petSprite(inBed ? "front" : w.dir, walking ? Math.floor(now / 160) % 2 : 0);
   const fx = EV.FX || {};
-  const pos = { x: 0, y: 0, h: img ? img.height : 14 };
+  const hd = img && img.width >= 64 ? 3 : 1; // a PNG cell is drawn at a third of its pixels (1:1 on the 3x home)
+  const pos = { x: 0, y: 0, h: img ? img.height / hd : 14 };
   items.push({ y: (inBed ? bed.y * TW + 1 : w.py) + TW + 0.5, draw: () => {
     const hop = fx.foodAnim ? Math.abs(Math.sin(now / 120)) * 2 : 0;
     const bob = walking ? Math.abs(Math.sin(now / 90)) * 2 : S && S.sleeping ? 0 : Math.sin(now / 400) * 0.6 + hop;
@@ -424,10 +433,11 @@ function drawWorld(g, now) {
     if (!inBed) { g.fillStyle = C.shadow; g.beginPath(); g.ellipse(bx, by - 1, 6, 2.5, 0, 0, Math.PI * 2); g.fill(); }
     if (img) {
       g.save(); g.translate(bx, by - Math.round(bob)); if (!inBed && w.dir === "side" && w.face < 0) g.scale(-1, 1);
-      g.drawImage(img, -Math.round(img.width / 2), -img.height); g.restore();
+      g.drawImage(img, -img.width / hd / 2, -img.height / hd + (hd > 1 ? 4 / hd : 0), img.width / hd, img.height / hd); g.restore();
     } else { g.fillStyle = C.gold; g.beginPath(); g.arc(bx, by - 7 - bob, 6, 0, Math.PI * 2); g.fill(); }
   } });
   items.sort((a, b) => a.y - b.y).forEach((it) => it.draw());
+  const front = art && art.image("maps/" + w.map + "-front.png"); if (front) g.drawImage(front, 0, 0, W, H);
   if (EV.WEATHER) EV.WEATHER.draw(g, now, W, H);
   if (!isDay()) { g.fillStyle = "rgba(31,47,92,.32)"; g.fillRect(0, 0, W, H); }
   if (S && S.sleeping) { g.fillStyle = "rgba(14,8,20,.35)"; g.fillRect(0, 0, W, H); }
@@ -463,8 +473,12 @@ function homeFrame(now) {
   const on = topOn();
   if (tc.hidden === on) { tc.hidden = !on; renderHomeDlg(); }
   if (!on) return;
-  if (!off) { off = document.createElement("canvas"); off.width = W; off.height = H; offG = off.getContext("2d"); topG = tc.getContext("2d"); }
+  // with PNG art (art.js) the home is drawn at 3x so every pixel of the art shows; otherwise at 1x and scaled up as before
+  const A = typeof EVART !== "undefined" ? EVART : null, hi = !!(A && EV.S && (A.image("maps/" + ws().map + ".png") || A.has(EV.S.species)));
+  const k = hi ? HS : 1;
+  if (!off || off.width !== W * k) { off = document.createElement("canvas"); off.width = W * k; off.height = H * k; offG = off.getContext("2d"); topG = tc.getContext("2d"); }
   stepWalk(now);
+  offG.setTransform(k, 0, 0, k, 0, 0); offG.imageSmoothingEnabled = false;
   const pos = drawWorld(offG, now), S = EV.S, fx = EV.FX || {}, c = topG;
   c.imageSmoothingEnabled = false;
   c.fillStyle = C.grassN; c.fillRect(0, 0, 720, 560);
