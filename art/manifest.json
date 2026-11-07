@@ -1,4 +1,25 @@
 {
- "v": 7,
- "files": []
+ "v": 63218961,
+ "files": [
+  {
+   "path": "maps/home.png",
+   "w": 720,
+   "h": 528
+  },
+  {
+   "path": "maps/vado.png",
+   "w": 720,
+   "h": 528
+  },
+  {
+   "path": "objects/flower.png",
+   "w": 16,
+   "h": 16
+  },
+  {
+   "path": "objects/tree.png",
+   "w": 32,
+   "h": 32
+  }
+ ]
 }

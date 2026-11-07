@@ -236,6 +236,8 @@ The drawn creatures and scenes are placeholders. Final art comes as PNG files in
 
 Images generated elsewhere (Gemini prompts: one image per stage with the 10 poses in a 5 × 2 grid on flat #00FF00 green) go through `python3 tools/art-import.py` first (needs Pillow): it keys out the green, finds each pose, scales every pose of a sheet by the same factor, stands them on the cell floor, and reduces the colours to one shared palette with hard edges. Run it with no arguments for the modes (creature, guardian, scene, map, battle).
 
+`art/objects/<kind>.png` replaces a thing drawn on the maps (tree, flower, lamp, bed…), at map scale: 16 px a tile, standing on its base tile. The current home and El Vado ground and the trees and flowers come from the CC0 Ninja Adventure pack: `python3 tools/ninja-maps.py <pack folder>` paints every map's rows from its tiles (autotiled paths and ponds, trees on the border). Credits for outside art live in `CREDITS.md`.
+
 After adding files run `node tools/art.js`: it writes the manifest and warns about wrong sizes, unknown names and semi-transparent creature edges. `tools/build-single.py` inlines the art into the one-file build.
 
 ## Savia levels per zone
