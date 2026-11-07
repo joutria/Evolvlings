@@ -1,5 +1,5 @@
 {
- "v": 3514142865,
+ "v": 2200336683,
  "files": [
   {
    "path": "creatures/ajolin.png",
@@ -142,12 +142,467 @@
    "h": 192
   },
   {
+   "path": "events/abrojo.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/acta.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/agalla.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/aguador.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/aguja.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/albina.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/alforja.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/almacen.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/altar.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/alvar.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/archivo.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/arpegio.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/bajada.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/barcas.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/bomba.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/brillo.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/cadenas.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/campanas.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/cara.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/carambanos.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/carbon.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/carro.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/cartas.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/cofre.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/compuerta.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/cripta.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/cuna.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/despierta.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/devuelta.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/diario.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/enredado.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/escoria.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/espejismo.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/espinas.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/estatuas.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/farolera.png",
+   "w": 256,
+   "h": 192
+  },
+  {
    "path": "events/farolero.png",
    "w": 256,
    "h": 192
   },
   {
+   "path": "events/faroles.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/flotan.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/fogarin.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/fogata.png",
+   "w": 256,
+   "h": 192
+  },
+  {
    "path": "events/fuera.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/grieta.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/guarda.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/herido.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/hielo.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/hollin.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/jardinero.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/juego.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/juramento.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/ladera.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/lamparas.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/latido.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/liquenes.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/llovizna.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/manantial.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/mapas.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/mensajero.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/mochila.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/muda.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/multa.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/musgo.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/nana.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/negra.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/noctua.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/nombres.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/ofrendas.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/pan.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/paso.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/penumbra.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/peregrina.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/pez.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/prestamo.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/puente.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/ramo.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/regreso.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/sala.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/santuario.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/semillas.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/setas.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/silencio.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/sueno.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/tercero.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/termas.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/tizon.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/tormenta.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/trinillas.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/tumba.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/tunel.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/vela.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/velo.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/verja.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "events/viajero.png",
    "w": 256,
    "h": 192
   },
