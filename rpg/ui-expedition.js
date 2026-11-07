@@ -12,7 +12,32 @@ let battle = null;      // current battle presentation state
 const rnd = Math.random;
 const pickN = (arr, n) => { const a = arr.slice(); const out = []; while (a.length && out.length < n) out.push(a.splice(Math.floor(rnd() * a.length), 1)[0]); return out; };
 
+/* ---------- An expedition left halfway is kept (design rule 3: never lose progress) ----------
+   Saved at every stop (path choice, event, reward, the look before a fight); a closed tab picks it up there.
+   A fight in progress restarts from its start, with the health the party had before it. Duels are not kept. */
+const runSlice = EV.slice("run", () => ({ x: null, view: null, at: 0 }));
+const RUN_VIEWS = ["map", "reward", "event", "prefight"];
+function saveRun(v) {
+  if (!X || X.duel || !X.party.length) return;
+  const R = runSlice(), c = Object.assign({}, X); delete c.shot;
+  R.x = JSON.parse(JSON.stringify(c)); R.view = v; R.at = Date.now(); EV.saveProfile();
+}
+function clearRun() { const R = runSlice(); if (R.x) { R.x = null; R.view = null; EV.saveProfile(); } }
+// the saved trip, if it still belongs to the creature you have now
+function savedRun() {
+  const R = runSlice(), S = EV.S;
+  if (!R.x) return null;
+  if (!S || S.phase !== "alive" || !R.x.party || !R.x.party[0] || R.x.party[0].kind !== S.species || !ZONES[R.x.zone]) { clearRun(); return null; }
+  return R;
+}
+function resumeRun() {
+  const R = savedRun(); if (!R) return false;
+  rpgState(); X = JSON.parse(JSON.stringify(R.x)); battle = null;
+  if (R.view === "prefight" && !X.pre) X.pre = { boss: false };
+  show(R.view); return true;
+}
 function startExpedition() {
+  if (resumeRun()) return;
   const why = expCheck(); if (why) { EV.toast(tx("exp.need." + why)); EV.sfx("deny"); return; }
   rpgState();
   const S = EV.S;
@@ -333,7 +358,7 @@ function foeUnits(boss) {
 }
 
 /* ---------- Views ---------- */
-function show(v) { view = v; render(); const el = $("scrExp"); if (el && !el.hidden) el.scrollIntoView({ behavior: "smooth", block: "start" }); }
+function show(v) { view = v; if (RUN_VIEWS.includes(v)) saveRun(v); else if (v === "end") clearRun(); render(); const el = $("scrExp"); if (el && !el.hidden) el.scrollIntoView({ behavior: "smooth", block: "start" }); }
 function pickStats(k) {
   const r = refOf(k);
   const ro = EV.P.eg && EV.P.eg.roster[k];
@@ -370,7 +395,7 @@ function preFight(boss) {
   X.pre = { boss }; show("prefight");
   clearTimeout(preTimer); preTimer = setTimeout(() => { if (X && view === "prefight") goFight(); }, 1600);
 }
-function goFight() { clearTimeout(preTimer); if (!X || !X.pre) return; const b = X.pre.boss; X.pre = null; startBattle(b); }
+function goFight() { clearTimeout(preTimer); if (!X || !X.pre) return; const b = X.pre.boss; saveRun("prefight"); X.pre = null; startBattle(b); }
 function render() {
   const el = $("scrExp"); if (!el) return;
   if (!X) { el.innerHTML = ""; return; }

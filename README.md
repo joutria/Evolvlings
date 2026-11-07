@@ -225,6 +225,10 @@ Every Refuge companion is born with one small trait of its own (the second MiniT
 - **Friends' codes**: "Your team code" turns your creature and your saved team's companions (cards, talents, birth traits, stars, Bond) into a `EVO1-…` text code. Pasting a friend's code saves their team (up to 6) to fight against, played by the AI. The first win against each code gives ✦ 20 and ∴ 5, at most 3 times a week, so made-up codes can't be farmed. Pasted codes are fully validated (known creatures and cards, level and grade ranges, a short plain-text name).
 - Saved in `P.duel` (`EV.slice("duel")`). The duel reuses the expedition pick screen and battle (`X.duel`), with no zone bonus.
 
+## Expeditions left halfway are kept
+
+Closing the game in the middle of an expedition loses nothing (design rule 3). The trip is saved at every stop: the path choice, an event, a reward and the look before a fight. The home button then reads "Resume the expedition" and takes you back to that stop, without spending energy again. A fight in progress starts again from its beginning, with the health the party had before it. Duels are not kept. The saved trip lives in `P.run`, and it is forgotten when the trip ends or when you raise a different creature.
+
 ## A picture for every pause
 
 Every stop on an expedition shows a picture of its zone, drawn by `EVSCENE.pause(zone, kind, mode)` in `scenes.js`: the path choice (`camino`, or `jefe` before the guardian), a short look before each fight (`pelea` / `jefe`, which moves on by itself after 1.6 s or with a tap), the rest (`descanso`), the chest (`cofre`), the reward after a win (`victoria`) and the way home (`regreso`). Savia and Echo runs get their own tint. Old short events show the path picture; conversations keep their own scene. Duels keep the battle snapshot.

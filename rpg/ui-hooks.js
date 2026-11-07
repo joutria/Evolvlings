@@ -14,6 +14,7 @@ function refreshHome() {
   homeSheet(alive);
   if (!alive) { btn.hidden = true; return; }
   btn.hidden = false;
+  if (savedRun()) { btn.textContent = tx("exp.resume", { z: zt("name", null, savedRun().x.zone) }); btn.disabled = false; btn.title = ""; const w0 = $("aExpWhy"); if (w0) w0.textContent = ""; const r0 = $("aRecharge"); if (r0) r0.hidden = true; return; }
   const why = expCheck();
   btn.textContent = tx("act.exp") + (why ? "" : " · " + tx("exp.cost"));
   btn.disabled = !!why;
