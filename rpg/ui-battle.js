@@ -364,7 +364,7 @@ const REDUCE = typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced
 // PNG art (art.js): a zone background replaces the drawn sky and ground, creature and guardian sheets replace the
 // procedural sprites. Both draw straight onto the full-size canvas (1 art pixel = 1 battle unit) so no detail is lost.
 const HAS_ART = typeof EVART !== "undefined";
-const artBg = (zone, day) => (HAS_ART && (EVART.image("battle/" + zone + (day ? "-day" : "-night") + ".png") || EVART.image("battle/" + zone + (day ? "-night" : "-day") + ".png"))) || null;
+const artBg = (zone, day) => (HAS_ART && !(EVART.classic && EVART.classic()) && (EVART.image("battle/" + zone + (day ? "-day" : "-night") + ".png") || EVART.image("battle/" + zone + (day ? "-night" : "-day") + ".png"))) || null;
 function artUnit(u, sq, emo) {
   if (!HAS_ART) return null;
   const dir = emo === "normal" ? "side" : null, st = u.own ? Math.max(0, Math.min(2, u.stage)) : 1;

@@ -1,6 +1,96 @@
 {
- "v": 2583537332,
+ "v": 1790996037,
  "files": [
+  {
+   "path": "battle/aurora-day.png",
+   "w": 360,
+   "h": 240
+  },
+  {
+   "path": "battle/aurora-night.png",
+   "w": 360,
+   "h": 240
+  },
+  {
+   "path": "battle/caves-day.png",
+   "w": 360,
+   "h": 240
+  },
+  {
+   "path": "battle/caves-night.png",
+   "w": 360,
+   "h": 240
+  },
+  {
+   "path": "battle/crater-day.png",
+   "w": 360,
+   "h": 240
+  },
+  {
+   "path": "battle/crater-night.png",
+   "w": 360,
+   "h": 240
+  },
+  {
+   "path": "battle/deep-day.png",
+   "w": 360,
+   "h": 240
+  },
+  {
+   "path": "battle/deep-night.png",
+   "w": 360,
+   "h": 240
+  },
+  {
+   "path": "battle/forest-day.png",
+   "w": 360,
+   "h": 240
+  },
+  {
+   "path": "battle/forest-night.png",
+   "w": 360,
+   "h": 240
+  },
+  {
+   "path": "battle/heart-day.png",
+   "w": 360,
+   "h": 240
+  },
+  {
+   "path": "battle/heart-night.png",
+   "w": 360,
+   "h": 240
+  },
+  {
+   "path": "battle/heights-day.png",
+   "w": 360,
+   "h": 240
+  },
+  {
+   "path": "battle/heights-night.png",
+   "w": 360,
+   "h": 240
+  },
+  {
+   "path": "battle/hollow-day.png",
+   "w": 360,
+   "h": 240
+  },
+  {
+   "path": "battle/hollow-night.png",
+   "w": 360,
+   "h": 240
+  },
+  {
+   "path": "battle/lake-day.png",
+   "w": 360,
+   "h": 240
+  },
+  {
+   "path": "battle/lake-night.png",
+   "w": 360,
+   "h": 240
+  },
   {
    "path": "creatures/ajolin.png",
    "w": 640,
@@ -1725,6 +1815,321 @@
    "path": "objects/well.png",
    "w": 16,
    "h": 21
+  },
+  {
+   "path": "pause/aurora-camino.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/aurora-cofre.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/aurora-descanso.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/aurora-jefe.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/aurora-pelea.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/aurora-regreso.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/aurora-victoria.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/caves-camino.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/caves-cofre.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/caves-descanso.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/caves-jefe.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/caves-pelea.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/caves-regreso.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/caves-victoria.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/crater-camino.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/crater-cofre.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/crater-descanso.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/crater-jefe.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/crater-pelea.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/crater-regreso.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/crater-victoria.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/deep-camino.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/deep-cofre.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/deep-descanso.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/deep-jefe.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/deep-pelea.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/deep-regreso.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/deep-victoria.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/forest-camino.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/forest-cofre.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/forest-descanso.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/forest-jefe.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/forest-pelea.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/forest-regreso.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/forest-victoria.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/heart-camino.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/heart-cofre.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/heart-descanso.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/heart-jefe.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/heart-pelea.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/heart-regreso.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/heart-victoria.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/heights-camino.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/heights-cofre.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/heights-descanso.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/heights-jefe.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/heights-pelea.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/heights-regreso.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/heights-victoria.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/hollow-camino.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/hollow-cofre.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/hollow-descanso.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/hollow-jefe.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/hollow-pelea.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/hollow-regreso.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/hollow-victoria.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/lake-camino.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/lake-cofre.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/lake-descanso.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/lake-jefe.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/lake-pelea.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/lake-regreso.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "pause/lake-victoria.png",
+   "w": 256,
+   "h": 192
   }
  ]
 }
