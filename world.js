@@ -226,8 +226,21 @@ function drawGround(id) {
 // things with height, drawn from the front; (bx, by) is the bottom-centre of their base tile
 function drawObj(c, kind, bx, by, t) {
   // PNG art (art.js): art/objects/<kind>.png at map scale (16 px a tile), standing on the base tile
-  const oim = typeof EVART !== "undefined" && EVART.image("objects/" + kind + ".png");
-  if (oim) { c.drawImage(oim, Math.round(bx - oim.width / 2), by + 1 - oim.height); return; }
+  // some places have one picture per state: the garden per level, the foraging nook per circle
+  const lvl = kind === "garden" ? (EV.BUILD ? EV.BUILD.lvl("garden") : 1) : 0;
+  const pic = kind === "garden" ? "garden-" + Math.max(1, Math.min(5, lvl)) : kind === "patch" ? "patch-" + circle() : kind;
+  const oim = typeof EVART !== "undefined" && EVART.image("objects/" + pic + ".png");
+  if (oim) {
+    const bob = kind === "bottle" ? Math.round(Math.sin(t / 500) * 1.5) : 0;
+    const ox = kind === "garden" ? bx - 10 : Math.round(bx - oim.width / 2);
+    c.drawImage(oim, ox, by + 1 - oim.height + bob);
+    // what the pictures can't show on their own: the board's news, the Root's breath, ripe produce
+    if (kind === "board" && boardNew()) { rect(c, bx - 1, by - oim.height - 5, 2, 4, C.gold); rect(c, bx - 1, by - oim.height, 2, 1, C.gold); }
+    if (kind === "root") { const a = 0.4 + 0.3 * Math.sin(t / 700); rect(c, bx - 1, by - Math.round(oim.height * 0.6), 2, 2, `rgba(125,255,176,${a.toFixed(2)})`); }
+    if (kind === "garden") { const st = EV.BUILD ? EV.BUILD.gardenStock() : { f: 0 };
+      for (let i = 0; i < Math.min(st.f, 2 + lvl * 2, 10); i++) rect(c, ox + 5 + (i % 5) * 6, by - 13 + Math.floor(i / 5) * 4, 2, 2, i % 3 === 2 ? "#e2ae2e" : C.red); }
+    return;
+  }
   const sh = (w) => { c.fillStyle = C.shadow; c.beginPath(); c.ellipse(bx + 1, by - 1, w, 2.5, 0, 0, Math.PI * 2); c.fill(); };
   if (kind === "board" && boardNew()) {
     // something new on the board: a soft gold glow and a pin
