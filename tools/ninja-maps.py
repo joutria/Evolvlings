@@ -64,7 +64,28 @@ def main(pack):
     for k, (im, *b) in cuts.items():
         o = im.crop(tuple(b)); bb = o.getbbox()
         if bb: o.crop(bb).save(os.path.join(ob, k + ".png"))
-    print("ok objects tree, flower, well, tila,", ", ".join(cuts), "; face tila")
+    # the Glade's Root (the pack's old gnarled trunk; world.js adds its green glow), the bottle in the pond
+    # (world.js makes it bob), the foraging nook as each circle searches it, and the garden at each level
+    nat, fd = nature, ts("TilesetFloorDetail")
+    trim = lambda o: o.crop(o.getbbox())
+    trim(tile(nat, 4, 0, 2, 2)).save(os.path.join(ob, "root.png"))
+    Image.open(os.path.join(pack, "Items", "Potion", "WaterPot.png")).convert("RGBA").save(os.path.join(ob, "bottle.png"))
+    for k, im in {"sol": tile(nat, 4, 14), "sky": tile(fd, 5, 3), "lake": tile(nat, 18, 9), "frost": tile(fd, 2, 3)}.items():
+        trim(im).save(os.path.join(ob, "patch-" + k + ".png"))
+    fence = trim(house.crop((128, 64, 160, 80)))
+    for n in range(1, 6):
+        g = Image.new("RGBA", (36, 16))
+        for r in range(2):
+            for x in range(2, 34): g.putpixel((x, 7 + r * 4), (122, 86, 54, 255)); g.putpixel((x, 8 + r * 4), (98, 66, 40, 255))
+        for i in range(min(10, 2 + n * 2)):
+            g.alpha_composite(trim(tile(fd, 4, 2)).resize((6, 6), Image.NEAREST) if False else trim(tile(fd, 4, 2)).crop((0, 0, 6, 6)), (2 + (i % 5) * 6, 2 + (i // 5) * 4))
+        if n >= 3:
+            for x in range(0, 36, 4):
+                for y in range(0, 4): g.putpixel((x, y), (150, 104, 62, 255))
+            for x in range(0, 36): g.putpixel((x, 1), (176, 124, 78, 255))
+        if n >= 5: g.alpha_composite(trim(el.crop((0, 0, 16, 16))).resize((8, 9), Image.NEAREST), (27, 5))
+        g.save(os.path.join(ob, "garden-%d.png" % n))
+    print("ok objects tree, flower, well, tila,", ", ".join(cuts), ", root, bottle, patch-*, garden-1..5; face tila")
     # creatures: every creature in the game is a monster of the pack (Jose, 2026-11-07). One row per stage: baby at 2x,
     # young at 3x, adult at 4x (3x if it would not fit) in the pack's second colour when it has one. Wild foes have one row.
     # The pack sheet is 4 columns (front, back, left, right) by 4 walking frames; we keep two frames of front, back and right

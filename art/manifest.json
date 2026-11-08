@@ -1,5 +1,5 @@
 {
- "v": 1790996037,
+ "v": 2428097336,
  "files": [
   {
    "path": "battle/aurora-day.png",
@@ -1757,6 +1757,11 @@
    "h": 11
   },
   {
+   "path": "objects/bottle.png",
+   "w": 9,
+   "h": 11
+  },
+  {
    "path": "objects/bowl.png",
    "w": 14,
    "h": 14
@@ -1764,6 +1769,31 @@
   {
    "path": "objects/flower.png",
    "w": 16,
+   "h": 16
+  },
+  {
+   "path": "objects/garden-1.png",
+   "w": 36,
+   "h": 16
+  },
+  {
+   "path": "objects/garden-2.png",
+   "w": 36,
+   "h": 16
+  },
+  {
+   "path": "objects/garden-3.png",
+   "w": 36,
+   "h": 16
+  },
+  {
+   "path": "objects/garden-4.png",
+   "w": 36,
+   "h": 16
+  },
+  {
+   "path": "objects/garden-5.png",
+   "w": 36,
    "h": 16
   },
   {
@@ -1785,6 +1815,31 @@
    "path": "objects/nestOld.png",
    "w": 14,
    "h": 11
+  },
+  {
+   "path": "objects/patch-frost.png",
+   "w": 15,
+   "h": 10
+  },
+  {
+   "path": "objects/patch-lake.png",
+   "w": 16,
+   "h": 16
+  },
+  {
+   "path": "objects/patch-sky.png",
+   "w": 15,
+   "h": 11
+  },
+  {
+   "path": "objects/patch-sol.png",
+   "w": 16,
+   "h": 16
+  },
+  {
+   "path": "objects/root.png",
+   "w": 32,
+   "h": 31
   },
   {
    "path": "objects/shop.png",
