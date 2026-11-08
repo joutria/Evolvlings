@@ -3376,5 +3376,5 @@ function card(id, gi = 0, o = {}) {
   return big;
 }
 
-root.EVSCENE = { event: evArt, end: endArt, ENDS: endList, EVIDS: Object.keys(EVSC), EVNOTE, pause: pauseArt, PAUSE_KINDS, art, card, IDS: Object.keys(SCENE), AW, AH, CW, CH, K, Pic, SAP, HD, PL, hd, NOTE };
+root.EVSCENE = { event: evArt, end: endArt, ENDS: endList, endSpec, EVIDS: Object.keys(EVSC), EVNOTE, pause: pauseArt, PAUSE_KINDS, art, card, IDS: Object.keys(SCENE), AW, AH, CW, CH, K, Pic, SAP, HD, PL, hd, NOTE };
 })(typeof window !== "undefined" ? window : globalThis);

@@ -125,10 +125,10 @@ if (PXL && PXL.sprite) {
 const S = root.EVSCENE;
 if (S) {
   const ev = S.event, end = S.end, pause = S.pause, art = S.art;
-  // Settings > Encounter pictures: "classic" keeps the drawn start pictures instead of the pack ones
+  // Settings > Encounter pictures: "classic" keeps the drawn start and ending pictures instead of the pack ones
   const classic = () => { try { return root.EV && root.EV.P && root.EV.P.evArt === "classic"; } catch (e) { return false; } };
   if (ev) S.event = function (id) { return (!classic() && A.scene("events/" + id + ".png")) || ev.apply(this, arguments); };
-  if (end) S.end = function (id, key) { return A.scene("events/" + id + "--" + key + ".png") || end.apply(this, arguments); };
+  if (end) S.end = function (id, key) { return (!classic() && A.scene("events/" + id + "--" + key + ".png")) || end.apply(this, arguments); };
   if (pause) S.pause = function (zone, kind) { return A.scene("pause/" + zone + "-" + kind + ".png") || pause.apply(this, arguments); };
   if (art) S.art = function (id) { return A.scene("cards/" + id + ".png") || art.apply(this, arguments); };
 }
