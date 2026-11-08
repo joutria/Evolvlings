@@ -128,9 +128,11 @@ class Scene:
     """An 8 x 6 tile picture. rows: 6 strings of 8 characters:
     '.' plain ground  '=' path  '~' water  '*' flower  ',' grass tuft  'o' pebble  'x' a grey (dead) flower"""
 
-    def __init__(self, floor="grass", rows=None, var=0, water=None, seed=11, path=True):
-        self.g = Image.new("RGBA", (W, H))
-        rows = rows or ["........"] * 6
+    def __init__(self, floor="grass", rows=None, var=0, water=None, seed=11, path=True, size=(W, H)):
+        self.w, self.h = size
+        self.g = Image.new("RGBA", size)
+        rows = rows or ["." * -(-self.w // T)] * -(-self.h // T)
+        ry, rx = len(rows) - 1, len(rows[0]) - 1
         rb = FLOORS[floor]; off = 11 * var
         plain = [tile("TilesetFloor", off, rb)] * 5 + [tile("TilesetFloor", off + c, rb) for c in (1, 2, 3, 4)]
         if not var and floor == "grass": plain += [tile("TilesetFloor", 2, rb - 1), tile("TilesetFloor", 3, rb - 1)]
@@ -144,7 +146,7 @@ class Scene:
                 self.g.alpha_composite(plain[0], (x * T, y * T))          # some variants have see-through corners
                 self.g.alpha_composite(plain[seed % len(plain)], (x * T, y * T))
                 if ch in blocks:
-                    same = lambda dx, dy: rows[min(5, max(0, y + dy))][min(7, max(0, x + dx))] == ch
+                    same = lambda dx, dy: rows[min(ry, max(0, y + dy))][min(rx, max(0, x + dx))] == ch
                     self.g.alpha_composite(NM.auto(blocks[ch], same), (x * T, y * T))
                 elif ch in deco: self.g.alpha_composite(deco[ch], (x * T, y * T))
         self.d = ImageDraw.Draw(self.g)
@@ -160,8 +162,8 @@ class Scene:
         NM.paste_clip(self.g, im, int(x), int(y))
         return self
 
-    def row(self, im, y, x0=-8, step=None, x1=W + 8):
-        x = x0
+    def row(self, im, y, x0=-8, step=None, x1=None):
+        x = x0; x1 = self.w + 8 if x1 is None else x1
         while x < x1: self.put(im, x, y); x += step or im.width
         return self
 
@@ -202,15 +204,15 @@ class Scene:
 
     def rain(self, n=70, seed=3, col=(200, 214, 240, 255)):
         for i in range(n):
-            seed = (seed * 9301 + 49297) % 233280; x = seed % (W + 20) - 10
-            seed = (seed * 9301 + 49297) % 233280; y = seed % H
+            seed = (seed * 9301 + 49297) % 233280; x = seed % (self.w + 20) - 10
+            seed = (seed * 9301 + 49297) % 233280; y = seed % self.h
             self.d.line([(x, y), (x - 2, y + 5)], fill=col)
         return self
 
     def snow(self, n=40, seed=5):
         for i in range(n):
-            seed = (seed * 9301 + 49297) % 233280; x = seed % W
-            seed = (seed * 9301 + 49297) % 233280; y = seed % H
+            seed = (seed * 9301 + 49297) % 233280; x = seed % self.w
+            seed = (seed * 9301 + 49297) % 233280; y = seed % self.h
             self.d.point((x, y), fill=(250, 252, 255, 255))
         return self
 
@@ -330,6 +332,9 @@ def render_end(eid, key, spec):
 
 SCENES = {}
 ZONE_OF = {}
+PLACES = {}
+ZONES = ["aurora", "crater", "forest", "hollow", "lake", "caves", "heights", "deep", "heart"]
+PAUSES = ["camino", "pelea", "cofre", "descanso", "jefe", "victoria", "regreso"]
 
 
 def scene(eid):
@@ -344,12 +349,26 @@ def load_scenes():
         zone = os.path.splitext(os.path.basename(path))[0]
         ns = dict(api, __name__=zone)
         exec(compile(open(path, encoding="utf8").read(), path, "exec"), ns)
+        if "PLACES" in ns: PLACES.update(ns["PLACES"])
 
 
 def main(pack, names):
     global PACK
     PACK = pack
     load_scenes()
+    if not names or "battle" in names:          # art/battle/<zone>-day|night.png, 360 x 240
+        bo = os.path.join(ROOT, "art", "battle"); os.makedirs(bo, exist_ok=True)
+        for z in ZONES:
+            for night in (False, True):
+                PLACES["battle"](z, night).convert("RGB").resize((360, 240), Image.NEAREST).save(os.path.join(bo, z + ("-night" if night else "-day") + ".png"))
+        print("ok battle backgrounds:", len(ZONES) * 2)
+    if not names or "pause" in names:           # art/pause/<zone>-<kind>.png, 256 x 192
+        po = os.path.join(ROOT, "art", "pause"); os.makedirs(po, exist_ok=True)
+        for z in ZONES:
+            for k in PAUSES: PLACES["pause"](z, k).convert("RGB").resize((256, 192), Image.NEAREST).save(os.path.join(po, z + "-" + k + ".png"))
+        print("ok pauses:", len(ZONES) * len(PAUSES))
+    names = [n for n in names if n not in ("battle", "pause")] if names else names
+    if names == []: return
     out = os.path.join(ROOT, "art", "events"); os.makedirs(out, exist_ok=True)
     todo = [e for e in SCENES if not names or e in names or ZONE_OF[e] in names]
     for eid in todo:
