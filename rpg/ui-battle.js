@@ -15,8 +15,8 @@ function startBattle(boss) {
   const b = new Battle(allies, foes, { zone: X.duel ? null : ZONES[X.zone], day: isDayNow() });
   const all = b.units;
   const anim = {};
-  ["ally", "foe"].forEach((side) => all.filter((u) => u.side === side).forEach((u) => { const [x, y] = cellXY(side, u.pos); anim[u.uid] = { x, y, lunge: 0, flash: 0, shownHp: u.hp }; }));
-  battle = { b, boss, anim, floats: [], log: [], aim: null, queue: [], done: false, cv: null, c: null, raf: 0 };
+  ["ally", "foe"].forEach((side) => all.filter((u) => u.side === side).forEach((u) => { const [x, y] = cellXY(side, u.pos); anim[u.uid] = { x, y, lunge: 0, flash: 0, sil: 0, kb: 0, shownHp: u.hp, hpT: u.hp, koT: null }; }));
+  battle = { b, boss, anim, floats: [], log: [], aim: null, queue: [], done: false, cv: null, c: null, raf: 0, pend: [], basic: null, shake: null, stopUntil: 0, banner: null, last: 0 };
   show("battle");
   runBattle();
 }
@@ -35,21 +35,63 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms / speed()));
 function uName(uid) { const u = battle.b.units.find((x) => x.uid === uid); return u ? u.name : ""; }
 function blog(s) { battle.log.unshift(s); battle.log = battle.log.slice(0, 5); renderBLog(); }
 function renderBLog() { const el = $("bLog"); if (el && battle) el.innerHTML = battle.log.map((s) => `<li>${esc(s)}</li>`).join(""); const r = $("bRound"); if (r && battle) r.textContent = tx("b.round", { n: Math.max(1, battle.b.round) }); }
+/* Events come out of the engine already resolved; what they show (numbers, flash, the health bar dropping, sounds) waits
+   for the moment the attack lands: the card animation's hit window, or the basic attack's contact. */
+const HELD = ["dmg", "miss", "heal", "st", "ko", "revive", "shield", "cleanse", "dodged"];
+const AREA = { multi: 1, wave: 1, quake: 1 };
 function flushEvents() {
-  const b = battle.b, ev = b.events.splice(0);
-  let hitSfx = null;
+  const b = battle.b, ev = b.events.splice(0), now = performance.now(), acc = { sfx: null };
+  let hold = 0;
   for (const e of ev) {
-    const a = e.u && battle.anim[e.u];
-    // who the card being cast lands on
-    if (battle.cast && e.k !== "act" && e.u && ["dmg", "heal", "st", "shield", "miss", "cleanse"].includes(e.k) && !battle.cast.tg.includes(e.u)) battle.cast.tg.push(e.u);
+    // who the card (or basic attack) being played lands on
+    const mv = battle.cast || battle.basic;
+    if (mv && e.k !== "act" && e.u && ["dmg", "heal", "st", "shield", "miss", "cleanse"].includes(e.k) && !mv.tg.includes(e.u)) mv.tg.push(e.u);
+    if (e.k === "act") {
+      const u = b.units.find((x) => x.uid === e.u), a = battle.anim[e.u];
+      battle.cast = e.card && HAS_EVS && EVS.CARD[e.card] && !REDUCE ? { id: e.card, uid: e.u, t0: now, dur: (EVS.DUR[EVS.anim(e.card).style] || 1) * 1000 / speed(), tg: [] } : null;
+      battle.basic = !e.card && !REDUCE && u.pos != null ? { uid: e.u, t0: now, dur: 620 / speed(), tg: [], front: cellRow(u.pos) === 0, col: TCOL[u.types[0]] || "#fbf6ef" } : null;
+      if (a && !battle.basic && !battle.cast) a.lunge = 1;
+      if (battle.cast) { const hw = EVS.hitWindow(e.card); hold = now + (hw ? hw[0] : 0.35) * battle.cast.dur; battle.cast.area = !!AREA[EVS.anim(e.card).style]; }
+      else if (battle.basic) hold = now + 0.45 * battle.basic.dur;
+      else hold = 0;
+      if (e.card) { blog(tx("log.act", { name: u.name, card: cardName(e.card) })); EV.sfx("card"); } else blog(tx("log.basic", { name: u.name }));
+      continue;
+    }
+    if (hold > now && HELD.includes(e.k)) { const u = e.u && b.units.find((x) => x.uid === e.u); battle.pend.push({ at: hold, e, hp: u ? u.hp : 0 }); continue; }
+    showEvent(e, acc);
+  }
+  if (acc.sfx) { EV.sfx(acc.sfx); if (acc.sfx === "crit") EV.buzz(25); }
+}
+const pendFor = (uid) => battle.pend.some((p) => p.e.u === uid);
+// the held events whose moment has come
+function landEvents(now) {
+  if (!battle.pend.length) return;
+  const due = battle.pend.filter((p) => p.at <= now); if (!due.length) return;
+  battle.pend = battle.pend.filter((p) => p.at > now);
+  const acc = { sfx: null };
+  for (const p of due) {
+    const a = p.e.u && battle.anim[p.e.u];
+    if (a && p.e.k === "dmg") a.hpT = Math.max(p.hp, a.hpT - p.e.n);
+    else if (a && (p.e.k === "heal" || p.e.k === "revive")) a.hpT = Math.min(p.hp, a.hpT + (p.e.n || 0));
+    if (p.e.k === "dmg") {
+      battle.stopUntil = now + 60; // a short hit-stop sells the weight
+      const area = (battle.cast && battle.cast.area) || false;
+      if (!REDUCE && (p.e.crit || area)) battle.shake = { t0: now, dur: 200, amp: p.e.crit ? 3 : 2 };
+    }
+    showEvent(p.e, acc);
+  }
+  if (acc.sfx) { EV.sfx(acc.sfx); if (acc.sfx === "crit") EV.buzz(25); }
+}
+function showEvent(e, acc) {
+  const b = battle.b, a = e.u && battle.anim[e.u];
+  let hitSfx = acc.sfx;
+  {
     switch (e.k) {
-      case "act": { const u = b.units.find((x) => x.uid === e.u); if (a) a.lunge = 1;
-        battle.cast = e.card && HAS_EVS && EVS.CARD[e.card] && !REDUCE ? { id: e.card, uid: e.u, t0: performance.now(), dur: (EVS.DUR[EVS.anim(e.card).style] || 1) * 1000, tg: [] } : null; if (e.card) { blog(tx("log.act", { name: u.name, card: cardName(e.card) })); EV.sfx("card"); } else blog(tx("log.basic", { name: u.name })); break; }
       case "support": if (b.units.some((x) => x.uid === e.u && x.side === "ally")) EV.P.c.supportUsed = (EV.P.c.supportUsed || 0) + 1; blog(tx("log.support", { name: uName(e.u), card: cardName(e.card) })); if (a) battle.floats.push({ x: a.x, y: a.y - 44, text: "★ " + cardName(e.card), col: "#ffe27a", life: 1.4, small: true }); break;
       case "dmg":
         if ((e.eff === "up" || e.eff === "opp") && e.by && b.units.some((x) => x.uid === e.by && x.side === "ally")) EV.P.c.advHits = (EV.P.c.advHits || 0) + 1;
         if (a) {
-          a.flash = 1;
+          a.flash = 1; if (!e.dot) { a.sil = 2; a.kb = 1; }
           // normal cream; ×1.5 gold and bigger; ×1.25 pink with an "Opposite" tag; ×0.75 grey and smaller; damage over time falls in its cause's colour
           const col = e.dot ? (e.dot === "burn" ? TCOL.fire : "#d2cbd9") : e.eff === "up" ? "#ffd57a" : e.eff === "opp" ? "#f4a6c4" : e.eff === "down" ? "#9d93ad" : "#fbf6ef";
           battle.floats.push({ x: a.x + (Math.random() * 16 - 8), y: a.y - (e.dot ? 20 : 34), vy: e.dot ? -0.3 : 0.45, text: (e.crit ? "¡" : "") + e.n + (e.crit ? "!" : ""), col, life: 1.1, big: e.crit || e.eff === "up", small: e.eff === "down" });
@@ -79,7 +121,7 @@ function flushEvents() {
       case "revive": blog(tx("log.revive", { name: uName(e.u), n: e.n })); if (a) battle.floats.push({ x: a.x, y: a.y - 40, text: "↑ " + e.n, col: "#8fe08a", life: 1.3 }); EV.sfx("heal"); break;
     }
   }
-  if (hitSfx) { EV.sfx(hitSfx); if (hitSfx === "crit") EV.buzz(25); }
+  acc.sfx = hitSfx;
 }
 /* ---------- Your cards: tap a ready card, aim it with time stopped, let go ----------
    Manual mode: your creatures still do their basic attacks on their own; their active cards wait for you.
@@ -165,6 +207,7 @@ async function runBattle() {
     // a card you let go of: it takes its creature's turn right now
     if (bt.queue.length) {
       const { u, aim } = bt.queue.shift();
+      if (EV.P.rpgIntro !== false && !REDUCE && u.cards.a) { bt.banner = { u, id: u.cards.a.id, t0: performance.now(), dur: 420 }; await new Promise((r) => setTimeout(r, 420)); if (bt !== battle) return; bt.banner = null; }
       if (b.castNow(u, aim)) { EV.P.c.aimed = (EV.P.c.aimed || 0) + 1; flushEvents(); renderTurn(); await wait(900); }
       last = performance.now(); continue;
     }
@@ -187,6 +230,7 @@ async function runBattle() {
     await wait(use ? 900 : 600);
     last = performance.now();
   }
+  while (bt.pend.length && bt === battle) await nextFrame();
   const res = b.over || "lose";
   bt.done = true; bt.aim = null; renderTurn();
   blog(res === "win" ? tx("b.win") : tx("b.lose"));
@@ -439,9 +483,53 @@ function drawAim(out, now) {
   out.fillText(aimSlow() ? "▷ ×0.1" : "❚❚", BW / 2, 18);
   out.restore();
 }
+// the basic attack: the front row runs half way, hits and comes back; the back row throws a small shot (offset in battle units)
+function basicPose(u, now) {
+  const m = battle.basic; if (!m || m.uid !== u.uid || !m.front) return 0;
+  const k = (now - m.t0) / m.dur; if (k >= 1) return 0;
+  const a = battle.anim[u.uid], q = battle.anim[m.tg[0]], dir = u.side === "ally" ? 1 : -1;
+  const dist = q ? Math.max(8, Math.abs(q.x - a.x) / 2 - 10) : 24;
+  const f = k < 0.12 ? -0.12 * (k / 0.12) : k < 0.45 ? (k - 0.12) / 0.33 : k < 0.6 ? 1 : 1 - (k - 0.6) / 0.4;
+  return Math.round(f * dist * dir / 2) * 2;
+}
+// a soft round light, added on top (glows of the card effects, the caster's wind-up)
+function glow(g, x, y, r, col, al) {
+  if (al <= 0) return;
+  const gr = g.createRadialGradient(x, y, 0, x, y, r); gr.addColorStop(0, col); gr.addColorStop(1, "rgba(0,0,0,0)");
+  g.save(); g.globalCompositeOperation = "lighter"; g.globalAlpha = Math.min(1, al); g.fillStyle = gr; g.fillRect(x - r, y - r, r * 2, r * 2); g.restore();
+}
+// the card's name and the creature that plays it, slid across for a moment when you let go of a card
+function drawBanner(out, now) {
+  const bn = battle.banner; if (!bn) return;
+  const k = Math.min(1, (now - bn.t0) / bn.dur), slide = k < 0.25 ? 1 - k / 0.25 : k > 0.85 ? -(k - 0.85) / 0.15 : 0;
+  const ty = CARDS[bn.id] ? CARDS[bn.id].type : null, col = TCOL[ty] || "#b9a7ff", y = 92, x = Math.round(slide * BW);
+  out.save(); out.translate(x, 0);
+  out.fillStyle = "rgba(29,22,38,.86)"; out.fillRect(0, y, BW, 44);
+  out.fillStyle = col; out.fillRect(0, y, BW, 3); out.fillRect(0, y + 41, BW, 3);
+  const im = artUnit(bn.u, 0, "happy");
+  if (im) { out.imageSmoothingEnabled = false; out.drawImage(im, 70 - im.width / 2, y + 44 - im.height); }
+  out.font = '700 18px "EvNum", "Pixelify Sans", system-ui, sans-serif'; out.textAlign = "left"; out.textBaseline = "middle";
+  out.lineWidth = 4; out.strokeStyle = "#1d1626"; out.strokeText(cardName(bn.id), 112, y + 22); out.fillStyle = "#fbf6ef"; out.fillText(cardName(bn.id), 112, y + 22);
+  out.font = '600 10px "EvNum", "Pixelify Sans", system-ui, sans-serif'; out.fillStyle = col; out.fillText(bn.u.name, 112, y + 8);
+  out.restore();
+}
+// a defeated creature: it drops and blinks, then goes up in a puff of dust (ms since it fell)
+function drawPuff(out, x, y, el, boss) {
+  const k = (el - 340) / 420; if (k <= 0 || k >= 1) return;
+  out.save(); out.globalAlpha = 1 - k;
+  for (let i = 0; i < 7; i++) { const an = i * Math.PI * 2 / 7 + 0.3, r = (boss ? 16 : 10) + k * (boss ? 22 : 14);
+    out.fillStyle = i % 2 ? "#e9e3ef" : "#c9c0d4"; out.beginPath(); out.arc(Math.round(x + Math.cos(an) * r), Math.round(y - 6 + Math.sin(an) * r * 0.6 - k * 6), (boss ? 7 : 5) * (1 - k * 0.5), 0, Math.PI * 2); out.fill(); }
+  out.restore();
+}
 function drawBattle(now) {
   if (!battle || !battle.c) return;
   const out = battle.c, b = battle.b, t = now / 1000, z = ZONES[X.zone];
+  // hit-stop: while it lasts the card and attack animations hold still
+  const fdt = battle.last ? Math.min(100, now - battle.last) : 0; battle.last = now;
+  const stopped = now < battle.stopUntil;
+  if (stopped) { if (battle.cast) battle.cast.t0 += fdt; if (battle.basic) battle.basic.t0 += fdt; }
+  landEvents(now);
+  if (battle.cv) { const sk = battle.shake; if (sk && now - sk.t0 < sk.dur) { const f = 1 - (now - sk.t0) / sk.dur, ax = Math.round((Math.random() * 2 - 1) * sk.amp * f), ay = Math.round((Math.random() * 2 - 1) * sk.amp * f); battle.cv.style.transform = `translate(${ax}px,${ay}px)`; } else if (sk) { battle.shake = null; battle.cv.style.transform = ""; } }
   const c = BLOW ? BLOW.g : out;
   if (BLOW) { c.setTransform(1, 0, 0, 1, 0, 0); c.imageSmoothingEnabled = false; c.scale(0.5, 0.5); }
   const day = b.day, bg = BLOW && artBg(X.zone, day);
@@ -473,15 +561,25 @@ function drawBattle(now) {
   for (const u of order) {
     const a = battle.anim[u.uid];
     if (u.pos != null) { const [tx, ty] = cellXY(u.side, u.pos); a.x += (tx - a.x) * 0.2; a.y += (ty - a.y) * 0.2; if (Math.abs(tx - a.x) < 0.5) a.x = tx; if (Math.abs(ty - a.y) < 0.5) a.y = ty; }
-    a.lunge = Math.max(0, a.lunge - 0.06); a.flash = Math.max(0, a.flash - 0.07);
-    a.shownHp += (u.hp - a.shownHp) * 0.15;
+    const held = pendFor(u.uid);
+    if (!held) a.hpT = u.hp;
+    if (!stopped) { a.lunge = Math.max(0, a.lunge - 0.06); a.flash = Math.max(0, a.flash - 0.07); a.kb = Math.max(0, a.kb - 0.14); if (a.sil > 0) a.sil--; }
+    a.shownHp += (a.hpT - a.shownHp) * 0.15;
     const dir = u.side === "ally" ? 1 : -1;
     const art = hi && artUnit(u, 0, "normal"), spr = BLOW && !art && evsKind(u.kind), cp = (spr || (art && HAS_EVS)) ? castPose(u, now) : null;
     if (cp) a.lunge = 0;
-    const lx = Math.round(Math.sin(a.lunge * Math.PI) * 9 * dir) * 2;
-    const ko = u.hp <= 0;
-    const x = Math.round((a.x + lx) / 2) * 2, y = a.y + (ko ? 8 : 0);
+    // defeat shows only once the blow that caused it has landed
+    const ko = u.hp <= 0 && !held;
+    if (ko && a.koT == null) a.koT = now; else if (!ko) a.koT = null;
+    const koEl = ko ? now - a.koT : 0, gone = ko && (REDUCE ? koEl > 0 : koEl > 340);
+    if (gone) { if (!REDUCE) drawPuff(out, Math.round(a.x / 2) * 2, a.y, koEl, u.boss); continue; }
+    const lx = Math.round(Math.sin(a.lunge * Math.PI) * 9 * dir) * 2 + basicPose(u, now) - Math.round(a.kb * 4 * dir / 2) * 2;
+    const x = Math.round((a.x + lx) / 2) * 2, y = a.y + (ko ? Math.round(koEl / 340 * 6) : 0);
     place.push({ u, a, x, y, ko });
+    if (ko && Math.floor(koEl / 60) % 2) continue; // blinking as it falls
+    // wind-up: a glow of the card's type grows behind the caster before it lets go
+    const cs0 = battle.cast;
+    if (cs0 && cs0.uid === u.uid && !REDUCE) { const kk = (now - cs0.t0) / cs0.dur; if (kk < 0.3) glow(out, x, y - 6, u.boss ? 44 : 30, TCOL[CARDS[cs0.id] && CARDS[cs0.id].type] || "#fbf6ef", 0.9 * Math.sin(kk / 0.3 * Math.PI)); }
     c.save(); c.translate(x, y);
     if (art) {
       // PNG cell straight onto the full-size canvas: feet stand on the cell's y = n - 4
@@ -489,13 +587,14 @@ function drawBattle(now) {
       const sq = cp && cp.sq != null ? cp.sq : REDUCE ? 0 : Math.floor(t * 2 + a.x / 50) % 2;
       let im = artUnit(u, sq, emo) || art;
       if (u.hollow) im = artHollow(im);
-      if (cp && cp.flash && HAS_EVS) im = EVS.silhouette(im);
+      if ((cp && cp.flash || a.sil > 0) && HAS_EVS) im = EVS.silhouette(im, a.sil > 0 ? "#ffffff" : undefined);
       const n = im.width, feet = u.boss ? 24 : 16;
       const hov = !REDUCE && evsKind(u.kind) && EVS.hovers(u.kind) ? Math.round(Math.sin(t * 2 + a.x)) * 2 - 4 : 0;
       out.save(); out.translate(x, y); out.imageSmoothingEnabled = false;
       out.fillStyle = "rgba(29,22,38,.35)"; out.fillRect(-Math.round(n * 0.2), feet - 2, Math.round(n * 0.4), 4);
       if (ko) out.globalAlpha = 0.35; else if (cp && cp.alpha != null) out.globalAlpha = cp.alpha;
       out.translate(cp ? cp.dx * 2 : 0, (cp ? cp.dy * 2 : 0) + hov);
+      if (cp && cp.sq === 1) { out.translate(0, feet); out.scale(1.08, 0.9); out.translate(0, -feet); }
       if (u.side === "foe") out.scale(-1, 1);
       out.drawImage(im, -n / 2, feet - (n - 4));
       out.restore();
@@ -504,7 +603,7 @@ function drawBattle(now) {
       const n = u.boss ? 32 : 24, emo = ko ? "sad" : a.flash > 0.5 ? "surprised" : cp ? "happy" : u.hp / u.maxHp < 0.3 ? "sad" : "normal";
       const frame = cp && cp.sq != null ? cp.sq : REDUCE ? 0 : Math.floor(t * 2 + a.x / 50) % 2;
       let im = EVS.sprite(u.kind, n, u.own ? Math.max(0, Math.min(2, u.stage)) : 1, frame, emo, !!u.hollow);
-      if (cp && cp.flash) im = EVS.silhouette(im);
+      if (cp && cp.flash || a.sil > 0) im = EVS.silhouette(im, a.sil > 0 ? "#ffffff" : undefined);
       const w = im.width * 2, h = im.height * 2, feet = u.boss ? 24 : 16;
       const hov = !REDUCE && EVS.hovers(u.kind) ? Math.round(Math.sin(t * 2 + a.x)) * 2 - 4 : 0;
       c.save();
@@ -521,7 +620,7 @@ function drawBattle(now) {
     drawMon(c, u.kind, { t: t + a.x, stage: u.own ? u.stage : 1, form: u.form, hollow: u.hollow, hp: u.hp / u.maxHp, ko });
     c.restore();
     }
-    if (a.flash > 0) { c.save(); c.globalAlpha = a.flash * 0.6; c.fillStyle = "#ffffff"; EV.ell(c, 0, -4, 22 * (u.boss ? 1.5 : 1), 22 * (u.boss ? 1.8 : 1)); c.fill(); c.restore(); }
+    if (a.flash > 0 && !art && !spr) { c.save(); c.globalAlpha = a.flash * 0.6; c.fillStyle = "#ffffff"; EV.ell(c, 0, -4, 22 * (u.boss ? 1.5 : 1), 22 * (u.boss ? 1.8 : 1)); c.fill(); c.restore(); }
     // shield ring
     if (u.shield > 0) { c.save(); c.strokeStyle = "#7cc8e3"; c.lineWidth = 2; c.beginPath(); c.arc(0, -4, u.boss ? 40 : 24, 0, Math.PI * 2); c.stroke(); c.restore(); }
     // segmented hp bar
@@ -549,6 +648,23 @@ function drawBattle(now) {
     }
   }
   if (BLOW) { c.setTransform(1, 0, 0, 1, 0, 0); PX.quantize(c, BW / 2, BH / 2, false); if (!hi) out.clearRect(0, 0, BW, BH); PX.blit(out, BLOW, BW, BH); }
+  // the card effect's light, sharp and additive on top of the pixels
+  if (cs && battle.cast && HAS_EVS && EVS.fxGlow) {
+    const k = (now - cs.t0) / cs.dur, pos = (uid) => { const q = battle.anim[uid]; return q ? { x: Math.round(q.x / 2), y: Math.round(q.y / 2) - 4 } : null; };
+    const f = pos(cs.uid), tg = cs.tg.map(pos).filter(Boolean), dir = (b.units.find((x) => x.uid === cs.uid) || {}).side === "ally" ? 1 : -1;
+    if (f) { const G = EVS.fxGlow(cs.id, k, { x: f.x + 6 * dir, y: f.y }, tg[0] || f, tg.length ? tg : [f]); for (const sp of G.spots) glow(out, sp.x * 2, sp.y * 2, sp.r * 2, G.col, sp.a); }
+  }
+  // the back row's basic attack: a small shot of its type in an arc
+  const bm = battle.basic;
+  if (bm) {
+    const k = (now - bm.t0) / bm.dur, f = battle.anim[bm.uid], q = battle.anim[bm.tg[0]];
+    if (k >= 1 || !f) battle.basic = null;
+    else if (!bm.front && q && k > 0.12 && k < 0.45) {
+      const kk = (k - 0.12) / 0.33, px = f.x + (q.x - f.x) * kk, py = f.y - 10 + (q.y - f.y) * kk - Math.sin(kk * Math.PI) * 18;
+      for (let i = 3; i >= 0; i--) { const k2 = Math.max(0, kk - i * 0.06), tx2 = f.x + (q.x - f.x) * k2, ty2 = f.y - 10 + (q.y - f.y) * k2 - Math.sin(k2 * Math.PI) * 18; out.globalAlpha = 1 - i * 0.22; out.fillStyle = i ? bm.col : "#fbf6ef"; out.fillRect(Math.round(tx2 / 2) * 2 - (i ? 2 : 3), Math.round(ty2 / 2) * 2 - (i ? 2 : 3), i ? 4 : 6, i ? 4 : 6); }
+      out.globalAlpha = 1; glow(out, px, py, 16, bm.col, 0.7);
+    } else if (q && k >= 0.45 && k < 0.7) glow(out, q.x, q.y - 10, 22, bm.col, 1 - (k - 0.45) / 0.25);
+  }
   // names, status icons and floating numbers stay sharp
   const font = (w, px) => `${w} ${px}px "EvNum", "Pixelify Sans", system-ui, sans-serif`;
   for (const { u, x, y } of place) {
@@ -565,6 +681,7 @@ function drawBattle(now) {
   }
   drawThreats(out, now);
   if (battle.aim) drawAim(out, now);
+  drawBanner(out, now);
   for (const f of battle.floats) {
     f.life -= 0.016; f.y -= f.vy == null ? 0.45 : f.vy;
     out.save(); out.globalAlpha = Math.max(0, Math.min(1, f.life)); out.textAlign = "center";
