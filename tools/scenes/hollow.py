@@ -120,3 +120,101 @@ def regreso():
     s.put(char("NinjaMageBlack", "left"), 64, 58)
     s.lit("dawn"); mist(s, 0.15)
     return s
+
+
+# ---------------- Cards (art/cards/<id>.png): the card box shows y 10..86 ----------------
+
+@card("night")
+def c_night():
+    """Night Shift: Nim waits on the doorstep; far up the hills, the lamps of the dig."""
+    s = Scene("grass", ["........"] * 3 + ["========"] * 2 + ["........"], var=1)
+    s.at(ruin("a"), 30, -4)
+    s.d.rectangle([52, 42, 76, 46], fill=(120, 110, 104, 255), outline=(60, 54, 56, 255))
+    s.put(mon("nim", "down"), 64, 56)
+    for x, y in ((8, 8), (16, 12), (106, 6), (118, 10)): s.d.point((x, y), fill=(255, 210, 130, 255)); s.glow(x, y, 6, FIRE, 0.6)
+    s.d.ellipse([60, 64, 66, 67], fill=(150, 150, 150, 255))
+    return s.lit("night")
+
+
+@card("nohide")
+def c_nohide():
+    """In the Hollow an Albor spy hides behind some barrels; Nim, who hides from everything, hangs upside down right above him and stares."""
+    s = Scene("grass", ["........"] * 6, var=1)
+    s.at(ruin("b"), 40, -26)
+    for x in (54, 66): s.d.rectangle([x, 50, x + 10, 62], fill=(140, 96, 56, 255), outline=(60, 40, 24, 255)); s.d.line([(x, 56), (x + 10, 56)], fill=(60, 40, 24, 255))
+    s.put(char("KnightGold", "up"), 64, 76)
+    s.d.line([(64, 24), (64, 36)], fill=(40, 34, 44, 255))
+    s.put(mon("nim", "down").transpose(Image.FLIP_TOP_BOTTOM), 64, 50)
+    return mist(s, 0.3, (64, 50, 26)).lit("gloom")
+
+
+@card("truename")
+def c_truename():
+    """Against a wall of the Hollow there is a shadow that is only a gap; Nim says a name aloud and the shadow begins to fill with colour."""
+    s = Scene("grass", ["........"] * 6, var=1)
+    s.d.rectangle([0, 0, 128, 44], fill=(120, 116, 124, 255)); s.d.line([(0, 44), (128, 44)], fill=(60, 56, 66, 255), width=2)
+    for y in range(8, 44, 9):
+        for x in range((y // 9 % 2) * 8, 128, 16): s.d.rectangle([x, y - 8, x + 15, y], outline=(96, 92, 102, 255))
+    sh = char("Villager2", "down"); col = sh.copy(); bl = Image.new("RGBA", sh.size, (16, 12, 22, 255)); bl.putalpha(sh.getchannel("A"))
+    half = bl.copy(); half.paste(col.crop((0, 8, 16, 16)), (0, 8), col.crop((0, 8, 16, 16)))
+    s.put(scale(half, 2), 76, 48)
+    s.put(mon("nim", "right"), 44, 66)
+    for x, y in ((52, 56), (58, 52), (64, 50)): s.d.point((x, y), fill=(230, 220, 250, 255))
+    return s.lit("gloom")
+
+
+@card("lance")
+def c_lance():
+    """At the gates of King Lóbrego's court, in the fog, Centinela crosses its lance before an Albor envoy bringing a scroll."""
+    s = Scene("grass", ["........", "........", "...==...", "...==...", "...==...", "...==..."], var=1)
+    s.at(ruin("big"), 24, -54)
+    s.put(mon("centinela", "down", 1), 64, 54)
+    s.d.line([(50, 40), (78, 56)], fill=(170, 170, 180, 255), width=2)
+    s.put(char("Knight", "up"), 64, 80)
+    s.d.rectangle([70, 68, 74, 71], fill=(236, 226, 200, 255))
+    return mist(s, 0.38, (64, 60, 34)).lit("gloom")
+
+
+@card("oath")
+def c_oath():
+    """In the fog waits a long line of Underside folk; Centinela kneels before the first, a girl, and whispers that it will protect her."""
+    s = Scene("grass", ["........"] * 6, var=1)
+    s.put(mon("centinela", "left", 1), 80, 56)
+    s.put(char("Child", "right"), 58, 58)
+    for i, (n, x) in enumerate((("Villager", 40), ("OldWoman", 26), ("Villager2", 12))): s.put(char(n, "right"), x, 60 + i % 2 * 2)
+    for i, (n, x) in enumerate((("Villager3", 30), ("Villager4", 16))): s.put(dim(char(n, "right"), 0.7), x, 76)
+    return mist(s, 0.42, (70, 54, 30)).lit("gloom")
+
+
+@card("veil")
+def c_veil():
+    """An Albor patrol sweeps the street with lantern light; Centinela throws a veil of fog over a girl pressed against the wall and the light passes by."""
+    s = Scene("grass", ["........"] * 3 + ["========"] * 2 + ["........"], var=1)
+    s.at(ruin("a"), -10, -4).at(ruin("b"), 70, -18)
+    s.put(char("Child", "down"), 40, 50).put(mon("centinela", "down"), 56, 52)
+    s.put(char("KnightGold", "left"), 112, 74).glow(104, 66, 26, COLD, 1.1)
+    s.lit("night")
+    return s.fog(0.35, (170, 176, 200), (110, 70, 24))
+
+
+@card("court")
+def c_court():
+    """King Lóbrego's court in the fog: empty chairs round an empty throne. No one sits. Centinela stands guard all the same."""
+    s = Scene("grass", ["........", "........", "...==...", "...==...", "...==...", "...==..."], var=1)
+    throne(s, 64, 34)
+    for x, y in ((30, 46), (98, 46), (24, 66), (104, 66), (36, 84), (92, 84)):
+        s.d.rectangle([x - 5, y - 10, x + 5, y - 4], fill=(110, 80, 60, 255), outline=(50, 36, 28, 255)); s.d.rectangle([x - 6, y - 4, x + 6, y], fill=(130, 96, 70, 255), outline=(50, 36, 28, 255))
+    s.put(mon("centinela", "down"), 84, 40)
+    return mist(s, 0.35, (64, 40, 30)).lit("gloom")
+
+
+@card("crown")
+def c_crown():
+    """The crown rests on the empty throne's cushion; an Underside hand reaches out to take it and stops halfway."""
+    s = Scene("grass", ["........"] * 6, var=1)
+    s.d.rectangle([20, 10, 108, 70], fill=(120, 118, 128, 255), outline=(50, 48, 58, 255))
+    s.d.rectangle([36, 44, 92, 66], fill=(120, 40, 60, 255), outline=(60, 20, 30, 255))
+    s.d.polygon([(48, 46), (52, 32), (58, 42), (64, 28), (70, 42), (76, 32), (80, 46)], fill=(220, 190, 80, 255), outline=(110, 80, 30, 255))
+    s.d.rectangle([96, 50, 128, 60], fill=(40, 34, 44, 255)); s.d.ellipse([88, 48, 100, 62], fill=(52, 44, 56, 255), outline=(20, 16, 24, 255))
+    for i in range(4): s.d.line([(90, 50 + i * 3), (84, 49 + i * 3)], fill=(52, 44, 56, 255), width=2)
+    return s.glow(64, 40, 30, WARM, 0.6).lit("gloom")

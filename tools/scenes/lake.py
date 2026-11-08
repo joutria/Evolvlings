@@ -97,3 +97,92 @@ def flotan():
     rope(s, [(40, 24), (60, 22), (78, 20)])
     for x, d in ((40, "right"), (56, "down"), (72, "left"), (90, "down")): s.put(char("Villager2", d), x, 88)
     return s.lit("day")
+
+
+# ---------------- Cards (art/cards/<id>.png): the card box shows y 10..86 ----------------
+
+@card("whirl")
+def c_whirl():
+    """In an eddy of the stream Remolín floats belly up, spinning, happy; beside it a bottle spins that cannot get out."""
+    s = Scene("grass", ["........", "~~~~~~~~", "~~~~~~~~", "~~~~~~~~", "~~~~~~~~", "........"], water="grass")
+    for r in (10, 18, 26): s.d.arc([60 - r, 50 - r // 2, 60 + r, 50 + r // 2], 20, 320, fill=(200, 230, 250, 255))
+    s.put(mon("remolin", "up"), 56, 56)
+    s.put(item("Potion", "WaterPot.png"), 76, 50)
+    return s.lit("day")
+
+
+@card("vessel")
+def c_vessel():
+    """In the Tides' temple Mother Marejada pours water into vessels of many shapes; Remolín has climbed into a bowl and taken its round shape."""
+    s = Scene("sand", ["........"] * 6, var=1)
+    s.d.rectangle([0, 0, 128, 24], fill=(90, 120, 140, 255)); s.d.line([(0, 24), (128, 24)], fill=(40, 60, 70, 255), width=2)
+    for x, (w, h) in zip(range(20, 120, 20), ((8, 14), (12, 8), (6, 18), (10, 10), (14, 6))):
+        s.d.rectangle([x - w // 2, 60 - h, x + w // 2, 60], fill=(190, 120, 80, 255), outline=(90, 54, 34, 255))
+    s.put(char("OldWoman", "down"), 46, 46)
+    s.d.ellipse([56, 70, 76, 80], fill=(190, 120, 80, 255), outline=(90, 54, 34, 255))
+    s.put(mon("remolin", "down"), 66, 76)
+    return s.lit("day")
+
+
+@card("guest")
+def c_guest():
+    """On the Tides' pier an Underside family arrives with their bundles; before asking anything, a village girl offers them a glass of water. Remolín peeks from the water."""
+    s = Scene("sand", ["~~~~~~~~", "~~~~~~~~", "~~~~~~~~", "........", "........", "........"], water="sand")
+    s.put(boat(), 30, 32)
+    for n, x in (("Villager2", 48), ("Child", 60), ("Villager", 72)): s.put(char(n, "down"), x, 60)
+    s.put(char("EggGirl", "up"), 62, 82); s.d.rectangle([68, 72, 70, 75], fill=(170, 210, 240, 255))
+    s.put(mon("remolin", "down"), 100, 30)
+    return s.lit("dusk")
+
+
+@card("truewater")
+def c_truewater():
+    """At night on the Mirror Lake, Mother Marejada draws water in a bowl; in the lake the shore lantern is reflected clean and pretty, in the bowl it is not."""
+    s = Scene("grass", ["~~~~~~~~"] * 4 + ["........"] * 2, water="grass")
+    s.put(cut("TilesetElement", 96, 48, 16, 32), 26, 72).glow(26, 48, 26, COLD, 1.0)
+    s.put(flip(cut("TilesetElement", 96, 48, 16, 32)).transpose(Image.FLIP_TOP_BOTTOM), 26, 96 - 24)
+    s.put(char("OldWoman", "up"), 70, 80)
+    s.d.ellipse([78, 76, 90, 82], fill=(150, 104, 62, 255), outline=(70, 46, 28, 255)); s.d.ellipse([80, 77, 88, 80], fill=(40, 20, 50, 255))
+    s.sap(84, 79, 3, 1)
+    return s.lit("night")
+
+
+@card("lostwave")
+def c_lostwave():
+    """Orilla kneels at the Mirror Lake and sets a folded letter afloat towards the red glow of the Crater, where her sister Ola works."""
+    s = Scene("grass", ["~~~~~~~~"] * 4 + ["........"] * 2, water="grass")
+    s.glow(110, 0, 50, FIRE, 1.1)
+    s.d.polygon([(54, 56), (62, 52), (66, 56), (58, 60)], fill=(240, 236, 220, 255), outline=(140, 130, 110, 255))
+    s.put(char("EggGirl", "up"), 60, 80).put(mon("vidriela", "up"), 82, 78)
+    return s.lit("dusk")
+
+
+@card("reading")
+def c_reading():
+    """At dawn Vidriela floats over the still lake and looks at the reflection; there is no one on the shore, but in the water a blow that has not yet happened."""
+    s = Scene("grass", ["~~~~~~~~"] * 5 + ["........"], water="grass")
+    s.put(mon("vidriela", "down", 1), 64, 36).glow(64, 30, 24, (200, 230, 255), 0.8)
+    s.put(dim(char("Knight", "right").transpose(Image.FLIP_TOP_BOTTOM), 0.6), 54, 70).put(dim(char("Villager2", "left").transpose(Image.FLIP_TOP_BOTTOM), 0.6), 72, 70)
+    s.d.line([(60, 62), (66, 60)], fill=(220, 220, 255, 255))
+    return s.lit("dawn")
+
+
+@card("mirror")
+def c_mirror():
+    """Orilla leans over the Deep Mirror; in the water it is not her grown-up self but two little girls hand in hand, she and her sister Ola."""
+    s = Scene("grass", ["~~~~~~~~"] * 4 + ["........"] * 2, water="grass")
+    s.put(guardian("mira"), 100, 44)
+    for x in (54, 66): s.put(dim(char("Child", "down").transpose(Image.FLIP_TOP_BOTTOM), 0.75), x, 56)
+    s.put(char("EggGirl", "up"), 60, 82)
+    return s.lit("dusk")
+
+
+@card("gaze")
+def c_gaze():
+    """From the bottom of the Mirror Lake everything looks small: the boats and people above are tiny silhouettes. A huge eye watches them from below."""
+    s = Scene("grass", ["~~~~~~~~"] * 6, water="grass")
+    for x, y in ((30, 22), (90, 28)): s.put(dim(boat(), 0.25), x, y)
+    for x in (50, 60, 74): s.put(dim(char("Villager", "down"), 0.2), x, 18)
+    s.d.ellipse([34, 50, 94, 84], fill=(230, 236, 220, 255), outline=(30, 40, 50, 255), width=2)
+    s.d.ellipse([54, 54, 74, 80], fill=(60, 140, 160, 255)); s.d.ellipse([60, 60, 68, 74], fill=(10, 14, 20, 255)); s.d.point((62, 61), fill=(255, 255, 255, 255))
+    return s.lit("deep")

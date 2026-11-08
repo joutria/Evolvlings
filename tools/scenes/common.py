@@ -133,3 +133,59 @@ def brillo():
     s.d.point((66, 52), fill=(255, 255, 220, 255)); s.d.point((65, 52), fill=(255, 230, 140, 255))
     s.d.point((66, 51), fill=(255, 230, 140, 255)); s.d.point((67, 52), fill=(255, 230, 140, 255))
     return s.glow(66, 52, 8, WARM, 0.9).lit("day")
+
+
+# ---------------- Cards (art/cards/<id>.png): the card box shows y 10..86 ----------------
+
+def ford(rows=None):
+    """El Vado: grass on both banks of a stream crossed by stepping stones."""
+    s = Scene("grass", rows or ["........", "........", "~~~~~~~~", "~~~~~~~~", "........", "........"], water="grass")
+    for x in range(8, 128, 16): s.d.ellipse([x - 5, 38, x + 5, 44], fill=(150, 146, 140, 255), outline=(70, 66, 64, 255))
+    return s
+
+
+@card("static")
+def c_static():
+    """In the Ford's square a girl has stroked Relampín's back: she has heard the latest news and gone stiff, hair on end. The neighbours laugh."""
+    s = Scene("grass", ["........", "..====..", "..====..", "..====..", "..====..", "........"])
+    s.put(tree(), 10, 30).put(tree(), 118, 30)
+    s.put(char("EggGirl", "down"), 60, 56).put(mon("relampin", "left"), 76, 58)
+    for dx in (-4, -1, 2, 5): s.d.line([(60 + dx, 42), (60 + dx * 2, 36)], fill=(250, 240, 150, 255))
+    for n, x, d in (("Villager", 24, "right"), ("OldWoman", 38, "right"), ("Villager2", 96, "left"), ("Child", 108, "left")): s.put(char(n, d), x, 74)
+    return s.lit("day")
+
+
+@card("chorus")
+def c_chorus():
+    """Sunset in the Ford's square: Coplo sings standing on a barrel and the whole square takes up the refrain; Trinilla keeps the beat from his cap."""
+    s = Scene("grass", ["........", "..====..", "..====..", "..====..", "..====..", "........"])
+    s.d.rectangle([58, 40, 70, 52], fill=(140, 96, 56, 255), outline=(60, 40, 24, 255))
+    s.put(char("FighterRed", "down", 6), 64, 42).put(mon("trinilla", "down"), 64, 28)
+    import math as _m
+    for i, n in enumerate(("Villager", "OldWoman", "Child", "Villager2", "Greenman", "Villager3", "NinjaBlue", "Villager4")):
+        a = _m.pi * (0.1 + i / 7 * 0.8); s.put(char(n, "up"), 64 + int(52 * _m.cos(a)), 50 + int(30 * _m.sin(a)))
+    return s.lit("dusk")
+
+
+@card("duet")
+def c_duet():
+    """Duet: on the Ford's stepping stones Tila (day side) and Nim (night side) sing their peoples' lullabies at once; the two notes meet and a star is born."""
+    s = ford()
+    s.put(char("Woman", "right"), 40, 42).put(mon("nim", "left"), 88, 42)
+    for x, y, c in ((50, 30, (255, 240, 200)), (56, 24, (255, 240, 200)), (78, 30, (190, 180, 240)), (72, 24, (190, 180, 240))): s.d.point((x, y), fill=c + (255,)); s.d.line([(x + 1, y), (x + 1, y - 3)], fill=c + (255,))
+    s.put(mon("unisona", "down"), 64, 22).glow(64, 14, 26, (255, 250, 220), 1.2)
+    s.lit("dusk")
+    night = s.g.crop((64, 0, 128, 96)); from PIL import ImageEnhance as _E
+    night = _E.Brightness(night).enhance(0.55); s.g.paste(night, (64, 0)); s.d = ImageDraw.Draw(s.g)
+    return s
+
+
+@card("unison")
+def c_unison():
+    """Night at the Ford: people of every people sing the same song in a ring, and Unísona shines above them."""
+    s = ford(["........", "........", "........", "........", "~~~~~~~~", "~~~~~~~~"])
+    import math as _m
+    for i, n in enumerate(("Woman", "Master", "Greenman", "NinjaMageBlack", "OldWoman", "Caveman", "NinjaBlue", "Eskimo", "Child")):
+        a = i / 9 * 2 * _m.pi; s.put(char(n, "down"), 64 + int(40 * _m.cos(a)), 48 + int(18 * _m.sin(a)))
+    s.put(mon("unisona", "down", 1), 64, 46).glow(64, 34, 50, (255, 250, 220), 1.4)
+    return s.lit("night")
