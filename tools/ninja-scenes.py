@@ -10,7 +10,7 @@ lanterns and windows, fog, caves) and scaled 2x to art/events/<id>.png (256 x 19
 start of the conversation instead of the drawn one; events without a PNG keep the drawn picture.
 
 The scenes themselves live in tools/scenes/<zone>.py, one function per event, registered with @scene("id")."""
-import sys, os, glob, math, importlib.util
+import sys, os, glob, math, json, importlib.util
 from PIL import Image, ImageDraw, ImageChops
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
@@ -44,7 +44,9 @@ DIRS = {"down": 0, "up": 1, "left": 2, "right": 3}
 
 
 def char(name, d="down", row=0):
-    """One 16 x 16 frame of a pack character: d is where it faces; row 6 is the arms-up pose of most of them."""
+    """One 16 x 16 frame of a pack character: d is where it faces; row 6 is the arms-up pose of most of them.
+    In an ending where the people have left (npc false), an empty frame."""
+    if END and END.get("npc") is False: return Image.new("RGBA", (T, T))
     return img("Actor", "Characters", name, "SpriteSheet.png").crop((DIRS[d] * T, row * T, DIRS[d] * T + T, row * T + T))
 
 
@@ -179,8 +181,11 @@ class Scene:
         self.d.line(pts, fill=col); return self
 
     def lit(self, preset="day", tint=None):
-        """Light the scene (see LIGHTS) with the glows added so far."""
+        """Light the scene (see LIGHTS) with the glows added so far; in an ending, its mood re-lights it."""
         t = tint or LIGHTS[preset]
+        if END:
+            t, extra = mood(t, END.get("m"), END.get("p") or [])
+            self.glows += extra
         if t != (1.0, 1.0, 1.0) or self.glows: self.g = light(self.g, t, self.glows)
         self.d = ImageDraw.Draw(self.g)
         return self
@@ -231,6 +236,98 @@ def light(g, tint, glows):
     return rgb.convert("RGBA")
 
 
+# ---------- Endings: the start scene again, re-lit by the ending's mood, with your team and what the outcome brings ----------
+# tools/scenes/endings.json holds the drawn endings' specs (EVSCENE.endSpec in scenes.js): mood m, team pose, props p,
+# z (a second look: the scene mirrored), npc false (the people have gone), foes. Written to art/events/<id>--<key>.png.
+END = None
+
+
+def mood(t, m, props):
+    """The light of an ending: a new tint and extra glows."""
+    g = []
+    if "fire" in props: g.append((64, 84, 34, FIRE, 0.9))
+    if "lamp" in props: g.append((32 if END and END.get("z") else 96, 62, 28, COLD, 0.9))     # the scene is mirrored afterwards
+    if m in ("dusk", "night", "cold"): t = LIGHTS[m] if m != "dusk" or min(t) > 0.5 else t
+    elif m == "red": t = (t[0], t[1] * 0.78, t[2] * 0.8)
+    elif m == "warm": g.append((64, 80, 60, FIRE, 0.55))
+    elif m == "bright": t = tuple(min(1.0, v * 1.2 + 0.08) for v in t); g.append((64, 24, 70, (255, 240, 200), 0.5))
+    elif m == "sap": t = (t[0] * 0.8, t[1] * 0.7, t[2] * 0.9); g += [(x, y, 16, SAP, 0.8) for x, y in ((20, 70), (70, 66), (112, 74))]
+    elif m == "tense": t = tuple(v * 0.85 for v in t)
+    return t, g
+
+
+TEAM = [("lumo", 14, 88), ("pebb", 30, 94), ("fizz", 46, 86)]
+
+
+def end_front(g, spec):
+    """Your team (Lumo, Pebb, Fizz), the foes and the props of the outcome, over the lit scene."""
+    d = ImageDraw.Draw(g)
+    right = spec.get("side") == "right" or (not spec.get("foes") and spec.get("z"))
+    team, foes, P = spec.get("team"), spec.get("foes") or [], spec.get("p") or []
+    if foes: right = False
+    for i, (c, x, y) in enumerate(TEAM):
+        if team == "away":
+            im = mon(c, "up"); x, y = (100 + i * 9, 88 + (i % 2) * 3) if right else (28 - i * 9, 88 + (i % 2) * 3)
+        else:
+            im = mon(c, "right" if team == "ready" or not right else "left")
+            if right: x = W - x
+            if team == "happy": y -= 3 if i % 2 == 0 else 1
+            if team in ("sleep", "closed"): im = dim(im, 0.8)
+        NM.paste_clip(g, im, x - im.width // 2, y - im.height)
+    for i, f in enumerate(foes[:3]):
+        im = mon(f, "left", 1); NM.paste_clip(g, im, 92 + i * 18 - im.width // 2, 88 + (i % 2) * 6 - im.height)
+    star = lambda x, y: [d.point((x + dx, y + dy), fill=(255, 226, 120, 255)) for dx, dy in ((0, -1), (-1, 0), (0, 0), (1, 0), (0, 1))]
+    def card(x, y):
+        for dx, dy in ((0, -10), (8, -6), (-8, -6), (10, 1), (-10, 1)): d.point((x + dx, y + dy), fill=(255, 236, 160, 255))
+        d.rectangle([x - 4, y - 6, x + 4, y + 5], fill=(246, 238, 216, 255), outline=(70, 52, 60, 255))
+        d.rectangle([x - 3, y - 5, x + 3, y + 1], fill=(110, 170, 200, 255)); star(x, y - 2)
+    if "card" in P: card(64, 56)
+    if "glint" in P: card(64, 34)
+    if "coins" in P:
+        for x, y in ((58, 90), (62, 89), (66, 90), (60, 87), (64, 86)): d.ellipse([x - 2, y - 1, x + 2, y + 1], fill=(250, 210, 80, 255), outline=(150, 100, 30, 255))
+    if "letter" in P: d.rectangle([58, 80, 70, 87], fill=(246, 238, 216, 255), outline=(90, 70, 60, 255)); d.line([(58, 80), (64, 84), (70, 80)], fill=(120, 80, 90, 255))
+    if "scroll" in P: d.rectangle([56, 82, 72, 88], fill=(246, 238, 216, 255), outline=(90, 70, 60, 255)); d.rectangle([54, 81, 56, 89], fill=(130, 90, 56, 255)); d.rectangle([72, 81, 74, 89], fill=(130, 90, 56, 255))
+    if "stone" in P: d.ellipse([60, 82, 68, 88], fill=(24, 16, 32, 255)); d.point((62, 84), fill=(180, 140, 230, 255))
+    if "bread" in P: d.ellipse([58, 85, 70, 91], fill=(200, 140, 70, 255), outline=(110, 70, 30, 255))
+    if "sprout" in P: d.ellipse([58, 89, 70, 92], fill=(100, 70, 44, 255)); d.line([(64, 89), (64, 82)], fill=(80, 150, 60, 255)); d.point((62, 82), fill=(110, 190, 80, 255)); d.point((66, 81), fill=(110, 190, 80, 255))
+    if "flower" in P:
+        for x, y in ((60, 88), (64, 86), (68, 88)): d.line([(x, y + 4), (x, y)], fill=(80, 150, 60, 255)); d.point((x, y), fill=(250, 240, 230, 255))
+    if "cup" in P: d.rectangle([60, 84, 66, 90], fill=(220, 224, 236, 255), outline=(90, 90, 110, 255))
+    if "bowl" in P: d.chord([56, 82, 72, 92], 0, 180, fill=(150, 100, 60, 255), outline=(70, 46, 28, 255)); [d.line([(x, 84), (x + 1, 79)], fill=(240, 240, 240, 255)) for x in (61, 64, 67)]
+    if "tube" in P: d.rectangle([60, 72, 63, 90], fill=(140, 200, 230, 255), outline=(60, 90, 120, 255)); d.rectangle([61, 82, 62, 89], fill=(250, 220, 90, 255))
+    if "zzz" in P:
+        for x, y, r in ((56, 70, 1), (62, 64, 2), (69, 57, 2)): d.line([(x - r, y - r), (x + r, y - r), (x - r, y + r), (x + r, y + r)], fill=(240, 240, 250, 255))
+    if "notes" in P:
+        for i, (x, y) in enumerate(((52, 50), (62, 42), (74, 48), (84, 38))): d.ellipse([x - 2, y - 1, x + 1, y + 1], fill=(250, 220, 110, 255) if i % 2 else (246, 238, 216, 255)); d.line([(x + 1, y), (x + 1, y - 5)], fill=(40, 30, 40, 255))
+    if "scratch" in P:
+        for x, y in ((24, 70), (27, 68), (30, 66)): d.line([(x, y), (x + 4, y - 5)], fill=(220, 90, 100, 255))
+    if "calm" in P:
+        for x, y in ((18, 74), (40, 70)): d.arc([x - 5, y - 5, x + 5, y + 5], 200, 330, fill=(110, 180, 220, 255))
+    if "eyes" in P:
+        for x in (90, 94): d.point((x, 92), fill=(255, 226, 120, 255))
+    if "drops-blue" in P:
+        for x, y in ((30, 60), (52, 52), (78, 58)): d.rectangle([x, y, x + 1, y + 1], fill=(110, 180, 230, 255))
+    if "lamp" in P: NM.paste_clip(g, cut("TilesetElement", 96, 48, 16, 32), 96 - 8, 88 - 30)
+    if "fire" in P: NM.paste_clip(g, frame(img("FX", "Particle", "Fire.png"), 12, 1), 58, 80)
+    if spec.get("m") == "tense":
+        v = Image.new("RGBA", g.size); vd = ImageDraw.Draw(v)
+        for i in range(12): vd.line([(i, 0), (i, H)], fill=(20, 14, 30, int(150 - i * 12))); vd.line([(W - 1 - i, 0), (W - 1 - i, H)], fill=(20, 14, 30, int(150 - i * 12)))
+        g = Image.alpha_composite(g.convert("RGBA"), v)
+    return g
+
+
+def render_end(eid, key, spec):
+    global END
+    END = spec
+    try:
+        s = SCENES[eid]()
+    finally:
+        END = None
+    g = (s.g if isinstance(s, Scene) else s).copy()
+    if spec.get("z"): g = flip(g)
+    return end_front(g, spec)
+
+
 SCENES = {}
 ZONE_OF = {}
 
@@ -259,7 +356,13 @@ def main(pack, names):
         s = SCENES[eid]()
         im = s.g if isinstance(s, Scene) else s
         im.convert("RGB").resize((W * 2, H * 2), Image.NEAREST).save(os.path.join(out, eid + ".png"))
-    print("ok", len(todo), "scenes:", " ".join(todo))
+    ends = json.load(open(os.path.join(os.path.dirname(__file__), "scenes", "endings.json"), encoding="utf8"))
+    n = 0
+    for eid in todo:
+        for key, spec in (ends.get(eid) or {}).items():
+            if not spec: continue
+            render_end(eid, key, spec).convert("RGB").resize((W * 2, H * 2), Image.NEAREST).save(os.path.join(out, eid + "--" + key + ".png")); n += 1
+    print("ok", len(todo), "scenes and", n, "endings:", " ".join(todo))
 
 
 if __name__ == "__main__":
