@@ -114,3 +114,115 @@ def muda():
         s.d.line([(x, 66), (x + 2, 46)], fill=(220, 220, 220, 255)); kite(s, x + 2, 50, ((x * 7) % 200 + 50, 100, 160))
         s.put(char("NinjaBlue", "up"), x, 74)
     return s.lit("gloom")
+
+
+# ---------------- Cards (art/cards/<id>.png): the card box shows y 10..86 ----------------
+
+def lines(s, y=40):
+    s.d.line([(0, y), (128, y + 4)], fill=(120, 110, 100, 255)); s.d.line([(0, y + 20), (128, y + 16)], fill=(120, 110, 100, 255))
+    for x, c in ((14, (200, 80, 70)), (34, (90, 130, 200)), (58, (230, 200, 90)), (88, (240, 240, 240)), (112, (120, 180, 110))):
+        s.d.rectangle([x, y + 1 + x // 32, x + 6, y + 8 + x // 32], fill=c + (255,))
+    return s
+
+
+@card("gust")
+def c_gust():
+    """Noon in the Heights: Fizz dozes on the washing lines and lets out three puffs by accident; a hat, a letter and a sock fly off, each its own way."""
+    s = cliffs(Scene("snow", ["........"] * 6))
+    lines(s, 40)
+    s.put(mon("fizz", "down"), 64, 60)
+    s.d.pieslice([16, 70, 28, 78], 180, 360, fill=(140, 90, 50, 255)); s.d.rectangle([94, 30, 100, 34], fill=(240, 236, 220, 255)); s.d.polygon([(106, 76), (110, 76), (110, 84), (114, 86), (106, 86)], fill=(200, 70, 70, 255))
+    for a, b in (((56, 58), (30, 72)), ((70, 52), (92, 36)), ((70, 62), (100, 78))): s.d.line([a, b], fill=(240, 244, 255, 255))
+    return s.lit("day")
+
+
+@card("cloud")
+def c_cloud():
+    """On a Heights rooftop Fizz has fallen asleep in the shape of a cloud with a pillow under it; a boy has climbed up to nap on top."""
+    s = Scene("snow", ["........"] * 6)
+    s.d.rectangle([0, 14, 128, 86], fill=(96, 104, 124, 255))
+    for y in range(18, 86, 6):
+        for x in range((y // 6 % 2) * 6, 128, 12): s.d.rectangle([x, y, x + 11, y + 5], outline=(70, 76, 96, 255))
+    s.d.rectangle([0, 10, 128, 14], fill=(130, 136, 156, 255))
+    s.d.ellipse([34, 40, 94, 66], fill=(244, 246, 252, 255), outline=(170, 180, 200, 255)); s.d.ellipse([46, 32, 80, 52], fill=(244, 246, 252, 255), outline=(170, 180, 200, 255))
+    s.put(mon("fizz", "down"), 50, 62)
+    s.put(char("Boy", "down"), 72, 50)
+    return s.lit("day")
+
+
+@card("errand")
+def c_errand():
+    """Relampín races across the rope bridge between two needles of the Heights with three scrolls tied to its back."""
+    s = Scene("snow", ["........"] * 6)
+    s.d.rectangle([0, 20, 128, 96], fill=(176, 196, 220, 255)); clouds(s, 40); clouds(s, 80)
+    s.d.rectangle([0, 50, 128, 58], fill=(150, 104, 62, 255))
+    for x in range(0, 128, 6): s.d.line([(x, 50), (x, 58)], fill=(90, 60, 34, 255))
+    s.put(mon("relampin", "right"), 66, 56)
+    for i in range(3): s.d.rectangle([56 + i * 3, 42, 58 + i * 3, 47], fill=(236, 226, 200, 255))
+    for x in (40, 46, 52): s.d.line([(x, 52), (x - 8, 52)], fill=(250, 250, 180, 255))
+    return s.lit("day")
+
+
+@card("news")
+def c_news():
+    """Sold News: over the clouds of the Heights a hooded buyer pays for a sealed scroll; the seal is a lantern, the news is about Albor."""
+    s = cliffs(Scene("snow", ["........"] * 6))
+    s.d.rectangle([0, 60, 128, 96], fill=(176, 196, 220, 255)); clouds(s, 74)
+    s.put(char("NinjaMasked", "left"), 80, 58).put(mon("relampin", "right"), 48, 56)
+    s.d.rectangle([60, 44, 66, 48], fill=(236, 226, 200, 255)); s.d.point((63, 46), fill=(200, 60, 60, 255))
+    for x in (70, 73): s.d.ellipse([x, 48, x + 2, 50], fill=(240, 200, 80, 255))
+    return s.lit("dusk")
+
+
+@card("highnote")
+def c_highnote():
+    """At night in the Heights Trinilla perches on a window and whistles the family's surname inside; below, in the shadow, someone waits with an open bag."""
+    s = Scene("snow", ["........"] * 6)
+    s.at(scale(cut("TilesetHouse", 0, 0, 64, 48), 2), 0, -20)
+    s.glow(64, 40, 18, WARM, 1.0)
+    s.put(mon("trinilla", "left"), 64, 48)
+    for x, y in ((54, 40), (50, 34), (46, 28)): s.d.point((x, y), fill=(240, 160, 200, 255)); s.d.line([(x + 1, y), (x + 1, y - 3)], fill=(240, 160, 200, 255))
+    s.put(char("NinjaDark", "up"), 96, 80); s.d.ellipse([100, 76, 108, 82], fill=(120, 80, 50, 255))
+    return s.lit("night")
+
+
+@card("deal")
+def c_deal():
+    """On the Choir of Three's balcony Céfira, Centella and Arpegio sing a deal to a Guild merchant; the notes tie his wrist like a ribbon."""
+    s = Scene("snow", ["........"] * 6)
+    s.d.rectangle([0, 0, 128, 40], fill=(130, 126, 140, 255)); s.d.rectangle([10, 38, 118, 44], fill=(170, 166, 180, 255), outline=(80, 76, 90, 255))
+    for n, x in (("SorcererOrange", 40), ("Princess", 64), ("Master", 88)): s.put(char(n, "down"), x, 36)
+    s.put(char("Villager4", "up"), 64, 78)
+    for i, (a, b) in enumerate((((40, 38), (56, 56)), ((64, 38), (64, 56)), ((88, 38), (72, 56)), ((56, 56), (68, 70)))): s.d.line([a, b], fill=((240, 160, 200), (240, 220, 120), (150, 200, 240), (240, 160, 200))[i] + (255,))
+    return s.lit("dusk")
+
+
+@card("gale")
+def c_gale():
+    """Storm over the Heights: the Great Vane spins out of control and the wind drags hundreds of news papers, all at once."""
+    s = cliffs(Scene("snow", ["........"] * 6))
+    s.put(guardian("veleta"), 64, 60)
+    for i in range(40): x, y = (i * 37) % 128, 12 + (i * 23) % 76; s.d.rectangle([x, y, x + 3, y + 2], fill=(236, 230, 214, 255))
+    for y in (20, 44, 70): s.d.arc([10, y - 6, 118, y + 6], 200, 340, fill=(230, 236, 250, 255))
+    return s.rain(30).lit("storm")
+
+
+@card("voices")
+def c_voices():
+    """In a Heights square people's voices slip out of their mouths like threads of smoke, and every thread ends at the Great Vane."""
+    s = cliffs(Scene("snow", ["........", "........", "..====..", "..====..", "..====..", "........"]))
+    s.put(guardian("veleta"), 64, 40)
+    for n, x, y in (("NinjaBlue", 24, 70), ("Villager2", 44, 82), ("OldMan2", 84, 82), ("Child", 104, 70)):
+        s.put(char(n, "up"), x, y); s.stem([(x, y - 14), ((x + 64) // 2, y - 30), (64, 30)], (190, 190, 200, 255))
+    return s.lit("gloom")
+
+
+@card("spin")
+def c_spin():
+    """At night the Great Vane turns where the wind blows; below, Coplo changes the words of his song so they point the same way."""
+    s = cliffs(Scene("snow", ["........"] * 6))
+    s.put(guardian("veleta"), 92, 50)
+    s.d.rectangle([20, 66, 32, 78], fill=(140, 96, 56, 255), outline=(60, 40, 24, 255))
+    s.put(char("FighterRed", "right"), 26, 66)
+    for x, y in ((40, 52), (52, 46), (64, 44)): s.d.point((x, y), fill=(240, 220, 140, 255)); s.d.line([(x + 1, y), (x + 1, y - 3)], fill=(240, 220, 140, 255))
+    return s.lit("night")

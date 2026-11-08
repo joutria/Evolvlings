@@ -92,3 +92,54 @@ def juramento():
         s.d.ellipse([x - 7, 44, x + 7, 60], outline=c + (255,), width=2)
         for i in range(5): s.d.line([(x - 6 + i * 3, 44), (x - 7 + i * 3, 34 + (i % 2) * 2)], fill=c + (255,), width=2)
     return s.glow(48, 50, 16, WARM, 0.6).lit("gloom")
+
+
+# ---------------- Cards (art/cards/<id>.png): the card box shows y 10..86 ----------------
+
+@card("ache")
+def c_ache():
+    """Deep in the Clearing the Aching Root is cracked and sweats black sap; the Caretaker with his lantern is a tiny figure beside it."""
+    s = Scene("grass", ["........"] * 6, var=1)
+    s.put(guardian("raiz", 2), 64, 80)
+    for x, y in ((44, 70), (84, 74), (60, 84)): s.sap(x, y, 10, 3)
+    s.put(char("OldMan", "down"), 104, 84).glow(110, 76, 14, WARM, 1.0)
+    return s.lit("gloom")
+
+
+@card("eight")
+def c_eight():
+    """Round the Root rise, like ghosts, eight singers, one per people; each sings it something different, and the Root remembers them all."""
+    s = stump(Scene("grass", ["........"] * 6, var=1), 64, 58)
+    import math as _m
+    for i, n in enumerate(("Woman", "Master", "Greenman", "NinjaMageBlack", "OldWoman", "Caveman", "NinjaBlue", "Eskimo")):
+        a = i / 8 * 2 * _m.pi; x, y = 64 + int(46 * _m.cos(a)), 54 + int(26 * _m.sin(a))
+        g = Image.blend(char(n, "down"), Image.new("RGBA", (16, 16), (220, 230, 255, 255)), 0.5); g.putalpha(char(n, "down").getchannel("A").point(lambda v: v * 3 // 4))
+        s.put(g, x, y + 8); s.glow(x, y, 12, (220, 230, 255), 0.6)
+    return s.lit("night")
+
+
+@card("rootheart")
+def c_rootheart():
+    """Inside the Root there is a heart of wood that beats once every hundred years; today it beat three times, and the rings of light are still opening."""
+    s = Scene("grass", ["........"] * 6, var=1)
+    s.d.rectangle([0, 0, 128, 96], fill=(80, 54, 34, 255))
+    for x in range(0, 128, 8): s.d.line([(x, 0), (x + 3, 96)], fill=(64, 42, 26, 255))
+    for r in (20, 32, 44): s.d.ellipse([64 - r, 48 - r * 2 // 3, 64 + r, 48 + r * 2 // 3], outline=(255, 220, 150, 255))
+    s.d.polygon([(64, 62), (50, 46), (52, 38), (58, 36), (64, 42), (70, 36), (76, 38), (78, 46)], fill=(150, 90, 50, 255), outline=(60, 34, 20, 255))
+    return s.glow(64, 48, 50, WARM, 1.2).lit("gloom")
+
+
+@card("firstnote")
+def c_firstnote():
+    """Long, long ago, on the Clearing's root, the First Singer gives a single note; round her already float the nine lights the Song will split into."""
+    s = Scene("grass", ["........"] * 6, var=1)
+    s.d.rectangle([0, 0, 128, 40], fill=(30, 30, 60, 255))
+    for x, y in ((10, 6), (30, 14), (50, 4), (80, 10), (100, 18), (120, 6)): s.d.point((x, y), fill=(255, 255, 240, 255))
+    s.put(scale(cut("TilesetNature", 0, 128, 32, 32), 2), 64, 74)
+    s.put(char("Monk2", "down", 6), 64, 50)
+    import math as _m
+    cols = ((255, 120, 80), (110, 200, 90), (255, 230, 140), (250, 240, 120), (200, 230, 250), (240, 160, 200), (90, 150, 220), (150, 140, 120), (130, 100, 180))
+    for i, c in enumerate(cols):
+        a = i / 9 * 2 * _m.pi; x, y = 64 + int(34 * _m.cos(a)), 40 + int(20 * _m.sin(a))
+        s.d.ellipse([x - 2, y - 2, x + 2, y + 2], fill=c + (255,)); s.glow(x, y, 10, c, 0.8)
+    return s.lit("night")

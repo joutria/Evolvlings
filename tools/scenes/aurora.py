@@ -164,3 +164,131 @@ def nana():
     s.d.rectangle([92, 70, 116, 73], fill=(140, 92, 54, 255), outline=(70, 44, 26, 255))        # the bench
     s.put(char("OldWoman", "left"), 106, 72)
     return s.lit("dusk")
+
+
+# ---------------- Cards (art/cards/<id>.png): the card box shows y 10..86 ----------------
+
+@card("flash")
+def c_flash():
+    """A lamplighter of Albor climbs his ladder and finds the lantern empty; the spark runs off down the street as Lumo."""
+    s = Scene("grass", ["........"] * 2 + ["========"] * 2 + ["..*.....", "........"])
+    s.at(house("O"), -14, -10).at(house("O2"), 70, -10)
+    lamps(s, [(30, 58, False), (108, 58, True)])
+    s.d.line([(24, 60), (28, 36)], fill=(150, 104, 66, 255), width=2); s.d.line([(34, 60), (32, 36)], fill=(150, 104, 66, 255), width=2)
+    for y in range(40, 60, 5): s.d.line([(26, y), (33, y)], fill=(150, 104, 66, 255))
+    s.put(char("OldMan", "up"), 30, 50)
+    for i, (x, y) in enumerate(((44, 52), (54, 56), (62, 58), (70, 60))): s.d.point((x, y), fill=(255, 250, 200, 255)); s.glow(x, y, 6, WARM, 0.5)
+    s.put(mon("lumo", "right"), 80, 66).glow(80, 58, 22, WARM, 1.0)
+    return s.lit("night")
+
+
+@card("lantern")
+def c_lantern():
+    """In an alley of the Dark Quarter a girl reads a paper by a lantern small enough to fit her hand; Lumo peeks over her shoulder."""
+    s = Scene("grass", ["........"] * 3 + ["========"] * 2 + ["........"], var=1)
+    s.at(ruin("a"), -12, -4).at(ruin("b"), 60, -18)
+    s.put(char("EggGirl", "down"), 60, 70)
+    s.d.rectangle([54, 62, 58, 66], fill=(238, 232, 214, 255))
+    s.d.rectangle([64, 64, 66, 67], fill=(250, 210, 120, 255)); s.glow(65, 64, 26, WARM, 1.1)
+    s.put(mon("lumo", "down"), 72, 58)
+    return s.lit("night")
+
+
+@card("spark")
+def c_spark():
+    """Through the iron fence of a Lantern House, a noble boy passes his spark (a little Lumo) to a girl of the Quarter."""
+    s = Scene("grass", ["*.*.*.*.", ".*...*..", "........", "..,.....", "........", "....,..."])
+    s.at(house("R"), 30, -22)
+    fence = cut("TilesetHouse", 144, 160, 80, 48); top = fence.crop((0, 0, fence.width, 14))
+    s.row(top, 44, -10, top.width - 2)
+    s.put(char("Noble", "down"), 56, 50)
+    s.put(char("Child", "up"), 70, 76)
+    s.put(mon("lumo", "down"), 63, 60).glow(63, 54, 20, WARM, 1.0)
+    return s.lit("dusk")
+
+
+@card("street")
+def c_street():
+    """In the Dark Quarter only one street has light: Tila climbs the ladder to light the last lantern; Mecha waits by the oil can."""
+    s = Scene("grass", ["........"] * 2 + ["========"] * 2 + ["........"] * 2, var=1)
+    s.at(ruin("a"), -14, -10).at(ruin("b"), 62, -24)
+    lamps(s, [(14, 58, True), (46, 58, True), (96, 58, False)])
+    s.d.line([(90, 62), (93, 36)], fill=(150, 104, 66, 255), width=2); s.d.line([(100, 62), (98, 36)], fill=(150, 104, 66, 255), width=2)
+    for y in range(40, 62, 5): s.d.line([(91, y), (99, y)], fill=(150, 104, 66, 255))
+    s.put(char("Woman", "up"), 96, 52)
+    s.put(mon("mecha", "down"), 76, 76).d.rectangle([84, 70, 88, 76], fill=(120, 120, 130, 255), outline=(50, 50, 60, 255))
+    s.glow(76, 70, 18, FIRE, 0.9)
+    return s.lit("night")
+
+
+@card("oil")
+def c_oil():
+    """Tila runs from the Albor stores at night with the oil can; the store's lantern burns cold."""
+    s = Scene("grass", ["........"] * 3 + ["========"] * 2 + ["........"])
+    s.at(house("R"), 54, -12)
+    s.put(lamp(True), 112, 58).glow(112, 34, 26, COLD, 1.0)
+    for x in (70, 82): s.d.rectangle([x, 50, x + 8, 60], fill=(140, 96, 56, 255), outline=(60, 40, 24, 255))
+    s.put(char("Woman", "left"), 40, 70)
+    s.d.rectangle([30, 64, 34, 69], fill=(120, 120, 130, 255), outline=(50, 50, 60, 255))
+    s.put(mon("mecha", "left"), 22, 72).glow(22, 66, 16, FIRE, 0.8)
+    return s.lit("night")
+
+
+@card("ration")
+def c_ration():
+    """Night in the Quarter: a neighbour serves soup from a great pot and the queue reaches the corner; Mecha is the fire under the pot."""
+    s = Scene("grass", ["........"] * 2 + ["========"] * 3 + ["........"], var=1)
+    s.at(ruin("a"), -10, -10).at(ruin("b"), 70, -24)
+    s.d.ellipse([28, 54, 48, 64], fill=(70, 66, 72, 255), outline=(30, 28, 34, 255)); s.d.ellipse([31, 55, 45, 59], fill=(200, 150, 80, 255))
+    s.put(mon("mecha", "down"), 38, 72).glow(38, 64, 24, FIRE, 1.1)
+    s.put(char("OldWoman", "right"), 18, 62)
+    for i, (n, x) in enumerate((("Villager", 58), ("Child", 70), ("Villager2", 82), ("OldMan3", 94), ("Villager3", 106), ("Villager4", 118))):
+        s.put(char(n, "left"), x, 64 + (i % 2) * 2)
+    return s.lit("night")
+
+
+@card("beam")
+def c_beam():
+    """At night the Great Lantern lights the Meadow from its hill and draws on the grass the line you may not cross; a family stops at its edge."""
+    s = Scene("grass", ["*.*..*.*", ".*.*..*.", "..*.*...", "........", "..,.....", "........"])
+    s.put(guardian("farol"), 64, 34).glow(64, 10, 70, COLD, 1.4)
+    s.d.line([(0, 62), (128, 62)], fill=(230, 240, 255, 255))
+    for n, x in (("Villager2", 50), ("Child", 62), ("Villager", 74)): s.put(char(n, "up"), x, 78)
+    return s.lit("night")
+
+
+@card("pride")
+def c_pride():
+    """In the hall of House Albor the Proud Crystal glows on its pedestal, never once gone out; Aurelia Albor rests her hand on it, alone and tired."""
+    s = Scene("sand", ["........", "........", "...==...", "...==...", "...==...", "...==..."], var=1)
+    s.d.rectangle([0, 0, 128, 28], fill=(150, 120, 110, 255)); s.d.line([(0, 28), (128, 28)], fill=(80, 60, 60, 255), width=2)
+    for x in (16, 112): s.d.rectangle([x - 4, 8, x + 4, 60], fill=(214, 206, 196, 255), outline=(110, 100, 96, 255))
+    s.d.rectangle([56, 46, 72, 56], fill=(200, 196, 190, 255), outline=(100, 96, 96, 255))
+    s.d.polygon([(64, 30), (70, 38), (64, 46), (58, 38)], fill=(230, 244, 255, 255), outline=(140, 170, 210, 255))
+    s.glow(64, 38, 40, COLD, 1.3)
+    s.put(char("Princess", "right"), 48, 60)
+    return s.lit("gloom")
+
+
+@card("law")
+def c_law():
+    """At sunset an Albor guard shuts the Meadow gate; a lamplighter of the Underside is left outside with his lantern lit."""
+    s = Scene("grass", ["*.*.*.*.", ".*.*.*.*", "........", "...==...", "...==...", "...==..."])
+    fence = cut("TilesetHouse", 144, 160, 80, 48); top = fence.crop((0, 0, fence.width, 14))
+    s.row(top, 38, -10, top.width - 2)
+    s.put(char("KnightGold", "down"), 52, 34)
+    s.put(char("Villager3", "up"), 66, 70)
+    s.d.rectangle([72, 60, 75, 64], fill=(250, 210, 120, 255)); s.glow(73, 60, 20, WARM, 1.0)
+    return s.lit("dusk")
+
+
+@card("rain")
+def c_rain():
+    """Fizz, grey and heavy, rains slowly on a Meadow field stained with sap; a farmer watches from under his umbrella as the stains fade."""
+    s = Scene("grass", [".,..,..,", "..,.,...", ",...,..,", ".,..,.,.", "..,...,.", ",..,...,"], var=1)
+    for x, y in ((24, 60), (56, 70), (92, 58)): s.sap(x, y, 12, 4)
+    s.put(scale(dim(mon("fizz", "down"), 0.75, grey=True), 2), 60, 44).glow(60, 30, 26, (200, 210, 230), 0.6)
+    s.put(char("Villager4", "up"), 100, 80)
+    s.d.pieslice([92, 62, 108, 74], 180, 360, fill=(180, 70, 60, 255), outline=(70, 30, 30, 255)); s.d.line([(100, 68), (100, 76)], fill=(60, 40, 30, 255))
+    s.rain(60)
+    return s.lit("storm")

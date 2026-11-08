@@ -10,12 +10,6 @@ NIGHT = {"aurora": "night", "crater": "night", "forest": "night", "hollow": "dee
 DAY = {"aurora": "day", "crater": "day", "forest": "day", "hollow": "gloom", "lake": "day", "caves": "cave", "heights": "cold", "deep": "cold", "heart": "gloom"}
 
 
-def guardian(gid):
-    sh = Image.open(os.path.join(ROOT, "art", "guardians", gid + ".png")).convert("RGBA")
-    c = sh.crop((0, 0, 96, 96)); c = c.crop(c.getbbox()); k = pixel_size(c)
-    return c.resize((c.width // k, c.height // k), Image.NEAREST)
-
-
 def rows_for(w, h, path=None, water_top=0, deco=""):
     """Ground rows: path 'v' (down the middle) or 'h' (across), water_top rows of water, and a few decorations."""
     cw, ch = -(-w // T), -(-h // T)

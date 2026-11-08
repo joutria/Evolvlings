@@ -122,3 +122,102 @@ def espinas():
     s.put(mon("remolin", "down"), 66, 38)
     s.stem([(58, 30), (64, 34), (72, 30)], col=(40, 30, 30, 255))
     return s.lit("day")
+
+
+# ---------------- Cards (art/cards/<id>.png): the card box shows y 10..86 ----------------
+
+@card("acorn")
+def c_acorn():
+    """Autumn in the Deep Wood: Brotín has sat so long at the foot of the oak that it grew roots, and a snail crosses its hat. It waits to grow."""
+    s = Scene("grass", [".,..,..,", "..,.,...", ",.*.,..,", ".,..,.,.", "..,..*,.", ",..,...,"], var=1)
+    s.put(tint(oak(2), (230, 150, 70)), 64, 62)
+    s.put(mon("brotin", "down"), 64, 80)
+    for dx in (-5, -2, 2, 5): s.d.line([(64 + dx, 80), (64 + dx * 2, 84)], fill=(110, 76, 44, 255))
+    s.d.ellipse([60, 66, 64, 69], fill=(200, 170, 120, 255), outline=(90, 60, 40, 255))
+    for x, y in ((24, 70), (100, 64), (40, 84), (90, 82)): s.d.ellipse([x, y, x + 3, y + 2], fill=(220, 130, 50, 255))
+    return s.lit("dusk")
+
+
+@card("rings")
+def c_rings():
+    """In a clearing of the Deep Wood, Grandpa Lichen counts aloud the rings of a huge stump while Brotín listens. Each ring is a year."""
+    s = Scene("grass", ["........"] * 6, var=1)
+    s.d.ellipse([34, 34, 94, 64], fill=(200, 160, 110, 255), outline=(90, 60, 36, 255))
+    for r in range(4, 30, 4): s.d.ellipse([64 - r, 49 - r // 2, 64 + r, 49 + r // 2], outline=(150, 110, 70, 255))
+    s.put(char("OldMan3", "right"), 26, 58).put(mon("brotin", "left"), 104, 60)
+    for x in range(-10, 140, 26): s.put(bush(), x, 18)
+    return s.lit("day")
+
+
+@card("seedling")
+def c_seedling():
+    """Two children meet at the forest's edge, one of the Deep Wood and one of the Underside; they plant the greeting seed and Brotín waters it with a leaf."""
+    s = Scene("grass", ["........", "........", "..,.....", "....,...", ".*......", "......*."])
+    for x in range(-10, 140, 22): s.put(bush(), x, 22)
+    s.d.ellipse([58, 54, 70, 60], fill=(110, 76, 44, 255)); s.d.line([(64, 56), (64, 50)], fill=(80, 170, 60, 255), width=2)
+    s.put(char("Greenman", "right"), 44, 62).put(char("NinjaMageBlack", "left"), 84, 62)
+    s.put(mon("brotin", "down"), 64, 78)
+    return s.lit("day")
+
+
+@card("inward")
+def c_inward():
+    """Inside a hollow trunk Espinardo hugs Brotín to keep it warm. Outside it does not prick; the spines that grow inward only hurt itself."""
+    s = Scene("grass", ["........"] * 6, var=1)
+    s.d.ellipse([20, 16, 108, 86], fill=(120, 80, 48, 255), outline=(60, 38, 22, 255))
+    s.d.ellipse([30, 24, 98, 78], fill=(54, 36, 26, 255))
+    s.put(mon("espinardo", "down", 1), 60, 64).put(mon("brotin", "down"), 72, 66)
+    return s.glow(64, 54, 30, WARM, 0.8).lit("gloom")
+
+
+@card("outward")
+def c_outward():
+    """At the forest's edge Espinardo plants itself, green spines bristling, in front of the little ones. Something comes from the dark."""
+    s = Scene("grass", ["........"] * 6, var=1)
+    for x in range(-10, 140, 22): s.put(dim(bush(), 0.35), x, 26)
+    for x, y in ((30, 18), (90, 14)): s.d.point((x, y), fill=(255, 60, 60, 255)); s.d.point((x + 3, y), fill=(255, 60, 60, 255))
+    s.put(mon("espinardo", "up", 1), 64, 58)
+    for n, x in (("brotin", 44), ("canin", 84), ("brotin", 64)): s.put(mon(n, "up"), x, 80)
+    return s.lit("gloom")
+
+
+@card("hedge")
+def c_hedge():
+    """At sunset an Underside family reaches the Hedge's gate with their bundles; Grandpa Lichen bars the way and Espinardo watches from above."""
+    s = hedge(Scene("grass", ["........", "........", "...==...", "...==...", "...==...", "...==..."]), 36, gap=(50, 80))
+    s.put(mon("espinardo", "down"), 92, 24)
+    s.put(char("OldMan3", "down"), 64, 50)
+    for n, x in (("Villager2", 52), ("Child", 64), ("Villager", 76)): s.put(char(n, "up"), x, 78)
+    return s.lit("dusk")
+
+
+@card("vine")
+def c_vine():
+    """A cut through the Deep Wood's ground: trees above; below, the roots of a vine go down and down until they touch a pocket of black sap."""
+    s = Scene("grass", ["........"] * 6)
+    s.d.rectangle([0, 30, 128, 96], fill=(96, 66, 44, 255)); s.d.rectangle([0, 60, 128, 96], fill=(70, 48, 34, 255))
+    for x in range(-10, 140, 22): s.put(bush(), x, 30)
+    s.stem([(64, 30), (60, 44), (68, 56), (62, 68), (66, 76)], (60, 120, 50, 255))
+    s.stem([(64, 30), (52, 40), (48, 52)], (60, 120, 50, 255))
+    s.sap(66, 82, 22, 6)
+    return s.lit("gloom")
+
+
+@card("thorn")
+def c_thorn():
+    """Inside the Thorn Wall, a forest girl tries to peek out between the spines; behind her the elders watch without a word."""
+    s = hedge(Scene("grass", ["........"] * 6, var=1), 34, thorny=True)
+    s.put(char("Greenman", "up"), 64, 56)
+    for n, x in (("OldMan3", 40), ("OldWoman", 88)): s.put(char(n, "up"), x, 80)
+    s.put(guardian("seto"), 112, 86)
+    return s.lit("gloom")
+
+
+@card("root")
+def c_root():
+    """An old tree of the forest drinks from below with all its roots; what climbs its trunk is not water and its leaves are turning black."""
+    s = Scene("grass", ["........"] * 6, var=1)
+    s.put(tint(oak(2), (90, 70, 110)), 64, 80)
+    for pts in (((56, 78), (40, 82), (24, 88)), ((72, 78), (90, 84), (108, 86)), ((64, 80), (64, 90))): s.stem(list(pts))
+    s.sap(30, 90, 16, 4); s.sap(100, 90, 14, 4)
+    return s.lit("gloom")

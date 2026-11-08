@@ -1,5 +1,5 @@
 {
- "v": 2428097336,
+ "v": 3320010693,
  "files": [
   {
    "path": "battle/aurora-day.png",
@@ -90,6 +90,426 @@
    "path": "battle/lake-night.png",
    "w": 360,
    "h": 240
+  },
+  {
+   "path": "cards/ache.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/acorn.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/anvil.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/beam.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/bellows.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/blow.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/bread.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/breath.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/cavein.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/chorus.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/cloud.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/core.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/court.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/crown.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/deal.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/duet.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/echo.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/eight.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/errand.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/firstnote.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/flash.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/frostslow.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/furnace.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/gale.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/gaze.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/guest.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/gust.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/harvest.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/hedge.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/highnote.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/inward.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/lance.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/lantern.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/law.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/lostwave.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/miner.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/mirror.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/news.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/night.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/nohide.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/oath.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/oil.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/outward.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/piece.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/pillow.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/pride.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/promise.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/rain.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/ration.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/reading.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/regent.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/rings.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/rockname.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/root.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/rootheart.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/sapbed.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/saprem.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/sealed.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/seedling.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/song.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/spark.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/spin.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/spores.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/static.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/stillgrow.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/street.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/stubborn.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/tale.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/temper.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/thorn.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/thousand.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/threads.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/throw.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/tombquiet.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/truename.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/truewater.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/unison.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/veil.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/vessel.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/vigil.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/vine.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/voices.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/whirl.png",
+   "w": 256,
+   "h": 192
+  },
+  {
+   "path": "cards/yawn.png",
+   "w": 256,
+   "h": 192
   },
   {
    "path": "creatures/ajolin.png",

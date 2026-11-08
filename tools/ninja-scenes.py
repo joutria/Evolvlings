@@ -9,7 +9,8 @@ people stand in for ours, our creatures come from art/creatures), then lit (day,
 lanterns and windows, fog, caves) and scaled 2x to art/events/<id>.png (256 x 192). The game shows that picture at the
 start of the conversation instead of the drawn one; events without a PNG keep the drawn picture.
 
-The scenes themselves live in tools/scenes/<zone>.py, one function per event, registered with @scene("id")."""
+The scenes themselves live in tools/scenes/<zone>.py, one function per event, registered with @scene("id"); the cards'
+lore scenes sit at the end of the zone files with @card("id") and go to art/cards/<id>.png ("cards" or a card id)."""
 import sys, os, glob, math, json, importlib.util
 from PIL import Image, ImageDraw, ImageChops
 
@@ -101,6 +102,11 @@ def dim(im, f=0.45, grey=False):
 def frame(im, w, i=0):
     """Frame i of a strip of frames w pixels wide."""
     return im.crop((i * w, 0, i * w + w, im.height))
+
+
+def tint(im, col, a=0.5):
+    """The same picture washed towards a colour (autumn leaves, leaves going black), keeping its shape."""
+    out = Image.blend(im.convert("RGBA"), Image.new("RGBA", im.size, col + (255,)), a); out.putalpha(im.getchannel("A")); return out
 
 
 def flip(im): return im.transpose(Image.FLIP_LEFT_RIGHT)
@@ -343,6 +349,25 @@ def scene(eid):
     return reg
 
 
+CARDS = {}
+
+
+def card(cid):
+    """A card's lore scene (art/cards/<id>.png). The card box shows the middle 5:3 of it (about y 10 to 86), so the
+    subject stays between those rows; the thumbnails show all of it."""
+    def reg(fn):
+        CARDS[cid] = fn; ZONE_OF["card:" + cid] = fn.__module__; return fn
+    return reg
+
+
+def guardian(gid, k=1):
+    """A zone guardian at the pack's own size (art/guardians/<id>.png, 96 px cells), k times bigger."""
+    sh = Image.open(os.path.join(ROOT, "art", "guardians", gid + ".png")).convert("RGBA")
+    c = sh.crop((0, 0, 96, 96)); c = c.crop(c.getbbox()); p = pixel_size(c)
+    c = c.resize((c.width // p, c.height // p), Image.NEAREST)
+    return scale(c, k) if k > 1 else c
+
+
 def load_scenes():
     api = {k: v for k, v in globals().items() if not k.startswith("_")}
     for path in sorted(glob.glob(os.path.join(os.path.dirname(__file__), "scenes", "*.py"))):
@@ -367,7 +392,14 @@ def main(pack, names):
         for z in ZONES:
             for k in PAUSES: PLACES["pause"](z, k).convert("RGB").resize((256, 192), Image.NEAREST).save(os.path.join(po, z + "-" + k + ".png"))
         print("ok pauses:", len(ZONES) * len(PAUSES))
-    names = [n for n in names if n not in ("battle", "pause")] if names else names
+    if not names or "cards" in names or any(n in CARDS for n in names):   # art/cards/<id>.png, 256 x 192
+        co = os.path.join(ROOT, "art", "cards"); os.makedirs(co, exist_ok=True)
+        todo = [c for c in CARDS if not names or "cards" in names or c in names]
+        for cid in todo:
+            s = CARDS[cid]()
+            (s.g if isinstance(s, Scene) else s).convert("RGB").resize((W * 2, H * 2), Image.NEAREST).save(os.path.join(co, cid + ".png"))
+        print("ok cards:", len(todo))
+    names = [n for n in names if n not in ("battle", "pause", "cards") and n not in CARDS] if names else names
     if names == []: return
     out = os.path.join(ROOT, "art", "events"); os.makedirs(out, exist_ok=True)
     todo = [e for e in SCENES if not names or e in names or ZONE_OF[e] in names]
