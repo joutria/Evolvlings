@@ -115,7 +115,7 @@ const RPG_EN = {
     "key.need.raft": "You need a raft. The loggers {from} will give you one once you calm their guardian.", "key.need.rope": "You need a rope. The miners {from} will give you one once you calm their guardian.",
     "pmap.aria": "Parchment map of the valley", "pmap.hint": "Tap a place on the parchment or pick one from the list.", "pmap.keys": "Key items: {list}.", "pmap.nokeys": "Key items: none yet.", "pmap.vado": "El Vado", "pmap.locked": "You can't go there yet.",
     "r.guard": "The guardian leaves you one of its cards", "grim.story": "Only Unísona gives it.", "end.unisona": "Unísona stays with you. From now on it can join you on any expedition, and its Star cards work for every creature.", "end.unisonaUp": "Unísona sings with you again and gives you another copy of one of its cards. Fuse them to raise its grade.",
-    "log.strip": "{name} loses {st}.", "log.cdup": "{name}'s card will take {n} longer to be ready.",
+    "log.cancel": "{name}: {st} cancels {op}.", "b.stNone": "no states.", "b.stAll": "whole battle", "b.stTurns": "{n} turns", "log.strip": "{name} loses {st}.", "log.cdup": "{name}'s card will take {n} longer to be ready.",
     "ach.guard8": ["The Song almost whole", "Calm all eight guardians of the valley."],
     "log.lost": "{name} can't find anyone in the fog.", "log.echo": "{name}'s blow rings out again!", "log.revive": "{name} gets back up with {n} health!",
     "ach.guard6": ["Underside at peace", "Calm all three guardians of the Underside."],

@@ -6,7 +6,7 @@
 /* ---------- Battle presentation ---------- */
 const BW = 360, BH = 240;
 // where a formation cell stands on the battle canvas: 3 lanes top to bottom, front row towards the middle
-const LANE_Y = [96, 148, 200], ROW_X = { ally: [128, 52], foe: [232, 308] };
+const LANE_Y = [98, 152, 206], ROW_X = { ally: [126, 48], foe: [234, 312] };
 const cellXY = (side, c) => [ROW_X[side][cellRow(c)], LANE_Y[cellLane(c)]];
 function startBattle(boss) {
   const allies = partyUnits().filter((u) => u.hp > 0);
@@ -15,8 +15,8 @@ function startBattle(boss) {
   const b = new Battle(allies, foes, { zone: X.duel ? null : ZONES[X.zone], day: isDayNow() });
   const all = b.units;
   const anim = {};
-  ["ally", "foe"].forEach((side) => all.filter((u) => u.side === side).forEach((u) => { const [x, y] = cellXY(side, u.pos); anim[u.uid] = { x, y, lunge: 0, flash: 0, sil: 0, kb: 0, shownHp: u.hp, hpT: u.hp, koT: null }; }));
-  battle = { b, boss, anim, floats: [], log: [], aim: null, choice: null, turnU: null, done: false, cv: null, c: null, raf: 0, pend: [], basic: null, shake: null, stopUntil: 0, banner: null, last: 0 };
+  ["ally", "foe"].forEach((side) => all.filter((u) => u.side === side).forEach((u) => { const [x, y] = cellXY(side, u.pos); anim[u.uid] = { x, y, mv: null, lunge: 0, flash: 0, sil: 0, kb: 0, shownHp: u.hp, hpT: u.hp, koT: null }; }));
+  battle = { b, boss, anim, floats: [], log: [], aim: null, choice: null, turnU: null, done: false, cv: null, c: null, raf: 0, pend: [], basic: null, shake: null, stopUntil: 0, banner: null, last: 0, drag: null, info: null, teamT: 0, teamH: "" };
   show("battle");
   runBattle();
 }
@@ -27,6 +27,8 @@ function battleMount() {
   if (!battle.raf) battle.raf = requestAnimationFrame(drawBattle);
   cv.addEventListener("pointerdown", aimTap);
   cv.addEventListener("pointermove", aimHover);
+  cv.addEventListener("pointerup", dragEnd);
+  cv.addEventListener("pointercancel", () => { if (battle) battle.drag = null; });
   renderBLog(); renderTurn();
   if (EV.GUIDE) EV.GUIDE.showTip("battle");
 }
@@ -37,7 +39,7 @@ function blog(s) { battle.log.unshift(s); battle.log = battle.log.slice(0, 5); r
 function renderBLog() { const el = $("bLog"); if (el && battle) el.innerHTML = battle.log.map((s) => `<li>${esc(s)}</li>`).join(""); const r = $("bRound"); if (r && battle) r.textContent = tx("b.round", { n: Math.max(1, battle.b.round) }); }
 /* Events come out of the engine already resolved; what they show (numbers, flash, the health bar dropping, sounds) waits
    for the moment the attack lands: the card animation's hit window, or the basic attack's contact. */
-const HELD = ["dmg", "miss", "heal", "st", "ko", "revive", "shield", "cleanse", "dodged", "hasten", "delay"];
+const HELD = ["dmg", "miss", "heal", "st", "cancel", "ko", "revive", "shield", "cleanse", "dodged", "hasten", "delay"];
 const AREA = { multi: 1, wave: 1, quake: 1 };
 function flushEvents() {
   const b = battle.b, ev = b.events.splice(0), now = performance.now(), acc = { sfx: null };
@@ -102,7 +104,8 @@ function showEvent(e, acc) {
         hitSfx = e.crit ? "crit" : hitSfx || "hit"; break;
       case "miss": if (a) battle.floats.push({ x: a.x, y: a.y - 34, text: e.blind ? "✴" : "~", col: "#cfe8ff", life: 1 }); blog(e.blind ? tx("log.blindMiss", { name: uName(e.by) }) : tx("log.miss", { name: uName(e.u) })); hitSfx = hitSfx || "miss"; break;
       case "heal": if (a) battle.floats.push({ x: a.x, y: a.y - 34, vy: 0.3, text: "+" + e.n, col: "#86b85a", life: 1.1 }); blog(tx("log.heal", { name: uName(e.u), n: e.n })); break;
-      case "st": if (a) battle.floats.push(STATUS[e.st].neg ? { x: a.x, y: a.y + (a.boss ? 66 : 58), vy: -0.25, text: STATUS[e.st].icon + " " + STATUS[e.st][L()], col: "#9d93ad", life: 1.3, small: true } : { x: a.x, y: a.y - 48, text: STATUS[e.st].icon + " " + STATUS[e.st][L()], col: "#1d1626", stroke: "#fbf6ef", life: 1.3, small: true }); blog(tx("log.st", { name: uName(e.u), st: STATUS[e.st][L()] })); break;
+      case "st": if (a) battle.floats.push(STATUS[e.st].neg ? { x: a.x, y: a.y + 34, vy: -0.25, text: STATUS[e.st].icon + " " + STATUS[e.st][L()] + (e.n > 1 ? " ×" + e.n : ""), col: "#9d93ad", life: 1.3, small: true } : { x: a.x, y: a.y - 48, text: STATUS[e.st].icon + " " + STATUS[e.st][L()] + (e.n > 1 ? " ×" + e.n : ""), col: "#1d1626", stroke: "#fbf6ef", life: 1.3, small: true }); blog(tx("log.st", { name: uName(e.u), st: STATUS[e.st][L()] })); break;
+      case "cancel": blog(tx("log.cancel", { name: uName(e.u), st: STATUS[e.st][L()], op: STATUS[e.by][L()] })); if (a) battle.floats.push({ x: a.x, y: a.y - 48, text: STATUS[e.st].icon + " ⇄ " + STATUS[e.by].icon, col: "#fbf6ef", life: 1.2, small: true }); break;
       case "shield": blog(tx("log.shield", { name: uName(e.u), n: e.n })); break;
       case "break": blog(tx("log.break")); break;
       case "cleanse": blog(tx("log.cleanse", { name: uName(e.u), st: e.st.map((s) => STATUS[s][L()]).join(", ") })); break;
@@ -197,8 +200,9 @@ function aimOk(c) {
 }
 function aimTap(e) {
   if (!battle || battle.done) return;
+  if (dragStart(e)) return;
   if (battle.moveSel && battle.choice) { moveTap(e); return; }
-  if (!battle.aim) return;
+  if (!battle.aim) { infoTap(e); return; }
   const c = cellAt(e);
   if (!aimOk(c)) { EV.sfx("deny"); return; }
   if (battle.aim.cell === c) { fireAim(); return; } // a second tap on the same cell lets go
@@ -208,11 +212,37 @@ function aimTap(e) {
 function moveTap(e) {
   const b = battle.b, u = battle.choice.u, c = cellAt(e, "ally"); if (c == null || u.pos == null) return;
   if (c === u.pos) { cancelAim(); return; }
-  const mate = b.units.some((x) => x.side === "ally" && x.hp > 0 && x.pos === c);
-  if (!nearCells(u.pos).includes(c) || (!mate && !b.cellFree("ally", c))) { EV.sfx("deny"); return; }
+  if (!moveOk(u, c)) { EV.sfx("deny"); return; }
   EV.sfx("tap"); choose({ k: "move", c });
 }
-function aimHover(e) { if (battle && battle.aim) battle.aim.hover = cellAt(e); }
+function aimHover(e) {
+  if (!battle) return;
+  const D = battle.drag;
+  if (D) { const r = battle.cv.getBoundingClientRect(); D.x = (e.clientX - r.left) / r.width * BW; D.y = (e.clientY - r.top) / r.height * BH; if (Math.hypot(D.x - D.x0, D.y - D.y0) > 8) D.moved = true; D.cell = cellAt(e, "ally"); return; }
+  if (battle.aim) battle.aim.hover = cellAt(e);
+}
+// a free cell next to it, or a teammate next to it (they swap)
+function moveOk(u, c) {
+  const b = battle.b; if (c == null || u.pos == null || c === u.pos || !nearCells(u.pos).includes(c)) return false;
+  return b.units.some((x) => x.side === "ally" && x.hp > 0 && x.pos === c) || b.cellFree("ally", c);
+}
+// Manual: press your creature and drag it to a cell next to it; a plain tap selects it, a second tap lets it go
+function dragStart(e) {
+  const C = battle.choice; if (!C || !handMove() || battle.aim || battle.done) return false;
+  const u = C.u; if (u.pos == null || cellAt(e, "ally") !== u.pos) return false;
+  const r = battle.cv.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * BW, y = (e.clientY - r.top) / r.height * BH;
+  battle.drag = { x0: x, y0: y, x, y, cell: u.pos, moved: false, was: battle.moveSel === u.uid };
+  battle.moveSel = u.uid; e.preventDefault(); // no text selection or native drag while you hold it
+  try { battle.cv.setPointerCapture(e.pointerId); } catch (err) { /* old browsers */ }
+  renderTurn(); return true;
+}
+function dragEnd() {
+  const D = battle && battle.drag; if (!D) return;
+  battle.drag = null;
+  const C = battle.choice; if (!C) return;
+  if (D.moved) { if (moveOk(C.u, D.cell)) { EV.sfx("tap"); choose({ k: "move", c: D.cell }); } else EV.sfx("deny"); return; }
+  if (D.was) cancelAim(); else { EV.sfx("tap"); renderTurn(); }
+}
 const nextFrame = () => new Promise((r) => requestAnimationFrame(r));
 async function runBattle() {
   const bt = battle, b = bt.b;
@@ -426,6 +456,9 @@ function artUnit(u, sq, emo) {
   const dir = emo === "normal" ? "side" : null, st = u.own ? Math.max(0, Math.min(2, u.stage)) : 1;
   return (u.boss && EVART.guardian(u.kind, sq, emo, dir)) || EVART.creature(u.kind, st, sq, emo, dir);
 }
+// battle sprites 1.5 times bigger than the sheet cell, still crisp: the cell read back at its own pixel size and
+// scaled by a whole number (art.js EVART.small), feet on the bottom row
+function bigArt(im, u) { return im && HAS_ART && EVART.small ? EVART.small(im, u.boss ? 72 : 46) || im : im; }
 const hollowArt = new WeakMap();
 function artHollow(cv) {
   // hollowed foes: the same picture, dimmed towards plum
@@ -446,30 +479,84 @@ function castPose(u, now) {
   }
   return p;
 }
-// marked threats: red cells that pulse until the card lands; your selected creature and where it can step
+// a formation cell as a tile on the ground (battle units): centred on the creature's feet
+const TILE_W = 62, TILE_H = 20;
+const tileOf = (side, c) => { const [x, y] = cellXY(side, c); return { x: x - TILE_W / 2, y: y + 6, w: TILE_W, h: TILE_H }; };
+const SIDE_COL = { ally: "124,200,227", foe: "224,144,127" };
+function tilePath(g, t) { g.beginPath(); if (g.roundRect) g.roundRect(t.x, t.y, t.w, t.h, 5); else g.rect(t.x, t.y, t.w, t.h); }
+// the cells foes have marked on your side: cell -> the marking foe
+function threatMap() {
+  const m = new Map();
+  for (const u of battle.b.units) if (u.windup && u.hp > 0 && u.side === "foe") for (const c of u.windup.cells) m.set(c, u);
+  return m;
+}
+// the 6 tiles of each side (bluish yours, reddish theirs; stronger in Manual), and the cover shields:
+// a front creature keeps basic attacks off the one behind it in its lane
+function drawTiles(g) {
+  const b = battle.b, strong = handMove() && !battle.done;
+  g.save();
+  for (const side of ["ally", "foe"]) {
+    const col = SIDE_COL[side];
+    for (let c = 0; c < CELLS; c++) {
+      const t = tileOf(side, c), back = cellRow(c) === 1;
+      tilePath(g, t);
+      g.fillStyle = `rgba(${col},${(strong ? 0.2 : 0.11) + (back ? 0 : 0.04)})`; g.fill();
+      g.lineWidth = 1.5; g.strokeStyle = `rgba(${col},${strong ? 0.75 : 0.42})`;
+      if (back) g.setLineDash([4, 3]); g.stroke(); g.setLineDash([]);
+    }
+    for (let lane = 0; lane < 3; lane++) {
+      const f = b.units.find((u) => u.side === side && u.hp > 0 && u.pos === lane), k = b.units.find((u) => u.side === side && u.hp > 0 && u.pos === lane + 3);
+      if (!f || !k) continue;
+      const x = Math.round((ROW_X[side][0] + ROW_X[side][1]) / 2), y = LANE_Y[lane] + 10;
+      g.fillStyle = "rgba(29,22,38,.7)"; g.fillRect(x - 6, y - 1, 12, 12);
+      g.fillStyle = `rgb(${col})`; g.beginPath(); g.moveTo(x - 4, y + 1); g.lineTo(x + 4, y + 1); g.lineTo(x + 4, y + 5); g.lineTo(x, y + 9); g.lineTo(x - 4, y + 5); g.closePath(); g.fill();
+      g.fillStyle = "rgba(255,255,255,.55)"; g.fillRect(x - 3, y + 2, 2, 3);
+    }
+  }
+  g.restore();
+}
+// marked threats: the red cells fill up as the marking foe's turn comes near; your current creature, where it can go,
+// and in Manual the safe cells next to it in green
 function drawThreats(out, now) {
   const b = battle.b, pulse = 0.55 + 0.35 * Math.sin(now / 160);
   out.save();
   for (const u of b.units) {
     if (!u.windup || u.hp <= 0) continue;
-    const side = b.other(u.side);
+    const side = b.other(u.side), fill = Math.max(0.15, Math.min(1, u.g || 0));
     for (const c of u.windup.cells) {
-      const [x, y] = cellXY(side, c);
-      out.fillStyle = `rgba(224,96,63,${0.25 * pulse})`; out.strokeStyle = `rgba(224,96,63,${pulse})`; out.lineWidth = 2;
-      out.beginPath(); out.ellipse(x, y + 12, 30, 12, 0, 0, Math.PI * 2); out.fill(); out.stroke();
+      const t = tileOf(side, c);
+      out.save(); tilePath(out, t); out.clip();
+      out.fillStyle = "rgba(224,96,63,.22)"; out.fillRect(t.x, t.y, t.w, t.h);
+      out.fillStyle = `rgba(224,96,63,${0.35 + 0.25 * pulse})`; out.fillRect(t.x, t.y + t.h * (1 - fill), t.w, t.h * fill);
+      out.restore();
+      tilePath(out, t); out.strokeStyle = `rgba(255,143,107,${pulse})`; out.lineWidth = 2; out.stroke();
     }
-    const a = battle.anim[u.uid]; if (a) { out.font = '700 16px "EvNum", "Pixelify Sans", system-ui, sans-serif'; out.textAlign = "center"; out.lineWidth = 3; out.strokeStyle = "#1d1626"; out.strokeText("!", a.x, a.y - (u.boss ? 64 : 44)); out.fillStyle = "#ff8f6b"; out.fillText("!", a.x, a.y - (u.boss ? 64 : 44)); }
+    const a = battle.anim[u.uid]; if (a) { const hy = a.y - (u.boss ? 84 : 52); out.font = '700 16px "EvNum", "Pixelify Sans", system-ui, sans-serif'; out.textAlign = "center"; out.lineWidth = 3; out.strokeStyle = "#1d1626"; out.strokeText("!", a.x, hy); out.fillStyle = "#ff8f6b"; out.fillText("!", a.x, hy); }
   }
   const cur = battle.turnU && battle.anim[battle.turnU], cu = cur && b.units.find((u) => u.uid === battle.turnU);
-  if (cur && cu && cu.hp > 0) { out.strokeStyle = `rgba(255,213,122,${0.6 + 0.4 * Math.sin(now / 200)})`; out.lineWidth = 2.5; out.beginPath(); out.ellipse(Math.round(cur.x / 2) * 2, cur.y + (cu.boss ? 24 : 16), cu.boss ? 34 : 24, cu.boss ? 10 : 8, 0, 0, Math.PI * 2); out.stroke(); }
+  if (cur && cu && cu.hp > 0 && cu.pos != null) { const t = tileOf(cu.side, cu.pos); tilePath(out, t); out.strokeStyle = `rgba(255,213,122,${0.6 + 0.4 * Math.sin(now / 200)})`; out.lineWidth = 2.5; out.stroke(); }
+  const C = battle.choice, threat = threatMap();
   const sel = battle.moveSel && b.units.find((u) => u.uid === battle.moveSel && u.hp > 0);
-  if (sel && handMove()) {
-    const [x, y] = cellXY("ally", sel.pos);
-    out.strokeStyle = "#b9a7ff"; out.lineWidth = 2.5; out.beginPath(); out.ellipse(x, y + 12, 30, 12, 0, 0, Math.PI * 2); out.stroke();
-    out.setLineDash([4, 3]); out.strokeStyle = "rgba(251,246,239,.8)"; out.lineWidth = 1.5;
-    for (const c of nearCells(sel.pos)) { const free = b.cellFree("ally", c); const [cx, cy] = cellXY("ally", c); out.strokeStyle = free ? "rgba(251,246,239,.8)" : "rgba(134,184,90,.9)"; out.beginPath(); out.ellipse(cx, cy + 12, 26, 10, 0, 0, Math.PI * 2); out.stroke(); }
-    out.setLineDash([]);
-  } else if (battle.moveSel) battle.moveSel = null;
+  const me = C && handMove() && !battle.aim && C.u.pos != null ? C.u : null;
+  if (sel && handMove() && me) {
+    for (const c of nearCells(sel.pos)) {
+      if (!moveOk(sel, c)) continue;
+      const t = tileOf("ally", c), bad = threat.has(c), over = battle.drag && battle.drag.cell === c;
+      tilePath(out, t);
+      out.fillStyle = bad ? "rgba(224,96,63,.18)" : over ? "rgba(134,184,90,.55)" : "rgba(134,184,90,.3)"; out.fill();
+      out.lineWidth = over ? 3 : 2; out.strokeStyle = bad ? "#ff8f6b" : "#a8d878"; out.stroke();
+    }
+  } else if (battle.moveSel && !sel) battle.moveSel = null;
+  else if (me && threat.has(me.pos)) {
+    // you stand where the blow lands: the cells you could step to that are safe glow green
+    for (const c of nearCells(me.pos)) { if (!moveOk(me, c) || threat.has(c)) continue; const t = tileOf("ally", c); tilePath(out, t); out.strokeStyle = `rgba(168,216,120,${pulse})`; out.lineWidth = 2; out.stroke(); }
+  }
+  // the creature you drag: a see-through copy under your finger
+  const D = battle.drag;
+  if (D && D.moved && sel) {
+    const im = bigArt(artUnit(sel, 0, "normal"), sel);
+    if (im) { out.save(); out.globalAlpha = 0.6; out.imageSmoothingEnabled = false; out.drawImage(im, Math.round(D.x - im.width / 2), Math.round(D.y - im.height + 12)); out.restore(); }
+  }
   out.restore();
 }
 // while aiming: the cells you can pick, the zone under your finger and the type multiplier on each foe it reaches
@@ -490,7 +577,7 @@ function drawAim(out, now) {
     for (const t of b.aimHits(A.u, show)) {
       const m = t.types.reduce((k, d) => k * typeMult(ty, d), 1), a = battle.anim[t.uid]; if (!a || m === 1) continue;
       out.font = '700 13px "EvNum", "Pixelify Sans", system-ui, sans-serif'; out.textAlign = "center"; out.lineWidth = 3; out.strokeStyle = "#1d1626";
-      const txt = "×" + (Math.round(m * 100) / 100); out.strokeText(txt, a.x, a.y - 40); out.fillStyle = m > 1 ? "#ffd57a" : "#9d93ad"; out.fillText(txt, a.x, a.y - 40);
+      const txt = "×" + (Math.round(m * 100) / 100); out.strokeText(txt, a.x, a.y - 50); out.fillStyle = m > 1 ? "#ffd57a" : "#9d93ad"; out.fillText(txt, a.x, a.y - 50);
     }
   }
   out.restore();
@@ -566,6 +653,53 @@ function drawStrip(out, now) {
   });
   out.restore();
 }
+// a row of state circles centred on x: icon inside, ×N top right from 2 stacks, turns left at the bottom (none when it
+// lasts the whole battle); past 4 it shows 3 and a "+N" circle
+function drawStRow(out, u, keys, x, y, good) {
+  if (!keys.length) return;
+  const show = keys.length > 4 ? keys.slice(0, 3) : keys, more = keys.length - show.length, n = show.length + (more ? 1 : 0), G = 15;
+  const font = (w, px) => `${w} ${px}px "EvNum", "Pixelify Sans", system-ui, sans-serif`;
+  out.save(); out.textAlign = "center"; out.textBaseline = "middle"; out.lineJoin = "round";
+  for (let i = 0; i < n; i++) {
+    const cx = Math.round(x - (n - 1) * G / 2 + i * G), k = show[i];
+    out.beginPath(); out.arc(cx, y, 6.5, 0, Math.PI * 2);
+    out.fillStyle = good ? "#2f7a3e" : "#a8382f"; out.fill(); out.lineWidth = 1.5; out.strokeStyle = good ? "#a8e08a" : "#ff9a86"; out.stroke();
+    if (!k) { out.font = font(700, 8); out.fillStyle = "#fbf6ef"; out.fillText("+" + more, cx, y + 0.5); continue; }
+    const s = u.st[k];
+    out.font = "8px system-ui"; out.fillStyle = "#fff"; out.fillText(STATUS[k].icon, cx, y + 0.5);
+    out.lineWidth = 2.5; out.strokeStyle = "#1d1626";
+    if ((s.n || 1) > 1) { out.font = font(700, 8); out.strokeText("×" + s.n, cx + 7, y - 6); out.fillStyle = "#ffd57a"; out.fillText("×" + s.n, cx + 7, y - 6); }
+    if (s.t < 99) { out.font = font(700, 7); out.strokeText(String(s.t), cx, y + 9); out.fillStyle = "#fbf6ef"; out.fillText(String(s.t), cx, y + 9); }
+  }
+  out.restore();
+}
+// tap a creature (or its name under the field) to read all its states
+function stInfo(u) {
+  const ks = Object.keys(u.st);
+  if (!ks.length) return `<p class="muted"><b>${esc(u.name)}</b> · ${esc(tx("b.stNone"))}</p>`;
+  return `<p><b>${esc(u.name)}</b></p><ul class="bstl">${ks.map((k) => { const s = u.st[k], neg = STATUS[k].neg;
+    return `<li class="${neg ? "neg" : "pos"}"><span class="ic">${STATUS[k].icon}</span> ${esc(STATUS[k][L()])}${(s.n || 1) > 1 ? ` <b>×${s.n}</b>` : ""} <small>${esc(s.t >= 99 ? tx("b.stAll") : tx("b.stTurns", { n: s.t }))}</small></li>`; }).join("")}</ul>`;
+}
+function infoTap(e) {
+  if (!battle || battle.aim || battle.moveSel || battle.drag) return false;
+  const r = battle.cv.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * BW, y = (e.clientY - r.top) / r.height * BH;
+  let best = null, bd = 30;
+  for (const u of battle.b.units) { const a = battle.anim[u.uid]; if (!a || u.hp <= 0) continue; const d = Math.hypot(a.x - x, a.y - 4 - y); if (d < bd) { bd = d; best = u; } }
+  battle.info = best && battle.info !== best.uid ? best.uid : null; battle.teamH = ""; renderTeam();
+  return !!best;
+}
+// who is fighting: name, level and health of each side, under the field
+function renderTeam() {
+  const el = $("bTeam"); if (!el || !battle) return;
+  const b = battle.b;
+  const chip = (u) => { const a = battle.anim[u.uid], hp = Math.max(0, Math.round(a ? a.hpT : u.hp)), ko = hp <= 0;
+    const st = Object.keys(u.st), pos = st.filter((k) => !STATUS[k].neg).length, neg = st.length - pos;
+    return `<button type="button" class="bchip ${u.side}${ko ? " ko" : ""}${battle.turnU === u.uid ? " now" : ""}" data-binfo="${u.uid}" aria-pressed="${battle.info === u.uid}"><span aria-hidden="true">${TYPES[u.types[0]].icon}</span><b>${esc(u.name)}</b> <small>${u.lvl}</small> <i>${hp}/${u.maxHp}</i>${pos ? `<em class="p">${pos}</em>` : ""}${neg ? `<em class="n">${neg}</em>` : ""}</button>`; };
+  const side = (sd) => b.units.filter((u) => u.side === sd).sort((p, q) => (p.pos == null ? 9 : cellLane(p.pos)) - (q.pos == null ? 9 : cellLane(q.pos)) || (p.pos || 0) - (q.pos || 0)).map(chip).join("");
+  const iu = battle.info && b.units.find((u) => u.uid === battle.info);
+  const h = `<div class="bteam-row"><div class="bside">${side("ally")}</div><div class="bside foe">${side("foe")}</div></div>${iu ? `<div class="binfo">${stInfo(iu)}</div>` : ""}`;
+  if (h !== battle.teamH) { battle.teamH = h; el.innerHTML = h; }
+}
 function drawBattle(now) {
   if (!battle || !battle.c) return;
   const out = battle.c, b = battle.b, t = now / 1000, z = ZONES[X.zone];
@@ -591,21 +725,35 @@ function drawBattle(now) {
   c.fillStyle = "#00000014"; for (let i = 0; i < 40; i++) { const x = (i * 97) % BW, y = 80 + ((i * 53) % 140); c.fillRect(x, y, 2, 5); }
   }
   if (!X.duel && !X.deep) drawSap(c, battle.boss || X.savia || X.echo ? 3 : saviaLvl(X.zone), REDUCE ? 0 : t, BW, BH);
-  // the 6 formation cells of each side, as soft patches on the ground
-  c.fillStyle = "#0000001c";
-  for (const side of ["ally", "foe"]) for (let k = 0; k < CELLS; k++) { const [x, y] = cellXY(side, k); EV.ell(c, x, y + 16, 26, 7); c.fill(); }
+  // the 6 formation cells of each side as tiles (sharp on the full canvas when the art layer is split, see below)
+  if (!(BLOW && HAS_ART && (bg || b.units.some((u) => artUnit(u, 0, "normal"))))) drawTiles(c);
   if (BLOW) { c.setTransform(1, 0, 0, 1, 0, 0); PX.quantize(c, BW / 2, BH / 2, !bg); c.scale(0.5, 0.5); }
   if (hi) {
     if (!bg) out.clearRect(0, 0, BW, BH);
     PX.blit(out, BLOW, BW, BH);
     c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, BW / 2, BH / 2); c.scale(0.5, 0.5);
+    drawTiles(out);
   }
   // units
   const order = b.units.slice().sort((p, q) => battle.anim[p.uid].y - battle.anim[q.uid].y);
   const place = [];
   for (const u of order) {
     const a = battle.anim[u.uid];
-    if (u.pos != null) { const [tx, ty] = cellXY(u.side, u.pos); a.x += (tx - a.x) * 0.2; a.y += (ty - a.y) * 0.2; if (Math.abs(tx - a.x) < 0.5) a.x = tx; if (Math.abs(ty - a.y) < 0.5) a.y = ty; }
+    // moving: a quick hop of a few steps towards the new cell; two creatures swapping pass side by side
+    let hopX = 0, hopY = 0, walk = -1, face = 0;
+    if (u.pos != null) {
+      const [tx, ty] = cellXY(u.side, u.pos);
+      if ((!a.mv && (Math.abs(tx - a.x) > 1 || Math.abs(ty - a.y) > 1)) || (a.mv && (a.mv.tx !== tx || a.mv.ty !== ty))) a.mv = { fx: a.x, fy: a.y, tx, ty, t0: now, dur: REDUCE ? 1 : 300 / speed() };
+      const mv = a.mv;
+      if (mv) {
+        const k = Math.min(1, (now - mv.t0) / mv.dur), e = k < 0.5 ? 2 * k * k : 1 - 2 * (1 - k) * (1 - k);
+        const dx = mv.tx - mv.fx, dy = mv.ty - mv.fy, len = Math.hypot(dx, dy) || 1, arc = Math.sin(k * Math.PI);
+        a.x = mv.fx + dx * e; a.y = mv.fy + dy * e;
+        hopX = Math.round(-dy / len * arc * 12); hopY = Math.round(dx / len * arc * 12) - Math.round(Math.abs(Math.sin(k * Math.PI * 2)) * 5);
+        walk = Math.floor(k * 4) % 2; if (Math.abs(dx) > Math.abs(dy)) face = dx > 0 ? 1 : -1;
+        if (k >= 1) { a.x = mv.tx; a.y = mv.ty; a.mv = null; }
+      }
+    }
     const held = pendFor(u.uid);
     if (!held) a.hpT = u.hp;
     if (!stopped) { a.lunge = Math.max(0, a.lunge - 0.06); a.flash = Math.max(0, a.flash - 0.07); a.kb = Math.max(0, a.kb - 0.14); if (a.sil > 0) a.sil--; }
@@ -619,7 +767,7 @@ function drawBattle(now) {
     const koEl = ko ? now - a.koT : 0, gone = ko && (REDUCE ? koEl > 0 : koEl > 340);
     if (gone) { if (!REDUCE) drawPuff(out, Math.round(a.x / 2) * 2, a.y, koEl, u.boss); continue; }
     const lx = Math.round(Math.sin(a.lunge * Math.PI) * 9 * dir) * 2 + basicPose(u, now) - Math.round(a.kb * 4 * dir / 2) * 2;
-    const x = Math.round((a.x + lx) / 2) * 2, y = a.y + (ko ? Math.round(koEl / 340 * 6) : 0);
+    const x = Math.round((a.x + lx + hopX) / 2) * 2, y = Math.round(a.y) + hopY + (ko ? Math.round(koEl / 340 * 6) : 0);
     place.push({ u, a, x, y, ko });
     if (ko && Math.floor(koEl / 60) % 2) continue; // blinking as it falls
     // wind-up: a glow of the card's type grows behind the caster before it lets go
@@ -629,8 +777,8 @@ function drawBattle(now) {
     if (art) {
       // PNG cell straight onto the full-size canvas: feet stand on the cell's y = n - 4
       const emo = ko ? "sad" : a.flash > 0.5 ? "surprised" : cp ? "happy" : u.hp / u.maxHp < 0.3 ? "sad" : "normal";
-      const sq = cp && cp.sq != null ? cp.sq : REDUCE ? 0 : Math.floor(t * 2 + a.x / 50) % 2;
-      let im = artUnit(u, sq, emo) || art;
+      const sq = cp && cp.sq != null ? cp.sq : walk >= 0 ? walk : REDUCE ? 0 : Math.floor(t * 2 + a.x / 50) % 2;
+      let im = bigArt(artUnit(u, sq, emo) || art, u);
       if (u.hollow) im = artHollow(im);
       if ((cp && cp.flash || a.sil > 0) && HAS_EVS) im = EVS.silhouette(im, a.sil > 0 ? "#ffffff" : undefined);
       const n = im.width, feet = u.boss ? 24 : 16;
@@ -641,12 +789,13 @@ function drawBattle(now) {
       out.translate(cp ? cp.dx * 2 : 0, (cp ? cp.dy * 2 : 0) + hov);
       if (cp && cp.sq === 1) { out.translate(0, feet); out.scale(1.08, 0.9); out.translate(0, -feet); }
       if (u.side === "foe") out.scale(-1, 1);
-      out.drawImage(im, -n / 2, feet - (n - 4));
+      if (face && (face > 0) !== (u.side === "ally")) out.scale(-1, 1);
+      out.drawImage(im, -Math.round(n / 2), feet - n + 2);
       out.restore();
     } else if (spr) {
       // pixel sprite: 1 sprite pixel = 2 battle units (the layer is drawn at half size)
-      const n = u.boss ? 32 : 24, emo = ko ? "sad" : a.flash > 0.5 ? "surprised" : cp ? "happy" : u.hp / u.maxHp < 0.3 ? "sad" : "normal";
-      const frame = cp && cp.sq != null ? cp.sq : REDUCE ? 0 : Math.floor(t * 2 + a.x / 50) % 2;
+      const n = u.boss ? 48 : 36, emo = ko ? "sad" : a.flash > 0.5 ? "surprised" : cp ? "happy" : u.hp / u.maxHp < 0.3 ? "sad" : "normal";
+      const frame = cp && cp.sq != null ? cp.sq : walk >= 0 ? walk : REDUCE ? 0 : Math.floor(t * 2 + a.x / 50) % 2;
       let im = EVS.sprite(u.kind, n, u.own ? Math.max(0, Math.min(2, u.stage)) : 1, frame, emo, !!u.hollow);
       if (cp && cp.flash || a.sil > 0) im = EVS.silhouette(im, a.sil > 0 ? "#ffffff" : undefined);
       const w = im.width * 2, h = im.height * 2, feet = u.boss ? 24 : 16;
@@ -667,9 +816,13 @@ function drawBattle(now) {
     }
     if (a.flash > 0 && !art && !spr) { c.save(); c.globalAlpha = a.flash * 0.6; c.fillStyle = "#ffffff"; EV.ell(c, 0, -4, 22 * (u.boss ? 1.5 : 1), 22 * (u.boss ? 1.8 : 1)); c.fill(); c.restore(); }
     // shield ring
-    if (u.shield > 0) { c.save(); c.strokeStyle = "#7cc8e3"; c.lineWidth = 2; c.beginPath(); c.arc(0, -4, u.boss ? 40 : 24, 0, Math.PI * 2); c.stroke(); c.restore(); }
-    // segmented hp bar
-    const bw = u.boss ? 80 : 56, by = u.boss ? 30 : 22;
+    if (u.shield > 0) { c.save(); c.strokeStyle = "#7cc8e3"; c.lineWidth = 2; c.beginPath(); c.arc(0, -8, u.boss ? 44 : 28, 0, Math.PI * 2); c.stroke(); c.restore(); }
+    c.restore();
+  }
+  // health bars after every creature, so the one standing in the lane below never covers them
+  for (const { u, a, x, y, ko } of place) {
+    const bw = u.boss ? 80 : 50, by = u.boss ? 30 : 18;
+    c.save(); c.translate(x, y);
     c.fillStyle = "#1d1626"; c.fillRect(-bw / 2 - 2, by - 2, bw + 4, 8);
     const pct = Math.max(0, a.shownHp / u.maxHp), col = pct > 0.5 ? "#86b85a" : pct > 0.25 ? "#ffd57a" : "#e0603f";
     c.fillStyle = col; const segs = Math.ceil((bw / 4) * pct); for (let k = 0; k < segs; k++) c.fillRect(-bw / 2 + k * 4, by, 2, 4);
@@ -711,18 +864,15 @@ function drawBattle(now) {
   }
   // names, status icons and floating numbers stay sharp
   const font = (w, px) => `${w} ${px}px "EvNum", "Pixelify Sans", system-ui, sans-serif`;
-  for (const { u, x, y } of place) {
-    const bw = u.boss ? 80 : 56, by = u.boss ? 30 : 22;
-    out.save(); out.translate(x, y);
-    out.font = font(600, 10); out.textAlign = "center"; out.textBaseline = "alphabetic"; out.fillStyle = "#fbf6ef"; out.strokeStyle = "#1d1626"; out.lineWidth = 3; out.lineJoin = "round";
-    // front and back of a lane stand close, so long names get cut a little sooner
-    const label = u.name.length > 11 ? u.name.slice(0, 10) + "…" : u.name;
-    out.strokeText(label + " · " + u.lvl, 0, by + 16); out.fillText(label + " · " + u.lvl, 0, by + 16);
-    const ks = Object.keys(u.st), good = ks.filter((k) => !STATUS[k].neg).map((k) => STATUS[k].icon).join(""), bad = ks.filter((k) => STATUS[k].neg).map((k) => STATUS[k].icon).join("");
-    out.font = "10px system-ui"; out.fillText(good + TYPES[u.types[0]].icon, 0, -(u.boss ? 56 : 30));
-    if (bad) out.fillText(bad, 0, by + 28);
-    out.restore();
+  // states as small circles: green buffs in a row over the head, red debuffs at the feet; names and levels are in the
+  // list under the field
+  for (const { u, x, y, ko } of place) {
+    if (ko) continue;
+    const ks = Object.keys(u.st);
+    drawStRow(out, u, ks.filter((k) => !STATUS[k].neg), x, y - (u.boss ? 52 : 22), true);
+    drawStRow(out, u, ks.filter((k) => STATUS[k].neg), x, y + (u.boss ? 14 : 6), false);
   }
+  if (now - battle.teamT > 200) { battle.teamT = now; renderTeam(); }
   drawThreats(out, now);
   drawStrip(out, now);
   if (battle.aim) drawAim(out, now);

@@ -101,6 +101,12 @@ const STATUS = {
   exposed: { neg: true,  icon: "🎯", v: 0,  es: "Expuesto",  en: "Exposed" },
   marked:  { neg: true,  icon: "📣", v: 20, es: "Señalado",  en: "Marked" },
 };
+// opposite statuses cancel stack for stack (an incoming one removes a stack of its opposite instead of landing)
+const ST_OPP = { haste: "slow", guard: "marked", cheer: "dull", regen: "burn", hidden: "exposed", evade: "blind" };
+for (const k of Object.keys(ST_OPP)) ST_OPP[ST_OPP[k]] = k;
+// these only refresh their turns; every other status stacks up to ×3 and grows stronger (×1, ×1.5, ×2)
+const ST_SOLO = { stun: 1, trap: 1, hidden: 1, taunt: 1, charge: 1, cushion: 1 };
+const ST_MAX = 3;
 
 /* ====================================================================== */
 /* Cards. Values are for grade Común; the grade scales them.              */

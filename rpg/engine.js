@@ -126,7 +126,8 @@ B.exposed = function (u) {
 };
 B.other = (side) => (side === "ally" ? "foe" : "ally");
 B.emit = function (e) { this.events.push(e); };
-B.stVal = function (u, name) { const s = u.st[name]; return s ? s.v : 0; };
+// a status' strength: its value grows by half for each extra stack (×1, ×1.5, ×2)
+B.stVal = function (u, name) { const s = u.st[name]; return s ? s.v * (1 + 0.5 * ((s.n || 1) - 1)) : 0; };
 B.eff = function (u, k) {
   let pct = (u.mods[k] || 0);
   if (k === "spd") pct += this.stVal(u, "haste") - this.stVal(u, "slow") + this.stVal(u, "might");
@@ -170,9 +171,17 @@ B.addStatus = function (src, tgt, st, cardType) {
     if (turns <= 0) { this.emit({ k: "resist", u: tgt.uid }); return false; }
   }
   if (!STATUS[name].neg && src && src.mods.buffLong && turns < 99) turns += src.mods.buffLong;
+  // its opposite is there: one stack of it goes away instead
+  const op = ST_OPP[name], oc = op && tgt.st[op];
+  if (oc) {
+    oc.n = (oc.n || 1) - 1; if (oc.n <= 0) delete tgt.st[op];
+    this.emit({ k: "cancel", u: tgt.uid, st: name, by: op });
+    return true;
+  }
   const cur = tgt.st[name];
-  tgt.st[name] = { t: Math.max(cur ? cur.t : 0, turns), v: Math.max(cur ? cur.v : 0, val != null ? val : STATUS[name].v) };
-  this.emit({ k: "st", u: tgt.uid, st: name });
+  const n = cur ? (ST_SOLO[name] ? 1 : Math.min(ST_MAX, (cur.n || 1) + 1)) : 1;
+  tgt.st[name] = { t: Math.max(cur ? cur.t : 0, turns), v: Math.max(cur ? cur.v : 0, val != null ? val : STATUS[name].v), n };
+  this.emit({ k: "st", u: tgt.uid, st: name, n });
   if (STATUS[name].neg) this.trigger("allyStatus", tgt, { status: name });
   return true;
 };
@@ -211,7 +220,7 @@ B.hit = function (src, tgt, pow, card, extra) {
   if (tgt.hp <= 0) return 0;
   const ty = this.typeOf(src, card);
   // blinded: 50% to miss; dodge
-  if (src.st.blind && this.rnd() < src.st.blind.v / 100) { this.emit({ k: "miss", u: tgt.uid, by: src.uid, blind: true }); return 0; }
+  if (src.st.blind && this.rnd() < Math.min(90, this.stVal(src, "blind")) / 100) { this.emit({ k: "miss", u: tgt.uid, by: src.uid, blind: true }); return 0; }
   const tsd = this.side[tgt.side];
   if (tsd.foresight > 0) { tsd.foresight--; this.emit({ k: "miss", u: tgt.uid, by: src.uid }); return 0; }
   if (!extra.trueHit && this.rnd() * 100 < this.dodgeOf(tgt, src)) { this.emit({ k: "miss", u: tgt.uid, by: src.uid }); return 0; }
@@ -236,12 +245,12 @@ B.hit = function (src, tgt, pow, card, extra) {
   if (src.mods.perFoeFallen) pct += src.mods.perFoeFallen * this.units.filter((x) => x.side !== src.side && x.hp <= 0).length;
   if (src.mods.vsHeld && (tgt.st.stun || tgt.st.slow || tgt.st.trap)) pct += src.mods.vsHeld;
   if (src.mods.perDebuff) pct += src.mods.perDebuff * Object.keys(tgt.st).filter((k) => STATUS[k].neg).length;
-  if (tgt.st.marked) pct += tgt.st.marked.v;
+  if (tgt.st.marked) pct += this.stVal(tgt, "marked");
   if (tgt.mods.frail) pct += Math.abs(tgt.mods.frail);
   const side = this.side[src.side];
   if (side.spark) { pct += side.spark; side.spark = 0; }
   d *= 1 + pct / 100;
-  if (src.st.soak && ty === "fire") d *= 1 - src.st.soak.v / 100;
+  if (src.st.soak && ty === "fire") d *= 1 - Math.min(90, this.stVal(src, "soak")) / 100;
   let crit = false;
   const cc = src.crit + (src.st.cheer ? 10 : 0) - this.stVal(src, "dull") + this.alive(src.side).reduce((a, x) => a + (x.mods.teamCrit || 0), 0);
   if (this.rnd() * 100 < cc) { crit = true; if (!tgt.mods.critImmune) d *= 1.5; }
@@ -462,8 +471,8 @@ B.roundStart = function () {
 B.turnStart = function (u) {
   if (u.hp <= 0) return false;
   u.defending = false; // a guard lasts until the creature's next turn
-  if (u.st.burn) { const d = Math.max(1, Math.round(u.maxHp * u.st.burn.v / 100)); u.hp = Math.max(0, u.hp - d); this.emit({ k: "dmg", u: u.uid, n: d, dot: "burn" }); if (u.hp <= 0) { u.st = {}; this.emit({ k: "ko", u: u.uid }); return false; } }
-  if (u.st.regen) this.heal(u, u, u.st.regen.v);
+  if (u.st.burn) { const d = Math.max(1, Math.round(u.maxHp * this.stVal(u, "burn") / 100)); u.hp = Math.max(0, u.hp - d); this.emit({ k: "dmg", u: u.uid, n: d, dot: "burn" }); if (u.hp <= 0) { u.st = {}; this.emit({ k: "ko", u: u.uid }); return false; } }
+  if (u.st.regen) this.heal(u, u, this.stVal(u, "regen"));
   if (u.mods.bleed) { const d = Math.max(1, Math.round(u.maxHp * Math.abs(u.mods.bleed) / 100)); if (u.hp > d) { u.hp -= d; this.emit({ k: "dmg", u: u.uid, n: d, dot: "bleed" }); } }
   if (u.cd > 0) u.cd--;
   if (u.st.stun || u.st.trap) { this.emit({ k: "skip", u: u.uid, why: u.st.stun ? "stun" : "trap" }); this.turnEnd(u); return false; }
