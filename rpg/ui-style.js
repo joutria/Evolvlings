@@ -60,12 +60,12 @@ const css = `
 .bctl .btn { flex: 1 1 160px; }
 .bturn { font-weight: 700; margin: 0; }
 .bhint { margin: 6px 0 4px; font-size: 13px; }
-.bdock { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
-.bcard { border: 2px solid var(--line); border-radius: 12px; background: var(--bg); color: inherit; font: inherit; padding: 6px 4px; display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; cursor: pointer; min-height: 64px; }
-.bcard strong, .bcard span { font-size: 12px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.bcard small { font-size: 11px; color: var(--muted, inherit); }
-.bcard.ready { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 35%, transparent); }
-.bcard:disabled { opacity: .55; cursor: default; }
+.bdock { display: grid; grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); gap: 6px; }
+.bact { border: 2px solid var(--line); border-radius: 12px; background: var(--bg); color: inherit; font: inherit; padding: 6px 4px; display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; cursor: pointer; min-height: 64px; }
+.bact strong, .bact span { font-size: 12px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bact small { font-size: 11px; color: var(--muted, inherit); }
+.bact.ready { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 35%, transparent); }
+.bact:disabled { opacity: .55; cursor: default; }
 .baim { margin-top: 6px; }
 .rcards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
 .rcard { display: flex; flex-direction: column; gap: 6px; }

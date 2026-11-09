@@ -257,6 +257,7 @@ B.hit = function (src, tgt, pow, card, extra) {
     if (ts.vessel > 0) { ts.vessel--; d *= 1 - ts.vesselV / 100; }
   }
   if (tgt.st.cushion) { d *= 1 - tgt.st.cushion.v / 100; delete tgt.st.cushion; }
+  if (tgt.defending) d *= 1 - DEFEND;
   d = Math.max(1, Math.round(d));
   // break shield
   if ((extra.breakShield || side.breakNext) && tgt.shield > 0) { tgt.shield = 0; tgt.shieldT = 0; side.breakNext = false; this.emit({ k: "break", u: tgt.uid }); }
@@ -414,6 +415,13 @@ B.apply = function (src, fx, card, ctx) {
   if (fx.selfMaxDown) { src.maxHp = Math.max(1, Math.round(src.maxHp * (1 - Math.abs(fx.selfMaxDown) / 100))); src.hp = Math.min(src.hp, src.maxHp); }
   if (fx.noClockFoes && !this.day) this.side[this.other(src.side)].noClock = true;
   if (card) this.side[src.side].lastType = card.type;
+  // speed as tactics: an active Bolt card pushes the allies it reaches forward in the turn order; Ice and Dream cards
+  // push the foes they reach back (shown at once on the order strip)
+  if (isActive && (ty === "bolt" || ty === "ice" || ty === "dream")) for (const t of list) {
+    if (t.hp <= 0 || t === src) continue;
+    if (ty === "bolt" && t.side === src.side) { t.g = Math.min(0.95, (t.g || 0) + HASTEN); this.emit({ k: "hasten", u: t.uid }); }
+    else if (ty !== "bolt" && t.side !== src.side) { t.g = (t.g || 0) - DELAY; this.emit({ k: "delay", u: t.uid }); }
+  }
   return true;
 };
 
@@ -453,6 +461,7 @@ B.roundStart = function () {
 // returns false if the unit can't act this turn
 B.turnStart = function (u) {
   if (u.hp <= 0) return false;
+  u.defending = false; // a guard lasts until the creature's next turn
   if (u.st.burn) { const d = Math.max(1, Math.round(u.maxHp * u.st.burn.v / 100)); u.hp = Math.max(0, u.hp - d); this.emit({ k: "dmg", u: u.uid, n: d, dot: "burn" }); if (u.hp <= 0) { u.st = {}; this.emit({ k: "ko", u: u.uid }); return false; } }
   if (u.st.regen) this.heal(u, u, u.st.regen.v);
   if (u.mods.bleed) { const d = Math.max(1, Math.round(u.maxHp * Math.abs(u.mods.bleed) / 100)); if (u.hp > d) { u.hp -= d; this.emit({ k: "dmg", u: u.uid, n: d, dot: "bleed" }); } }
@@ -505,6 +514,36 @@ B.act = function (u, useCard, aim) {
     else this.emit({ k: "lost", u: u.uid });
   }
   this.turnEnd(u);
+};
+/* ---------- Turns ----------
+   One creature acts at a time, in the order its speed sets (the turn bars below, jumped straight to the next one that
+   fills). On its turn a creature attacks, plays its card, defends (−40 % damage until its next turn) or moves: a step to a
+   free cell next to it costs the turn, swapping places with an ally next to it costs half a turn. */
+const DEFEND = 0.4, HASTEN = 0.3, DELAY = 0.25;
+B.defend = function (u) {
+  if (this.over || u.hp <= 0) return;
+  u.defending = true; this.emit({ k: "defend", u: u.uid });
+  this.turnEnd(u);
+};
+B.stepTurn = function (u, c) {
+  if (this.over || u.hp <= 0 || u.pos == null || !nearCells(u.pos).includes(c)) return false;
+  const mate = this.units.find((x) => x.side === u.side && x.hp > 0 && x.pos === c);
+  if (mate) { mate.pos = u.pos; u.pos = c; this.emit({ k: "move", u: u.uid, to: c }); this.emit({ k: "move", u: mate.uid, to: mate.pos }); this.turnEnd(u); u.g = 0.5; return true; }
+  if (!this.cellFree(u.side, c)) return false;
+  u.pos = c; this.emit({ k: "move", u: u.uid, to: c }); this.turnEnd(u);
+  return true;
+};
+// the next n turns as things stand (who acts, in order); the creature whose turn it is comes first
+B.order = function (n) {
+  if (this.time == null) return [];
+  const al = this.units.filter((u) => u.hp > 0), g = new Map(al.map((u) => [u, u.g || 0])), out = [];
+  while (out.length < n && al.length) {
+    let best = null, bt = Infinity;
+    for (const u of al) { const t = Math.max(0, (1 - g.get(u)) / this.rate(u)); if (t < bt) { bt = t; best = u; } }
+    for (const u of al) g.set(u, g.get(u) + this.rate(u) * bt);
+    out.push(best); g.set(best, 0);
+  }
+  return out;
 };
 B.checkOver = function () {
   if (this.over) return this.over;
@@ -601,5 +640,5 @@ B.runAll = function (maxRounds) {
 };
 
 
-const api = { CELLS, cellRow, cellLane, autoForm, cardShape, shapeCells, nearCells, AUTO_DODGE, GRADE_VIS, COMPAT, canUse, UPGRADE_N, TYPES, BEATS, OPPOSITE, typeMult, GRADES, rollGrade, STATUS, CARDS, DROP_POOL, scaled, MONS, makeUnit, Battle, lvlScale, xpNeed, SLOT_LVL, ZONES, EVENTS, isDayNow };
+const api = { DEFEND, CELLS, cellRow, cellLane, autoForm, cardShape, shapeCells, nearCells, AUTO_DODGE, GRADE_VIS, COMPAT, canUse, UPGRADE_N, TYPES, BEATS, OPPOSITE, typeMult, GRADES, rollGrade, STATUS, CARDS, DROP_POOL, scaled, MONS, makeUnit, Battle, lvlScale, xpNeed, SLOT_LVL, ZONES, EVENTS, isDayNow };
 if (typeof window !== "undefined") window.EvoEngine = api;

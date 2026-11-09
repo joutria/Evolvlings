@@ -851,6 +851,8 @@ function burst(g, type, x, y, k) {
   const t = TYPE[type] || TYPE.star, r = 3 + k * 10, n = 10;
   for (let i = 0; i < n; i++) { const a = i * Math.PI * 2 / n; g.fillStyle = i % 2 ? t.ramp[3] : t.sig; g.fillRect(Math.round(x + Math.cos(a) * r), Math.round(y + Math.sin(a) * r * .8), k < .6 ? 3 : 2, k < .6 ? 3 : 2); }
   if (k < .4) { g.fillStyle = P.ink; g.fillRect(Math.round(x) - 4, Math.round(y) - 4, 9, 9); g.fillStyle = P.cream; g.fillRect(Math.round(x) - 3, Math.round(y) - 3, 7, 7); }
+  // the type's own particles thrown outwards (sparks, leaves, drops...), falling a little as they go
+  for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3 + .4, rr = 4 + k * 16; mote(g, type, x + Math.cos(a) * rr * 1.2, y + Math.sin(a) * rr * .7 + k * k * 6, k, i % 2 === 0); }
 }
 function statusMark(g, st, x, y, k) {
   const px = (a, b, col, w = 1, h = 1) => { g.fillStyle = col; g.fillRect(Math.round(a), Math.round(b), w, h); };
@@ -879,17 +881,18 @@ function fx(g, id, t, from, to, targets) {
       const list = a.style === "multi" ? targets.concat(targets).slice(0, 3) : [to];
       list.forEach((tg, i) => {
         const t0 = .2 + i * .1, k = (t - t0) / .35;
-        if (k > 0 && k < 1) { const x = from.x + (tg.x - from.x) * k, y = from.y + (tg.y - from.y) * k - (a.arc ? Math.sin(k * Math.PI) * 14 : 0);
+        if (k > 0 && k < 1) { const x = from.x + (tg.x - from.x) * k, y = from.y + (tg.y - from.y) * k - Math.sin(k * Math.PI) * (a.arc ? 14 : 6);
           if (a.ring) { for (let j = 0; j < 8; j++) { const an = j * Math.PI / 4; px(x + Math.cos(an) * 3, y + Math.sin(an) * 3, ty.ramp[2]); } }
           else { const dir = Math.sign(tg.x - from.x) || 1, sz = a.style === "multi" ? 3 : 5;
-            for (let j = 1; j <= 3; j++) mote(g, type, x - dir * (sz + j * 4), y + (j % 2 ? -1 : 1), (k + j * .2) % 1);
+            for (let j = 1; j <= 5; j++) { const kk = Math.max(0, k - j * .05); mote(g, type, from.x + (tg.x - from.x) * kk - dir * 2, from.y + (tg.y - from.y) * kk - Math.sin(kk * Math.PI) * (a.arc ? 14 : 6) + (j % 2 ? -1 : 1), (k + j * .2) % 1, j < 3); }
             px(x - sz / 2 - 1, y - sz / 2 - 1, P.ink, sz + 2, sz + 2); px(x - sz / 2, y - sz / 2, ty.sig, sz, sz); px(x - sz / 2, y - sz / 2, ty.ramp[3], 2, 1); } }
         if (k >= 1 && k < 1.6) burst(g, type, tg.x, tg.y, (k - 1) / .6);
       });
       break; }
-    case "beam": if (t >= .3 && t < .6) { const y = from.y; const x0 = Math.min(from.x, to.x), x1 = Math.max(from.x, to.x);
-        px(x0, y - 2, ty.ramp[2], x1 - x0, 5); px(x0, y - 1, P.cream, x1 - x0, 3); if (type === "star") [P.ember4, P.sea3, P.rose2, P.glim1].forEach((c2, i) => px(x0, y - 3 + i * 2 + (i > 1 ? 1 : 0), c2, x1 - x0, 1)); }
-      if (t >= .35 && t < .75) { const k = (t - .35) / .4; px(to.x - 1, to.y - 8 - k * 4, P.cream, 3, 17 + k * 8); px(to.x - 8 - k * 4, to.y - 1, P.cream, 17 + k * 8, 3); } break;
+    case "beam": if (t >= .3 && t < .6) { const y = from.y; const x0 = Math.min(from.x, to.x), x1 = Math.max(from.x, to.x), w = (t * 24 | 0) % 2;
+        px(x0, y - 3 - w, ty.ramp[1], x1 - x0, 7 + w * 2); px(x0, y - 2, ty.ramp[2], x1 - x0, 5); px(x0, y - 1, P.cream, x1 - x0, 3);
+        for (let i = 0; i < 6; i++) { const sx = x0 + ((i * 37 + (t * 60 | 0) * 7) % Math.max(1, x1 - x0)); mote(g, type, sx, y - 5 + (i % 3) * 5, (t * 3 + i * .17) % 1); } if (type === "star") [P.ember4, P.sea3, P.rose2, P.glim1].forEach((c2, i) => px(x0, y - 3 + i * 2 + (i > 1 ? 1 : 0), c2, x1 - x0, 1)); }
+      if (t >= .35 && t < .75) { const k = (t - .35) / .4; px(to.x - 1, to.y - 8 - k * 4, P.cream, 3, 17 + k * 8); px(to.x - 8 - k * 4, to.y - 1, P.cream, 17 + k * 8, 3); burst(g, type, to.x, to.y, k); } break;
     case "wave": { const k = (t - .2) / .6; if (k > 0 && k < 1) { const minX = Math.min(...targets.map((p) => p.x)) - 20, maxX = Math.max(...targets.map((p) => p.x)) + 20; const x = minX + (maxX - minX) * k, base = Math.max(...targets.map((p) => p.y)) + 13;
         for (let i = 0; x - i > minX - 6 && i < 60; i++) { const crest = i < 10 ? Math.sin((i / 10) * Math.PI / 2) : 1, h = Math.round((14 - (i > 10 ? (i - 10) * .12 : 0)) * crest + Math.sin((x - i) * .5) * 2); if (h <= 0) continue;
           px(x - i, base - h, P.ink); px(x - i, base - h + 1, i < 3 ? ty.ramp[3] : ty.ramp[2], 1, h - 1); if ((x - i) % 3 === 0) px(x - i, base - h + 1, ty.ramp[3]); }
@@ -917,8 +920,26 @@ function fx(g, id, t, from, to, targets) {
   // status mark after the hit for damage cards
   if (hitAt != null && a.st && a.style !== "debuff" && t > hitAt + .15) targets.slice(0, a.style === "shot" || a.style === "melee" || a.style === "beam" || a.style === "vines" ? 1 : 3).forEach((tg) => statusMark(g, a.st, tg.x, tg.y - 16, (t - hitAt - .15) / (1 - hitAt)));
 }
+// Soft light for the effect (drawn by the battle on the full-size canvas, additive): [{x, y, r, a}] in low-res units
+// plus the type's colour. Projectiles shine as they fly, impacts flare, heals and shields glow on their targets.
+function fxGlow(id, t, from, to, targets) {
+  const a = anim(id), type = (CARD[id] || [, "star"])[1], col = (TYPE[type] || TYPE.star).sig, out = [];
+  targets = targets && targets.length ? targets : [to];
+  const flare = (p, k, r) => { if (k > 0 && k < 1) out.push({ x: p.x, y: p.y, r: r * (.6 + k * .6), a: 1 - k }); };
+  switch (a.style) {
+    case "shot": case "multi": (a.style === "multi" ? targets.concat(targets).slice(0, 3) : [to]).forEach((tg, i) => { const k = (t - .2 - i * .1) / .35;
+      if (k > 0 && k < 1) out.push({ x: from.x + (tg.x - from.x) * k, y: from.y + (tg.y - from.y) * k - Math.sin(k * Math.PI) * (a.arc ? 14 : 6), r: 9, a: .8 });
+      flare(tg, (k - 1) / .6, 22); }); break;
+    case "beam": if (t >= .3 && t < .6) { for (let i = 0; i <= 4; i++) out.push({ x: from.x + (to.x - from.x) * i / 4, y: from.y, r: 10, a: .55 }); } flare(to, (t - .35) / .4, 26); break;
+    case "melee": flare(to, (t - .45) / .3, a.heavy ? 26 : 18); break;
+    case "wave": case "quake": case "vines": targets.forEach((tg) => flare(tg, (t - .45) / .4, 20)); break;
+    case "heal": case "buff": case "shield": case "cleanse": targets.forEach((tg) => { if (t > .1 && t < .9) out.push({ x: tg.x, y: tg.y, r: 18, a: .5 * Math.sin((t - .1) / .8 * Math.PI) }); }); break;
+    case "debuff": targets.forEach((tg) => flare(tg, (t - .5) / .4, 16)); break;
+  }
+  return { col, spots: out };
+}
 // when does the target flash (cream silhouette + 2 px knockback)? null = it doesn't get hit
 function hitWindow(id) { const s = anim(id).style; return { melee: [.45, .62], shot: [.55, .72], multi: [.55, .85], beam: [.35, .6], wave: [.45, .75], quake: [.4, .7], vines: [.45, .65], debuff: [.5, .62] }[s] || null; }
 
-root.EVS = { P, R, TYPE, GRADE, KINDS, KIND_TYPE, SPEC, sprite, silhouette, hovers, typeIcon, cardArt, card, CARD, PACT, ANIM, DUR, anim, pose, fx, hitWindow, mote, CW, CH };
+root.EVS = { P, R, TYPE, GRADE, KINDS, KIND_TYPE, SPEC, sprite, silhouette, hovers, typeIcon, cardArt, card, CARD, PACT, ANIM, DUR, anim, pose, fx, fxGlow, hitWindow, mote, CW, CH };
 })(typeof window !== "undefined" ? window : globalThis);
