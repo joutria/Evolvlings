@@ -484,6 +484,7 @@ B.roundStart = function () {
 B.turnStart = function (u) {
   if (u.hp <= 0) return false;
   u.defending = false; // a guard lasts until the creature's next turn
+  if (u.waited) { u.waited = false; return !(u.st.stun || u.st.trap); } // back from waiting: the turn already started
   if (u.st.burn) { const d = Math.max(1, Math.round(u.maxHp * this.stVal(u, "burn") / 100)); u.hp = Math.max(0, u.hp - d); this.emit({ k: "dmg", u: u.uid, n: d, dot: "burn" }); if (u.hp <= 0) { u.st = {}; this.emit({ k: "ko", u: u.uid }); return false; } }
   if (u.st.regen) this.heal(u, u, this.stVal(u, "regen"));
   if (u.mods.bleed) { const d = Math.max(1, Math.round(u.maxHp * Math.abs(u.mods.bleed) / 100)); if (u.hp > d) { u.hp -= d; this.emit({ k: "dmg", u: u.uid, n: d, dot: "bleed" }); } }
@@ -545,7 +546,8 @@ B.act = function (u, useCard, aim) {
 /* ---------- Turns ----------
    One creature acts at a time, in the order its speed sets (the turn bars below, jumped straight to the next one that
    fills). On its turn a creature attacks, plays its card, defends (−40 % damage until its next turn) or moves: a step to a
-   free cell next to it costs the turn, swapping places with an ally next to it costs half a turn. */
+   free cell next to it or swapping places with an ally next to it costs half a turn (it acts again sooner). It can also wait:
+   it gives way to the next creature in the order and acts right after it. */
 const DEFEND = 0.4, HASTEN = 0.3, DELAY = 0.25;
 B.defend = function (u) {
   if (this.over || u.hp <= 0) return;
@@ -557,7 +559,16 @@ B.stepTurn = function (u, c) {
   const mate = this.units.find((x) => x.side === u.side && x.hp > 0 && x.pos === c);
   if (mate) { mate.pos = u.pos; u.pos = c; this.emit({ k: "move", u: u.uid, to: c }); this.emit({ k: "move", u: mate.uid, to: mate.pos }); this.turnEnd(u); u.g = 0.5; return true; }
   if (!this.cellFree(u.side, c)) return false;
-  u.pos = c; this.emit({ k: "move", u: u.uid, to: c }); this.turnEnd(u);
+  u.pos = c; this.emit({ k: "move", u: u.uid, to: c }); this.turnEnd(u); u.g = 0.5;
+  return true;
+};
+// wait: the creature steps back in the order to act right after the next one (its turn isn't spent, so states don't tick)
+B.waitTurn = function (u) {
+  if (this.over || u.hp <= 0) return false;
+  const al = this.units.filter((x) => x.hp > 0 && x !== u); if (!al.length) return false;
+  const t = al.reduce((m, x) => Math.min(m, Math.max(0, (1 - (x.g || 0)) / this.rate(x))), Infinity);
+  u.g = 1 - this.rate(u) * (t + 0.001); u.waited = true;
+  this.emit({ k: "wait", u: u.uid });
   return true;
 };
 // the next n turns as things stand (who acts, in order); the creature whose turn it is comes first
