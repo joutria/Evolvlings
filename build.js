@@ -445,6 +445,7 @@ const css = `
 .bd-card.done { opacity: .7; }
 .bd-max { margin: 0; font-weight: 600; color: #b8860b; }
 .bd-card .poor, .bd-store .poor { color: #b8364b; font-size: 12px; }
+.bd-need { display: grid; grid-template-columns: 7.5em minmax(0, 1fr); gap: 8px; align-items: center; width: 100%; font: 500 12px var(--font-mono); } .bd-need .bar { height: 8px; }
 `;
 const st = document.createElement("style"); st.textContent = css; document.head.appendChild(st);
 
