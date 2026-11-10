@@ -463,7 +463,14 @@ function artUnit(u, sq, emo) {
 }
 // battle sprites 1.5 times bigger than the sheet cell, still crisp: the cell read back at its own pixel size and
 // scaled by a whole number (art.js EVART.small), feet on the bottom row
-function bigArt(im, u) { return im && HAS_ART && EVART.small ? EVART.small(im, u.boss ? 72 : 46) || im : im; }
+// one scale per creature, measured on its standing side frame, so no frame grows or shrinks; returns { im, y } where y is
+// where the picture's top edge goes, measured from the feet
+function bigArt(im, u) {
+  if (!im) return null;
+  const ref = artUnit(u, 0, "normal"), B = HAS_ART && EVART.big ? EVART.big(im, ref, u.boss ? 72 : 46) : null;
+  // the cell's feet row (4 px above its bottom) stays on the ground line
+  return B ? { im: B.im, top: -Math.round((im.height - 4 - B.oy) * B.k / B.S) } : { im, top: -(im.height - 4) };
+}
 const hollowArt = new WeakMap();
 function artHollow(cv) {
   // hollowed foes: the same picture, dimmed towards plum
@@ -522,30 +529,32 @@ function drawTiles(g) {
 }
 // marked threats: the red cells fill up as the marking foe's turn comes near; your current creature, where it can go,
 // and in Manual the safe cells next to it in green
-function drawThreats(out, now) {
+// on the ground, under the creatures: marked cells filling red with a "!" badge on their front corner, your creature's
+// tile, where it can move and the safe cells next to it
+function drawGround(g, now) {
   const b = battle.b, pulse = 0.55 + 0.35 * Math.sin(now / 160);
-  out.save();
+  g.save();
   for (const u of b.units) {
     if (!u.windup || u.hp <= 0) continue;
     const side = b.other(u.side), fill = Math.max(0.15, Math.min(1, u.g || 0));
     for (const c of u.windup.cells) {
       const t = tileOf(side, c);
-      out.save(); tilePath(out, t); out.clip();
-      out.fillStyle = "rgba(224,96,63,.22)"; out.fillRect(t.x, t.y, t.w, t.h);
-      out.fillStyle = `rgba(224,96,63,${0.35 + 0.25 * pulse})`; out.fillRect(t.x, t.y + t.h * (1 - fill), t.w, t.h * fill);
-      out.restore();
-      tilePath(out, t); out.strokeStyle = `rgba(255,143,107,${pulse})`; out.lineWidth = 2; out.stroke();
-      // a red "!" in the tile's top-right corner: this cell takes the blow
-      const ex = t.x + t.w - 4, ey = t.y + 1, er = 6 + Math.round(pulse);
-      out.beginPath(); out.arc(ex, ey, er + 1.5, 0, Math.PI * 2); out.fillStyle = "#1d1626"; out.fill();
-      out.beginPath(); out.arc(ex, ey, er, 0, Math.PI * 2); out.fillStyle = "#e0402f"; out.fill();
-      out.font = '700 11px "EvNum", "Pixelify Sans", system-ui, sans-serif'; out.textAlign = "center"; out.textBaseline = "middle";
-      out.fillStyle = "#fff"; out.fillText("!", ex, ey + 0.5);
+      g.save(); tilePath(g, t); g.clip();
+      g.fillStyle = "rgba(224,96,63,.22)"; g.fillRect(t.x, t.y, t.w, t.h);
+      g.fillStyle = `rgba(224,96,63,${0.35 + 0.25 * pulse})`; g.fillRect(t.x, t.y + t.h * (1 - fill), t.w, t.h * fill);
+      g.restore();
+      tilePath(g, t); g.strokeStyle = `rgba(255,143,107,${pulse})`; g.lineWidth = 2; g.stroke();
+      // a red "!" on the tile's front right corner: this cell takes the blow
+      const ex = t.x + t.w - 6, ey = t.y + t.h - 3, er = 6 + Math.round(pulse);
+      g.beginPath(); g.arc(ex, ey, er + 1.5, 0, Math.PI * 2); g.fillStyle = "#1d1626"; g.fill();
+      g.beginPath(); g.arc(ex, ey, er, 0, Math.PI * 2); g.fillStyle = "#e0402f"; g.fill();
+      g.font = '700 11px "EvNum", "Pixelify Sans", system-ui, sans-serif'; g.textAlign = "center"; g.textBaseline = "middle";
+      g.fillStyle = "#fff"; g.fillText("!", ex, ey + 0.5);
     }
-    const a = battle.anim[u.uid]; if (a) { const hy = a.y - (u.boss ? 84 : 52); out.font = '700 16px "EvNum", "Pixelify Sans", system-ui, sans-serif'; out.textAlign = "center"; out.lineWidth = 3; out.strokeStyle = "#1d1626"; out.strokeText("!", a.x, hy); out.fillStyle = "#ff8f6b"; out.fillText("!", a.x, hy); }
   }
   const cur = battle.turnU && battle.anim[battle.turnU], cu = cur && b.units.find((u) => u.uid === battle.turnU);
-  if (cur && cu && cu.hp > 0 && cu.pos != null) { const t = tileOf(cu.side, cu.pos); tilePath(out, t); out.strokeStyle = `rgba(255,213,122,${0.6 + 0.4 * Math.sin(now / 200)})`; out.lineWidth = 2.5; out.stroke(); }
+  if (cur && cu && cu.hp > 0 && cu.pos != null) { const t = tileOf(cu.side, cu.pos); tilePath(g, t); g.strokeStyle = `rgba(255,213,122,${0.6 + 0.4 * Math.sin(now / 200)})`; g.lineWidth = 2.5; g.stroke(); }
+  if (battle.aim) drawAimGround(g);
   const C = battle.choice, threat = threatMap();
   const sel = battle.moveSel && b.units.find((u) => u.uid === battle.moveSel && u.hp > 0);
   const me = C && handMove() && !battle.aim && C.u.pos != null ? C.u : null;
@@ -553,19 +562,42 @@ function drawThreats(out, now) {
     for (const c of nearCells(sel.pos)) {
       if (!moveOk(sel, c)) continue;
       const t = tileOf("ally", c), bad = threat.has(c), over = battle.drag && battle.drag.cell === c;
-      tilePath(out, t);
-      out.fillStyle = bad ? "rgba(224,96,63,.18)" : over ? "rgba(134,184,90,.55)" : "rgba(134,184,90,.3)"; out.fill();
-      out.lineWidth = over ? 3 : 2; out.strokeStyle = bad ? "#ff8f6b" : "#a8d878"; out.stroke();
+      tilePath(g, t);
+      g.fillStyle = bad ? "rgba(224,96,63,.18)" : over ? "rgba(134,184,90,.55)" : "rgba(134,184,90,.3)"; g.fill();
+      g.lineWidth = over ? 3 : 2; g.strokeStyle = bad ? "#ff8f6b" : "#a8d878"; g.stroke();
     }
   } else if (battle.moveSel && !sel) battle.moveSel = null;
   else if (me && threat.has(me.pos)) {
     // you stand where the blow lands: the cells you could step to that are safe glow green
-    for (const c of nearCells(me.pos)) { if (!moveOk(me, c) || threat.has(c)) continue; const t = tileOf("ally", c); tilePath(out, t); out.strokeStyle = `rgba(168,216,120,${pulse})`; out.lineWidth = 2; out.stroke(); }
+    for (const c of nearCells(me.pos)) { if (!moveOk(me, c) || threat.has(c)) continue; const t = tileOf("ally", c); tilePath(g, t); g.strokeStyle = `rgba(168,216,120,${pulse})`; g.lineWidth = 2; g.stroke(); }
   }
-  // the creature you drag: a see-through copy under your finger
-  const D = battle.drag;
+  g.restore();
+}
+// while aiming, on the ground: the tiles you can pick, and the zone under your finger lit up
+function drawAimGround(g) {
+  const A = battle.aim, side = A.shape === "ally" ? "ally" : "foe", show = A.cell != null ? A.cell : A.hover;
+  const hitCells = show != null && aimOk(show) ? (A.shape === "lane" || A.shape === "row" || A.shape === "cross" ? shapeCells(A.shape, show) : [show]) : [];
+  g.save();
+  for (let c = 0; c < CELLS; c++) {
+    const on = hitCells.includes(c), ok = aimOk(c);
+    if (!on && !ok) continue;
+    const t = tileOf(side, c); tilePath(g, t);
+    g.fillStyle = on ? (side === "ally" ? "rgba(134,184,90,.5)" : "rgba(255,213,122,.45)") : "rgba(251,246,239,.12)"; g.fill();
+    g.strokeStyle = on ? (side === "ally" ? "#a8d878" : "#ffd57a") : "rgba(251,246,239,.6)"; g.lineWidth = on ? 3 : 1.5; g.stroke();
+  }
+  g.restore();
+}
+// over everything: the "!" over a foe that has marked a blow, and the creature you drag (a see-through copy under your finger)
+function drawThreats(out, now) {
+  const b = battle.b;
+  out.save();
+  for (const u of b.units) {
+    if (!u.windup || u.hp <= 0) continue;
+    const a = battle.anim[u.uid]; if (a) { const hy = a.y - (u.boss ? 84 : 52); out.font = '700 16px "EvNum", "Pixelify Sans", system-ui, sans-serif'; out.textAlign = "center"; out.lineWidth = 3; out.strokeStyle = "#1d1626"; out.strokeText("!", a.x, hy); out.fillStyle = "#ff8f6b"; out.fillText("!", a.x, hy); }
+  }
+  const sel = battle.moveSel && b.units.find((u) => u.uid === battle.moveSel && u.hp > 0), D = battle.drag;
   if (D && D.moved && sel) {
-    const im = bigArt(artUnit(sel, 0, "normal"), sel);
+    const bD = bigArt(artUnit(sel, 0, "normal"), sel), im = bD && bD.im;
     if (im) { out.save(); out.globalAlpha = 0.6; out.imageSmoothingEnabled = false; out.drawImage(im, Math.round(D.x - im.width / 2), Math.round(D.y - im.height + 12)); out.restore(); }
   }
   out.restore();
@@ -574,15 +606,6 @@ function drawThreats(out, now) {
 function drawAim(out, now) {
   const A = battle.aim, b = battle.b, side = A.shape === "ally" ? "ally" : "foe", show = A.cell != null ? A.cell : A.hover;
   out.save();
-  out.fillStyle = "rgba(29,22,38,.28)"; out.fillRect(0, 0, BW, BH);
-  const hitCells = show != null && aimOk(show) ? (A.shape === "lane" || A.shape === "row" || A.shape === "cross" ? shapeCells(A.shape, show) : [show]) : [];
-  for (let c = 0; c < CELLS; c++) {
-    const [x, y] = cellXY(side, c), on = hitCells.includes(c), ok = aimOk(c);
-    if (!on && !ok) continue;
-    out.strokeStyle = on ? (side === "ally" ? "#86b85a" : "#ffd57a") : "rgba(251,246,239,.5)"; out.lineWidth = on ? 3 : 1.5;
-    out.fillStyle = on ? (side === "ally" ? "rgba(134,184,90,.25)" : "rgba(255,213,122,.22)") : "transparent";
-    out.beginPath(); out.ellipse(x, y + 4, 30, 30, 0, 0, Math.PI * 2); out.fill(); out.stroke();
-  }
   if (show != null && side === "foe") {
     const card = A.u.cards.a, ty = b.typeOf(A.u, card);
     for (const t of b.aimHits(A.u, show)) {
@@ -738,13 +761,13 @@ function drawBattle(now) {
   }
   if (!X.duel && !X.deep) drawSap(c, battle.boss || X.savia || X.echo ? 3 : saviaLvl(X.zone), REDUCE ? 0 : t, BW, BH);
   // the 6 formation cells of each side as tiles (sharp on the full canvas when the art layer is split, see below)
-  if (!(BLOW && HAS_ART && (bg || b.units.some((u) => artUnit(u, 0, "normal"))))) drawTiles(c);
+  if (!(BLOW && HAS_ART && (bg || b.units.some((u) => artUnit(u, 0, "normal"))))) { drawTiles(c); drawGround(c, now); }
   if (BLOW) { c.setTransform(1, 0, 0, 1, 0, 0); PX.quantize(c, BW / 2, BH / 2, !bg); c.scale(0.5, 0.5); }
   if (hi) {
     if (!bg) out.clearRect(0, 0, BW, BH);
     PX.blit(out, BLOW, BW, BH);
     c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, BW / 2, BH / 2); c.scale(0.5, 0.5);
-    drawTiles(out);
+    drawTiles(out); drawGround(out, now);
   }
   // units
   const order = b.units.slice().sort((p, q) => battle.anim[p.uid].y - battle.anim[q.uid].y);
@@ -790,19 +813,19 @@ function drawBattle(now) {
       // PNG cell straight onto the full-size canvas: feet stand on the cell's y = n - 4
       const emo = ko ? "sad" : a.flash > 0.5 ? "surprised" : cp ? "happy" : u.hp / u.maxHp < 0.3 ? "sad" : "normal";
       const sq = cp && cp.sq != null ? cp.sq : walk >= 0 ? walk : REDUCE ? 0 : Math.floor(t * 2 + a.x / 50) % 2;
-      let im = bigArt(artUnit(u, sq, emo) || art, u);
+      const bA = bigArt(artUnit(u, sq, emo) || art, u); let im = bA.im;
       if (u.hollow) im = artHollow(im);
       if ((cp && cp.flash || a.sil > 0) && HAS_EVS) im = EVS.silhouette(im, a.sil > 0 ? "#ffffff" : undefined);
       const n = im.width, feet = u.boss ? 24 : 16;
       const hov = !REDUCE && evsKind(u.kind) && EVS.hovers(u.kind) ? Math.round(Math.sin(t * 2 + a.x)) * 2 - 4 : 0;
       out.save(); out.translate(x, y); out.imageSmoothingEnabled = false;
-      out.fillStyle = "rgba(29,22,38,.35)"; out.fillRect(-Math.round(n * 0.2), feet - 2, Math.round(n * 0.4), 4);
+      out.fillStyle = "rgba(29,22,38,.35)"; out.fillRect(-Math.round(n * 0.15), feet - 2, Math.round(n * 0.3), 4);
       if (ko) out.globalAlpha = 0.35; else if (cp && cp.alpha != null) out.globalAlpha = cp.alpha;
       out.translate(cp ? cp.dx * 2 : 0, (cp ? cp.dy * 2 : 0) + hov);
-      if (cp && cp.sq === 1) { out.translate(0, feet); out.scale(1.08, 0.9); out.translate(0, -feet); }
+      if (cp && cp.sq === 1) { out.translate(0, feet); out.scale(1.04, 0.94); out.translate(0, -feet); }
       if (u.side === "foe") out.scale(-1, 1);
       if (face && (face > 0) !== (u.side === "ally")) out.scale(-1, 1);
-      out.drawImage(im, -Math.round(n / 2), feet - n + 2);
+      out.drawImage(im, -Math.round(im.width / 2), feet + bA.top);
       out.restore();
     } else if (spr) {
       // pixel sprite: 1 sprite pixel = 2 battle units (the layer is drawn at half size)
