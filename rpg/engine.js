@@ -36,7 +36,6 @@ function makeUnit(o) {
     dodge: Math.max(0, base.spd / 20 + (pm.dodge || 0) + ((o.star || 0) >= 4 ? 6 : 0) + tal.dodge),
     mods: pm, cards: o.cards || {}, cd: 0, st: {}, shield: 0, shieldT: 0, hitOnce: false, skip: 0, sUsed: false, sCount: 0, hitsTaken: 0,
   };
-  if (u.cards.a) u.cd = Math.ceil(u.cards.a.a.cd / 2);
   if (Number.isInteger(o.pos) && o.pos >= 0 && o.pos < CELLS) u.pos = o.pos;
   if (o.hpPct === 0) { u.hp = 0; }
   return u;
@@ -107,7 +106,7 @@ function Battle(allies, foes, opt) {
   // expedition foes hit a little harder to make up for the formation, zones and dodging (balanced with tools/check.js sims)
   if (this.zone) for (const u of foes) u.base.str *= u.boss ? TUNE.boss : TUNE.foe;
   this.events = [];          // presentation queue: {k:'act'|'dmg'|'heal'|'miss'|'st'|'log'|'ko'|'shield'|'cleanse', ...}
-  this.side = { ally: { lastType: null, spark: 0, breakNext: false, cloud: 0, vessel: 0, vesselV: 0 }, foe: { lastType: null, spark: 0, breakNext: false, cloud: 0, vessel: 0, vesselV: 0 } };
+  this.side = { ally: { imp: IMP.start, lastType: null, spark: 0, breakNext: false, cloud: 0, vessel: 0, vesselV: 0 }, foe: { imp: IMP.start, lastType: null, spark: 0, breakNext: false, cloud: 0, vessel: 0, vesselV: 0 } };
   for (const u of this.units) if (u.mods.sight) this.side[u.side].sight = Math.max(this.side[u.side].sight || 0, u.mods.sight);
   for (const u of this.units) {
     const s = u.cards.s;
@@ -125,7 +124,21 @@ B.exposed = function (u) {
   return !this.alive(u.side).some((x) => x.pos === u.pos - 3);
 };
 B.other = (side) => (side === "ally" ? "foe" : "ally");
-B.emit = function (e) { this.events.push(e); };
+B.emit = function (e) {
+  this.events.push(e);
+  // a creature down: the other side gains Ímpetu
+  if (e.k === "ko") { const u = this.units.find((x) => x.uid === e.u); if (u) this.gainImp(this.other(u.side), IMP.ko); }
+};
+/* ---------- Ímpetu ----------
+   Each side shares one bar of Ímpetu (0 to 10) to play its active cards. It starts at 3, grows +1 on each of the side's
+   turns, +1 more with each basic attack and +2 for each foe that falls. A card costs what its cooldown used to be
+   (3 to 6, less at higher grades) and then rests for 2 of its creature's turns, so one creature can't spend it all.
+   Start-of-battle cards and supports are free. It exists only inside a battle. */
+const IMP = { start: 3, max: 10, turn: 1, basic: 1, ko: 2, rest: 3 }; // rest 3 = sits out 2 of its turns (balanced with 1000 sims)
+B.IMP_MAX = IMP.max;
+B.impCost = function (u) { const a = u.cards.a && u.cards.a.a; return a ? Math.max(1, Math.min(IMP.max, a.cd || 1)) : 99; };
+B.gainImp = function (side, n) { const S = this.side[side]; if (!S) return; S.imp = Math.max(0, Math.min(IMP.max, (S.imp || 0) + n)); };
+B.payImp = function (u) { this.gainImp(u.side, -this.impCost(u)); u.cd = IMP.rest; };
 // a status' strength: its value grows by half for each extra stack (×1, ×1.5, ×2)
 B.stVal = function (u, name) { const s = u.st[name]; return s ? s.v * (1 + 0.5 * ((s.n || 1) - 1)) : 0; };
 B.eff = function (u, k) {
@@ -389,7 +402,7 @@ B.apply = function (src, fx, card, ctx) {
   const zoneF = (shape === "lane" || shape === "row" ? ZONE_POW : 1) * ((ctx && ctx.charged) || 1);
   const list = this.targets(fx.tgt, src, Object.assign({ card }, ctx));
   if (fx.foresight) { this.side[src.side].foresight = (this.side[src.side].foresight || 0) + fx.foresight; this.emit({ k: "st", u: src.uid, st: "evade" }); }
-  if (fx.cdDown) for (const u of this.alive(src.side)) u.cd = Math.max(0, u.cd - fx.cdDown);
+  if (fx.cdDown) this.gainImp(src.side, fx.cdDown); // "cooldowns down" now feeds the shared Ímpetu
   if (!list.length) return !!(fx.foresight || fx.cdDown);
   const ty = card ? card.type : null;
   if (fx.pow) {
@@ -411,7 +424,7 @@ B.apply = function (src, fx, card, ctx) {
     }
   } else if (fx.st) for (const t of list) { this.addStatus(src, t, fx.st, ty); if (fx.st2) this.addStatus(src, t, fx.st2, ty); }
   if (fx.strip) for (const t of list) { const pos = Object.keys(t.st).filter((k) => !STATUS[k].neg).sort((a, b) => t.st[b].t - t.st[a].t); if (pos.length) { delete t.st[pos[0]]; this.emit({ k: "strip", u: t.uid, st: pos[0] }); } }
-  if (fx.cdUp) for (const t of list) if (t.cards.a && t.hp > 0) { t.cd = (t.cd || 0) + fx.cdUp; this.emit({ k: "cdup", u: t.uid, n: fx.cdUp }); }
+  if (fx.cdUp && list.some((t) => t.hp > 0)) { this.gainImp(this.other(src.side), -fx.cdUp); for (const t of list) if (t.cards.a && t.hp > 0) { this.emit({ k: "cdup", u: t.uid, n: fx.cdUp }); break; } }
   if (fx.copyBuff) for (const t of list) for (const k of Object.keys(t.st)) if (!STATUS[k].neg && k !== "hidden" && k !== "taunt") { src.st[k] = Object.assign({}, t.st[k]); this.emit({ k: "st", u: src.uid, st: k }); }
   if (fx.revive) for (const t of list) if (t.hp <= 0) { t.hp = Math.max(1, Math.round(t.maxHp * fx.revive / 100)); this.emit({ k: "revive", u: t.uid, n: t.hp }); }
   if (fx.selfCost) { const c = Math.round(src.maxHp * Math.abs(fx.selfCost) / 100); if (src.hp > c) { src.hp -= c; this.emit({ k: "dmg", u: src.uid, n: c, dot: "cost" }); } }
@@ -475,6 +488,7 @@ B.turnStart = function (u) {
   if (u.st.regen) this.heal(u, u, this.stVal(u, "regen"));
   if (u.mods.bleed) { const d = Math.max(1, Math.round(u.maxHp * Math.abs(u.mods.bleed) / 100)); if (u.hp > d) { u.hp -= d; this.emit({ k: "dmg", u: u.uid, n: d, dot: "bleed" }); } }
   if (u.cd > 0) u.cd--;
+  this.gainImp(u.side, IMP.turn);
   if (u.st.stun || u.st.trap) { this.emit({ k: "skip", u: u.uid, why: u.st.stun ? "stun" : "trap" }); this.turnEnd(u); return false; }
   if (u.skip) { u.skip = 0; this.emit({ k: "skip", u: u.uid, why: "tired" }); this.turnEnd(u); return false; }
   return true;
@@ -485,7 +499,7 @@ B.turnEnd = function (u) {
   if (u.shieldT > 0) { u.shieldT--; if (u.shieldT <= 0) u.shield = 0; }
   this.checkOver();
 };
-B.canPlay = function (u) { return !!(u.cards.a && u.cd <= 0); };
+B.canPlay = function (u) { return !!(u.cards.a && u.cd <= 0 && this.side[u.side].imp >= this.impCost(u)); };
 // would the auto mode use the active card now?
 B.wantPlay = function (u) {
   if (!this.canPlay(u)) return false;
@@ -496,6 +510,10 @@ B.wantPlay = function (u) {
     return hurt;
   }
   if (!a.pow && a.cleanse && !a.heal) return this.alive(u.side).some((x) => Object.keys(x.st).some((k) => STATUS[k].neg));
+  // save up: a teammate's dearer card is at most 2 Ímpetu away
+  const imp = this.side[u.side].imp, mine = this.impCost(u);
+  const dear = this.alive(u.side).filter((x) => x !== u && x.cards.a).reduce((m, x) => Math.max(m, this.impCost(x)), 0);
+  if (dear > mine && imp < dear && dear - imp <= 2) return false;
   return true;
 };
 B.act = function (u, useCard, aim) {
@@ -506,20 +524,20 @@ B.act = function (u, useCard, aim) {
     this.emit({ k: "act", u: u.uid, card: c.id });
     const hit = this.apply(u, c.a, c, { aim: w.aim, strict: true, charged: THREAT_POW });
     if (!this.alive(this.other(u.side)).some((x) => w.cells.includes(x.pos))) this.emit({ k: "dodged", u: u.uid });
-    u.cd = Math.max(1, c.a.cd - 1); this.side[u.side].lastActive = c; // the marking turn counts towards the cooldown
+    u.cd = IMP.rest; this.side[u.side].lastActive = c; // paid when it was marked
     void hit; this.turnEnd(u); return;
   }
-  if (useCard && this.canPlay(u) && this.wantThreat(u)) { this.markThreat(u); useCard = false; }
+  if (useCard && this.canPlay(u) && this.wantThreat(u)) { this.markThreat(u); if (u.windup) this.payImp(u); useCard = false; }
   if (useCard && this.canPlay(u)) {
     const c = u.cards.a;
     this.emit({ k: "act", u: u.uid, card: c.id });
+    this.payImp(u);
     this.apply(u, c.a, c, aim != null ? { aim } : {});
-    u.cd = c.a.cd;
     if (!c.a.echoLast) this.side[u.side].lastActive = c;
   } else {
     const t = this.targets("basic", u)[0];
     this.emit({ k: "act", u: u.uid, card: null });
-    if (t) this.hit(u, t, u.pos != null && cellRow(u.pos) === 0 ? 88 : 80, null, {});
+    if (t) { this.hit(u, t, u.pos != null && cellRow(u.pos) === 0 ? 88 : 80, null, {}); this.gainImp(u.side, IMP.basic); }
     else this.emit({ k: "lost", u: u.uid });
   }
   this.turnEnd(u);
@@ -649,5 +667,5 @@ B.runAll = function (maxRounds) {
 };
 
 
-const api = { DEFEND, CELLS, cellRow, cellLane, autoForm, cardShape, shapeCells, nearCells, AUTO_DODGE, GRADE_VIS, COMPAT, canUse, UPGRADE_N, TYPES, BEATS, OPPOSITE, typeMult, GRADES, rollGrade, STATUS, CARDS, DROP_POOL, scaled, MONS, makeUnit, Battle, lvlScale, xpNeed, SLOT_LVL, ZONES, EVENTS, isDayNow };
+const api = { IMP, DEFEND, CELLS, cellRow, cellLane, autoForm, cardShape, shapeCells, nearCells, AUTO_DODGE, GRADE_VIS, COMPAT, canUse, UPGRADE_N, TYPES, BEATS, OPPOSITE, typeMult, GRADES, rollGrade, STATUS, CARDS, DROP_POOL, scaled, MONS, makeUnit, Battle, lvlScale, xpNeed, SLOT_LVL, ZONES, EVENTS, isDayNow };
 if (typeof window !== "undefined") window.EvoEngine = api;
