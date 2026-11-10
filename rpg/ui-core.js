@@ -63,8 +63,8 @@ function fxText(fx) {
   if (fx.ifAbove) { const r = fxText(Object.assign({}, fx, { ifAbove: 0 })); return (es ? `Si tiene más del ${pc(fx.ifAbove)} de vida: ` : `If above ${pcE(fx.ifAbove)} health: `) + r.charAt(0).toLowerCase() + r.slice(1); }
   if (fx.echoLast) out.push(es ? `repite la última carta Activa del equipo al ${pc(fx.echoLast)}` : `replays the team's last Active card at ${pcE(fx.echoLast)}`);
   if (fx.foresight) out.push(es ? "el próximo golpe contra el equipo falla" : "the next hit against the team misses");
-  if (fx.cdUp && !fx.pow) out.push(es ? `las cartas Activas ${tg.replace(/^a /, "de ")} tardan ${fx.cdUp} turno más` : `the Active cards of ${tg} take ${fx.cdUp} more turn`);
-  if (fx.cdDown) out.push(es ? `las cartas del equipo se recargan ${fx.cdDown} turno antes` : `the team's cards recharge ${fx.cdDown} turn sooner`);
+  if (fx.cdUp && !fx.pow) out.push(es ? `el rival pierde ✶${fx.cdUp} de Ímpetu` : `the other side loses ✶${fx.cdUp} Ímpetu`);
+  if (fx.cdDown) out.push(es ? `el equipo gana ✶${fx.cdDown} de Ímpetu` : `the team gains ✶${fx.cdDown} Ímpetu`);
   if (fx.copyBuff) out.push(es ? `copia en sí misma los estados buenos ${tg}` : `copies the good statuses of ${tg} onto itself`);
   if (fx.revive) out.push(es ? `levanta ${tg} con ${pc(fx.revive)} de vida` : `revives ${tg} with ${pcE(fx.revive)} health`);
   if (fx.noClockFoes) return es ? "Si es de noche, anula el +10 % del Reloj del claro a los enemigos" : "At night, cancels the enemies' +10% Glade Clock bonus";
@@ -79,7 +79,7 @@ function fxText(fx) {
     if (fx.pierce) out.push(es ? "atraviesa el Escudo" : "goes through Shields");
     if (fx.teamDrain) out.push(es ? `el equipo se cura el ${pc(fx.teamDrain)} del daño, repartido` : `the team heals ${pcE(fx.teamDrain)} of the damage, shared out`);
     if (fx.strip) out.push(es ? "le quita su mejora más larga" : "removes its longest buff");
-    if (fx.cdUp) out.push(es ? `su carta Activa tarda ${fx.cdUp} turno${fx.cdUp > 1 ? "s" : ""} más` : `its Active card takes ${fx.cdUp} more turn${fx.cdUp > 1 ? "s" : ""}`);
+    if (fx.cdUp) out.push(es ? `su equipo pierde ✶${fx.cdUp} de Ímpetu` : `its side loses ✶${fx.cdUp} Ímpetu`);
     if (fx.splash) out.push(es ? `salpica ${pc(fx.splash)} al resto de enemigos` : `splashes ${pcE(fx.splash)} onto the other enemies`);
     if (fx.drain) out.push(es ? `se cura el ${pc(fx.drain)} del daño` : `heals ${pcE(fx.drain)} of the damage`);
   } else if (fx.st) out.push(es ? `${stTextEs(fx.st)} ${STATUS[fx.st[0]].neg ? tg : tg}` : `${stTextEn(fx.st)} (${tg})`);
@@ -163,7 +163,7 @@ function supportText(s) {
 }
 function slotText(sc, slot) {
   if (slot === "p") return passiveText(sc.p);
-  if (slot === "a") return fxText(sc.a) + (L() === "es" ? ` (enfr. ${sc.a.cd})` : ` (cd ${sc.a.cd})`);
+  if (slot === "a") return fxText(sc.a) + ` (${tx("b.imp")} ${sc.a.cd})`;
   return supportText(sc.s);
 }
 /* Pixel sprites from sprites.js (window.EVS): creatures, card art, 9x9 type icons and card-use animations.
@@ -195,7 +195,7 @@ function cardHtml(id, gi, opts) {
   const rows = ["a", "p", "s"].map((sl) => `<li class="${opts.slot === sl ? "on" : ""}"><b>${esc(tx("slot." + sl))}</b> ${esc(slotText(sc, sl))}</li>`).join("");
   const by = C.by && MONS[C.by] ? monName(C.by) : "";
   const no = String(CARD_NO.indexOf(id) + 1).padStart(3, "0") + "/" + CARD_NO.length;
-  const inner = `<div class="tcg-name"><span class="tcg-gem" title="${esc(TYPES[ty][L()])}">${tyIcon(ty)}</span><strong>${esc(cardName(id))}</strong>${opts.count > 1 ? `<span class="cnt">×${opts.count}</span>` : ""}<span class="tcg-cd" title="${esc(tx("slot.a"))}">⟳${sc.a.cd}</span></div>
+  const inner = `<div class="tcg-name"><span class="tcg-gem" title="${esc(TYPES[ty][L()])}">${tyIcon(ty)}</span><strong>${esc(cardName(id))}</strong>${opts.count > 1 ? `<span class="cnt">×${opts.count}</span>` : ""}<span class="tcg-cd" title="${esc(tx("slot.a") + " · " + tx("b.imp"))}">✶${sc.a.cd}</span></div>
   ${tcgArt(C.by, ty, false, id)}
   <div class="tcg-line"><span>${esc(TYPES[ty][L()])}${by ? " · " + esc(by) : ""}${C.boss ? " · 👑" : ""}</span><span class="tcg-pips" title="${esc(GRADES[gi][L()])}">${"◆".repeat(gi + 1)}<i>${"◇".repeat(5 - gi)}</i></span></div>
   <div class="tcg-box"><ul class="rc-fx">${rows}</ul><p class="rc-lore">${esc(cardLore(id))}</p></div>

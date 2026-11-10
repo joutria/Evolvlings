@@ -51,7 +51,8 @@ function cell(folder, kind, st, col) {
   const cv = document.createElement("canvas"); cv.width = n; cv.height = n;
   const g = cv.getContext("2d"); g.imageSmoothingEnabled = false; g.drawImage(im, col * n, row * n, n, n, 0, 0, n, n);
   // an empty cell (the artist left it blank) falls back to the front frame
-  const d = g.getImageData(0, 0, n, n).data; let any = false; for (let i = 3; i < d.length; i += 4) if (d[i]) { any = true; break; }
+  let any = !readOk(); // without trustworthy pixel reads, take the cell as it is
+  if (!any) { const d = g.getImageData(0, 0, n, n).data; for (let i = 3; i < d.length; i += 4) if (d[i]) { any = true; break; } }
   if (!any && col > 1) return cell(folder, kind, st, col % 2);
   return (cells[key] = cv);
 }
@@ -72,6 +73,7 @@ A.scene = (path) => {
 // eggs, portraits...): find the cell's own pixel size (pack art is 16 px sprites at 2-4x), read it back at 1 pixel per
 // pixel, then scale by a whole number so it stays crisp. The box is square, (n + 2) or bigger, feet on the bottom row.
 const smalls = new WeakMap();
+const readOk = () => !(root.PX && root.PX.readOk === false);
 function pixelSize(d, w, x0, y0, bw, bh) {
   for (const S of [4, 3, 2]) {
     if (bw % S || bh % S) continue;
@@ -85,6 +87,7 @@ function pixelSize(d, w, x0, y0, bw, bh) {
   return 1;
 }
 function small(cv, n, dull) {
+  if (!readOk()) return null; // scrambled pixel reads (anti-fingerprinting): callers draw the cell as it is
   let per = smalls.get(cv); if (!per) smalls.set(cv, (per = {}));
   const key = n + (dull ? "d" : ""); if (per[key]) return per[key];
   const w = cv.width, h = cv.height, d = cv.getContext("2d").getImageData(0, 0, w, h).data;

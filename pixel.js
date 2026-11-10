@@ -241,8 +241,22 @@ function nearest(r, g, b) {
   LUT[k] = bi + 1; return bi;
 }
 const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
+// Can this browser read its own canvas pixels back? Anti-fingerprinting modes (Firefox resistFingerprinting, Brave
+// strict shields, Safari private browsing...) hand back scrambled pixels; snapping those to the palette paints noise
+// over the whole picture. Then the palette pass is skipped and pictures are drawn as they are.
+const READ_OK = (() => {
+  try {
+    const c = document.createElement("canvas"); c.width = 4; c.height = 4;
+    const g = c.getContext("2d", { willReadFrequently: true });
+    g.fillStyle = "#3a6b35"; g.fillRect(0, 0, 4, 4); g.fillStyle = "#d64f2a"; g.fillRect(1, 1, 2, 2);
+    const d = g.getImageData(0, 0, 4, 4).data;
+    const near = (px, r, gg, b) => { const i = px * 4; return Math.abs(d[i] - r) < 4 && Math.abs(d[i + 1] - gg) < 4 && Math.abs(d[i + 2] - b) < 4 && d[i + 3] > 250; };
+    return near(0, 0x3a, 0x6b, 0x35) && near(5, 0xd6, 0x4f, 0x2a) && near(10, 0xd6, 0x4f, 0x2a) && near(15, 0x3a, 0x6b, 0x35) && near(3, 0x3a, 0x6b, 0x35);
+  } catch (e) { return false; }
+})();
 // snap every pixel of a small canvas to Glimmer-32 (with a light ordered dither for gradients)
 function quantize(g, w, h, dither = true) {
+  if (!READ_OK) return;
   const im = g.getImageData(0, 0, w, h), d = im.data;
   for (let y = 0, i = 0; y < h; y++) for (let x = 0; x < w; x++, i += 4) {
     if (d[i + 3] < 110) { d[i + 3] = 0; continue; }
@@ -277,5 +291,5 @@ function frameURL(fill, edge, inner, notch, size = 12, b = 4) {
   return `url(${c.toDataURL()})`;
 }
 function iconURL(key, z = 1) { const ic = ICON[key]; if (z === 1) return ic.toDataURL(); const c = document.createElement("canvas"); c.width = ic.width * z; c.height = ic.height * z; const g = c.getContext("2d"); g.imageSmoothingEnabled = false; g.drawImage(ic, 0, 0, c.width, c.height); return c.toDataURL(); }
-root.PX = { P, RAMP, ICON, bake, rng, sprite, egg, quantize, layer, blit, rect, disc, white, frameURL, iconURL };
+root.PX = { readOk: READ_OK, P, RAMP, ICON, bake, rng, sprite, egg, quantize, layer, blit, rect, disc, white, frameURL, iconURL };
 })(typeof window !== "undefined" ? window : globalThis);

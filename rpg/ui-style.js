@@ -55,6 +55,14 @@ const css = `
 .bstage canvas { touch-action: none; }
 .bteam { width: 100%; max-width: 620px; margin: 6px auto 0; }
 .bteam-row { display: flex; justify-content: space-between; gap: 8px; }
+.bteam-row + .bteam-row { margin-top: 4px; }
+.bimp { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; }
+.bimp.foe { flex-direction: row-reverse; opacity: .8; }
+.bimp i { display: inline-flex; gap: 2px; }
+.bimp b { width: 9px; height: 12px; border-radius: 2px; background: color-mix(in srgb, var(--line) 30%, var(--bg)); border: 1px solid var(--line); }
+.bimp.ally b.on { background: #ffd57a; border-color: #b98a2a; }
+.bimp.foe b.on { background: #e0907f; border-color: #a8382f; }
+.bcost { font-size: 11px; color: #b98a2a; }
 .binfo { margin-top: 6px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 10px; font-size: 13px; }
 .binfo p { margin: 0 0 4px; }
 .bstl { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 12px; }

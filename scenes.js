@@ -1456,6 +1456,7 @@ function tint(b, x0, y0, w, h, col, a) { for (let y = y0; y < y0 + h; y++) for (
 function pixFig(fn, res = 2) {
   const W = EW * res, H = EH * res, c = canvas(W, H), g = c.getContext("2d");
   g.save(); g.scale(res, res); g.lineJoin = "round"; g.lineCap = "round"; fn(g); g.restore();
+  if (typeof PX !== "undefined" && PX.readOk === false) return c; // scrambled pixel reads: keep the soft edges
   const im = g.getImageData(0, 0, W, H), d = im.data;
   for (let i = 0; i < d.length; i += 4) { if (d[i + 3] < 165) { d[i + 3] = 0; continue; } d[i + 3] = 255; }
   g.putImageData(im, 0, 0); return c;
@@ -3296,7 +3297,7 @@ function endBack(b, s) {
 }
 
 // figures' centre on the 128x96 grid, from the opaque pixels of the drawn people
-function figCentre(cv) { const g = cv.getContext("2d"), d = g.getImageData(0, 0, cv.width, cv.height).data, w = cv.width; let sx = 0, sy = 0, n = 0;
+function figCentre(cv) { if (typeof PX !== "undefined" && PX.readOk === false) return [EW / 2, EH / 2]; const g = cv.getContext("2d"), d = g.getImageData(0, 0, cv.width, cv.height).data, w = cv.width; let sx = 0, sy = 0, n = 0;
   for (let i = 3; i < d.length; i += 16) if (d[i]) { const p = (i - 3) / 4; sx += p % w; sy += Math.floor(p / w); n++; }
   return n ? [sx / n / (cv.width / EW), sy / n / (cv.height / EH)] : [EW / 2, EH / 2]; }
 

@@ -153,7 +153,9 @@ function renderTurn() {
     return;
   }
   const a = u.cards.a, can = b.canPlay(u);
-  const cardBtn = a ? `<button type="button" class="bact${can ? " ready" : ""}" data-bt="card" ${can ? "" : "disabled"}><strong>${esc(cardName(a.id))}</strong><small>${esc(can ? tx("b.ready") : tx("b.cd", { n: u.cd }))}</small></button>` : "";
+  const cost = b.impCost(u), imp = b.side.ally.imp;
+  const why = can ? tx("b.ready") : u.cd > 0 ? tx("b.rest", { n: u.cd }) : tx("b.impNeed", { n: cost - imp });
+  const cardBtn = a ? `<button type="button" class="bact${can ? " ready" : ""}" data-bt="card" ${can ? "" : "disabled"}><strong>${esc(cardName(a.id))} <span class="bcost">✶${cost}</span></strong><small>${esc(why)}</small></button>` : "";
   const full = handMove();
   el.innerHTML = `<p class="bturn">${esc(tx("b.yourTurn", { name: u.name }))}</p><div class="bdock">${cardBtn}
     <button type="button" class="bact" data-bt="basic"><strong>${esc(tx("b.basic"))}</strong><small>${esc(tx(u.pos != null && cellRow(u.pos) === 0 ? "form.front" : "form.back"))}</small></button>
@@ -697,7 +699,8 @@ function renderTeam() {
     return `<button type="button" class="bchip ${u.side}${ko ? " ko" : ""}${battle.turnU === u.uid ? " now" : ""}" data-binfo="${u.uid}" aria-pressed="${battle.info === u.uid}"><span aria-hidden="true">${TYPES[u.types[0]].icon}</span><b>${esc(u.name)}</b> <small>${u.lvl}</small> <i>${hp}/${u.maxHp}</i>${pos ? `<em class="p">${pos}</em>` : ""}${neg ? `<em class="n">${neg}</em>` : ""}</button>`; };
   const side = (sd) => b.units.filter((u) => u.side === sd).sort((p, q) => (p.pos == null ? 9 : cellLane(p.pos)) - (q.pos == null ? 9 : cellLane(q.pos)) || (p.pos || 0) - (q.pos || 0)).map(chip).join("");
   const iu = battle.info && b.units.find((u) => u.uid === battle.info);
-  const h = `<div class="bteam-row"><div class="bside">${side("ally")}</div><div class="bside foe">${side("foe")}</div></div>${iu ? `<div class="binfo">${stInfo(iu)}</div>` : ""}`;
+  const pips = (sd) => { const n = b.side[sd].imp || 0; return `<div class="bimp ${sd}" title="${esc(tx("b.imp"))}"><span>${esc(tx("b.imp"))} ${n}</span><i>${Array.from({ length: b.IMP_MAX }, (_, k) => `<b class="${k < n ? "on" : ""}"></b>`).join("")}</i></div>`; };
+  const h = `<div class="bteam-row">${pips("ally")}${pips("foe")}</div><div class="bteam-row"><div class="bside">${side("ally")}</div><div class="bside foe">${side("foe")}</div></div>${iu ? `<div class="binfo">${stInfo(iu)}</div>` : ""}`;
   if (h !== battle.teamH) { battle.teamH = h; el.innerHTML = h; }
 }
 function drawBattle(now) {
@@ -828,7 +831,7 @@ function drawBattle(now) {
     c.fillStyle = col; const segs = Math.ceil((bw / 4) * pct); for (let k = 0; k < segs; k++) c.fillRect(-bw / 2 + k * 4, by, 2, 4);
     if (u.shield > 0) { c.fillStyle = "#c8eef5"; c.fillRect(-bw / 2, by, Math.min(bw, bw * u.shield / u.maxHp), 2); }
     if (u.defending && !ko) { c.fillStyle = "#7cc8e3"; c.fillRect(-bw / 2 - 8, by - 2, 4, 6); c.fillStyle = "#1d1626"; c.fillRect(-bw / 2 - 8, by + 4, 4, 1); }
-    if (u.cards.a && u.cd <= 0 && !ko) { c.fillStyle = "#ffd57a"; c.fillRect(bw / 2 + 4, by - 2, 4, 4); c.fillStyle = "#1d1626"; c.fillRect(bw / 2 + 4, by + 2, 4, 2); }
+    if (u.cards.a && b.canPlay(u) && !ko) { c.fillStyle = "#ffd57a"; c.fillRect(bw / 2 + 4, by - 2, 4, 4); c.fillStyle = "#1d1626"; c.fillRect(bw / 2 + 4, by + 2, 4, 2); }
     c.restore();
   }
   // card-use effect on top of the units, in low-res pixels
