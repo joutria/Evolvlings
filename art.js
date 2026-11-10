@@ -69,7 +69,7 @@ A.scene = (path) => {
   const g = cv.getContext("2d"); g.imageSmoothingEnabled = false; g.drawImage(im, 0, 0, 512, 384);
   return (scenes[path] = cv);
 };
-// A sheet cell as a small sprite about n px tall, for the places that ask the drawn sprite libraries (cards, Refuge,
+// A sheet cell as a small sprite about n px on its longer side (a wide, flat blob must not grow huge), for the places that ask the drawn sprite libraries (cards, Refuge,
 // eggs, portraits...): find the cell's own pixel size (pack art is 16 px sprites at 2-4x), read it back at 1 pixel per
 // pixel, then scale by a whole number so it stays crisp. The box is square, (n + 2) or bigger, feet on the bottom row.
 const smalls = new WeakMap();
@@ -95,7 +95,7 @@ function small(cv, n, dull) {
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (d[(y * w + x) * 4 + 3]) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
   if (x1 < 0) return null;
   const bw = x1 - x0 + 1, bh = y1 - y0 + 1, S = pixelSize(d, w, x0, y0, bw, bh), sw = Math.ceil(bw / S), sh = Math.ceil(bh / S);
-  const k = Math.max(1, Math.round(n / sh)), box = Math.max(n + 2, sw * k + 2, sh * k + 2);
+  const k = Math.max(1, Math.round(n / Math.max(sw, sh))), box = Math.max(n + 2, sw * k + 2, sh * k + 2);
   const out = document.createElement("canvas"); out.width = box; out.height = box;
   const g = out.getContext("2d"); g.imageSmoothingEnabled = false;
   g.drawImage(cv, x0, y0, sw * S, sh * S, Math.floor((box - sw * k) / 2), box - 1 - sh * k, sw * k, sh * k);
@@ -103,7 +103,7 @@ function small(cv, n, dull) {
   return (per[key] = out);
 }
 A.small = small;
-// A whole sheet cell scaled by a whole number, with the scale and pixel grid measured once on a reference frame of the
+// A whole sheet cell scaled by a whole number (about n px on the longer side), with the scale and pixel grid measured once on a reference frame of the
 // same creature (its standing frame), so every frame of it (walking, casting, hurt...) keeps one size and one place.
 // Returns { im, k, S }: 1 art pixel (S cell pixels) becomes k pixels; the cell keeps its own layout (feet stay put).
 const refs = new WeakMap(), bigs = new WeakMap();
@@ -113,7 +113,7 @@ function measure(ref, n) {
   let x0 = w, y0 = h, x1 = -1, y1 = -1;
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (d[(y * w + x) * 4 + 3]) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
   if (x1 < 0) return null;
-  const bh = y1 - y0 + 1, S = pixelSize(d, w, x0, y0, x1 - x0 + 1, bh), k = Math.max(1, Math.round(n / Math.ceil(bh / S)));
+  const bw = x1 - x0 + 1, bh = y1 - y0 + 1, S = pixelSize(d, w, x0, y0, bw, bh), k = Math.max(1, Math.round(n / Math.ceil(Math.max(bw, bh) / S)));
   m = { n, S, k, ox: x0 % S, oy: y0 % S }; refs.set(ref, m); return m;
 }
 function big(cv, ref, n) {

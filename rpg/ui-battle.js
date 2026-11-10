@@ -461,16 +461,24 @@ function artUnit(u, sq, emo) {
   const dir = emo === "normal" ? "side" : null, st = u.own ? Math.max(0, Math.min(2, u.stage)) : 1;
   return (u.boss && EVART.guardian(u.kind, sq, emo, dir)) || EVART.creature(u.kind, st, sq, emo, dir);
 }
-// battle sprites 1.5 times bigger than the sheet cell, still crisp: the cell read back at its own pixel size and
-// scaled by a whole number (art.js EVART.small), feet on the bottom row
 // one scale per creature, measured on its standing side frame, so no frame grows or shrinks; returns { im, y } where y is
 // where the picture's top edge goes, measured from the feet
 function bigArt(im, u) {
   if (!im) return null;
   const ref = artUnit(u, 0, "normal"), B = HAS_ART && EVART.big ? EVART.big(im, ref, u.boss ? 72 : 46) : null;
   // the cell's feet row (4 px above its bottom) stays on the ground line
-  return B ? { im: B.im, top: -Math.round((im.height - 4 - B.oy) * B.k / B.S) } : { im, top: -(im.height - 4) };
+  if (!B) return { im, top: -(im.height - 4) };
+  const top = -Math.round((im.height - 4 - B.oy) * B.k / B.S);
+  if (u.boss) return { im: B.im, top };
+  // everyone but the bosses 10 % smaller (Jose), so they stand inside their tiles
+  let sm = shrunk.get(B.im);
+  if (!sm) {
+    sm = document.createElement("canvas"); sm.width = Math.round(B.im.width * UNIT_SCALE); sm.height = Math.round(B.im.height * UNIT_SCALE);
+    const g = sm.getContext("2d"); g.imageSmoothingEnabled = false; g.drawImage(B.im, 0, 0, sm.width, sm.height); shrunk.set(B.im, sm);
+  }
+  return { im: sm, top: Math.round(top * UNIT_SCALE) };
 }
+const UNIT_SCALE = 0.9, shrunk = new WeakMap();
 const hollowArt = new WeakMap();
 function artHollow(cv) {
   // hollowed foes: the same picture, dimmed towards plum
@@ -829,7 +837,7 @@ function drawBattle(now) {
       out.restore();
     } else if (spr) {
       // pixel sprite: 1 sprite pixel = 2 battle units (the layer is drawn at half size)
-      const n = u.boss ? 48 : 36, emo = ko ? "sad" : a.flash > 0.5 ? "surprised" : cp ? "happy" : u.hp / u.maxHp < 0.3 ? "sad" : "normal";
+      const n = u.boss ? 48 : 32, emo = ko ? "sad" : a.flash > 0.5 ? "surprised" : cp ? "happy" : u.hp / u.maxHp < 0.3 ? "sad" : "normal";
       const frame = cp && cp.sq != null ? cp.sq : walk >= 0 ? walk : REDUCE ? 0 : Math.floor(t * 2 + a.x / 50) % 2;
       let im = EVS.sprite(u.kind, n, u.own ? Math.max(0, Math.min(2, u.stage)) : 1, frame, emo, !!u.hollow);
       if (cp && cp.flash || a.sil > 0) im = EVS.silhouette(im, a.sil > 0 ? "#ffffff" : undefined);
