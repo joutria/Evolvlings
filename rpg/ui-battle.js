@@ -120,6 +120,7 @@ function showEvent(e, acc) {
       case "echo": blog(tx("log.echo", { name: uName(e.u) })); if (a) battle.floats.push({ x: a.x, y: a.y - 50, text: "≋", col: "#d8c8a8", life: 1 }); break;
       case "warn": { const u = b.units.find((x) => x.uid === e.u); blog(tx("log.warn", { name: u.name, card: cardName(e.card) })); if (a) battle.floats.push({ x: a.x, y: a.y - 52, text: "! " + cardName(e.card), col: "#ff8f6b", life: 1.6, small: true }); EV.sfx("deny"); EV.buzz(20); break; }
       case "move": blog(tx("log.move", { name: uName(e.u) })); break;
+      case "wait": blog(tx("log.wait", { name: uName(e.u) })); if (a) battle.floats.push({ x: a.x, y: a.y - 44, text: "⏳", col: "#fbf6ef", life: 1, small: true }); break;
       case "defend": blog(tx("log.defend", { name: uName(e.u) })); if (a) battle.floats.push({ x: a.x, y: a.y - 44, text: "◈ −" + Math.round(DEFEND * 100) + " %", col: "#7cc8e3", life: 1.2, small: true }); EV.sfx("tap"); break;
       case "hasten": blog(tx("log.hasten", { name: uName(e.u) })); if (a) battle.floats.push({ x: a.x, y: a.y - 50, text: "»", col: "#ffd57a", life: 1.1 }); break;
       case "delay": blog(tx("log.delay", { name: uName(e.u) })); if (a) battle.floats.push({ x: a.x, y: a.y - 50, text: "«", col: "#9fd3ff", life: 1.1 }); break;
@@ -156,11 +157,12 @@ function renderTurn() {
   const cost = b.impCost(u), imp = b.side.ally.imp;
   const why = can ? tx("b.ready") : u.cd > 0 ? tx("b.rest", { n: u.cd }) : tx("b.impNeed", { n: cost - imp });
   const cardBtn = a ? `<button type="button" class="bact${can ? " ready" : ""}" data-bt="card" ${can ? "" : "disabled"}><strong>${esc(cardName(a.id))} <span class="bcost">✶${cost}</span></strong><small>${esc(why)}</small></button>` : "";
-  const full = handMove();
+  const full = handMove(), nx = full ? b.order(3).find((x) => x !== u) : null;
   el.innerHTML = `<p class="bturn">${esc(tx("b.yourTurn", { name: u.name }))}</p><div class="bdock">${cardBtn}
     <button type="button" class="bact" data-bt="basic"><strong>${esc(tx("b.basic"))}</strong><small>${esc(tx(u.pos != null && cellRow(u.pos) === 0 ? "form.front" : "form.back"))}</small></button>
     ${full ? `<button type="button" class="bact" data-bt="move"><strong>${esc(tx("b.move"))}</strong><small>${esc(tx("b.moveCost"))}</small></button>
-    <button type="button" class="bact" data-bt="defend"><strong>${esc(tx("b.defend"))}</strong><small>−${Math.round(DEFEND * 100)} %</small></button>` : ""}</div>`;
+    <button type="button" class="bact" data-bt="defend"><strong>${esc(tx("b.defend"))}</strong><small>−${Math.round(DEFEND * 100)} %</small></button>
+    ${nx ? `<button type="button" class="bact" data-bt="wait"><strong>${esc(tx("b.wait"))}</strong><small>${esc(tx("b.waitAfter", { name: nx.name }))}</small></button>` : ""}` : ""}</div>`;
 }
 // your creature's turn: wait for what you choose ({k: basic|card|move|defend}), or null to let the game play it
 function askTurn(u) { return new Promise((resolve) => { battle.choice = { u, resolve }; renderTurn(); }); }
@@ -171,7 +173,7 @@ function choose(ch) {
 function turnBtn(k) {
   const C = battle && battle.choice; if (!C) return;
   const u = C.u, b = battle.b;
-  if (k === "basic" || k === "defend") { EV.sfx("tap"); choose({ k }); return; }
+  if (k === "basic" || k === "defend" || k === "wait") { EV.sfx("tap"); choose({ k }); return; }
   if (k === "move") { battle.moveSel = u.uid; EV.sfx("tap"); renderTurn(); return; }
   if (k === "card") {
     if (!b.canPlay(u)) { EV.sfx("deny"); return; }
@@ -269,6 +271,7 @@ async function runBattle() {
       if (EV.P.rpgIntro !== false && !REDUCE && u.cards.a) { bt.banner = { u, id: u.cards.a.id, t0: performance.now(), dur: 420 }; await new Promise((r) => setTimeout(r, 420)); if (bt !== battle) return; bt.banner = null; }
       b.act(u, true, ch.aim); EV.P.c.aimed = (EV.P.c.aimed || 0) + 1; slow = true;
     } else if (ch.k === "defend") b.defend(u);
+    else if (ch.k === "wait") b.waitTurn(u);
     else if (ch.k === "move") { if (!b.stepTurn(u, ch.c)) b.act(u, false); }
     else b.act(u, false);
     flushEvents(); bt.turnU = null; renderTurn();
@@ -532,6 +535,12 @@ function drawThreats(out, now) {
       out.fillStyle = `rgba(224,96,63,${0.35 + 0.25 * pulse})`; out.fillRect(t.x, t.y + t.h * (1 - fill), t.w, t.h * fill);
       out.restore();
       tilePath(out, t); out.strokeStyle = `rgba(255,143,107,${pulse})`; out.lineWidth = 2; out.stroke();
+      // a red "!" in the tile's top-right corner: this cell takes the blow
+      const ex = t.x + t.w - 4, ey = t.y + 1, er = 6 + Math.round(pulse);
+      out.beginPath(); out.arc(ex, ey, er + 1.5, 0, Math.PI * 2); out.fillStyle = "#1d1626"; out.fill();
+      out.beginPath(); out.arc(ex, ey, er, 0, Math.PI * 2); out.fillStyle = "#e0402f"; out.fill();
+      out.font = '700 11px "EvNum", "Pixelify Sans", system-ui, sans-serif'; out.textAlign = "center"; out.textBaseline = "middle";
+      out.fillStyle = "#fff"; out.fillText("!", ex, ey + 0.5);
     }
     const a = battle.anim[u.uid]; if (a) { const hy = a.y - (u.boss ? 84 : 52); out.font = '700 16px "EvNum", "Pixelify Sans", system-ui, sans-serif'; out.textAlign = "center"; out.lineWidth = 3; out.strokeStyle = "#1d1626"; out.strokeText("!", a.x, hy); out.fillStyle = "#ff8f6b"; out.fillText("!", a.x, hy); }
   }
