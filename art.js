@@ -103,6 +103,31 @@ function small(cv, n, dull) {
   return (per[key] = out);
 }
 A.small = small;
+// A whole sheet cell scaled by a whole number, with the scale and pixel grid measured once on a reference frame of the
+// same creature (its standing frame), so every frame of it (walking, casting, hurt...) keeps one size and one place.
+// Returns { im, k, S }: 1 art pixel (S cell pixels) becomes k pixels; the cell keeps its own layout (feet stay put).
+const refs = new WeakMap(), bigs = new WeakMap();
+function measure(ref, n) {
+  let m = refs.get(ref); if (m && m.n === n) return m;
+  const w = ref.width, h = ref.height, d = ref.getContext("2d").getImageData(0, 0, w, h).data;
+  let x0 = w, y0 = h, x1 = -1, y1 = -1;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (d[(y * w + x) * 4 + 3]) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+  if (x1 < 0) return null;
+  const bh = y1 - y0 + 1, S = pixelSize(d, w, x0, y0, x1 - x0 + 1, bh), k = Math.max(1, Math.round(n / Math.ceil(bh / S)));
+  m = { n, S, k, ox: x0 % S, oy: y0 % S }; refs.set(ref, m); return m;
+}
+function big(cv, ref, n) {
+  if (!readOk() || !cv || !ref) return null;
+  const m = measure(ref, n); if (!m) return null;
+  let per = bigs.get(cv); if (!per) bigs.set(cv, (per = {}));
+  const key = n + ":" + m.S + ":" + m.k; if (per[key]) return per[key];
+  const cw = Math.floor((cv.width - m.ox) / m.S), ch = Math.floor((cv.height - m.oy) / m.S);
+  const out = document.createElement("canvas"); out.width = cw * m.k; out.height = ch * m.k;
+  const g = out.getContext("2d"); g.imageSmoothingEnabled = false;
+  g.drawImage(cv, m.ox, m.oy, cw * m.S, ch * m.S, 0, 0, cw * m.k, ch * m.k);
+  return (per[key] = { im: out, k: m.k, S: m.S, oy: m.oy });
+}
+A.big = big;
 root.EVART = A;
 load();
 
