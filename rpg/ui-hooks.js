@@ -74,6 +74,32 @@ $("scrExp").addEventListener("click", (e) => {
   if (t.dataset.xset) { loadSet(+t.dataset.xset, X.offer); render(); }
   formTap(t);
 });
+// formation: press a creature and drag it onto another cell (whoever stands there swaps); a tap still selects
+{
+  let fd = null;
+  const cellUnder = (e) => { const el = document.elementFromPoint(e.clientX, e.clientY); return el && el.closest("[data-fcell]"); };
+  $("scrExp").addEventListener("pointerdown", (e) => {
+    const t = e.target.closest("[data-fcell]"); if (!t || !X || view !== "pick" || !t.classList.contains("on")) return;
+    fd = { from: t, x: e.clientX, y: e.clientY, moved: false, over: null }; e.preventDefault();
+  });
+  document.addEventListener("pointermove", (e) => {
+    if (!fd) return;
+    if (!fd.moved && Math.hypot(e.clientX - fd.x, e.clientY - fd.y) > 10) { fd.moved = true; fd.from.classList.add("drag"); }
+    if (!fd.moved) return;
+    const o = cellUnder(e);
+    if (o !== fd.over) { if (fd.over) fd.over.classList.remove("over"); fd.over = o && o !== fd.from ? o : null; if (fd.over) fd.over.classList.add("over"); }
+  });
+  const end = (e, ok) => {
+    const d = fd; fd = null; if (!d || !d.moved) return;
+    d.from.classList.remove("drag"); if (d.over) d.over.classList.remove("over");
+    // the click that follows a drag must not select anything
+    const swallow = (ev) => { ev.stopPropagation(); ev.preventDefault(); };
+    document.addEventListener("click", swallow, { capture: true, once: true }); setTimeout(() => document.removeEventListener("click", swallow, { capture: true }), 50);
+    if (ok && d.over) formDrag(+d.from.dataset.fcell, +d.over.dataset.fcell);
+  };
+  document.addEventListener("pointerup", (e) => end(e, true));
+  document.addEventListener("pointercancel", (e) => end(e, false));
+}
 $("teamsPanel").addEventListener("click", onTeamsClick);
 $("teamsPanel").addEventListener("keydown", (e) => { if (e.key === "Enter" && e.target.dataset.tname) { const b = $("teamsPanel").querySelector('button[data-tset^="ok:"]'); if (b) b.click(); } });
 $("btnTeams").addEventListener("click", () => { EV.sfx("tap"); EV.togglePanel("teams"); });

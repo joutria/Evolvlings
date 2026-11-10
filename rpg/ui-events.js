@@ -275,6 +275,7 @@ function onExpClick(e) {
   if (d.lvlpick != null) { const o = X.end.lvlPick[+d.lvlpick]; giveCard(o.id, o.g); X.end.cards.push(o); X.end.lvlPick = null; EV.toast(tx("r.card", { card: cardName(o.id) }), GRADES[o.g][L()]); EV.sfx("card"); EV.save(); EV.checkAch(); render(); return; }
   if (d.b) { if (d.b === "fire") fireAim(); else if (d.b === "cancel") cancelAim(); return; }
   if (d.bt) { if (battle) turnBtn(d.bt); return; }
+  if (d.binfo) { if (battle) { battle.info = battle.info === d.binfo ? null : d.binfo; battle.teamH = ""; renderTeam(); EV.sfx("tap"); } return; }
   if (d.m) { EV.P.rpgMode = d.m; EV.saveProfile(); t.parentNode.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === t))); if (battle) { if (d.m === "auto") battle.aim = null; renderTurn(); } return; }
   if (d.s) { EV.P.rpgSpeed = +d.s; EV.saveProfile(); t.parentNode.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === t))); return; }
   switch (d.x) {

@@ -473,6 +473,7 @@ function render() {
         <div class="seg" id="bMode">${["auto", "semi", "manual"].map((m) => `<button type="button" data-m="${m}" aria-pressed="${EV.P.rpgMode === m}" title="${esc(tx("b.modeT." + m))}">${esc(tx("b." + m))}</button>`).join("")}</div>
         <div class="seg" id="bSpeed">${[1, 2, 4].map((s) => `<button type="button" data-s="${s}" aria-pressed="${(EV.P.rpgSpeed || 1) === s}">×${s}</button>`).join("")}</div></div>
       <div class="bstage"><canvas id="bCanvas" role="img" aria-label="${esc(view === "zones" ? tx("zones.title") : zt("name"))}"></canvas></div>
+      <div class="bteam" id="bTeam"></div>
       <div id="bTurn"></div>
       <ul class="blog" id="bLog" aria-live="polite"></ul></div>`;
   } else if (view === "prefight") {
@@ -773,6 +774,16 @@ function formTap(t) {
   T.form = Object.assign({}, T.form, fm);
   EV.sfx("card"); EV.save(); render();
   return true;
+}
+// formation drag: the creature on cell `from` goes to cell `to`, swapping with whoever stands there
+function formDrag(from, to) {
+  const T = teamState(), keys = formKeys(), fm = formOf(keys);
+  const k = keys.find((x) => fm[x] === from); if (!k || from === to) return;
+  const here = keys.find((x) => fm[x] === to);
+  if (here) fm[here] = from;
+  fm[k] = to; formSel = null;
+  T.form = Object.assign({}, T.form, fm);
+  EV.sfx("card"); EV.save(); render();
 }
 function lootHtml() {
   const l = X.loot;

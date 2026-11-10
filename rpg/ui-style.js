@@ -52,6 +52,31 @@ const css = `
 .rc-cant { margin: 6px 0 0; font-size: 12px; font-weight: 700; color: var(--bad, #c0392b); }
 .bstage { width: 100%; max-width: 620px; margin: 0 auto; position: relative; border-radius: 16px; overflow: hidden; border: 1px solid var(--line); background: #000; }
 .bstage canvas { display: block; width: 100%; height: auto; }
+.bstage canvas { touch-action: none; }
+.bteam { width: 100%; max-width: 620px; margin: 6px auto 0; }
+.bteam-row { display: flex; justify-content: space-between; gap: 8px; }
+.binfo { margin-top: 6px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 10px; font-size: 13px; }
+.binfo p { margin: 0 0 4px; }
+.bstl { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.bstl li { padding-left: 6px; border-left: 3px solid #2f7a3e; }
+.bstl li.neg { border-left-color: #a8382f; }
+.bstl small { color: var(--muted, inherit); }
+.bside { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1; }
+.bside.foe { align-items: flex-end; }
+.bchip { font: inherit; color: inherit; border: 0; cursor: pointer; display: inline-flex; align-items: baseline; gap: 4px; max-width: 100%; font-size: 12px; padding: 2px 8px; border-radius: 8px; border-left: 3px solid #7cc8e3; background: color-mix(in srgb, var(--line) 12%, var(--bg)); white-space: nowrap; }
+.bside.foe .bchip { border-left: 0; border-right: 3px solid #e0907f; }
+.bchip b { font-weight: 600; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.bchip small { color: var(--muted, inherit); }
+.bchip i { font-style: normal; font-variant-numeric: tabular-nums; color: var(--muted, inherit); }
+.bchip.now { box-shadow: 0 0 0 2px #ffd57a; }
+.bchip em { font-style: normal; font-size: 10px; min-width: 14px; text-align: center; border-radius: 7px; color: #fff; }
+.bchip em.p { background: #2f7a3e; }
+.bchip em.n { background: #a8382f; }
+.bchip[aria-pressed="true"] { outline: 2px solid var(--accent); }
+.bchip.ko { opacity: .45; text-decoration: line-through; }
+.fcell.drag { opacity: .5; }
+.fcell.over { border-color: var(--accent); border-style: solid; background: color-mix(in srgb, var(--accent) 18%, var(--bg)); }
+.fcell.on { touch-action: none; }
 .bbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .bbar .grow { flex: 1; }
 .blog { list-style: none; margin: 0; padding: 0; font-size: 13px; color: var(--muted); min-height: 5.6em; display: flex; flex-direction: column; gap: 2px; }

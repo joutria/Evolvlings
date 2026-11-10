@@ -115,7 +115,7 @@ const RPG_ES = {
     "key.need.raft": "Necesitas una balsa. Los leñadores {from} te darán una cuando calmes a su guardián.", "key.need.rope": "Necesitas una cuerda. Los mineros {from} te darán una cuando calmes a su guardián.",
     "pmap.aria": "Mapa de pergamino del valle", "pmap.hint": "Toca un lugar del pergamino o elige en la lista.", "pmap.keys": "Objetos clave: {list}.", "pmap.nokeys": "Objetos clave: ninguno todavía.", "pmap.vado": "El Vado", "pmap.locked": "Todavía no se puede ir.",
     "r.guard": "El guardián te deja una de sus cartas", "grim.story": "Solo la da Unísona.", "end.unisona": "Unísona se queda contigo. Desde ahora puede acompañarte en cualquier expedición, y sus cartas Estrella valen para todas las criaturas.", "end.unisonaUp": "Unísona canta contigo otra vez y te da otra copia de una de sus cartas. Fusiónalas para que suba de rareza.",
-    "log.strip": "{name} pierde {st}.", "log.cdup": "La carta de {name} tardará {n} más en estar lista.",
+    "log.cancel": "{name}: {st} anula {op}.", "b.stNone": "sin estados.", "b.stAll": "todo el combate", "b.stTurns": "{n} turnos", "log.strip": "{name} pierde {st}.", "log.cdup": "La carta de {name} tardará {n} más en estar lista.",
     "ach.guard8": ["El Canto casi entero", "Calma a los ocho guardianes del valle."],
     "log.lost": "{name} no encuentra a nadie en la niebla.", "log.echo": "¡El golpe de {name} resuena otra vez!", "log.revive": "¡{name} se levanta con {n} de vida!",
     "ach.guard6": ["El Envés en calma", "Calma a los tres guardianes del Envés."],
