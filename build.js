@@ -447,7 +447,7 @@ const css = `
 .bd-card .poor, .bd-store .poor { color: #b8364b; font-size: 12px; }
 .bd-need { display: grid; grid-template-columns: 7.5em minmax(0, 1fr); gap: 8px; align-items: center; width: 100%; font: 500 12px var(--font-mono); } .bd-need .bar { height: 8px; }
 `;
-const st = document.createElement("style"); st.textContent = css; document.head.appendChild(st);
+const st = document.createElement("style"); st.textContent = css; (document.body || document.head).appendChild(st);
 
 EV.HOOKS.renderBuild = () => { tick(); render(); };
 const prevShow = EV.HOOKS.showScreen;

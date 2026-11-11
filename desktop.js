@@ -87,8 +87,10 @@
   const st = document.createElement("style");
   st.id = "desktopStyle";
   st.textContent = css;
-  // after every other style block, also the ones the rpg scripts add while loading
-  const add = () => document.head.appendChild(st);
+  // after every other style block, also the ones the rpg scripts add while loading. It goes at the end of <body>, not
+  // in <head>: the artifact viewer wraps the whole page inside its own <body>, so the game's own <style> blocks end up
+  // there and anything put in <head> would lose to them (the PC layout came out half applied, Jose 2026-11-11)
+  const add = () => (document.body || document.head).appendChild(st);
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", add); else add();
   // the side column has room on a PC: show the battle stats unfolded the first time
   window.addEventListener("load", () => {

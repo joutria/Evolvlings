@@ -295,7 +295,7 @@ css.textContent = `
 .stage.fr-dorada { box-shadow: 0 0 0 4px #e0b84a, 0 0 0 7px #fff3c4, 0 0 18px 8px rgba(224, 184, 74, .45); }
 @media (max-width: 520px) { .ss-street { gap: 2px; padding: 4px; } .ss-street i b { width: 9px; height: 11px; } }
 `;
-document.head.appendChild(css);
+(document.body || document.head).appendChild(css);
 
 /* ---------- Achievements ---------- */
 const ACH = [["pass20", 50, () => passLvl() >= 20], ["pass40", 150, () => passLvl() >= 40], ["lamps12", 80, (p) => !!(p.cosm && p.cosm.mem.tila)]];

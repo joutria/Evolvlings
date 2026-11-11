@@ -600,7 +600,7 @@ css.textContent = `
 @media (max-width: 560px) { .rf-slots { grid-template-columns: 1fr; } .rf-slot { min-height: 0; } .rf-grid { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 380px) { .rf-grid { grid-template-columns: 1fr; } }
 `;
-document.head.appendChild(css);
+(document.body || document.head).appendChild(css);
 
 /* ---------- Achievements ---------- */
 EV.ACH.push(

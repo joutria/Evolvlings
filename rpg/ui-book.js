@@ -553,7 +553,7 @@ function refreshBookBtn() {
   .bk-page.r{border-radius:0;border-top:2px dashed var(--bf);min-height:50dvh}
 }
 @media (prefers-reduced-motion:reduce){.bk-tab{transition:none}}`;
-  document.head.appendChild(s);
+  (document.body || document.head).appendChild(s);
 })();
 (function bookHook() {
   const b = $("btnBook"); if (!b) return;

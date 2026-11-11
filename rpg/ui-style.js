@@ -199,4 +199,4 @@ const css = `
 .loot span { background: var(--bg); border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; }
 @media (max-width: 520px) { .mons { grid-template-columns: repeat(2, minmax(0, 1fr)); } .rcards { grid-template-columns: minmax(0, 340px); justify-content: center; } }
 `;
-const styleEl = document.createElement("style"); styleEl.textContent = css; document.head.appendChild(styleEl);
+const styleEl = document.createElement("style"); styleEl.textContent = css; (document.body || document.head).appendChild(styleEl);
