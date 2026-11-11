@@ -14,6 +14,8 @@
      criaturas your creature and your Refuge companions: stages, stats, talents, and their story, opened by level
                (habits at 5, what their people say at 15, what the Sap does at 30, rpg/data-lore-mons.js) and stars
                (the two FRAG pieces of eggs.js at ★2 and ★4)
+     gente     the people of the Glade you met or heard named: by their trade until you know their name, the
+               conversations they spoke in (a tap opens that Diary page), the lines you heard from them and about them
      escritos  the Writings you found, and the Threads two of them make together
    EV.P.bookNew holds the sections with something new (a dot on the ribbon and on the button). Classic script: it uses
    the shared rpg/*.js names (TALK, CARDS, cardHtml...). */
@@ -24,9 +26,10 @@ const BOOK_ICON = {
   zonas: '<path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 3v15M15 6v15" stroke="currentColor" stroke-width="2"/>',
   bestiario: '<circle cx="7" cy="8" r="2.2" fill="currentColor"/><circle cx="12" cy="6" r="2.2" fill="currentColor"/><circle cx="17" cy="8" r="2.2" fill="currentColor"/><path d="M6 17c0-4 3-6 6-6s6 2 6 6c0 2-2 3-6 3s-6-1-6-3z" fill="currentColor"/>',
   criaturas: '<ellipse cx="12" cy="13" rx="6.5" ry="8" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 13l2.5-2 2 2.5 2-2.5 1.5 1.5" fill="none" stroke="currentColor" stroke-width="2"/>',
+  gente: '<circle cx="9" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="16.5" cy="9" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3.5 19c0-3.5 2.5-5.5 5.5-5.5s5.5 2 5.5 5.5M14 14c3.5-.8 6.5 1 6.5 4.5" fill="none" stroke="currentColor" stroke-width="2"/>',
   escritos: '<path d="M6 4h10l3 3v13H6z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 10h7M9 14h7" stroke="currentColor" stroke-width="2"/>',
 };
-const BOOK_TABS = [["diario", "#a3343b"], ["criaturas", "#b0782a"], ["zonas", "#8a6a3a"], ["bestiario", "#4f9a3c"], ["cartas", "#2f5d96"], ["escritos", "#6e6283"]];
+const BOOK_TABS = [["diario", "#a3343b"], ["criaturas", "#b0782a"], ["gente", "#3f7f86"], ["zonas", "#8a6a3a"], ["bestiario", "#4f9a3c"], ["cartas", "#2f5d96"], ["escritos", "#6e6283"]];
 const BK = { open: false, tab: "diario", sel: {} };
 const bookNew = () => EV.P.bookNew || (EV.P.bookNew = {});
 const bt = (k, v) => tx("book." + k, v);
@@ -338,10 +341,70 @@ function beastPage(k) {
   return h;
 }
 
+/* ---------- People of the Glade: everyone you met or heard named, from the conversations you lived ---------- */
+// where each person lives: the zone of the first conversation they speak in
+let PZONE = null;
+function personZones() {
+  if (PZONE) return PZONE;
+  PZONE = {};
+  for (const z of DZONES()) for (const id in TALK[z]) for (const k in (TALK[z][id].who || {})) { const p = PPL_WHO[TALK[z][id].who[k]]; if (p && (!PZONE[p] || PZONE[p] === "common")) PZONE[p] = z; }
+  return PZONE;
+}
+// what the Diary holds about each person: conversations they spoke in, their lines you heard, lines that name them
+function peopleIndex() {
+  const D = diarySlice(), I = {}, rec = (p) => I[p] || (I[p] = { ev: [], said: [], about: [] });
+  for (const key in D) {
+    const [z, id] = key.split("/"), ev = TALK[z] && TALK[z][id]; if (!ev) continue;
+    const R = D[key], met = new Set();
+    for (const n of Object.keys(ev.nodes)) {
+      if (!R.v[n]) continue;
+      (ev.nodes[n].say || []).forEach(([k, t], i) => {
+        const sp = k && PPL_WHO[(ev.who || {})[k]];
+        if (sp) { met.add(sp); rec(sp).said.push([key, n, i]); }
+        for (const p in PPL) if (p !== sp && PPL[p].n.some((nm) => { const r = nameFind(nm); r.lastIndex = 0; return r.test(t); })) rec(p).about.push([key, n, i]);
+      });
+    }
+    met.forEach((p) => rec(p).ev.push(key));
+  }
+  return I;
+}
+const personName = (p) => (isKnown(p) ? (L() === "en" ? PPL[p].nEn : PPL[p].n)[0] : PPL[p].a[L()] || PPL[p].a.es);
+const sayLine = (key, n, i) => { const [z, id] = key.split("/"); try { return talkText(id).say(n, i); } catch (e) { return ""; } };
+function peopleList() {
+  const I = peopleIndex(), Z = personZones(), all = Object.keys(PPL), seen = all.filter((p) => I[p] && I[p].ev.length || isKnown(p));
+  const groups = {};
+  for (const p of seen) { const g = I[p] && I[p].ev.length ? Z[p] || "common" : "@heard"; (groups[g] = groups[g] || []).push(p); }
+  let h = "";
+  for (const g of DZONES().concat(["@heard"])) {
+    if (!groups[g]) continue;
+    h += `<p class="bk-grp">${esc(g === "@heard" ? bt("heardOf") : zoneLabel(g))}</p><ul class="bk-list">`;
+    for (const p of groups[g]) {
+      const on = BK.sel.gente === p ? ' aria-current="true"' : "", n = I[p] ? I[p].ev.length : 0;
+      h += `<li><button type="button" class="bk-it" data-bksel="${p}"${on}><span class="bk-nm">${esc(personName(p))}<small>${esc(isKnown(p) ? PPL[p].a[L()] || PPL[p].a.es : bt("noName"))}</small></span><span class="bk-ct">${n ? `💬 ${n}` : ""}</span></button></li>`;
+    }
+    h += `</ul>`;
+  }
+  const left = all.length - seen.length;
+  if (left) h += `<ul class="bk-list"><li><button type="button" class="bk-it locked" data-bksel="@none"${BK.sel.gente === "@none" ? ' aria-current="true"' : ""}><span class="bk-ic">?</span><span class="bk-nm">${esc(bt("peopleLeft", { n: left }))}<small>${esc(bt("notYet"))}</small></span></button></li></ul>`;
+  return h;
+}
+function peoplePage(p) {
+  if (!PPL[p]) return `<h3>???</h3><p class="bk-sub">${esc(bt("peopleHow"))}</p>`;
+  const I = peopleIndex()[p] || { ev: [], said: [], about: [] }, Z = personZones()[p];
+  let h = `<h3>${esc(personName(p))}</h3><p class="bk-sub">${esc(isKnown(p) ? PPL[p].a[L()] || PPL[p].a.es : bt("noNameLong"))}${Z && I.ev.length ? " · " + esc(zoneLabel(Z)) : ""}</p>`;
+  if (I.ev.length) h += `<p class="bk-q">${esc(bt("metIn"))}</p><ul class="bk-list">` + I.ev.map((k) => `<li><button type="button" class="bk-it" data-bkgo="${k}"><span class="bk-nm">${esc(evTitle(k.split("/")[1]))}<small>${esc(zoneLabel(k.split("/")[0]))}</small></span><span class="bk-ct">→</span></button></li>`).join("") + `</ul>`;
+  const quotes = (list, max) => list.slice(-max).map(([k, n, i]) => sayLine(k, n, i)).filter(Boolean).map((t) => `<p class="bk-say">«${esc(t)}»</p>`).join("");
+  if (I.said.length) h += `<p class="bk-q">${esc(bt("heardFrom"))}</p>` + quotes(I.said, 4);
+  if (I.about.length) h += `<p class="bk-q">${esc(bt("saidAbout"))}</p>` + quotes(I.about, 4);
+  if (!I.ev.length && !I.about.length) h += `<p class="bk-say n">${esc(bt("onlyName"))}</p>`;
+  return h;
+}
+
 /* ---------- the book ---------- */
 const BOOK_SEC = {
   diario: { list: diaryList, page: diaryPage, first: () => { const D = diarySlice(); return Object.keys(D).sort((a, b) => D[b].t - D[a].t)[0]; }, sub: () => { const z = DZONES().map(diaryCounts).reduce((a, c) => ({ lived: a.lived + c.lived, all: a.all + c.all, seen: a.seen + c.seen, ends: a.ends + c.ends }), { lived: 0, all: 0, seen: 0, ends: 0 }); return bt("diarioSub", { n: z.lived, m: z.all, a: z.seen, b: z.ends }); } },
   criaturas: { list: monsList, page: monsPage, first: () => monKinds().find((k) => myMon(k) && myMon(k).own) || monKinds().find((k) => myMon(k)), sub: () => bt("monsSub", { n: monKinds().filter((k) => myMon(k)).length, m: monKinds().length }) },
+  gente: { list: peopleList, page: peoplePage, first: () => { const I = peopleIndex(); return Object.keys(PPL).find((p) => I[p] && I[p].ev.length); }, sub: () => { const I = peopleIndex(); return bt("genteSub", { n: Object.keys(PPL).filter((p) => isKnown(p)).length, m: Object.keys(PPL).filter((p) => I[p] && I[p].ev.length).length }); } },
   zonas: { list: zonesList, page: zonePage, first: () => X && X.zone && ZONES[X.zone] ? X.zone : "aurora", sub: () => bt("zonasSub", { n: Object.keys(ZONES).filter((z) => (EV.P.cleared || {})[z]).length, m: Object.keys(ZONES).length }) },
   bestiario: { list: beastList, page: beastPage, first: () => (beastKinds().find(([, k]) => beastKnown(k)) || beastKinds()[0] || [])[1], sub: () => bt("beastRule") },
   cartas: { list: cardsList, page: cardsPage, first: () => Object.keys(CARDS).find((id) => (EV.P.grim || {})[id]), sub: () => tx("grim.desc") },
@@ -392,6 +455,7 @@ function onBookClick(e) {
     const r = $("bookView").querySelector(".bk-page.r"); if (r) { r.scrollTop = 0; if (matchMedia("(max-width: 760px)").matches) r.scrollIntoView({ block: "start", behavior: "smooth" }); }
     return;
   }
+  if (t.dataset.bkgo) { EV.sfx("tap"); BK.tab = "diario"; BK.sel.diario = t.dataset.bkgo; renderBook(); return; }
   if (t.dataset.bklvl) { EV.sfx("tap"); (BK.lvl = BK.lvl || {})[BK.sel.bestiario] = +t.dataset.bklvl; renderBook(); return; }
   if (t.dataset.craft) { onCardsClick(e); renderBook(); }
 }
