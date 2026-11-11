@@ -316,6 +316,7 @@ function endBattle(res) {
   for (const m of X.party) m.hp = m.hp <= 0 ? Math.min(1, 0.3 + winRevive) : Math.min(1, m.hp + 0.25 + winHeal);
   X.wins++; EV.P.c.expWins = (EV.P.c.expWins || 0) + 1;
   const foes = b.units.filter((u) => u.side === "foe");
+  if (typeof beastWin === "function") foes.forEach(beastWin);
   const xp = foes.reduce((a, u) => a + 8 + 4 * u.lvl, 0) * (boss ? 2 : 1);
   const coins = boss ? 30 : 3 + Math.floor(rnd() * 4) + foes.length;
   X.loot.xp += xp; X.loot.coins += coins;
