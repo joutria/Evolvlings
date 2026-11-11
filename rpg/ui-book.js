@@ -5,10 +5,15 @@
    Sections so far:
      diario    every conversation you lived, copied line by line: the questions you asked and the way you took; the
                ones you skipped are grey lines, the endings you did not choose are grey boxes (EV.P.diary)
-     cartas    the Grimoire (it moved here from the Cards panel): every card by circle and type, and crafting
+     cartas    the Grimoire (it moved here from the Cards panel): every card by circle and type, and crafting; its story
+               opens with the best grade you own (Rare scene, Super rare what nobody sees, Epic the thread,
+               rpg/data-lore-cards.js)
      zonas     every zone: the foes you can meet there and how often, its guardian, verse, encounters lived and Sap
      bestiario the foes you fought: an entry after 3 wins (guardians after 1), with stats at the levels you beat them,
                their cards, where they live and what is said of them (EV.P.bst[kind] = { w wins, lv highest level, l {lvl:1} })
+     criaturas your creature and your Refuge companions: stages, stats, talents, and their story, opened by level
+               (habits at 5, what their people say at 15, what the Sap does at 30, rpg/data-lore-mons.js) and stars
+               (the two FRAG pieces of eggs.js at ★2 and ★4)
      escritos  the Writings you found, and the Threads two of them make together
    EV.P.bookNew holds the sections with something new (a dot on the ribbon and on the button). Classic script: it uses
    the shared rpg/*.js names (TALK, CARDS, cardHtml...). */
@@ -18,9 +23,10 @@ const BOOK_ICON = {
   cartas: '<rect x="4" y="5" width="11" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4.5l9 2.5-3 13" fill="none" stroke="currentColor" stroke-width="2"/>',
   zonas: '<path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 3v15M15 6v15" stroke="currentColor" stroke-width="2"/>',
   bestiario: '<circle cx="7" cy="8" r="2.2" fill="currentColor"/><circle cx="12" cy="6" r="2.2" fill="currentColor"/><circle cx="17" cy="8" r="2.2" fill="currentColor"/><path d="M6 17c0-4 3-6 6-6s6 2 6 6c0 2-2 3-6 3s-6-1-6-3z" fill="currentColor"/>',
+  criaturas: '<ellipse cx="12" cy="13" rx="6.5" ry="8" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 13l2.5-2 2 2.5 2-2.5 1.5 1.5" fill="none" stroke="currentColor" stroke-width="2"/>',
   escritos: '<path d="M6 4h10l3 3v13H6z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 10h7M9 14h7" stroke="currentColor" stroke-width="2"/>',
 };
-const BOOK_TABS = [["diario", "#a3343b"], ["zonas", "#8a6a3a"], ["bestiario", "#4f9a3c"], ["cartas", "#2f5d96"], ["escritos", "#6e6283"]];
+const BOOK_TABS = [["diario", "#a3343b"], ["criaturas", "#b0782a"], ["zonas", "#8a6a3a"], ["bestiario", "#4f9a3c"], ["cartas", "#2f5d96"], ["escritos", "#6e6283"]];
 const BK = { open: false, tab: "diario", sel: {} };
 const bookNew = () => EV.P.bookNew || (EV.P.bookNew = {});
 const bt = (k, v) => tx("book." + k, v);
@@ -144,7 +150,75 @@ function cardsPage(id) {
   const P = EV.P, C = CARDS[id]; if (!C) return `<p class="bk-sub">${esc(bt("pickCard"))}</p>`;
   const boss = !!C.boss || !!C.story, owner = C.by && MONS[C.by] ? monName(C.by) : "";
   const craft = boss ? `<p class="rc-cant">${esc(tx(C.story ? "grim.story" : "grim.boss"))}</p>` : `<div class="rc-btns"><button class="btn ghost" type="button" data-craft="${id}" ${(P.dust || 0) < craftCost() ? "disabled" : ""}>${esc(tx("grim.craft", { c: craftCost() }))}</button></div>`;
-  return `<div class="bk-card">${(P.grim || {})[id] ? cardHtml(id, 0, { foot: craft }) : ghostCardHtml(id, tx("grim.unknown") + (owner && !boss ? " · " + tx("grim.by", { mon: owner }) : ""), craft)}</div>`;
+  if (!(P.grim || {})[id]) return `<div class="bk-card">${ghostCardHtml(id, tx("grim.unknown") + (owner && !boss ? " · " + tx("grim.by", { mon: owner }) : ""), craft)}</div>`;
+  const g = cardBest(id);
+  return `<div class="bk-card">${cardHtml(id, Math.max(0, g), { foot: craft })}</div>${cardLoreHtml(id, g)}`;
+}
+// the best grade you own of a card (-1: none left, it is only in the Grimoire)
+const cardBest = (id) => EV.P.cards.reduce((m, c) => (c.id === id ? Math.max(m, c.g) : m), -1);
+// its story opens as you upgrade it: Rare shows the scene, Super rare what nobody sees, Epic the thread
+function cardLoreHtml(id, g) {
+  const T = window.EVCARDLORE && EVCARDLORE[id]; if (!T) return "";
+  const t = T[L()] || T.es;
+  return `<p class="bk-q">${esc(bt("cardStory"))}</p>` + ["scene", "hidden", "thread"].map((k, i) => loreRow(bt("cl." + k), t[i], g >= i + 1, bt("opensGrade", { g: GRADES[i + 1][L()] }))).join("");
+}
+// one line of lore: open, or grey with the way to open it
+const loreRow = (label, text, open, how) => open
+  ? `<div class="bk-lore"><b>${esc(label)}</b><p class="bk-say">${esc(maskNames(text))}</p></div>`
+  : `<div class="bk-lore off"><b>${esc(label)}</b><p class="bk-say">🔒 ${esc(how)}</p></div>`;
+
+/* ---------- My creatures: their story opens with level and stars (rpg/data-lore-mons.js, FRAG in eggs.js) ---------- */
+const monLore = () => window.EVMONLORE || {};
+// your creature or a Refuge companion of that kind: level, stars, stage reached
+function myMon(k) {
+  const S = EV.S, own = !!(S && S.phase === "alive" && S.species === k), R = own ? rpgState() : null;
+  const r = EV.P.eg && EV.P.eg.roster && EV.P.eg.roster[k];
+  if (!R && !r) return null;
+  return { lvl: Math.max(R ? R.lvl : 0, r ? r.lvl : 0), st: r ? r.st || 0 : 0, r, own, stage: own ? S.stage : 1 };
+}
+const monKinds = () => Object.keys(monLore()).filter((k) => MONS[k]);
+function monsList() {
+  const all = monKinds(), have = all.filter((k) => myMon(k)).sort((a, b) => myMon(b).own - myMon(a).own || myMon(b).lvl - myMon(a).lvl);
+  let h = `<ul class="bk-list">`;
+  for (const k of have) {
+    const m = myMon(k), on = BK.sel.criaturas === k ? ' aria-current="true"' : "";
+    h += `<li><button type="button" class="bk-it" data-bksel="${k}"${on}><span class="bk-ic">${tyIcon(MONS[k].types[0])}</span><span class="bk-nm">${esc(monName(k))}<small>${esc(m.own ? EV.S.name : bt("companion"))}</small></span><span class="bk-ct">${esc(bt("lvl", { n: m.lvl }))}${m.st ? " " + "★".repeat(m.st) : ""}</span></button></li>`;
+  }
+  // the ones you have not met stay one grey line: their names would give them away
+  const left = all.length - have.length;
+  if (left) h += `<li><button type="button" class="bk-it locked" data-bksel="@none"${BK.sel.criaturas === "@none" ? ' aria-current="true"' : ""}><span class="bk-ic">?</span><span class="bk-nm">${esc(bt("monsLeft", { n: left }))}<small>${esc(bt("notYet"))}</small></span></button></li>`;
+  return h + `</ul>`;
+}
+function monsPage(k) {
+  const M = MONS[k], m = M && myMon(k);
+  if (!m) return `<h3>???</h3><p class="bk-sub">${esc(bt("monHow"))}</p>`;
+  const S = EV.S;
+  const pics = [0, 1, 2].map((st) => `<canvas class="bk-mon${st > m.stage ? " sil" : ""}" width="96" height="80" data-mstage="${k}:${st}" role="img" aria-label="${esc(bt("stage." + st))}"></canvas>`).join("");
+  let h = `<h3>${esc(monName(k))}${m.own ? ` · ${esc(S.name)}` : ""}</h3><p class="bk-sub">${M.types.map(typeChip).join(" ")} · ${esc(bt("lvl", { n: m.lvl }))}${m.st ? " · " + "★".repeat(m.st) : ""}</p><div class="bk-stages">${pics}</div>`;
+  const u = makeUnit(m.own ? ownUnitOpts(1) : { kind: k, lvl: m.lvl, side: "ally", name: monName(k), stage: 1, cards: {} });
+  h += `<div class="bk-stats">${[["hp", u.maxHp], ["str", u.base.str], ["def", u.base.def], ["spd", u.base.spd], ["crit", Math.round(u.crit) + "%"]].map(([s, v]) => `<div><b>${typeof v === "number" ? Math.round(v) : v}</b><small>${esc(bt("st." + s))}</small></div>`).join("")}</div>`;
+  const rec = m.own ? rpgState() : m.r, tal = talentsOf(k, m.lvl, rec && rec.tal);
+  if (tal.length) h += `<p class="bk-say"><b>${esc(tx("tal.title"))}:</b> ${tal.map((T) => `${tyIcon(T.type)} ${esc(T[L()])}`).join(" · ")}</p>`;
+  if (m.r) {
+    const B = BIRTH[birthKey(k, m.r)], U = EV.EGGS && EV.EGGS.unitOf(k);
+    if (B) h += `<p class="bk-say"><b>${esc(bt("birth"))}</b> ${esc(B[L()])} (${esc(B.fx[L()])})</p>`;
+    if (U) h += `<p class="bk-say"><b>${esc(bt("bond"))}</b> ${U.bond}</p>`;
+  }
+  const lore = (monLore()[k] || {})[L()] || (monLore()[k] || {}).es || [], fr = (EV.EGGS && EV.EGGS.fragsOf(k)) || null;
+  const rows = [[bt("ml.born"), (MON_DESC[L()] || {})[k], true, ""],
+    [bt("ml.habits"), lore[0], m.lvl >= 5, bt("opensLvl", { n: 5 })]];
+  if (fr) rows.push([bt("ml.star", { n: 2 }), fr[0], m.st >= 2, bt("opensStar", { n: 2 })]);
+  rows.push([bt("ml.village"), lore[1], m.lvl >= 15, bt("opensLvl", { n: 15 })]);
+  if (fr) rows.push([bt("ml.star", { n: 4 }), fr[1], m.st >= 4, bt("opensStar", { n: 4 })]);
+  rows.push([bt("ml.sap"), lore[2], m.lvl >= 30, bt("opensLvl", { n: 30 })]);
+  h += `<p class="bk-q">${esc(bt("monStory"))}</p>` + rows.filter((r) => r[1]).map((r) => loreRow(r[0], r[1], r[2], r[3])).join("");
+  return h;
+}
+function paintStage(cv) {
+  const [k, st] = cv.dataset.mstage.split(":"), out = EV.setupCanvas(cv, 96, 80);
+  if (!evsKind(k)) { cv.dataset.mon = k; paintMon(cv); return; }
+  const spr = EVS.sprite(k, 24, +st, 0, "happy"), z = +st === 0 ? 2 : 3;
+  out.imageSmoothingEnabled = false; out.drawImage(spr, (96 - spr.width * z) / 2, 80 - spr.height * z, spr.width * z, spr.height * z);
 }
 
 /* ---------- Writings ---------- */
@@ -267,6 +341,7 @@ function beastPage(k) {
 /* ---------- the book ---------- */
 const BOOK_SEC = {
   diario: { list: diaryList, page: diaryPage, first: () => { const D = diarySlice(); return Object.keys(D).sort((a, b) => D[b].t - D[a].t)[0]; }, sub: () => { const z = DZONES().map(diaryCounts).reduce((a, c) => ({ lived: a.lived + c.lived, all: a.all + c.all, seen: a.seen + c.seen, ends: a.ends + c.ends }), { lived: 0, all: 0, seen: 0, ends: 0 }); return bt("diarioSub", { n: z.lived, m: z.all, a: z.seen, b: z.ends }); } },
+  criaturas: { list: monsList, page: monsPage, first: () => monKinds().find((k) => myMon(k) && myMon(k).own) || monKinds().find((k) => myMon(k)), sub: () => bt("monsSub", { n: monKinds().filter((k) => myMon(k)).length, m: monKinds().length }) },
   zonas: { list: zonesList, page: zonePage, first: () => X && X.zone && ZONES[X.zone] ? X.zone : "aurora", sub: () => bt("zonasSub", { n: Object.keys(ZONES).filter((z) => (EV.P.cleared || {})[z]).length, m: Object.keys(ZONES).length }) },
   bestiario: { list: beastList, page: beastPage, first: () => (beastKinds().find(([, k]) => beastKnown(k)) || beastKinds()[0] || [])[1], sub: () => bt("beastRule") },
   cartas: { list: cardsList, page: cardsPage, first: () => Object.keys(CARDS).find((id) => (EV.P.grim || {})[id]), sub: () => tx("grim.desc") },
@@ -284,6 +359,7 @@ function bookHtml() {
 }
 function bookMount(el) {
   el.querySelectorAll("canvas[data-mon]").forEach((cv) => { try { paintMon(cv); } catch (e) { /* art is decoration */ } });
+  el.querySelectorAll("canvas[data-mstage]").forEach((cv) => { try { paintStage(cv); } catch (e) { /* art is decoration */ } });
   el.querySelectorAll("[data-bkscene]").forEach((box) => { try { const cv = EVSCENE.event(box.dataset.bkscene); if (cv) { const c = document.createElement("canvas"); c.width = cv.width; c.height = cv.height; c.getContext("2d").drawImage(cv, 0, 0); c.setAttribute("role", "img"); const n = EVSCENE.EVNOTE[box.dataset.bkscene]; if (n && n.scene) c.setAttribute("aria-label", maskNames(n.scene)); box.appendChild(c); } } catch (e) { /* art is decoration */ } });
 }
 function renderBook() {
@@ -368,6 +444,12 @@ function refreshBookBtn() {
 .bk-card .rcard{margin:0 auto}
 .bk-mon{width:144px;height:120px;image-rendering:pixelated;display:block;margin:4px 0 6px}
 .bk-mon.sil{filter:brightness(0) opacity(.45)}
+.bk-stages{display:flex;gap:4px;align-items:flex-end;flex-wrap:wrap}
+.bk-stages .bk-mon{width:96px;height:80px;margin:0}
+.bk-lore{border-left:3px solid var(--bg2);padding:2px 10px;margin:8px 0}
+.bk-lore b{font:700 13px var(--font-display);color:var(--bg2);letter-spacing:.03em}
+.bk-lore.off{border-left-style:dashed;border-color:var(--bf)}
+.bk-lore.off b,.bk-lore.off .bk-say{color:var(--bf)}
 .bk-bar{display:grid;grid-template-columns:minmax(90px,150px) 1fr 44px;gap:8px;align-items:center;font-size:14px;margin:4px 0}
 .bk-bar .tr{background:var(--bp2);border-radius:5px;height:10px}
 .bk-bar i{display:block;height:10px;border-radius:5px;background:var(--bg2)}
