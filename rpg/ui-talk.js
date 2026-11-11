@@ -10,7 +10,7 @@
 const TALK = window.EVEVENTS || {}, TALK_EN = window.EVEVENTS_EN || {};
 // "common" events (campfires, treasures...) can come up in any zone; a few of them join each zone's bag
 const COMMON_SHARE = 3;
-const talkZone = (id, zone) => { const z = zone || (X && X.zone); return TALK[z] && TALK[z][id] ? z : TALK.common && TALK.common[id] ? "common" : null; };
+const talkZone = (id, zone) => { const z = zone || (X && X.zone); return TALK[z] && TALK[z][id] ? z : TALK.common && TALK.common[id] ? "common" : Object.keys(TALK).find((k) => TALK[k][id]) || null; };
 const talkEv = (id, zone) => { const z = talkZone(id, zone); return z ? TALK[z][id] : null; };
 const deckSlice = EV.slice("evDeck", () => ({}));
 // the events a zone can draw right now
@@ -34,24 +34,69 @@ function drawDeck(zone) {
   d.bag.splice(d.bag.indexOf(pick), 1); d.last = pick;
   return pick;
 }
+/* ---------- names: nobody is named until you hear the name (rpg/data-people.js) ---------- */
+const PPL = (window.EVPEOPLE && EVPEOPLE.PEOPLE) || {}, PPL_WHO = (window.EVPEOPLE && EVPEOPLE.BY_WHO) || {};
+const knownSlice = EV.slice("known", () => ({}));
+const isKnown = (pid) => !PPL[pid] || !!knownSlice()[pid];
+const nameRx = {};
+function nameFind(t) { return nameRx[t] || (nameRx[t] = new RegExp("(^|[^0-9A-Za-zÁÉÍÓÚÑÜáéíóúñü])(" + t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ")(?![0-9A-Za-zÁÉÍÓÚÑÜáéíóúñü])", "g")); }
+// a line said out loud (or an option you pick): every name in it becomes known. Spanish text is the reference, the
+// names are the same in both languages
+function hearNames(text) {
+  if (!text) return;
+  const K = knownSlice();
+  for (const pid in PPL) if (!K[pid] && PPL[pid].n.some((t) => { const r = nameFind(t); r.lastIndex = 0; return r.test(text); })) { K[pid] = 1; EV.P.bookNew = Object.assign(EV.P.bookNew || {}, { gente: 1 }); }
+}
+// narration (or a label) that names someone you have not heard of yet: "el farolero viejo" in their place
+function maskNames(text, lang) {
+  if (!text) return text;
+  const lg = lang || L(), K = knownSlice();
+  let out = text;
+  for (const pid in PPL) {
+    if (K[pid]) continue;
+    const p = PPL[pid], forms = (lg === "en" ? p.nEn : p.n), alias = p.r[lg] || p.r.es;
+    for (const t of forms) { const r = nameFind(t); r.lastIndex = 0; out = out.replace(r, (m, pre) => pre + "\u0001" + alias + "\u0002"); }
+  }
+  if (out === text) return text;
+  if (lg === "es") out = out.replace(/(^|[^\wáéíóúñ])(a|de) \u0001el /gi, (m, pre, w) => pre + (w === "de" ? "del" : w === "De" ? "Del" : w === "A" ? "Al" : "al") + " \u0001");
+  // capital letter at the start of a sentence
+  out = out.replace(/(^|[.!?…]\s+|[«“¡¿"]\s*)\u0001(.)/g, (m, pre, c) => pre + "\u0001" + c.toUpperCase());
+  return out.replace(/[\u0001\u0002]/g, "");
+}
+// the label over a line: "Farolero viejo" until you know them
+function whoName(esLabel, label, lang) {
+  const pid = PPL_WHO[esLabel];
+  if (pid && !isKnown(pid)) { const a = PPL[pid].a; return a[lang || L()] || a.es; }
+  return maskNames(label, lang);
+}
+/* ---------- the Diary: which lines of each conversation you have seen (EV.P.diary["zone/id"]) ---------- */
+const diarySlice = EV.slice("diary", () => ({}));
+function diaryRec(id, zone) {
+  const z = talkZone(id, zone); if (!z) return null;
+  const D = diarySlice(), k = z + "/" + id;
+  if (!D[k]) { D[k] = { v: {}, o: {}, n: 0, t: Object.keys(D).length + 1 }; EV.P.bookNew = Object.assign(EV.P.bookNew || {}, { diario: 1 }); }
+  return D[k];
+}
 /* ---------- the conversation ---------- */
 function talkText(id) {
   const ev = talkEv(id), z = talkZone(id), en = L() === "en" && TALK_EN[z] && TALK_EN[z][id];
   return {
-    who: (k) => (en && en.who && en.who[k]) || ev.who[k] || k,
-    say: (n, i) => (en && en.nodes[n] && en.nodes[n].say[i]) || ev.nodes[n].say[i][1],
+    who: (k) => whoName(ev.who[k] || k, (en && en.who && en.who[k]) || ev.who[k] || k),
+    say: (n, i) => { const t = (en && en.nodes[n] && en.nodes[n].say[i]) || ev.nodes[n].say[i][1]; return ev.nodes[n].say[i][0] ? t : maskNames(t); },
     opt: (n, i) => (en && en.nodes[n] && en.nodes[n].opts && en.nodes[n].opts[i]) || ev.nodes[n].opts[i].t,
   };
 }
 function talkStart(id) {
   X.talk = { id, log: [], used: {}, hub: null, end: null, gain: {} };
+  const R = diaryRec(id); if (R) R.n++;
   X.eventFight = false; X.eventCard = null; X.eventFoes = null;
   talkVisit(talkEv(id).start);
 }
 function talkAdd(f) { const g = X.talk.gain; for (const k of ["xp", "coins", "heal", "hurt"]) if (f[k]) g[k] = (g[k] || 0) + f[k]; if (f.card) g.card = 1; if (f.fight) g.fight = f.foes || true; if (f.cost) g.cost = (g.cost || 0) + f.cost; }
 function talkVisit(nid) {
   const T = X.talk, ev = talkEv(T.id), n = ev.nodes[nid];
-  n.say.forEach((s, i) => T.log.push({ n: nid, i, who: s[0] }));
+  n.say.forEach((s, i) => { T.log.push({ n: nid, i, who: s[0] }); if (s[0]) hearNames(s[1]); });
+  const R = diaryRec(T.id); if (R) R.v[nid] = 1;
   if (n.fx) { runFx(n.fx, {}, ""); talkAdd(n.fx); }
   if (n.end) {
     runFx(n.end, {}, ""); talkAdd(n.end);
@@ -69,6 +114,7 @@ function talkPick(i) {
   if (o.cNeed && !(EV.P.flags || {})[o.cNeed]) return;
   if (o.fx) { if (runFx(o.fx, {}, "") == null) { EV.toast(tx("talk.poor")); EV.sfx("deny"); return; } talkAdd(o.fx); }
   T.used[T.hub + ":" + i] = 1;
+  hearNames(o.t); const R = diaryRec(T.id); if (R) R.o[T.hub + ":" + i] = 1;
   T.log.push({ you: [T.hub, i] });
   EV.P.c.evChoices = (EV.P.c.evChoices || 0) + 1;
   EV.sfx("tap");

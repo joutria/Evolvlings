@@ -12,6 +12,7 @@ function refreshHome() {
   chip.hidden = !(alive && S.stage >= 1) && !(EV.P.cards && EV.P.cards.length);
   if ($("btnTeams")) $("btnTeams").hidden = !(alive && S.stage >= 1);
   homeSheet(alive);
+  if (typeof refreshBookBtn === "function") refreshBookBtn();
   if (!alive) { btn.hidden = true; return; }
   btn.hidden = false;
   if (savedRun()) { btn.textContent = tx("exp.resume", { z: zt("name", null, savedRun().x.zone) }); btn.disabled = false; btn.title = ""; const w0 = $("aExpWhy"); if (w0) w0.textContent = ""; const r0 = $("aRecharge"); if (r0) r0.hidden = true; return; }

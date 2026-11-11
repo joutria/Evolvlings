@@ -8,7 +8,7 @@
 /* ====================================================================== */
 let cTab = "col", lastPack = null;
 function cardTabs() {
-  return `<div class="seg ctabs" role="group">${["col", "grim", "shop"].concat(EV.WELL && !EV.quietOn() ? ["well"] : []).map((k) => `<button type="button" data-ctab="${k}" aria-pressed="${cTab === k}">${esc(k === "well" ? EV.WELL.tab() : tx("ctab." + k))}</button>`).join("")}</div>`;
+  return `<div class="seg ctabs" role="group">${["col", "grim", "shop"].concat(EV.WELL && !EV.quietOn() ? ["well"] : []).map((k) => `<button type="button" data-ctab="${k}" aria-pressed="${cTab === k}">${esc(k === "well" ? EV.WELL.tab() : tx("ctab." + k))}${k === "grim" ? " ↗" : ""}</button>`).join("")}</div>`;
 }
 function grimHtml() {
   const P = EV.P, all = Object.keys(CARDS), seen = all.filter((id) => (P.grim || {})[id]).length;
@@ -152,7 +152,8 @@ function renderCards() {
   if (cTab !== "col") {
     if (cTab === "well" && EV.quietOn()) cTab = "col";
     if (cTab === "well" && EV.WELL) { el.innerHTML = `<div class="panel-head"><h2>${esc(EV.WELL.title())}</h2>${cardTabs()}</div>` + EV.WELL.html(); return; }
-    el.innerHTML = `<div class="panel-head"><h2>${esc(tx(cTab === "grim" ? "ctab.grim" : "ctab.shop"))}</h2>${cardTabs()}</div>` + (cTab === "grim" ? grimHtml() + escritosHtml() : workshopHtml());
+    if (cTab === "grim") cTab = "col"; // the Grimoire lives in the book now
+    el.innerHTML = `<div class="panel-head"><h2>${esc(tx("ctab.shop"))}</h2>${cardTabs()}</div>` + workshopHtml();
     return;
   }
   let html = `<div class="panel-head"><h2>${esc(tx("cards.title"))}</h2>${cardTabs()}<span class="progress">${esc(tx("cards.owned", { n: P.cards.length }))}</span></div><p class="muted" style="margin:0">${esc(tx("cards.desc"))}</p>`;
@@ -216,6 +217,7 @@ function onCardsClick(e) {
   if (cfClick(t, renderCards)) return;
   if (t.dataset.chg) { EV.sfx("tap"); const [w, sl] = t.dataset.chg.split(":"); openPick(w, sl); return; }
   const R = rpgState(); const P = EV.P;
+  if (t.dataset.ctab === "grim") { EV.sfx("tap"); openBook("cartas"); return; }
   if (t.dataset.ctab) { cTab = t.dataset.ctab; EV.sfx("tap"); renderCards(); return; }
   if (EV.WELL && EV.WELL.click(t)) return;
   if (t.dataset.dust) {
