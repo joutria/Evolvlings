@@ -17,6 +17,7 @@ const TIPS = {
     teams: ["Equipos", "Elige dos compañeros del Refugio para ir contigo y qué cartas lleva cada uno. Puedes guardar hasta 5 equipos y cargarlos con un toque antes de salir."],
     daily: ["Tareas y premios", "Cuatro tareas al día y seis a la semana dan ♪ Notas del Canto. Lo que no hagas hoy se guarda hasta 2 días más, y el calendario nunca se pierde si faltas."],
     refuge: ["Refugio", "Aquí viven las criaturas de tus huevos. Cada una sube de nivel y de ♥ Vínculo viajando contigo o con trabajos, y nunca se va. Cada una nace con un rasgo propio (🥚). Los huevos se compran con ♪ Notas."],
+    book: ["Libro del Cuidador", "Aquí se apunta todo lo que vives, y solo eso. El Diario copia cada encuentro con lo que preguntaste y el camino que tomaste; lo que no preguntaste sale en gris, y si el encuentro vuelve puedes probar otro camino. A la gente se la llama por su oficio hasta que oyes su nombre. Las Cartas (el Grimorio) y los Escritos también están aquí."],
     savia: ["La Savia de cada zona", "Junto a cada zona ves cuánta Savia Negra le queda: goteo (●●), venas (●) o limpia. Al calmar a su guardián se retira hasta las venas, y con 3 estrellas la zona queda limpia y se ve así en cada visita. Solo cambia cómo se ve el lugar, nunca lo hace más difícil."],
     weather: ["El tiempo", "En el Claro llueve, hay niebla o nieva según la época del año, y cambia cada 6 horas. Nunca perjudica: la lluvia riega el huerto, la niebla deja descansar a tu criatura y la nieve la divierte."],
     season: ["Temporada", "Un pase gratis de 40 niveles que sube con tus tareas, y un evento con 🕯 Cera para ayudar a Tila. No hay versión de pago."],
@@ -34,6 +35,7 @@ const TIPS = {
     teams: ["Teams", "Pick two Refuge companions to come with you and the cards each one carries. Save up to 5 teams and load one with a tap before you leave."],
     daily: ["Tasks and rewards", "Four daily and six weekly tasks give ♪ Song Notes. What you don't do today keeps for 2 more days, and the calendar never resets if you miss a day."],
     refuge: ["Refuge", "The creatures from your eggs live here. Each grows in level and ♥ Bond by travelling with you or doing jobs, and none ever leaves. Each is born with a trait of its own (🥚). Eggs cost ♪ Notes."],
+    book: ["Caretaker's Book", "Everything you live is written here, and only that. The Diary copies each encounter with what you asked and the way you took; what you didn't ask stays grey, and if the encounter comes back you can try another way. People go by their trade until you hear their name. Cards (the Grimoire) and Writings are here too."],
     savia: ["Each zone's Sap", "Next to each zone you see how much Black Sap is left: dripping (●●), veins (●) or clean. Calming its guardian pulls it back to veins, and with 3 stars the zone is clean and looks it on every visit. It only changes how the place looks, never how hard it is."],
     weather: ["Weather", "In the Glade it rains, gets foggy or snows depending on the time of year, and it changes every 6 hours. It never hurts: rain waters the garden, fog lets your creature rest and snow keeps it amused."],
     season: ["Season", "A free 40-level pass that grows with your tasks, and an event where 🕯 Wax helps Tila. There is no paid version."],
@@ -51,7 +53,7 @@ const GLOSS = {
   es: [
     ["✦", "Chispas", "Cuidando, con tareas, expediciones, logros y el Huerto.", "Tienda, obras, sobres del Taller y la Despensa."],
     ["♪", "Notas del Canto", "Tareas diarias y semanales, 3 ★ en una zona, la temporada y el Refugio. También se cambian Chispas por Notas (con límite semanal).", "Huevos del Refugio y el Pozo de los Ecos. Nunca caducan."],
-    ["∴", "Polvo de Estrella", "Deshaciendo cartas repetidas, huevos repetidos y el Rincón de búsqueda.", "Crear cartas en el Grimorio (Cartas → Grimorio) y cambiar talentos."],
+    ["∴", "Polvo de Estrella", "Deshaciendo cartas repetidas, huevos repetidos y el Rincón de búsqueda.", "Crear cartas en el Grimorio (Libro → Cartas) y cambiar talentos."],
     ["🪵", "Madera", "Al terminar expediciones y con trabajos de tus compañeros.", "Obras del Claro."],
     ["👣", "Pasos", "10 cada día; se guardan hasta 30 y se pueden comprar unos pocos.", "Buscar en el Rincón de búsqueda. Pasear y salir de expedición son gratis."],
     ["🕯", "Cera", "Solo durante el evento: tareas, expediciones y ayudar a Tila.", "Encender los faroles del evento."],
@@ -59,7 +61,7 @@ const GLOSS = {
   en: [
     ["✦", "Chispas", "Care, tasks, expeditions, achievements and the Garden.", "Shop, builds, Workshop packs and the Pantry."],
     ["♪", "Song Notes", "Daily and weekly tasks, 3 ★ in a zone, the season and the Refuge. Chispas can also be traded for Notes (weekly limit).", "Refuge eggs and the Well of Echoes. They never expire."],
-    ["∴", "Stardust", "Breaking down duplicate cards, duplicate eggs and the foraging nook.", "Crafting cards in the Grimoire (Cards → Grimoire) and changing talents."],
+    ["∴", "Stardust", "Breaking down duplicate cards, duplicate eggs and the foraging nook.", "Crafting cards in the Grimoire (Book → Cards) and changing talents."],
     ["🪵", "Wood", "Finishing expeditions and your companions' jobs.", "Glade builds."],
     ["👣", "Steps", "10 a day; up to 30 keep and a few can be bought.", "Searching the foraging nook. Walking around and setting out are free."],
     ["🕯", "Wax", "Only during the event: tasks, expeditions and helping Tila.", "Lighting the event's lanterns."],
