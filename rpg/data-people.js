@@ -83,6 +83,10 @@
     nasa: P(["Abuela Nasa", "Grandma Nasa"], ["Abuela Nasa", "Nasa"], "Anciana de la barca", "la anciana de la barca", "Old woman in the boat", "the old woman in the boat", ["Grandma Nasa", "Nasa"]),
     cardo: P(["Cardo, aguador", "Cardo, water seller"], ["Cardo"], "Aguador del Prado", "el aguador del Prado", "Meadow water seller", "the Meadow water seller"),
     orilla: P(["Orilla"], ["Orilla"], "Lectora del cuaderno", "la lectora del cuaderno", "Notebook reader", "the notebook reader"),
+    // named by others in the conversations and on the cards, never speakers themselves
+    ola: P([], ["Ola"], "Hermana del lago", "la hermana del lago", "Sister from the lake", "the sister from the lake"),
+    coplo: P([], ["Coplo"], "Cantor de la plaza", "el cantor de la plaza", "Square singer", "the square singer"),
+    aurelia: P([], ["Aurelia Albor", "Aurelia"], "Señora de la Casa Albor", "la señora de la Casa Albor", "Lady of House Albor", "the lady of House Albor"),
   };
   // titles for the book's Diary (no names in them: they would give away who you meet)
   const TITLES = {
