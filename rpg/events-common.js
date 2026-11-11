@@ -35,7 +35,7 @@ window.EVEVENTS.common = {
                       ["retal", "Lo de siempre: cada uno cerrando su puerta y quejándose de que hace frío."]], back: "a" },
     donde: { say: [["retal", "De todas partes, que es lo mismo que de ninguna."], [null, "Remueve las castañas con un palo."],
                    ["retal", "Tuve casa. Una vez. El agua se la llevó, o el fuego, o la gente, ya no me acuerdo cuál de los tres. Desde entonces, la casa es el camino."]], back: "a" },
-    comer: { say: [[null, "Coméis castañas hasta quemaros los dedos. Al terminar, Retal mira tu ropa con ojo de sastre."],
+    comer: { say: [[null, "Comen castañas hasta quemarse los dedos. Al terminar, Retal mira tu ropa con ojo de sastre."],
                    ["retal", "¿Me das un trozo? Uno pequeño. De la manga, que no se nota."], [null, "Le das un retal. Él te da a cambio algo que lleva en el bolsillo."]], end: { heal: 0.3, xp: 8, card: true } },
     adios: { say: [["retal", "Si nos volvemos a ver, tráeme noticias. Las buenas, si hay. Si no, las otras."]], end: { xp: 6 } },
   } },
@@ -65,7 +65,7 @@ window.EVEVENTS.common = {
                 { t: "Seguir sin pararte", go: "seguir" }] },
     beber: { say: [[null, "El agua está tan fría que duele en los dientes. Después, durante un rato, el cansancio se va a otro sitio."]], fx: { heal: 0.2 }, back: "a" },
     mirar: { say: [[null, "En el fondo, entre los guijarros, hay monedas antiguas de muchos pueblos. Gente que pidió un deseo aquí. Algunas son tan viejas que ya no se ve la cara de quien las acuñó."],
-                   [null, "No coges ninguna. Hay cosas que no se cogen."]], fx: { xp: 6 }, back: "a" },
+                   [null, "No tomas ninguna. Hay cosas que no se toman."]], fx: { xp: 6 }, back: "a" },
     lavar: { say: [[null, "Lavas una a una las heridas de tus criaturas. Se quejan, se sacuden, te salpican. Al final, se tumban al sol con el pelo de punta."]], end: { heal: 0.45, xp: 6 } },
     seguir: { say: [[null, "Sigues. El ruido del agua te acompaña un trecho, y luego, sin que te des cuenta, ya no está."]], end: { xp: 6 } },
   } },
@@ -78,14 +78,14 @@ window.EVEVENTS.common = {
     buscar: { say: [[null, "Das una vuelta. No hay nadie, pero en el tronco hay una muesca reciente a la altura de los ojos, y otra más arriba, y otra más. Alguien ha marcado el árbol para encontrarlo a la vuelta."]], back: "a" },
     abrir: { say: [[null, "Dentro hay una manta, pan duro, una cantimplora vacía y un sobre con un nombre escrito. Al fondo, un monedero."]],
              opts: [{ t: "Leer el nombre del sobre", go: "sobre", once: true },
-                    { t: "Coger el monedero", go: "coger" },
+                    { t: "Tomar el monedero", go: "coger" },
                     { t: "Dejar algo tuyo dentro y cerrarla", go: "dejar2" },
                     { t: "Cerrarla sin tocar nada", go: "cerrar" }] },
     sobre: { say: [[null, "«Para mi hermana, si llego. Si no llego, para quien la encuentre: dile que lo intenté.»"], [null, "No dice dónde está la hermana."]], back: "abrir" },
     coger: { say: [[null, "Te guardas el monedero. Pesa lo justo para que te pese también otra cosa."], [null, "Al irte, vuelves la cabeza una vez. La mochila se balancea sola en la rama."]], end: { coins: 16, xp: 4 } },
-    dejar2: { say: [[null, "Dejas dentro un poco de comida y llenas la cantimplora. Cierras con el mismo nudo cuidadoso."], [null, "Quien vuelva a por ella encontrará algo más de lo que dejó. No sabrá de quién."]], end: { xp: 14, heal: 0.1 } },
+    dejar2: { say: [[null, "Dejas dentro un poco de comida y llenas la cantimplora. Cierras con el mismo nudo cuidadoso."], [null, "Quien vuelva por ella encontrará algo más de lo que dejó. No sabrá de quién."]], end: { xp: 14, heal: 0.1 } },
     cerrar: { say: [[null, "Vuelves a hacer el nudo, igual que estaba. No es tuya. Alguien va a volver."]], end: { xp: 10 } },
-    dejar: { say: [[null, "La dejas colgada. Alguien va a volver a por ella. O alguien la necesitará más que tú."]], end: { xp: 8 } },
+    dejar: { say: [[null, "La dejas colgada. Alguien va a volver por ella. O alguien la necesitará más que tú."]], end: { xp: 8 } },
   } },
 
   tormenta: { kind: "encuentro", need: { layer: 1 }, who: {}, start: "a", nodes: {
@@ -95,7 +95,7 @@ window.EVEVENTS.common = {
                 { t: "Ofrecerle algo de comer", go: "comer", once: true },
                 { t: "Taparla con tu chaqueta", go: "tapar" },
                 { t: "Echarla del refugio", go: "echar" }] },
-    lejos: { say: [[null, "Te sientas en tu extremo y ella en el suyo. Escucháis la lluvia los dos. Poco a poco, deja de temblar."], [null, "Tus criaturas se acercan a olerla. Ella se deja."]], back: "a" },
+    lejos: { say: [[null, "Te sientas en tu extremo y ella en el suyo. Escuchan la lluvia los dos. Poco a poco, deja de temblar."], [null, "Tus criaturas se acercan a olerla. Ella se deja."]], back: "a" },
     comer: { say: [[null, "Le dejas un trozo de pan en el suelo, a medio camino. Lo mira mucho rato. Luego se lo come de un bocado, sin dejar de mirarte."]], back: "a" },
     tapar: { say: [[null, "Le echas tu chaqueta por encima. Se queda quieta, sorprendida. Luego se acurruca debajo, y tú pasas frío el resto de la tormenta."],
                    [null, "Cuando para la lluvia, la criatura sale, se sacude y te deja algo a los pies antes de irse."]], end: { xp: 12, card: true, hurt: 0.05 } },
@@ -127,7 +127,7 @@ window.EVEVENTS.common = {
     hablar: { say: [[null, "Te acercas hablándole bajito, de nada en concreto. La criatura deja de gruñir. Te deja tocar el lazo. Lo aflojas, poco a poco."],
                     [null, "Cuando la pata sale, no se va. Cojea unos pasos detrás de ti, como si quisiera ver adónde vas."]], end: { xp: 14, card: true, flag: "soltasteTrampa" } },
     cortar: { say: [[null, "Tiras del lazo de golpe. La pata sale, y con ella el dolor, y la criatura te muerde antes de entender que la has ayudado. Luego entiende. Luego ya es tarde."]], end: { hurt: 0.1, fight: true, xp: 10 } },
-    dejar: { say: [[null, "La dejas. El cazador vendrá a por ella. Es su trabajo, y su cena."], [null, "Durante un rato oyes a la criatura tirar del lazo. Luego ya no la oyes."]], end: { xp: 4 } },
+    dejar: { say: [[null, "La dejas. El cazador vendrá por ella. Es su trabajo, y su cena."], [null, "Durante un rato oyes a la criatura tirar del lazo. Luego ya no la oyes."]], end: { xp: 4 } },
   } },
 
   alforja: { kind: "dialogo", need: { layer: 1 }, who: { alforja: "Doña Alforja" }, start: "a", nodes: {
@@ -147,7 +147,7 @@ window.EVEVENTS.common = {
                    [null, "No te dice cuánto cuestan. Te las guarda en la bolsa sin preguntar y te guiña un ojo."]], fx: { xp: 6 }, back: "a" },
     comprar: { say: [[null, "Doña Alforja te da un tarro de ungüento y cuenta tus Chispas con una lentitud exasperante."],
                      ["alforja", "Dos veces al día. Y no se lo des a probar a los bichos, que les gusta y luego no queda."]], end: { heal: 0.5, xp: 4 } },
-    adios: { say: [["alforja", "¡Volveré a pasar! Siempre vuelvo a pasar. Es lo bueno de no tener casa: no te pilla nunca lejos."]], end: { xp: 4 } },
+    adios: { say: [["alforja", "¡Volveré a pasar! Siempre vuelvo a pasar. Es lo bueno de no tener casa: nunca te queda lejos."]], end: { xp: 4 } },
   } },
 
   brillo: { kind: "encuentro", need: { layer: 1 }, who: {}, start: "a", nodes: {

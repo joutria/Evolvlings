@@ -74,7 +74,7 @@
       seer: { t: "Orilla está arrodillada junto a un charco del Arroyo. «El agua de aquí es poca, pero no miente. ¿Quieres que mire por ti?» Antes de que respondas, Madre Marejada se interpone: «Mi nieta tiene los ojos turbios. No hagas caso de lo que diga.»",
         c: ["Escuchar a Orilla", "Obedecer a la Madre", "Mirar el agua tú mismo"],
         o: ["«La luz bebe de la raíz. Lo he visto tres veces. Nadie quiere saber de qué luz hablo.» Marejada se va sin decir nada.",
-            "Marejada moja los dedos y toca la frente de tus criaturas. «Que el agua os esconda.» Orilla baja la mirada.",
+            "Marejada moja los dedos y toca la frente de tus criaturas. «Que el agua los esconda.» Orilla baja la mirada.",
             "En el reflejo ves un farol con raíces en vez de pie, bebiendo del fondo hasta dejarlo negro. Cuando levantas la vista, las dos se han ido."] },
       lena: { t: "En la forja, Maese Tizón se limpia las manos. «Busco a alguien que me traiga mineral del borde del Envés. Pago bien. Aquí nadie regala nada; por eso todo vale algo.» Detrás de él, una enfriadora de las Mareas se venda las manos en silencio.",
         c: ["Aceptar el encargo", "Preguntarle el nombre a la enfriadora", "Denunciar el accidente al Gremio"],

@@ -6,8 +6,8 @@ window.EVEVENTS.forest = {
                ["abrojo", "Alto. Por aquí no se entra. Y menos con criaturas que no son del Bosque."],
                [null, "El guarda mira el hueco por el que has entrado. Luego te mira a ti."], ["abrojo", "¿Cómo has...? Ese hueco no estaba ayer."]],
          opts: [{ t: "«Estaba abierto. Alguien lo dejó así.»", go: "abierto", once: true },
-                { t: "«¿Por qué cerrasteis el Bosque?»", go: "porque", once: true },
-                { t: "«¿Cuánto lleváis sin dormir?»", go: "dormir", once: true },
+                { t: "«¿Por qué cerraron el Bosque?»", go: "porque", once: true },
+                { t: "«¿Cuánto llevan sin dormir?»", go: "dormir", once: true },
                 { t: "Pedirle paso con buenas palabras", go: "paso" },
                 { t: "Pasar de largo sin pedir permiso", go: "pelea" }] },
     abierto: { say: [["abrojo", "Alguien de dentro, entonces. Desde fuera no se puede: el Seto muerde."],
@@ -30,9 +30,9 @@ window.EVEVENTS.forest = {
                 { t: "Despedirte", go: "adios" }] },
     porque: { say: [["llovizna", "Porque los de dentro no nos dejan entrar. Así que haré un bosque fuera. Cuando sea grande, el Seto quedará en medio."],
                     ["llovizna", "Y entonces ya no se sabrá quién está dentro y quién fuera."]], back: "a" },
-    bellotas: { say: [["llovizna", "Del roble de la linde. Es el más grande de este lado. Las suelta por encima del Seto, como si quisiera que alguien las cogiera."],
+    bellotas: { say: [["llovizna", "Del roble de la linde. Es el más grande de este lado. Las suelta por encima del Seto, como si quisiera que alguien las recogiera."],
                       [null, "Señala un roble enorme al otro lado de las espinas. Tiene una rama torcida que cuelga justo sobre el hueco."]], fx: { flag: "robleLinde" }, back: "a" },
-    familia: { say: [["llovizna", "En el campamento del Arroyo. Mi madre lava ropa en el barro. Yo me escapo."], ["llovizna", "No se lo digas, ¿eh? Cree que voy a por agua. Bueno, en realidad sí riego."]], back: "a" },
+    familia: { say: [["llovizna", "En el campamento del Arroyo. Mi madre lava ropa en el barro. Yo me escapo."], ["llovizna", "No se lo digas, ¿eh? Cree que voy por agua. Bueno, en realidad sí riego."]], back: "a" },
     plantar: { say: [[null, "Cavas hoyitos con las manos y ella mete las bellotas con mucho cuidado, una por una, como si las arropara."],
                      ["llovizna", "Ese es tuyo. Le pondré tu nombre. Cuando vuelvas, a lo mejor ya ha salido."]], end: { xp: 12, heal: 0.1, flag: "bellotaNina" } },
     adios: { say: [["llovizna", "Si ves a un viejo con capucha verde y olor a tierra, dile que sus bellotas están bien cuidadas."]], end: { xp: 6 } },
@@ -53,7 +53,7 @@ window.EVEVENTS.forest = {
                    [null, "Muy al fondo, una gota negra sube despacio por la pared. Hacia arriba."]], fx: { xp: 8, flag: "robleHueco" }, back: "a" },
     escuchar: { say: [[null, "Doña Agalla te cuenta la historia de un invierno de hace trescientos años, con todos los detalles. Tarda una hora. Tus criaturas se duermen entre sus raíces."],
                       ["agalla", "...y por eso nunca hay que fiarse de una ardilla. Gracias, joven. Hacía mucho que nadie me dejaba terminar."]], end: { heal: 0.35, xp: 8 } },
-    adios: { say: [["agalla", "Deprisa, deprisa. Todos tan deprisa. Ya pararéis."]], end: { xp: 4 } },
+    adios: { say: [["agalla", "Deprisa, deprisa. Todos tan deprisa. Ya pararán."]], end: { xp: 4 } },
   } },
 
   liquenes: { kind: "dialogo", need: { layer: 2 }, who: { liquen: "Abuelo Liquen" }, start: "a", nodes: {
@@ -101,15 +101,15 @@ window.EVEVENTS.forest = {
                  ["yedra", "Sin él, las heridas no cierran. Las de los árboles, digo. Bueno, y las otras."]], back: "a" },
     porque: { say: [["yedra", "Los ancianos dicen que no es seguro dormir con tanta gente fuera del Seto. Que alguien podría entrar mientras dormimos."],
                     ["yedra", "Yo creo que tienen miedo de otra cosa. Cuando cierras los ojos aquí, oyes algo debajo de la tierra. Algo que tampoco duerme."]], fx: { flag: "sinSilencio" }, back: "a" },
-    cantar: { say: [[null, "Le cantas lo primero que se te ocurre. A la tercera estrofa Yedra ronca. A la cuarta, tus criaturas también. Os quedáis un rato descansando a la sombra."]], end: { heal: 0.4 } },
+    cantar: { say: [[null, "Le cantas lo primero que se te ocurre. A la tercera estrofa Yedra ronca. A la cuarta, tus criaturas también. Se quedan un rato descansando a la sombra."]], end: { heal: 0.4 } },
     adios: { say: [["yedra", "Si encuentras sueño por ahí, tráeme un poco."]], end: { xp: 4 } },
   } },
 
   fuera: { kind: "dialogo", need: { layer: 1 }, who: { bruma: "Bruma" }, start: "a", nodes: {
     a: { say: [[null, "Junto al Seto, por el lado de fuera, una familia de la Sombra ha montado un refugio con mantas. El padre recoge ramitas caídas, solo las caídas, una a una."],
                ["bruma", "No cortamos nada, ¿eh? Solo lo que el Bosque tira. Eso no está prohibido. Creo."]],
-         opts: [{ t: "«¿Por qué no vais al Barrio Apagado?»", go: "barrio", once: true },
-                { t: "«¿Qué os pasó el primer invierno?»", go: "invierno", once: true },
+         opts: [{ t: "«¿Por qué no van al Barrio Apagado?»", go: "barrio", once: true },
+                { t: "«¿Qué les pasó el primer invierno?»", go: "invierno", once: true },
                 { t: "Darles algo de lo que llevas (8 Chispas)", go: "dar", fx: { cost: 8 } },
                 { t: "Ayudar a recoger ramas caídas", go: "ramas" }] },
     barrio: { say: [["bruma", "Porque el Barrio es para los que trabajan de noche. Y yo no quiero que mis hijos crezcan con polvo dorado en las uñas."],
@@ -117,7 +117,7 @@ window.EVEVENTS.forest = {
     invierno: { say: [["bruma", "Llegamos con nieve. El Seto todavía era un muro de palos; no mordía como ahora. Alguien cortó ramas para hacer fuego. No fui yo, pero da igual: para ellos fuimos todos."],
                       ["bruma", "A la mañana siguiente plantaron el Seto. A la otra, ya nos llegaba a la cintura."]], back: "a" },
     dar: { say: [[null, "Bruma acepta sin mirarte a los ojos. Los niños sí te miran, mucho."], ["bruma", "Esto es para mantas. Gracias, Cuidador."]], end: { xp: 10, flag: "ayudasteFuera" } },
-    ramas: { say: [[null, "Recogéis ramas caídas hasta llenar dos brazadas. Al final el fuego prende, pequeño y limpio, y los niños se acercan a calentarse con tus criaturas."]], end: { xp: 8, heal: 0.2 } },
+    ramas: { say: [[null, "Recogen ramas caídas hasta llenar dos brazadas. Al final el fuego prende, pequeño y limpio, y los niños se acercan a calentarse con tus criaturas."]], end: { xp: 8, heal: 0.2 } },
   } },
 
   musgo: { kind: "encuentro", need: { layer: 2 }, who: { nino: "Niño del Bosque" }, start: "a", nodes: {
@@ -131,7 +131,7 @@ window.EVEVENTS.forest = {
                       [null, "Un golpe lento. Otro. Muy separados. Como un corazón enorme que late cada vez más despacio."],
                       ["nino", "Eso no es el musgo. Eso lleva sonando todo el invierno. Mi abuela dice que no lo escuchemos."]], fx: { flag: "latidoRaiz", xp: 12 }, back: "a" },
     que: { say: [["nino", "Si escuchas mucho rato, el musgo cruje. Crec, crec. Es que se estira."], ["nino", "Mi hermana dice que también se oyen los pasos de las hormigas. Mi hermana miente mucho."]], back: "a" },
-    jugar: { say: [[null, "Os ponéis a jugar a esconderse entre las raíces. Los niños ganan todas las veces: el Bosque los esconde mejor que a ti."]], end: { heal: 0.25, xp: 6 } },
+    jugar: { say: [[null, "Se ponen a jugar a las escondidas entre las raíces. Los niños ganan todas las veces: el Bosque los esconde mejor que a ti."]], end: { heal: 0.25, xp: 6 } },
     adios: { say: [["nino", "¡Shh!"]], end: { xp: 2 } },
   } },
 

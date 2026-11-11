@@ -3,10 +3,10 @@ window.EVEVENTS = window.EVEVENTS || {};
 window.EVEVENTS.deep = {
   vela: { kind: "dialogo", need: { layer: 1 }, who: { nevisca: "Nevisca, soñadora del Turno" }, start: "a", nodes: {
     a: { say: [[null, "En la sala del Turno de Vela, una docena de camas de piel blanca forman un círculo. En cada una duerme alguien. Una mujer joven se despierta despacio, se frota los ojos y apunta algo en una tablilla de hielo."],
-               ["nevisca", "Shhh. Habla flojo, que los demás siguen escuchando. Me toca a mí contar lo que ha dicho Su Majestad."]],
+               ["nevisca", "Shhh. Habla bajito, que los demás siguen escuchando. Me toca a mí contar lo que ha dicho Su Majestad."]],
          opts: [{ t: "«¿Qué ha dicho el Rey?»", go: "dicho", once: true },
                 { t: "«¿Cómo se escucha a alguien en sueños?»", go: "como", once: true },
-                { t: "«¿Habéis visto alguna vez al Rey?»", go: "visto", once: true },
+                { t: "«¿Alguna vez han visto al Rey?»", go: "visto", once: true },
                 { t: "Tumbarte en una cama libre", go: "dormir" },
                 { t: "Despedirte en silencio", go: "adios" }] },
     dicho: { say: [[null, "Nevisca mira la tablilla. Está en blanco."], ["nevisca", "Nada. Otra vez nada. Hace una luna que Su Majestad no dice nada."],
@@ -23,7 +23,7 @@ window.EVEVENTS.deep = {
   setas: { kind: "encuentro", need: { layer: 1 }, who: { yesca: "Yesca, cultivadora" }, start: "a", nodes: {
     a: { say: [[null, "Bajo el hielo se abre una caverna tibia llena de setas que brillan en todos los colores. Un hombre bajito del pueblo Seta riega las setas con un cazo de agua caliente."],
                ["yesca", "¡Pasa, pasa, que se escapa el calor! Aquí es donde vivimos los que nos quedamos. Bueno, los que nos dejaron."]],
-         opts: [{ t: "«¿Os dejaron?»", go: "dejaron", once: true },
+         opts: [{ t: "«¿Los dejaron?»", go: "dejaron", once: true },
                 { t: "«¿Por qué brillan las setas?»", go: "brillan", once: true },
                 { t: "«¿Qué opinas de la Regente?»", go: "regente", once: true },
                 { t: "Comer algo con él", go: "comer" },
@@ -62,7 +62,7 @@ window.EVEVENTS.deep = {
                 { t: "Romper los carámbanos de un golpe", go: "romper" }] },
     gotas: { say: [[null, "Las gotas caen siempre en el mismo ritmo: dos rápidas y una lenta. Como un corazón que late mal."], [null, "El agua que gotea no es del todo transparente. Tiene un brillo verde, muy débil."]], back: "a" },
     sigilo: { say: [[null, "Cruzas de puntillas. A mitad de camino, una gota te cae en la nuca, das un respingo y los carámbanos con ojos se descuelgan del techo."]], end: { fight: true, foes: ["carambano", "carambano"], xp: 12 } },
-    lumo: { say: [[null, "Lumo brilla todo lo que puede. El hielo suda, los carámbanos se ablandan y los de ojos se retiran hacia el fondo, ofendidos."], [null, "Pasáis, pero Lumo sale agotado y tiritando."]], end: { xp: 10, hurt: 0.06 } },
+    lumo: { say: [[null, "Lumo brilla todo lo que puede. El hielo suda, los carámbanos se ablandan y los de ojos se retiran hacia el fondo, ofendidos."], [null, "Pasan, pero Lumo sale agotado y tiritando."]], end: { xp: 10, hurt: 0.06 } },
     romper: { say: [[null, "Golpeas el primer carámbano. Se rompe con un sonido de campana, y todos los demás despiertan a la vez."]], end: { fight: true, foes: ["carambano", "carambano", "capuchon"], foeBuff: 10, xp: 14 } },
   } },
 
@@ -76,7 +76,7 @@ window.EVEVENTS.deep = {
     abajo: { say: [["nieve", "¡El Rey! ¡Es el Rey dormido! Mi abuela dice que no, que es una piedra blanca. Pero las piedras no cambian de sitio."], ["granizo", "Ayer estaba más a la izquierda."]], back: "a" },
     oreja: { say: [[null, "Te tumbas sobre el hielo y pegas la oreja. Muy abajo, muy despacio, algo late. Una vez. Mucho rato después, otra."], [null, "Los niños se han callado y te miran."]], fx: { flag: "latidoHielo" }, back: "a" },
     patinar: { say: [[null, "Te atan unos huesos a las botas. Te caes cuatro veces. A la quinta das una vuelta entera y los niños aplauden. Tus criaturas resbalan detrás de ti dando vueltas como trompos."]], end: { xp: 12, heal: 0.15 } },
-    centro: { say: [["nieve", "¡Jo! ¡Siempre igual!"], [null, "Se apartan, refunfuñando. Justo cuando llegan a la orilla, el centro del lago cruje con un ruido seco y se abre una grieta larga."],
+    centro: { say: [["nieve", "¡Ay, no! ¡Siempre lo mismo!"], [null, "Se apartan, refunfuñando. Justo cuando llegan a la orilla, el centro del lago cruje con un ruido seco y se abre una grieta larga."],
                     [null, "Por la grieta asoma un vaho tibio que huele a tierra. Los niños se quedan muy quietos."], ["granizo", "...Gracias."]], end: { xp: 14, flag: "grietaLago" } },
   } },
 
@@ -144,7 +144,7 @@ window.EVEVENTS.deep = {
                    ["esporina", "Este trozo dice qué pasa si alguien bebe por debajo de los sueños del Rey. Dice que la calma no es para siempre."],
                    ["esporina", "Para ti, un precio especial: nada. Pero solo si se lo lees a ella, delante de todos. Quiero verle la cara."]], fx: { flag: "trozoInscripcion" }, back: "a" },
     madre: { say: [[null, "Esporina se queda inmóvil. Por primera vez no tiene un precio preparado."], ["esporina", "¿Eso preguntó? ¿Con esas palabras?"],
-                   [null, "Se gira para que no le veas la cara."], ["esporina", "Pues dile que no. Que como fatal. Que venga ella a ver qué como."]], back: "a" },
+                   [null, "Se gira para que no le veas la cara."], ["esporina", "Pues dile que no. Que como pésimo. Que venga ella a ver qué como."]], back: "a" },
     adios: { say: [["esporina", "Vuelve cuando la calma se acabe. Que se acabará. Yo tendré la tienda abierta."]], end: { xp: 20 } },
   } },
 };

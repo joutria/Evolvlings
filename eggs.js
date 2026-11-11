@@ -22,7 +22,7 @@ const TX = {
     "empty": "El Refugio todavía está vacío. Tira en el Pozo de Huevos, incuba el huevo y la criatura vivirá aquí.",
     "lvl": "Nv {n}", "bond": "Vínculo {n}", "bondMax": "Vínculo máximo", "pet": "Acariciar", "petDone": "Ya la acariciaste hoy",
     "bond.0": "{n} te observa desde su rincón del Refugio.", "bond.1": "{n} viene corriendo cuando te ve llegar.",
-    "bond.2": "{n} no se separa de ti en todo el día.", "bond.3": "{n} y tú os entendéis sin palabras.",
+    "bond.2": "{n} no se separa de ti en todo el día.", "bond.3": "{n} y tú se entienden sin palabras.",
     "bondWhy": "El Vínculo sube al viajar juntos (+1), al ganar (+1 más) y al acariciarla una vez al día (+1; si faltas, se guardan hasta 3 caricias). Cada nivel da +1,5 % a sus estadísticas y +1 % de crítico. Con Vínculo 5 y 10 sus cartas suben de rareza.",
     "badge": "Refugio · Nv {l} · ♥ {b}", "born": "¡Ha nacido {n}!", "bornSub": "Ya vive en el Refugio y puede acompañarte en tu próxima expedición.",
     "dup": "¡Otra vez {n}!", "dupSub": "{n} ya tiene sus 5 estrellas. Su hermano se queda con la familia de Tila y te deja {d} ∴ de Polvo y +1 de Vínculo.",
@@ -65,7 +65,7 @@ const TX = {
     "wel.title": "Tareas de bienvenida", "wel.sub": "Una sola vez. Dan {n} Notas del Canto en total.", "wel.claim": "Cobrar ♪{n}", "wel.done": "Cobrada",
     "w.feed3": "Dar de comer 3 veces", "w.exp1": "Terminar una expedición", "w.equip": "Equipar una carta", "w.well1": "Tirar en el Pozo de los Ecos",
     "w.egg1": "Tirar en el Pozo de Huevos", "w.hatch1": "Abrir un huevo del Refugio", "w.bond2": "Llegar a Vínculo 2 con un compañero", "w.cl5": "Llegar a Nivel de Cuidador 5",
-    "trip": "{n}: +{x} XP", "tripLvl": "{n} sube al nivel {l}", "tripBond": "{n} y tú llegáis a Vínculo {b}",
+    "trip": "{n}: +{x} XP", "tripLvl": "{n} sube al nivel {l}", "tripBond": "{n} y tú llegan a Vínculo {b}",
     "ach.egg1": ["Primer nido", "Abre un huevo del Refugio."], "ach.bond10": ["Inseparables", "Llega a Vínculo 10 con un compañero del Refugio."], "ach.cl10": ["Cuidador del Vado", "Llega a Nivel de Cuidador 10."],
   },
   en: {
