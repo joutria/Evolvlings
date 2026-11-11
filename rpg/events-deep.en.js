@@ -40,7 +40,7 @@ window.EVEVENTS_EN.deep = {
          opts: ["“What's that down there?”", "Skate with them", "Put your ear to the ice", "Tell them to get away from the middle"] },
     abajo: { say: ["The King! It's the sleeping King! My grandma says no, it's a white rock. But rocks don't move around.", "Yesterday it was more to the left."] },
     oreja: { say: ["You lie on the ice and press your ear to it. Far below, very slowly, something beats. Once. A long while later, again.", "The children have gone quiet and are watching you."] },
-    patinar: { say: ["They tie bones to your boots. You fall four times. On the fifth you make a full circle and the children clap. Your creatures slide along behind you like curling stones."] },
+    patinar: { say: ["They tie bones to your boots. You fall four times. On the fifth you make a full circle and the children clap. Your creatures slide along behind you spinning like tops."] },
     centro: { say: ["Aww! Always the same!", "They move away, grumbling. Just as they reach the shore, the middle of the lake cracks with a dry snap and a long fissure opens.", "Through the crack rises a warm breath that smells of earth. The children go very still.", "...Thanks."] },
   } },
   sueno: { who: {}, nodes: {

@@ -103,7 +103,7 @@ window.EVEVENTS.heart = {
 
   bomba: { kind: "encuentro", need: { layer: 4 }, who: { barrena: "Barrena, de los Pozos" }, start: "a", nodes: {
     a: { say: [[null, "Junto a una de las estatuas hay un pozo nuevo, tapado con tablones, y una bomba de mano de hierro. Un hombre de Sombra con las mangas negras hasta el codo bombea despacio. Cada vez que baja la palanca, el suelo responde con un golpe."],
-               ["barrena", "Si vienes a inspeccionar, el permiso está en la caseta. Si no lo eres, no has visto nada y yo tampoco te he visto a ti."]],
+               ["barrena", "Si eres inspector, el permiso está en la caseta. Si no lo eres, no has visto nada y yo tampoco te he visto a ti."]],
          opts: [{ t: "«¿Qué sacas de ahí abajo?»", go: "saca", once: true },
                 { t: "«¿Para quién trabajas?»", go: "quien", once: true },
                 { t: "«Cada vez que bombeas, el suelo da un golpe.»", go: "golpe", once: true },

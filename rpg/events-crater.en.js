@@ -39,7 +39,7 @@ window.EVEVENTS_EN.crater = {
   pan: { who: { miga: "Miga, baker" }, nodes: {
     a: { say: ["On a street in the Crater the ground is so warm that a girl bakes bread right on the flagstones, under clay bells.", "Ground bread! The only bread that bakes itself. Hungry? In the Crater, the first piece is free."],
          opts: ["“The first piece is free?”", "“Where does the flour come from?”", "Take the first piece", "Buy bread for the team (6 Chispas)"] },
-    costumbre: { say: ["It's an old custom. If someone arrives hungry, the first piece is theirs. The second one's business.", "People used to come back for the second. Now, with the Hondura folk and the Water folk... hardly anyone gets to the second."] },
+    costumbre: { say: ["It's an old custom. If someone arrives hungry, the first piece is theirs. The second one's business.", "Most people used to buy the second. Now, with the Hondura folk and the Water folk, hardly anyone can afford it."] },
     harina: { say: ["Miga lifts a sack. It's printed with a lantern: the mark of House Albor.", "From Albor, like everything. They pay for it and take it off the order. My bread is Albor's, my oven is the ground's, and I belong to whoever pays me.", "She shrugs."] },
     comer: { say: ["The bread comes out hot, its crust full of ash. It tastes of iron and glory.", "Come back whenever. The first piece is always free."] },
     comprar: { say: ["Miga wraps four loaves in a cloth. Your creatures don't even wait for them to cool.", "Now that's business! Enjoy."] },

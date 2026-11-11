@@ -2,7 +2,7 @@
 window.EVEVENTS_EN = window.EVEVENTS_EN || {};
 window.EVEVENTS_EN.forest = {
   abrojo: { who: { abrojo: "Abrojo, Hedge guard" }, nodes: {
-    a: { say: ["As you slip through the gap in the Hedge, a wooden spear bars your way. The guard holding it has thorns on his sleeves and the face of someone who hasn't slept.", "Halt. No entry here. Especially not with creatures that aren't from the Forest.", "He looks at the gap you came through. Then he looks at you.", "How did you... ? That gap wasn't there yesterday."],
+    a: { say: ["As you slip through the gap in the Hedge, a wooden spear bars your way. The guard holding it has thorns on his sleeves and the face of someone who hasn't slept.", "Halt. No entry here. Especially not with creatures that aren't from the Forest.", "He looks at the gap you came through. Then he looks at you.", "How did you...? That gap wasn't there yesterday."],
          opts: ["“It was open. Someone left it that way.”", "“Why did you close the Forest?”", "“How long since you slept?”", "Ask him politely to let you through", "Walk past without asking"] },
     abierto: { say: ["Someone from inside, then. From outside you can't: the Hedge bites.", "He scratches at a thorn stuck in his wrist.", "Some elders say the Forest is suffocating, shut in like this. I don't say anything. I keep watch."] },
     porque: { say: ["Because the first winter of the exodus, hundreds came. They cut branches for firewood. Branches from trees with names.", "The council voted for the Hedge. Even Grandpa Liquen voted yes, and he came here as a refugee.", "Strange, isn't it? The ones who arrive are the ones who shut the door hardest."] },

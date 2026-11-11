@@ -23,7 +23,7 @@ window.EVEVENTS.crater = {
 
   termas: { kind: "encuentro", need: { layer: 1 }, who: { ascua: "La vieja Ascua" }, start: "a", nodes: {
     a: { say: [[null, "Donde antes estaban las termas del Cráter solo quedan piletas de piedra secas y algún charco templado. En uno de ellos, una anciana tiene los pies metidos y los ojos cerrados."],
-               ["ascua", "Llegas tarde, criatura. Hace dos años aquí cabía medio Cráter. Ahora cabemos yo y mis juanetes."]],
+               ["ascua", "Llegas tarde, corazón. Hace dos años aquí cabía medio Cráter. Ahora cabemos yo y mis juanetes."]],
          opts: [{ t: "«¿Qué pasó con el agua?»", go: "agua", once: true },
                 { t: "«¿Quién venía a las termas?»", go: "quien", once: true },
                 { t: "Meter tú también los pies", go: "pies", once: true },
@@ -86,7 +86,7 @@ window.EVEVENTS.crater = {
                 { t: "Aceptar el primer trozo", go: "comer" },
                 { t: "Comprar pan para el equipo (6 Chispas)", go: "comprar", fx: { cost: 6 } }] },
     costumbre: { say: [["miga", "Es una costumbre vieja. Si alguien llega con hambre, el primer trozo es suyo. El segundo ya es negocio."],
-                       ["miga", "Antes la gente se quedaba en el segundo. Ahora con los de Hondura y los del Agua... casi nadie llega al segundo."]], back: "a" },
+                       ["miga", "Antes casi todos compraban el segundo. Ahora, con los de Hondura y los del Agua, casi nadie puede pagarlo."]], back: "a" },
     harina: { say: [[null, "Miga levanta un saco. Tiene impreso un farol: la marca de la Casa Albor."],
                     ["miga", "De Albor, como todo. La pagan ellos y la descuentan del encargo. Mi pan es de Albor, mi horno es del suelo y yo soy de quien me pague."], [null, "Se encoge de hombros."]], fx: { flag: "harinaAlbor" }, back: "a" },
     comer: { say: [[null, "El pan sale caliente, con la corteza llena de ceniza. Sabe a hierro y a gloria."], ["miga", "Vuelve cuando quieras. El primer trozo siempre es gratis."]], end: { heal: 0.2, xp: 4 } },
