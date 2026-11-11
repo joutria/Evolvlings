@@ -883,7 +883,7 @@ const css = `
 #btnMap.on { outline: 2px solid var(--gold, #e0b04a); }
 @media (max-width: 480px) { .wdlg-face { width: 56px; height: 56px; } .wdlg-pet { width: 36px; height: 36px; } }
 `;
-const st = document.createElement("style"); st.textContent = css; document.head.appendChild(st);
+const st = document.createElement("style"); st.textContent = css; (document.body || document.head).appendChild(st);
 
 EV.HOOKS.renderMap = () => { foodPick = false; setTimeout(render, 0); };
 const prevShow = EV.HOOKS.showScreen;

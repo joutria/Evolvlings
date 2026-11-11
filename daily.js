@@ -377,7 +377,7 @@ css.textContent = `
 .dch.got { opacity: .6; }
 .dch small { font-size: 12px; color: var(--muted); }
 `;
-document.head.appendChild(css);
+(document.body || document.head).appendChild(css);
 
 /* ---------- Hooks ---------- */
 EV.HOOKS.renderDaily = () => { tick(); setTimeout(render, 0); };

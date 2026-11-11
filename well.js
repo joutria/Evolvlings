@@ -209,7 +209,7 @@ const css = `
 .well-hist { max-height: 260px; overflow: auto; padding-left: 22px; } .well-hist small { color: var(--muted); }
 @media (max-width: 620px) { .well-ban { grid-template-columns: 1fr; } }
 `;
-const st = document.createElement("style"); st.textContent = css; document.head.appendChild(st);
+const st = document.createElement("style"); st.textContent = css; (document.body || document.head).appendChild(st);
 
 /* ---------- Achievements ---------- */
 EV.ACH.push(["well1", 15, (p) => (p.c.wellPulls || 0) >= 1], ["legend1", 100, (p) => (p.cards || []).some((c) => c.g >= LEG)]);

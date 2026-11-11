@@ -123,7 +123,7 @@ const css = `
 .gd-cur p span { color: var(--muted); font-weight: 600; }
 .gd-tip p { margin: 4px 0 8px; font-size: 14px; }
 `;
-const st = document.createElement("style"); st.textContent = css; document.head.appendChild(st);
+const st = document.createElement("style"); st.textContent = css; (document.body || document.head).appendChild(st);
 
 // the panel and its menu button
 const header = $("btnJournal");
