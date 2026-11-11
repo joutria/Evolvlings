@@ -57,7 +57,7 @@
     yedra: P(["Yedra"], ["Yedra"], "Mujer de la hamaca", "la mujer de la hamaca", "Woman in the hammock", "the woman in the hammock"),
     bruma: P(["Bruma"], ["Bruma"], "Padre de la Sombra", "el padre de la Sombra", "Shadow father", "the Shadow father"),
     // Corazón del Claro
-    brezo: P(["Brezo, guarda del Tocón", "Brezo, keeper of the Stump"], ["Brezo"], "Guarda del Tocón", "el guarda del Tocón", "Keeper of the Stump", "the keeper of the Stump"),
+    brezo: P(["Brezo, guarda del Tocón", "Brezo, keeper of the Stump"], ["Brezo"], "Guarda del Tocón", "la guarda del Tocón", "Keeper of the Stump", "the keeper of the Stump"),
     cincel: P(["Cincel, escultor", "Cincel, sculptor"], ["Cincel"], "Escultor viejo", "el escultor viejo", "Old sculptor", "the old sculptor"),
     antifona: P(["Antífona, peregrina", "Antífona, pilgrim"], ["Antífona"], "Peregrina del manto", "la peregrina del manto", "Pilgrim in the cloak", "the pilgrim in the cloak"),
     barrena: P(["Barrena, de los Pozos", "Barrena, of the Wells"], ["Barrena"], "Hombre de la bomba", "el hombre de la bomba", "Man at the pump", "the man at the pump"),

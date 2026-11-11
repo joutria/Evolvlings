@@ -7,7 +7,7 @@ window.EVEVENTS_EN.lake = {
     que: { say: ["When the Stream dried up, the Mother said the water had gone down somewhere. If it went down, it can come up. If we pray, it comes up.", "Around him, a dozen heads nod slowly."] },
     funciona: { say: ["Some nights the puddle wakes up a finger higher. Those nights we prayed well.", "The other nights we prayed badly, and we try again. Easy, see?"] },
     presa: { say: ["A silence falls. Someone in the ring spits on the ground.", "That's what the ones who don't pray say. The Mother has said nothing about dams. If it were true, she'd have seen it in the water.", "He looks at you with more pity than anger.", "Sit down anyway. Water holds no grudge against anyone."] },
-    crecio: { say: ["A whole hand's breadth! In a single night! That night all forty of us prayed, even the children.", "You know about a wheel that turned once, up there. You say nothing. The old man is crying with joy."] },
+    crecio: { say: ["A whole hand's breadth! In a single night! That night all forty of us prayed, even the children.", "You know that, up there, someone turned a wheel once. You say nothing. The old man is crying with joy."] },
     rezar: { say: ["You sit in the mud with them. The prayer is a song without words, like the sound of running water. Your creatures fall asleep in your lap.", "At dawn the puddle hasn't grown. But nobody seems sad. They offer you a bowl of soup."] },
     adios: { say: ["Come back on a moonlit night. With a moon, the water listens better."] },
   } },

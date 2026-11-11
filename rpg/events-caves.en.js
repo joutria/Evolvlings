@@ -59,7 +59,7 @@ window.EVEVENTS_EN.caves = {
   nombres: { who: { pared: "The wall" }, nodes: {
     a: { say: ["In a corner of the Hall of Echoes there's a list of names on the wall, in slow handwriting. At the top it says: “Voices gone quiet”. The last names are written bigger, and more crooked.", "When you bring your hand close, the stone is warm."],
          opts: ["Read the names", "Ask aloud who writes them", "Write a name yourself", "Step away"] },
-    leer: { say: ["“Grandpa Pizarra. The girl who sang in Water. A pilgrim of Light whose verse spoke of a borrowed light. Two Thunder brothers.”", "Below, the last line: “Every day I write fewer names. Either fewer remain, or I remember less.”"] },
+    leer: { say: ["“Grandpa Pizarra. The girl who sang in the Water tongue. A pilgrim of Light whose verse spoke of a borrowed light. Two Thunder brothers.”", "Below, the last line: “Every day I write fewer names. Either fewer remain, or I remember less.”"] },
     quien: { say: ["Your question comes back once. Twice. The third doesn't come back.", "Instead the wall answers, very slowly, in a voice like a mountain sitting down:", "Me. Let no one say otherwise.", "A streak of dust falls from the ceiling. Then nothing."] },
     escribir: { say: ["You pick up a stone and write, at the end of the list, the name of someone who is gone. Your creatures watch without understanding.", "When you finish, the stone warms under your hand for a moment, like someone squeezing a hand at a funeral."] },
     adios: { say: ["You step away. Behind you there's a slow scraping, like a fingernail of stone on the wall. Someone is writing another name."] },
