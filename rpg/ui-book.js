@@ -6,6 +6,9 @@
      diario    every conversation you lived, copied line by line: the questions you asked and the way you took; the
                ones you skipped are grey lines, the endings you did not choose are grey boxes (EV.P.diary)
      cartas    the Grimoire (it moved here from the Cards panel): every card by circle and type, and crafting
+     zonas     every zone: the foes you can meet there and how often, its guardian, verse, encounters lived and Sap
+     bestiario the foes you fought: an entry after 3 wins (guardians after 1), with stats at the levels you beat them,
+               their cards, where they live and what is said of them (EV.P.bst[kind] = { w wins, lv highest level, l {lvl:1} })
      escritos  the Writings you found, and the Threads two of them make together
    EV.P.bookNew holds the sections with something new (a dot on the ribbon and on the button). Classic script: it uses
    the shared rpg/*.js names (TALK, CARDS, cardHtml...). */
@@ -13,9 +16,11 @@
 const BOOK_ICON = {
   diario: '<path d="M5 3h11a3 3 0 0 1 3 3v15H8a3 3 0 0 1-3-3z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 8h7M9 12h7M9 16h4" stroke="currentColor" stroke-width="2"/>',
   cartas: '<rect x="4" y="5" width="11" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4.5l9 2.5-3 13" fill="none" stroke="currentColor" stroke-width="2"/>',
+  zonas: '<path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 3v15M15 6v15" stroke="currentColor" stroke-width="2"/>',
+  bestiario: '<circle cx="7" cy="8" r="2.2" fill="currentColor"/><circle cx="12" cy="6" r="2.2" fill="currentColor"/><circle cx="17" cy="8" r="2.2" fill="currentColor"/><path d="M6 17c0-4 3-6 6-6s6 2 6 6c0 2-2 3-6 3s-6-1-6-3z" fill="currentColor"/>',
   escritos: '<path d="M6 4h10l3 3v13H6z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 10h7M9 14h7" stroke="currentColor" stroke-width="2"/>',
 };
-const BOOK_TABS = [["diario", "#a3343b"], ["cartas", "#2f5d96"], ["escritos", "#8a7a64"]];
+const BOOK_TABS = [["diario", "#a3343b"], ["zonas", "#8a6a3a"], ["bestiario", "#4f9a3c"], ["cartas", "#2f5d96"], ["escritos", "#6e6283"]];
 const BK = { open: false, tab: "diario", sel: {} };
 const bookNew = () => EV.P.bookNew || (EV.P.bookNew = {});
 const bt = (k, v) => tx("book." + k, v);
@@ -166,9 +171,104 @@ function escPage(id) {
   return `<h3>${esc(maskNames(t.title))}</h3>${t.text.split(/\n+/).map((p) => `<p class="bk-say">${esc(maskNames(p))}</p>`).join("")}`;
 }
 
+/* ---------- Bestiary: wins per foe (EV.P.bst) ---------- */
+const beastSlice = EV.slice("bst", () => ({}));
+const isGuardian = (k) => Object.values(ZONES).some((z) => z.boss === k);
+const beastNeed = (k) => (isGuardian(k) ? 1 : 3);
+const beastKnown = (k) => ((beastSlice()[k] || {}).w || 0) >= beastNeed(k);
+// called by endBattle for every foe of a won fight
+function beastWin(u) {
+  if (!u || !MONS[u.kind]) return;
+  const B = beastSlice(), r = B[u.kind] || (B[u.kind] = { w: 0, lv: 0, l: {} }), was = r.w >= beastNeed(u.kind);
+  r.w++; r.lv = Math.max(r.lv, u.lvl); r.l[u.lvl] = 1;
+  const lv = Object.keys(r.l).map(Number).sort((a, b) => a - b); if (lv.length > 12) delete r.l[lv[0]];
+  if (!was && r.w >= beastNeed(u.kind)) { bookNew().bestiario = 1; EV.toast(bt("newBeast", { n: monName(u.kind, !u.boss) })); }
+}
+// how often each foe comes up in a zone: its share of the zone's list (the game draws from that list)
+function zoneOdds(z) {
+  const f = (ZONES[z] && ZONES[z].foes) || [], c = {};
+  for (const k of f) c[k] = (c[k] || 0) + 1;
+  return Object.keys(c).map((k) => [k, Math.round(100 * c[k] / f.length)]).sort((a, b) => b[1] - a[1]);
+}
+const foeName = (k) => (beastKnown(k) ? monName(k, !isGuardian(k)) : "???");
+// the small line on the expedition screen: "You may meet: Dim Lumo 40 % · ??? 20 %"
+function zoneOddsLine(z) {
+  if (!ZONES[z]) return "";
+  return `<p class="muted zone-odds">${esc(bt("canMeet"))} ${zoneOdds(z).map(([k, p]) => `<span class="${beastKnown(k) ? "" : "unk"}">${esc(foeName(k))} ${p} %</span>`).join(" · ")}</p>`;
+}
+const zoneSeen = (z) => zoneOpen(z) || ((EV.P.cleared || {})[z] || 0) > 0;
+function zonesList() {
+  let h = "", grp = null;
+  for (const id of Object.keys(ZONES)) {
+    const g = (zt("sub", null, id) || "").split(" · ")[0];
+    if (g !== grp) { if (grp !== null) h += `</ul>`; h += `<p class="bk-grp">${esc(g)}</p><ul class="bk-list">`; grp = g; }
+    const on = BK.sel.zonas === id ? ' aria-current="true"' : "", st = (EV.P.stars || {})[id] || 0;
+    h += zoneSeen(id) ? `<li><button type="button" class="bk-it" data-bksel="${id}"${on}><span class="bk-ic">${tyIcon(ZONES[id].type)}</span><span class="bk-nm">${esc(zt("name", null, id))}<small>${esc(TYPES[ZONES[id].type][L()])}</small></span><span class="bk-ct">${starStr(st)}</span></button></li>`
+      : `<li><button type="button" class="bk-it locked" data-bksel="${id}"${on}><span class="bk-ic">🔒</span><span class="bk-nm">${esc(zt("name", null, id))}<small>${esc(bt("notYet"))}</small></span></button></li>`;
+  }
+  return h + `</ul>`;
+}
+function zonePage(id) {
+  const z = ZONES[id]; if (!z) return "";
+  if (!zoneSeen(id)) return `<h3>${esc(zt("name", null, id))}</h3><p class="bk-sub">${esc(bt("notYetLong"))}</p><p class="bk-say n">${esc(keyLock(id) || tx(z.unlockAll ? "zones.lockHeart" : Array.isArray(z.unlock) ? (z.unlock.includes("hollow") ? "zones.lockHigh" : "zones.lockEnv") : "zones.lock"))}</p>`;
+  const cl = (EV.P.cleared || {})[id] || 0, sap = saviaLvl(id), c = TALK[id] ? diaryCounts(id) : null;
+  let h = `<h3>${esc(zt("name", null, id))}</h3><p class="bk-sub">${esc(zt("sub", null, id))}</p><p class="bk-say">${esc(zt("desc", null, id))}</p>`;
+  h += `<p class="bk-q">${esc(bt("canMeet"))}</p>` + zoneOdds(id).map(([k, p]) => `<div class="bk-bar"><span class="${beastKnown(k) ? "" : "unk"}">${esc(foeName(k))}</span><span class="tr"><i style="width:${p}%"></i></span><span>${p} %</span></div>`).join("");
+  h += `<p class="bk-q">${esc(bt("guardian"))}</p><p class="bk-say">${esc(zt("bossD", null, id))}${cl ? " " + esc(tx("zones.done", { n: cl })) : ""}</p>`;
+  if (cl) h += `<p class="bk-say n">${esc(tx("zones.verse", { v: zt("verse", null, id) }))}</p>`;
+  if (c) h += `<p class="bk-q">${esc(bt("lived", { n: c.lived, m: c.all }))}</p><div class="bk-prog"><i style="width:${Math.round(100 * c.lived / Math.max(1, c.all))}%"></i></div>`;
+  h += `<p class="bk-say"><b>${esc(bt("sap"))}</b> ${esc(tx("sap." + sap))} ${sapDrops(sap, 2)}</p>`;
+  return h;
+}
+// the foes of the zones you have opened, grouped by the first zone they live in; guardians last
+function beastKinds() {
+  const out = [], seen = new Set();
+  for (const id of Object.keys(ZONES)) {
+    if (!zoneSeen(id)) continue;
+    for (const k of ZONES[id].foes) if (!seen.has(k)) { seen.add(k); out.push([id, k]); }
+  }
+  for (const id of Object.keys(ZONES)) if (zoneSeen(id) && ZONES[id].boss && !seen.has(ZONES[id].boss)) { seen.add(ZONES[id].boss); out.push(["@g", ZONES[id].boss]); }
+  for (const k in beastSlice()) if (!seen.has(k) && MONS[k]) { seen.add(k); out.push([isGuardian(k) ? "@g" : "@x", k]); }
+  return out;
+}
+function beastList() {
+  const B = beastSlice(), all = beastKinds();
+  let h = `<p class="bk-sub">${esc(bt("beastSub", { n: all.filter(([, k]) => beastKnown(k)).length, m: all.length }))}</p>`, grp = null;
+  for (const [g, k] of all) {
+    if (g !== grp) { if (grp !== null) h += `</ul>`; h += `<p class="bk-grp">${esc(g === "@g" ? bt("guardians") : g === "@x" ? bt("elsewhere") : zt("name", null, g))}</p><ul class="bk-list">`; grp = g; }
+    const r = B[k] || { w: 0 }, on = BK.sel.bestiario === k ? ' aria-current="true"' : "", need = beastNeed(k);
+    h += beastKnown(k) ? `<li><button type="button" class="bk-it" data-bksel="${k}"${on}><span class="bk-ic">${tyIcon(MONS[k].types[0])}</span><span class="bk-nm">${esc(foeName(k))}<small>${MONS[k].types.map((t) => esc(TYPES[t][L()])).join(" · ")}</small></span><span class="bk-ct">${r.w} ✓</span></button></li>`
+      : `<li><button type="button" class="bk-it locked" data-bksel="${k}"${on}><span class="bk-ic">?</span><span class="bk-nm">???<small>${esc(r.w ? bt("beaten", { n: r.w, m: need }) : bt("unseen"))}</small></span><span class="bk-ct">${r.w} / ${need}</span></button></li>`;
+  }
+  return h + `</ul>`;
+}
+function beastPage(k) {
+  const m = MONS[k]; if (!m) return "";
+  const r = beastSlice()[k] || { w: 0, lv: 0, l: {} }, need = beastNeed(k), boss = isGuardian(k);
+  const where = Object.keys(ZONES).filter((id) => zoneSeen(id) && (ZONES[id].foes.includes(k) || ZONES[id].boss === k));
+  const pic = `<canvas class="bk-mon${beastKnown(k) ? "" : " sil"}" width="96" height="80" data-mon="${k}"></canvas>`;
+  if (!beastKnown(k)) return `<h3>???</h3>${pic}<p class="bk-sub">${esc(r.w ? bt("beaten", { n: r.w, m: need }) : bt("unseen"))}</p><p class="bk-say n">${esc(bt("beastHow", { n: need }))}</p>${where.length ? `<p class="bk-say"><b>${esc(bt("livesIn"))}</b> ${where.map((id) => esc(zt("name", null, id))).join(", ")}</p>` : ""}`;
+  const lvls = Object.keys(r.l).map(Number).sort((a, b) => a - b), lv = lvls.includes(BK.lvl && BK.lvl[k]) ? BK.lvl[k] : lvls[lvls.length - 1] || 1;
+  const u = makeUnit({ kind: k, lvl: lv, side: "foe", name: monName(k, !boss), hollow: !boss, boss, stage: 1, cards: {} });
+  u.base.str *= boss ? TUNE.boss : TUNE.foe; // as the zones tune it in battle
+  const weak = TYPE_ORDER.filter((t) => m.types.some((d) => BEATS[t] === d)), strong = m.types.map((t) => BEATS[t]).filter(Boolean);
+  let h = `<h3>${esc(foeName(k))}</h3>${pic}<p class="bk-sub">${m.types.map(typeChip).join(" ")}</p>`;
+  const desc = (MON_DESC[L()] || {})[k]; if (desc) h += `<p class="bk-say n">${esc(desc)}</p>`;
+  h += `<p class="bk-say">${weak.length ? `<b>${esc(bt("weak"))}</b> ${weak.map(typeChip).join(" ")} ` : ""}${strong.length ? `<b>${esc(bt("strong"))}</b> ${strong.map(typeChip).join(" ")}` : ""}</p>`;
+  h += `<p class="bk-q">${esc(bt("statsAt"))}</p><div class="bk-seg" role="group">${lvls.map((l) => `<button type="button" data-bklvl="${l}" aria-pressed="${l === lv}">${esc(bt("lvl", { n: l }))}</button>`).join("")}</div>`;
+  h += `<div class="bk-stats">${[["hp", u.maxHp], ["str", u.base.str], ["def", u.base.def], ["spd", u.base.spd], ["crit", Math.round(u.crit) + "%"]].map(([s, v]) => `<div><b>${typeof v === "number" ? Math.round(v) : v}</b><small>${esc(bt("st." + s))}</small></div>`).join("")}</div>`;
+  const cs = boss ? m.cards : m.cards.slice(0, 2);
+  h += `<p class="bk-q">${esc(bt("skills"))}</p>` + cs.map((id) => CARDS[id] ? `<p class="bk-say">${tyIcon(CARDS[id].type)} <b>${esc(cardName(id))}</b>: ${esc(slotText(scaled(id, 0), "a"))}</p>` : "").join("");
+  if (where.length) h += `<p class="bk-q">${esc(bt("livesIn"))}</p>` + where.map((id) => { const o = zoneOdds(id).find(([x]) => x === k); return `<p class="bk-say">${esc(zt("name", null, id))}${o ? " · " + o[1] + " %" : " · " + esc(bt("guardian"))}</p>`; }).join("");
+  h += `<p class="bk-margin">${esc(bt("yourMark", { w: r.w, l: r.lv }))}</p>`;
+  return h;
+}
+
 /* ---------- the book ---------- */
 const BOOK_SEC = {
   diario: { list: diaryList, page: diaryPage, first: () => { const D = diarySlice(); return Object.keys(D).sort((a, b) => D[b].t - D[a].t)[0]; }, sub: () => { const z = DZONES().map(diaryCounts).reduce((a, c) => ({ lived: a.lived + c.lived, all: a.all + c.all, seen: a.seen + c.seen, ends: a.ends + c.ends }), { lived: 0, all: 0, seen: 0, ends: 0 }); return bt("diarioSub", { n: z.lived, m: z.all, a: z.seen, b: z.ends }); } },
+  zonas: { list: zonesList, page: zonePage, first: () => X && X.zone && ZONES[X.zone] ? X.zone : "aurora", sub: () => bt("zonasSub", { n: Object.keys(ZONES).filter((z) => (EV.P.cleared || {})[z]).length, m: Object.keys(ZONES).length }) },
+  bestiario: { list: beastList, page: beastPage, first: () => (beastKinds().find(([, k]) => beastKnown(k)) || beastKinds()[0] || [])[1], sub: () => bt("beastRule") },
   cartas: { list: cardsList, page: cardsPage, first: () => Object.keys(CARDS).find((id) => (EV.P.grim || {})[id]), sub: () => tx("grim.desc") },
   escritos: { list: escList, page: escPage, first: () => LORE && (LORE.LORE_ESCRITOS.find((w) => (EV.P.escritos || {})[w.id]) || {}).id, sub: () => "" },
 };
@@ -183,6 +283,7 @@ function bookHtml() {
     <div class="bk-tabs" role="tablist" aria-label="${esc(bt("title"))}">${tabs}</div></div>`;
 }
 function bookMount(el) {
+  el.querySelectorAll("canvas[data-mon]").forEach((cv) => { try { paintMon(cv); } catch (e) { /* art is decoration */ } });
   el.querySelectorAll("[data-bkscene]").forEach((box) => { try { const cv = EVSCENE.event(box.dataset.bkscene); if (cv) { const c = document.createElement("canvas"); c.width = cv.width; c.height = cv.height; c.getContext("2d").drawImage(cv, 0, 0); c.setAttribute("role", "img"); const n = EVSCENE.EVNOTE[box.dataset.bkscene]; if (n && n.scene) c.setAttribute("aria-label", maskNames(n.scene)); box.appendChild(c); } } catch (e) { /* art is decoration */ } });
 }
 function renderBook() {
@@ -215,6 +316,7 @@ function onBookClick(e) {
     const r = $("bookView").querySelector(".bk-page.r"); if (r) { r.scrollTop = 0; if (matchMedia("(max-width: 760px)").matches) r.scrollIntoView({ block: "start", behavior: "smooth" }); }
     return;
   }
+  if (t.dataset.bklvl) { EV.sfx("tap"); (BK.lvl = BK.lvl || {})[BK.sel.bestiario] = +t.dataset.bklvl; renderBook(); return; }
   if (t.dataset.craft) { onCardsClick(e); renderBook(); }
 }
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && BK.open && !($("cview") && !$("cview").hidden)) { e.stopImmediatePropagation(); closeBook(); } }, true);
@@ -264,6 +366,23 @@ function refreshBookBtn() {
 .bk-margin{border-left:3px solid var(--bs);padding:4px 10px;margin:12px 0;color:var(--bs);font-size:14px}
 .bk-ex{font-size:12px;color:var(--bi2);font-style:italic}
 .bk-card .rcard{margin:0 auto}
+.bk-mon{width:144px;height:120px;image-rendering:pixelated;display:block;margin:4px 0 6px}
+.bk-mon.sil{filter:brightness(0) opacity(.45)}
+.bk-bar{display:grid;grid-template-columns:minmax(90px,150px) 1fr 44px;gap:8px;align-items:center;font-size:14px;margin:4px 0}
+.bk-bar .tr{background:var(--bp2);border-radius:5px;height:10px}
+.bk-bar i{display:block;height:10px;border-radius:5px;background:var(--bg2)}
+.bk-bar span:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.bk-book .unk{color:var(--bf)}
+.bk-prog{height:6px;background:var(--bp2);border-radius:3px;margin:4px 0 12px}
+.bk-prog i{display:block;height:100%;background:var(--bg2);border-radius:3px}
+.bk-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:8px 0;text-align:center}
+.bk-stats div{background:var(--bp2);border-radius:6px;padding:6px 2px}
+.bk-stats b{display:block;font-size:19px;font-variant-numeric:tabular-nums}
+.bk-stats small{font-size:12px;color:var(--bi2)}
+.bk-seg{display:flex;gap:4px;flex-wrap:wrap;margin:6px 0}
+.bk-seg button{appearance:none;border:2px solid var(--bi);background:transparent;color:var(--bi);font:600 13px var(--font-body);border-radius:14px;padding:2px 10px;cursor:pointer;min-height:32px}
+.bk-seg button[aria-pressed=true]{background:var(--bi);color:var(--bp)}
+.zone-odds .unk{opacity:.7}
 .bk-tabs{display:flex;flex-direction:column;gap:6px;padding-top:22px;margin-left:-2px}
 .bk-tab{appearance:none;border:0;cursor:pointer;width:50px;height:46px;border-radius:0 10px 10px 0;display:grid;place-items:center;color:#fff;opacity:.75;transform:translateX(-6px);transition:transform .15s,opacity .15s;position:relative}
 .bk-tab svg{width:22px;height:22px}
@@ -280,6 +399,8 @@ function refreshBookBtn() {
   .bk-tab{border-radius:10px 10px 0 0;transform:translateY(4px);width:48px;height:42px}
   .bk-tab[aria-selected=true]{transform:none}
   .bk-tt{display:none}
+  .bk-stats{grid-template-columns:repeat(3,1fr)}
+  .bk-tabs{overflow-x:auto}
   .bk-page{overflow:visible;flex:0 0 auto}
   .bk-tabs{flex:0 0 auto}
   .bk-page.l{border-radius:0}
