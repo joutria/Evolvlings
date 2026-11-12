@@ -10,10 +10,27 @@ autotile block by looking at the neighbours. Out come art/maps/<map>.png (720 x 
 art/objects/tree.png, flower.png, well.png and tila.png, which replace the drawn ones, and art/faces/tila.png, Tila's
 face in conversations (the pack's Woman), and art/creatures/<id>.png for every creature (story, common and the wild foes in rpg/data-wild.js)."""
 import sys, os, re
-from PIL import Image
+from PIL import Image, ImageDraw
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 T = 16
+
+# creatures: every creature in the game is a monster of the pack (Jose, 2026-11-07). The first monster draws the baby and
+# young stages, the last one the adult. Picked so the colour reads as the creature's type (2026-11-12 art review:
+# Fizz airy blue, Bostezo a night owl, ice in ice blues, Capuchón a real mushroom, fire adults in reds).
+SHEETS = {
+    "lumo": ("Spirit", "Spirit2"), "fizz": ("Octopus2", "ButterflyBlue"), "pebb": ("Mole2", "Mole"), "unisona": ("GoldRacoon",),
+    "fuellito": ("DragonYellow",), "brotin": ("KappaGreen", "KappaRed"), "remolin": ("Reptile",),
+    "bostezo": ("Slime", "Owl2"), "mecha": ("LanternRed", "LanternGreen"), "yunqueron": ("Beast2", "Beast"),
+    "espinardo": ("Larva",), "nim": ("SpiderRed", "SpiderYellow"), "centinela": ("Skull",),
+    "vidriela": ("Fish", "FishRed"), "ecolito": ("Mollusc2", "Mollusc"), "relampin": ("Mouse", "MouseBlack"),
+    "trinilla": ("HeartRed", "HeartGreen"), "carambano": ("AxolotBlue",), "capuchon": ("Mushroom2",),
+    "guardatumba": ("SkullBlue", "Grey Trex"),
+}
+WILD = {"fulgor": "Flam2", "chisporro": "Flam", "canin": "Bamboo", "ojuelo": "Eye", "ajolin": "Axolot", "topacio": "Racoon", "ululu": "Owl", "sombrerin": "Mushroom"}
+# guardians: the pack's bosses, each its own figure (Mira was Raíz's cyclops and Seto was Micelio's frog until 2026-11-12)
+BOSSES = {"farol": "GiantSpirit", "forja": "GiantFlam", "seto": "GiantBamboo", "mira": "GiantSlime", "grava": "GiantRacoon",
+          "trono": "TenguRed", "veleta": "TenguBlue", "micelio": "GiantFrog2", "raiz": "DemonCyclop"}
 
 def main(pack):
     ts = lambda n: Image.open(os.path.join(pack, "Backgrounds", "Tilesets", n + ".png")).convert("RGBA")
@@ -24,6 +41,16 @@ def main(pack):
     blocks = {"=": (floor, 4, 7), "~": (water, 4, 6)}
     trees = [tile(nature, 0, 0, 2, 2), tile(nature, 16, 0, 2, 2), tile(nature, 18, 0, 2, 2)]
     rock = tile(nature, 18, 9)
+    pine = tile(nature, 2, 0, 2, 2)
+    fdet = ts("TilesetFloorDetail")
+    trim1 = lambda o: o.crop(o.getbbox())
+    # flat ground details from the nature tileset: grass tufts, small flowers (shrunk to half), pebbles
+    tufts = [tile(fdet, c, 2) for c in (0, 1, 2, 3, 6)]
+    flowers = [trim1(tile(nature, c, 11)) for c in (0, 1, 3, 6)] + [trim1(tile(fdet, 5, 2))] * 2
+    small = lambda f: f.resize((max(1, f.width // 2), max(1, f.height // 2)), Image.NEAREST)
+    pebbles = [trim1(nature.crop((240 + i * 16, 288, 256 + i * 16, 304))) for i in range(4)]
+    pebbles = [p.resize((max(1, p.width // 2), max(1, p.height // 2)), Image.NEAREST) if p.width > 8 else p for p in pebbles]
+    lily = trim1(water.crop((176, 48, 192, 64)))
 
     src = open(os.path.join(ROOT, "world.js"), encoding="utf8").read()
     maps = {m.group(1): re.findall(r'"([^"]{15})"', m.group(2)) for m in re.finditer(r"\n  (\w+): \{\n    rows: \[(.*?)\]", src, re.S)}
@@ -39,11 +66,43 @@ def main(pack):
                 ch = rows[y][x]
                 if ch in blocks: g.alpha_composite(auto(blocks[ch], lambda dx, dy: at(x + dx, y + dy, ch)), (x * T, y * T))
                 if ch == "r": g.alpha_composite(rock, (x * T, y * T))
-        # border trees, back to front
+        # ground details (2026-11-12, "el mapa también debe ser mejorado"): flat things only, never on a place, the
+        # tile you stand on to use it, a decoration world.js draws, the path or the water, so nothing looks solid
+        # where you can walk. Flowers gather on "," tiles; tufts, small flowers and pebbles dot the rest of the grass.
+        busy = taken(src, name)
+        for y in range(1, H - 1):
+            for x in range(1, W - 1):
+                seed = (seed * 9301 + 49297) % 233280
+                ch = rows[y][x]
+                if (x, y) in busy or ch not in ".,": continue
+                if ch == ",":
+                    for i, (dx, dy) in enumerate(((1, 1), (8, 3), (3, 8), (9, 9))): g.alpha_composite(small(flowers[(seed + i) % len(flowers)]), (x * T + dx, y * T + dy))
+                    continue
+                r = seed % 100
+                near_path = any(at(x + dx, y + dy, "=") for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)))
+                if r < 18: g.alpha_composite(tufts[seed % len(tufts)], (x * T + seed % 5 - 2, y * T + seed % 3))
+                elif r < 28: g.alpha_composite(small(flowers[seed % len(flowers)]) if seed % 3 else flowers[-1], (x * T + 3 + seed % 5, y * T + 3 + seed % 4))
+                elif r < 33 or (near_path and r < 45): g.alpha_composite(pebbles[seed % len(pebbles)], (x * T + 3 + seed % 7, y * T + 5 + seed % 6))
+        # one lily pad on the pond, on a water tile with water below it
+        lilies = [(x, y) for y in range(H) for x in range(W) if rows[y][x] == "~" and at(x, y + 1, "~") and at(x + 1, y, "~") and at(x - 1, y, "~")]
+        for x, y in lilies[:1]: g.alpha_composite(lily, (x * T + 4, y * T + 6))
+        # a soft shadow where the wood begins, so the trees stand on the grass instead of being cut out of it
+        sh = Image.new("RGBA", g.size)
+        for y in range(H):
+            for x in range(W):
+                if rows[y][x] == "#" or (x, y) in busy: continue
+                for dx, dy, side in ((0, -1, "top"), (-1, 0, "left"), (1, 0, "right")):
+                    if at(x + dx, y + dy, "#"):
+                        box = {"top": (x * T, y * T, x * T + T, y * T + 5), "left": (x * T, y * T, x * T + 4, y * T + T),
+                               "right": (x * T + T - 4, y * T, x * T + T, y * T + T)}[side]
+                        ImageDraw.Draw(sh).rectangle([box[0], box[1], box[2] - 1, box[3] - 1], fill=(20, 40, 24, 44))
+        g.alpha_composite(sh)
+        # border trees, back to front: round trees, pines and fruit trees mixed, a bush now and then in the gaps
         for y in range(H):
             for x in range(W):
                 if rows[y][x] != "#": continue
-                tr = trees[(x * 7 + y * 3) % len(trees)]
+                k = (x * 7 + y * 3 + x * y) % 11
+                tr = trees[k % len(trees)] if k < 9 else pine
                 # the bottom row sits low so its canopy never hides what stands on the row above
                 paste_clip(g, tr, x * T - 8, y * T - (4 if y == H - 1 else 14))
         out = os.path.join(ROOT, "art", "maps"); os.makedirs(out, exist_ok=True)
@@ -90,16 +149,6 @@ def main(pack):
     # young at 3x, adult at 4x (3x if it would not fit) in the pack's second colour when it has one. Wild foes have one row.
     # The pack sheet is 4 columns (front, back, left, right) by 4 walking frames; we keep two frames of front, back and right
     # in 64 px cells with the feet on y = 60. The emotion cells stay empty, so the game falls back to the front frames.
-    sheets = {
-        "lumo": ("Spirit", "Spirit2"), "fizz": ("Slime", "Slime2"), "pebb": ("Mole2", "Mole"), "unisona": ("GoldRacoon",),
-        "fuellito": ("DragonYellow", "Dragon"), "brotin": ("KappaGreen", "KappaRed"), "remolin": ("Reptile", "Reptile2"),
-        "bostezo": ("ButterflyBlue", "Butterfly"), "mecha": ("LanternRed", "LanternGreen"), "yunqueron": ("Beast", "Beast2"),
-        "espinardo": ("Larva", "Larva2"), "nim": ("SpiderRed", "SpiderYellow"), "centinela": ("SkullBlue", "Skull"),
-        "vidriela": ("Fish", "FishRed"), "ecolito": ("Mollusc2", "Mollusc"), "relampin": ("Mouse", "MouseBlack"),
-        "trinilla": ("HeartRed", "HeartGreen"), "carambano": ("Slime3", "Slime4"), "capuchon": ("Octopus2", "Octopus"),
-        "guardatumba": ("Cyclope", "Cyclope2"),
-    }
-    wild = {"fulgor": "Flam2", "chisporro": "Flam", "canin": "Bamboo", "ojuelo": "Eye", "ajolin": "Axolot", "topacio": "Racoon", "ululu": "Owl", "sombrerin": "Mushroom"}
     cr = os.path.join(ROOT, "art", "creatures"); os.makedirs(cr, exist_ok=True)
     def frames(mon):
         d = os.path.join(pack, "Actor", "Monsters", mon)
@@ -113,18 +162,16 @@ def main(pack):
             fr = fr.crop(bb); kk = k if fr.height * k <= 60 and fr.width * k <= 64 else 3
             fr = fr.resize((fr.width * kk, fr.height * kk), Image.NEAREST)
             out.alpha_composite(fr, (cell * 64 + (64 - fr.width) // 2, y + 60 - fr.height))
-    for id_, mons in sheets.items():
+    for id_, mons in SHEETS.items():
         out = Image.new("RGBA", (640, 192))
         for st, (mon, k) in enumerate([(mons[0], 2), (mons[0], 3), (mons[-1], 4)]): row(out, st * 64, mon, k)
         out.save(os.path.join(cr, id_ + ".png"))
-    for id_, mon in wild.items():
+    for id_, mon in WILD.items():
         out = Image.new("RGBA", (640, 64)); row(out, 0, mon, 3); out.save(os.path.join(cr, id_ + ".png"))
-    print("ok creatures", len(sheets), "+ wild", len(wild))
+    print("ok creatures", len(SHEETS), "+ wild", len(WILD))
     # guardians: the pack's bosses, two idle frames as front A and B in 96 px cells (2x when that still fits)
-    bosses = {"farol": "GiantSpirit", "forja": "GiantFlam", "seto": "GiantFrog", "mira": "DemonCyclop2", "grava": "GiantRacoon",
-              "trono": "TenguRed", "veleta": "TenguBlue", "micelio": "GiantFrog2", "raiz": "DemonCyclop"}
     gd = os.path.join(ROOT, "art", "guardians"); os.makedirs(gd, exist_ok=True)
-    for id_, boss in bosses.items():
+    for id_, boss in BOSSES.items():
         d = os.path.join(pack, "Actor", "Boss", boss)
         idle = Image.open(os.path.join(d, next(n for n in sorted(os.listdir(d)) if n.lower().startswith("idle")))).convert("RGBA")
         fh = idle.height; out = Image.new("RGBA", (192, 96))
@@ -135,7 +182,20 @@ def main(pack):
             fr = fr.resize((fr.width * k, fr.height * k), Image.NEAREST)
             out.alpha_composite(fr, (cell * 96 + (96 - fr.width) // 2, max(0, 92 - fr.height)))
         out.save(os.path.join(gd, id_ + ".png"))
-    print("ok guardians", ", ".join(bosses))
+    print("ok guardians", ", ".join(BOSSES))
+
+def taken(src, name):
+    """The tiles of a map that must stay plain grass: every place (its whole width), the tile you stand on to use it,
+    the solid tiles it lists, the start tile and the decorations world.js draws itself."""
+    m = re.search(r"\n  " + name + r": \{.*?\n    start: \[(\d+), (\d+)\], deco: \[(.*?)\],\n  \}", src, re.S)
+    if not m: return set()
+    block = m.group(0); busy = {(int(m.group(1)), int(m.group(2)))}
+    for pm in re.finditer(r"\{ id: \"\w+\", x: (\d+), y: (\d+)(?:, w: (\d+))?(.*?)\}(?:,|\n)", block):
+        x, y, w = int(pm.group(1)), int(pm.group(2)), int(pm.group(3) or 1)
+        for i in range(-(w // 2), w - w // 2): busy.add((x + i, y))
+        for a, b in re.findall(r"\[(\d+), (\d+)\]", pm.group(4)): busy.add((int(a), int(b)))
+    for a, b in re.findall(r"\[\"\w+\", (\d+), (\d+)\]", m.group(3)): busy.add((int(a), int(b)))
+    return busy
 
 def paste_clip(dst, im, x, y):
     # alpha_composite refuses negative offsets: crop what falls outside first
