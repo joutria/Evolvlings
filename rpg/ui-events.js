@@ -281,6 +281,7 @@ function onExpClick(e) {
   switch (d.x) {
     case "go": EV.sfx("tap"); setOut(); break;
     case "cancel": X = null; goHome(); break;
+    case "morehome": EV.sfx("tap"); X.allHome = true; render(); break;
     case "quit": finish("quit"); break;
     case "continue": afterReward(); break;
     case "evnext":

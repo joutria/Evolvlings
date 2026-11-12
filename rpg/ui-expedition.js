@@ -58,6 +58,7 @@ function pickZone(id, mode) {
   X.zone = id; X.savia = !!mode.savia; X.echo = mode.echo || null; X.deep = mode.deep || 0; X.duel = mode.duel || null; X.deepRule = X.deep ? deepRule() : null;
   const home = EV.EGGS ? EV.EGGS.offer(S.species) : [];
   X.offer = home.concat(pickN(z.allies.filter((k) => k !== S.species && !home.includes(k)), 3));
+  X.home = home.length; X.allHome = false;
   // Unísona: brought by Tila and Nim to the Heart; after the Heart is calm it can join any trip
   if (id === "heart" || (EV.P.flags || {}).unisona) X.offer.unshift("unisona");
   // your saved team comes along when its companions are on offer
@@ -459,7 +460,7 @@ function render() {
   } else if (view === "pick") {
     body = `<div class="panel"><p class="lead">${esc(X.duel ? tx("duel.desc") : zt("desc"))}</p>${X.duel || X.echo || X.deep || typeof zoneOddsLine !== "function" ? "" : zoneOddsLine(X.zone)}
       ${setBarHtml()}<h3>${esc(tx("exp.pick"))}</h3><p class="muted" style="margin:0">${esc(tx("exp.pickSub"))}</p>
-      <div class="mons">${X.offer.map((k) => `<button type="button" class="mon" data-pick="${k}" aria-pressed="${X.chosen.includes(k)}"><canvas width="96" height="80" data-mon="${k}"></canvas><strong>${esc(monName(k))}</strong>${typeChip(MONS[k].types[0])}<small>${esc(MON_DESC[L()][k])}</small>${refOf(k) ? `<span class="mref">${esc(EV.EGGS.badge(k))}</span>` : ""}${pickStats(k)}</button>`).join("")}</div>
+      <div class="mons">${pickShown().map((k) => `<button type="button" class="mon" data-pick="${k}" aria-pressed="${X.chosen.includes(k)}"><canvas width="96" height="80" data-mon="${k}"></canvas><strong>${esc(monName(k))}</strong>${typeChip(MONS[k].types[0])}<small>${esc(MON_DESC[L()][k])}</small>${refOf(k) ? `<span class="mref">${esc(EV.EGGS.badge(k))}</span>` : ""}${pickStats(k)}</button>`).join("")}</div>${pickMoreHtml()}
       </div>${loadoutHtml()}${X.chosen.filter((k) => refOf(k)).map(compLoadHtml).join("")}${X.chosen.some((k) => !refOf(k) && k !== "unisona") ? `<p class="muted cload-wild">${esc(tx("cload.wild"))}</p>` : ""}${formHtml()}<div class="panel">
       <div class="bctl"><button class="btn" type="button" data-x="go" ${X.chosen.length === 2 ? "" : "disabled"}>${esc(X.duel ? tx("duel.go") : tx("exp.go") + " · " + tx("exp.cost"))}</button><button class="btn ghost" type="button" data-x="cancel">${esc(tx("exp.cancel"))}</button></div></div>`;
   } else if (view === "map") {
@@ -633,6 +634,13 @@ document.addEventListener("keydown", (e) => { if (e.key === "Escape" && CPICK) {
 function refreshLoadViews() {
   if ($("cardsPanel") && !$("cardsPanel").hidden) renderCards();
   if ($("teamsPanel") && !$("teamsPanel").hidden) renderTeams();
+}
+/* Pick screen: the 4 strongest Refuge companions show first; the rest fold behind a button (chosen ones always show) */
+const HOME_SHOWN = 4;
+const pickShown = () => X.offer.filter((k, i) => X.allHome || i >= (X.home || 0) || i < HOME_SHOWN || X.chosen.includes(k) || k === "unisona");
+function pickMoreHtml() {
+  const n = X.offer.length - pickShown().length;
+  return n > 0 ? `<div class="bctl"><button class="btn ghost" type="button" data-x="morehome">${esc(tx("exp.moreHome", { n }))}</button></div>` : "";
 }
 /* ---------- Teams: your creature and two Refuge companions, with up to 5 saved sets ---------- */
 const SETS_N = 5;
