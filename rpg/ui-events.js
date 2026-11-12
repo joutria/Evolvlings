@@ -247,9 +247,11 @@ function onExpClick(e) {
   if (d.zone) { EV.sfx("tap"); pickZone(d.zone, { savia: !!d.savia }); return; }
   if (d.deep) { const f = +d.deep; if (!deepOpen() || !deepFloorOpen(f)) { EV.sfx("deny"); return; } EV.sfx("tap"); pickZone(deepZone(f), { deep: f }); return; }
   if (d.echo) { const e = echoInfo(); if (!e || !e.lvlOk || e.left <= 0) { EV.sfx("deny"); return; } EV.sfx("tap"); pickZone(e.zone, { echo: e.rule }); return; }
+  if (d.mpc) { const mc = X.mc || (X.mc = []), i = mc.indexOf(d.mpc); if (i >= 0) mc.splice(i, 1); else mc.push(d.mpc); EV.sfx("tap"); render(); return; }
   if (d.pick) {
     const k = d.pick, i = X.chosen.indexOf(k);
-    if (i >= 0) X.chosen.splice(i, 1); else { if (X.chosen.length >= 2) X.chosen.shift(); X.chosen.push(k); }
+    if (i >= 0) X.chosen.splice(i, 1); else { if (X.chosen.length >= 2) (X.keep || (X.keep = [])).push(X.chosen.shift()); X.chosen.push(k); }
+    if (i >= 0) (X.keep || (X.keep = [])).push(k);
     { const T = teamState(); T.comp = X.chosen.filter((c) => rosterOf(c)); }
     EV.sfx("tap"); render(); return;
   }
