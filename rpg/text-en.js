@@ -46,7 +46,7 @@ const RPG_EN = {
     "tal.title": "Talents", "tal.none": "The first talent comes at level {n}.", "tal.pick": "Choose a talent ({n})", "tal.next": "Next talent at level {n}",
     "tal.reset": "Change talents · ∴ {c}", "tal.resetAsk": "Change {name}'s talents for {c} Stardust? You'll pick each one again.", "tal.choose": "Choose a talent", "tal.o": "Offensive", "tal.d": "Defensive",
     "tal.why": "This level offers {type} talents. You can change them any time with Stardust.", "tal.got": "{name} learns {t}.",
-    "cards.toNext": "{a} → {g}: {n} / {m} copies", "cards.unequip": "Remove", "cards.inUse": "In use",
+    "cards.fuseAll": "Upgrade all ({n})", "cards.fuseAllTitle": "Upgrade all cards", "cards.fuseAllDesc": "Every {n} matching copies join into 1 of the next grade, and if that makes another {n}, those go up too. Copies you are not using go first; if an equipped one goes in, the new card takes its slot.", "cards.fuseAllGo": "Upgrade ({n})", "cards.fuseAllNo": "Cancel", "cards.fuseAllDone": "Done! {n} upgrades made.", "cards.toNext": "{a} → {g}: {n} / {m} copies", "cards.unequip": "Remove", "cards.inUse": "In use",
     "cf.search": "Search cards (name, type, effect…)", "cf.sort": "Sort", "cf.sort.use": "Usable first", "cf.sort.new": "Newest", "cf.sort.rar": "Rarity", "cf.sort.type": "Type", "cf.sort.name": "Name", "cf.sort.copies": "Copies",
     "cf.dir.down": "Normal order (tap to reverse)", "cf.dir.up": "Reversed order (tap to restore)", "cf.filters": "Filters", "cf.quick": "Quick", "cf.type": "Type", "cf.grade": "Rarity", "cf.fx": "Effect",
     "cf.only.fav": "Favourites", "cf.only.usable": "Can use", "cf.only.inUse": "In use", "cf.only.fuse": "Ready to upgrade",

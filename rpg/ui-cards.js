@@ -193,7 +193,7 @@ function renderCards() {
     return cardHtml(id, g, { count: list.length, foot: `${copies}${cantNote(id)}${btns.length ? `<div class="rc-btns">${btns.join("")}</div>` : ""}` });
   };
   // the collection is a grid of thumbnails; tapping one opens the whole card with its buttons
-  if (ids.length) html += cfFilterHtml("col");
+  if (ids.length) html += fuseAllBtn() + cfFilterHtml("col");
   const favs = cfSlice().fav;
   html += `<div class="ctiles">${ids.map((id) => {
     const g = bestG(id), n = groups[id].length, inUse = groups[id].some((c) => eqSet.has(c.uid));
@@ -203,10 +203,55 @@ function renderCards() {
   CFX.col = { keys: ids, id: (k) => k, cards: (k) => groups[k], eqSet, box: el.querySelector(".ctiles"), attr: "data-cview" };
   applyCF("col");
 }
-function openCardView(id, html) {
+/* ---------- Upgrades: 5 copies of one grade make 1 of the next ----------
+   fuseOnce does one upgrade; fusePlan lists every upgrade "Mejorar todas" would do, climbing grades
+   (10 Común → 2 Rara; 25 Común → 5 Rara → 1 Súper rara). */
+function fuseOnce(id, gi) {
+  const P = EV.P, R = rpgState();
+  if (gi >= GRADES.length - 1) return null;
+  const eqSet = new Set([...(R ? Object.values(R.eq).filter(Boolean) : []), ...compUids()]);
+  // use free copies first; if an equipped copy goes in, the new card takes its slot
+  const same = P.cards.filter((c) => c.id === id && c.g === gi).sort((a, b) => eqSet.has(a.uid) - eqSet.has(b.uid));
+  const used = same.slice(0, UPGRADE_N);
+  if (used.length < UPGRADE_N) return null;
+  P.cards = P.cards.filter((c) => !used.includes(c));
+  const nc = giveCard(id, gi + 1); P.c.fused = (P.c.fused || 0) + 1;
+  if (R) for (const k of ["a", "p", "s"]) if (used.some((c) => c.uid === R.eq[k])) R.eq[k] = nc.uid;
+  const ro = (P.eg && P.eg.roster) || {};
+  for (const kind in ro) for (const k of ["a", "p", "s"]) if (ro[kind].eq && used.some((c) => c.uid === ro[kind].eq[k])) ro[kind].eq[k] = nc.uid;
+  return nc;
+}
+function fusePlan() {
+  const counts = {};
+  for (const c of EV.P.cards) { const o = counts[c.id] = counts[c.id] || {}; o[c.g] = (o[c.g] || 0) + 1; }
+  const plan = [];
+  for (const id in counts) {
+    const n = Object.assign({}, counts[id]), steps = [];
+    for (let g = 0; g < GRADES.length - 1; g++) {
+      const k = Math.floor((n[g] || 0) / UPGRADE_N); if (!k) continue;
+      steps.push({ g, n: k }); n[g] -= k * UPGRADE_N; n[g + 1] = (n[g + 1] || 0) + k;
+    }
+    if (steps.length) plan.push({ id, steps, top: steps[steps.length - 1].g + 1 });
+  }
+  return plan.sort((a, b) => b.top - a.top || cardName(a.id).localeCompare(cardName(b.id)));
+}
+function fuseAllBtn() {
+  const plan = fusePlan(); if (!plan.length) return "";
+  const n = plan.reduce((s, p) => s + p.steps.reduce((t, st) => t + st.n, 0), 0);
+  return `<div class="rc-btns fuse-all"><button class="btn" type="button" data-fuseall="1">${esc(tx("cards.fuseAll", { n }))}</button></div>`;
+}
+function openFuseAll() {
+  const plan = fusePlan(); if (!plan.length) return;
+  const n = plan.reduce((s, p) => s + p.steps.reduce((t, st) => t + st.n, 0), 0);
+  const gName = (g) => `<b style="color:${GRADES[g].col}">${esc(GRADES[g][L()])}</b>`;
+  const rows = plan.map((p) => `<li class="fa-row">${thumbHtml(p.id, p.top)}<div><strong>${esc(cardName(p.id))}</strong>${p.steps.map((st) => `<span class="fa-step">${st.n * UPGRADE_N} ${gName(st.g)} → ${st.n} ${gName(st.g + 1)}</span>`).join("")}</div></li>`).join("");
+  openCardView(null, `<p class="muted" style="margin:0 0 8px">${esc(tx("cards.fuseAllDesc", { n: UPGRADE_N }))}</p><ul class="fa-list">${rows}</ul>
+    <div class="rc-btns"><button class="btn ghost" type="button" data-cp="close">${esc(tx("cards.fuseAllNo"))}</button><button class="btn" type="button" data-fusego="1">${esc(tx("cards.fuseAllGo", { n }))}</button></div>`, tx("cards.fuseAllTitle"));
+}
+function openCardView(id, html, title) {
   let el = $("cview");
   if (!el) { el = document.createElement("div"); el.id = "cview"; el.className = "cpick-wrap"; document.body.appendChild(el); el.addEventListener("click", (e) => { if (e.target.closest("[data-cp]")) { closeCardView(); return; } const b = e.target.closest("button"); if (b && !b.disabled) { closeCardView(); onCardsClick(e); } }); }
-  el.innerHTML = `<div class="cpick-back" data-cp="close"></div><div class="cpick cview" role="dialog" aria-modal="true"><div class="cp-head"><h3>${esc(cardName(id))}</h3><button class="sheet-x" type="button" data-cp="close" aria-label="${esc(tx("load.close"))}">✕</button></div><div class="cp-list">${html || colCard(id)}</div></div>`;
+  el.innerHTML = `<div class="cpick-back" data-cp="close"></div><div class="cpick cview" role="dialog" aria-modal="true"><div class="cp-head"><h3>${esc(title || cardName(id))}</h3><button class="sheet-x" type="button" data-cp="close" aria-label="${esc(tx("load.close"))}">✕</button></div><div class="cp-list">${html || colCard(id)}</div></div>`;
   el.hidden = false;
 }
 function closeCardView() { const el = $("cview"); if (el) el.hidden = true; }
@@ -250,18 +295,16 @@ function onCardsClick(e) {
     R.eq[slot] = uid; P.c.equips = (P.c.equips || 0) + 1; EV.sfx("card"); EV.save(); renderCards(); return;
   }
   if (t.dataset.unequip && R) { R.eq[t.dataset.unequip] = null; EV.sfx("tap"); EV.save(); renderCards(); return; }
+  if (t.dataset.fuseall) { EV.sfx("tap"); openFuseAll(); return; }
+  if (t.dataset.fusego) {
+    const plan = fusePlan(); let n = 0;
+    for (const p of plan) for (const st of p.steps) for (let i = 0; i < st.n; i++) if (fuseOnce(p.id, st.g)) n++;
+    if (!n) return;
+    EV.toast(tx("cards.fuseAllDone", { n })); EV.sfx("grow"); EV.buzz(20); EV.save(); EV.checkAch(); renderCards(); return;
+  }
   if (t.dataset.fuse) {
     const [id, g] = t.dataset.fuse.split(":"); const gi = +g;
-    const eqSet = new Set([...(R ? Object.values(R.eq).filter(Boolean) : []), ...compUids()]);
-    // use free copies first; if an equipped copy goes in, the new card takes its slot
-    const same = P.cards.filter((c) => c.id === id && c.g === gi).sort((a, b) => eqSet.has(a.uid) - eqSet.has(b.uid));
-    const used = same.slice(0, UPGRADE_N);
-    if (used.length < UPGRADE_N || gi >= GRADES.length - 1) return;
-    P.cards = P.cards.filter((c) => !used.includes(c));
-    const nc = giveCard(id, gi + 1); P.c.fused = (P.c.fused || 0) + 1;
-    if (R) for (const k of ["a", "p", "s"]) if (used.some((c) => c.uid === R.eq[k])) R.eq[k] = nc.uid;
-    const ro = (P.eg && P.eg.roster) || {};
-    for (const kind in ro) for (const k of ["a", "p", "s"]) if (ro[kind].eq && used.some((c) => c.uid === ro[kind].eq[k])) ro[kind].eq[k] = nc.uid;
+    if (!fuseOnce(id, gi)) return;
     EV.toast(tx("cards.fused", { card: cardName(id), g: GRADES[gi + 1][L()] })); EV.sfx("grow"); EV.save(); EV.checkAch(); renderCards();
   }
 }
