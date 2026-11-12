@@ -57,7 +57,8 @@ function pickZone(id, mode) {
   const S = EV.S, z = ZONES[id];
   X.zone = id; X.savia = !!mode.savia; X.echo = mode.echo || null; X.deep = mode.deep || 0; X.duel = mode.duel || null; X.deepRule = X.deep ? deepRule() : null;
   const home = EV.EGGS ? EV.EGGS.offer(S.species) : [];
-  X.offer = home.concat(pickN(z.allies.filter((k) => k !== S.species && !home.includes(k)), 3));
+  const away = EV.BUILD && EV.BUILD.busy ? EV.BUILD.busy().map((b) => b.k) : []; // at a Refuge job: not even as a wild one
+  X.offer = home.concat(pickN(z.allies.filter((k) => k !== S.species && !home.includes(k) && !away.includes(k)), 3));
   X.home = home; X.allHome = false; X.mq = ""; X.mc = [];
   // Unísona: brought by Tila and Nim to the Heart; after the Heart is calm it can join any trip
   if (id === "heart" || (EV.P.flags || {}).unisona) X.offer.unshift("unisona");
@@ -460,7 +461,7 @@ function render() {
   } else if (view === "pick") {
     body = `<div class="panel"><p class="lead">${esc(X.duel ? tx("duel.desc") : zt("desc"))}</p>${X.duel || X.echo || X.deep || typeof zoneOddsLine !== "function" ? "" : zoneOddsLine(X.zone)}
       ${setBarHtml()}<h3>${esc(tx("exp.pick"))}</h3><p class="muted" style="margin:0">${esc(tx("exp.pickSub"))}</p>
-      ${pickFilterHtml()}<div class="mons">${X.offer.map((k) => `<button type="button" class="mon" data-pick="${k}" aria-pressed="${X.chosen.includes(k)}"><canvas width="96" height="80" data-mon="${k}"></canvas><strong>${esc(monName(k))}</strong>${typeChip(MONS[k].types[0])}<small>${esc(MON_DESC[L()][k])}</small>${refOf(k) ? `<span class="mref">${esc(EV.EGGS.badge(k))}</span>` : ""}${pickStats(k)}</button>`).join("")}</div>${pickMoreHtml()}
+      ${pickFilterHtml()}<div class="mons">${X.offer.map((k) => `<button type="button" class="mon" data-pick="${k}" aria-pressed="${X.chosen.includes(k)}"><canvas width="96" height="80" data-mon="${k}"></canvas><strong>${esc(monName(k))}</strong>${typeChip(MONS[k].types[0])}<small>${esc(MON_DESC[L()][k])}</small>${refOf(k) ? `<span class="mref">${esc(EV.EGGS.badge(k))}</span>` : ""}${pickStats(k)}</button>`).join("")}</div>${pickMoreHtml()}${pickBusyHtml()}
       </div>${loadoutHtml()}${X.chosen.filter((k) => refOf(k)).map(compLoadHtml).join("")}${X.chosen.some((k) => !refOf(k) && k !== "unisona") ? `<p class="muted cload-wild">${esc(tx("cload.wild"))}</p>` : ""}${formHtml()}<div class="panel">
       <div class="bctl"><button class="btn" type="button" data-x="go" ${X.chosen.length === 2 ? "" : "disabled"}>${esc(X.duel ? tx("duel.go") : tx("exp.go") + " · " + tx("exp.cost"))}</button><button class="btn ghost" type="button" data-x="cancel">${esc(tx("exp.cancel"))}</button></div></div>`;
   } else if (view === "map") {
@@ -648,6 +649,12 @@ const pickShown = () => X.offer.filter((k) => X.chosen.includes(k) || (mpOn() ? 
 function pickMoreHtml() {
   const n = X.offer.filter(mpFolded).length;
   return n > 0 ? `<div class="bctl"><button class="btn ghost" type="button" data-x="morehome">${esc(tx("exp.moreHome", { n }))}</button></div>` : "";
+}
+// Refuge companions away at a job can't come along: say who and where, so they don't just look missing
+function pickBusyHtml() {
+  const busy = EV.BUILD && EV.BUILD.busy ? EV.BUILD.busy().filter((b) => b.k !== EV.S.species) : [];
+  if (!busy.length) return "";
+  return `<p class="muted">${busy.map((b) => esc(tx(b.done ? "exp.busyDone" : "exp.busy", { n: monName(b.k), p: b.place }))).join("<br>")}</p>`;
 }
 // search by name and circle chips, shown once there are more companions than fit at a glance
 function pickFilterHtml() {
