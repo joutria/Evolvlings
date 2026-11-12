@@ -20,7 +20,7 @@ const TX = {
     "egg.0": "Huevo de corteza", "egg.1": "Huevo de musgo", "egg.2": "Huevo celeste", "egg.3": "Huevo lila", "egg.4": "Huevo dorado",
     // refuge
     "empty": "El Refugio todavía está vacío. Tira en el Pozo de Huevos, incuba el huevo y la criatura vivirá aquí.",
-    "lvl": "Nv {n}", "bond": "Vínculo {n}", "bondMax": "Vínculo máximo", "pet": "Acariciar", "petDone": "Ya la acariciaste hoy",
+    "lvl": "Nv {n}", "bond": "Vínculo {n}", "bondMax": "Vínculo máximo", "pet": "Acariciar", "petAll": "Acariciar a todos ({n})", "petAll.got": "Acariciaste a {n} criaturas. +{b} Vínculo en total", "petDone": "Ya la acariciaste hoy",
     "bond.0": "{n} te observa desde su rincón del Refugio.", "bond.1": "{n} viene corriendo cuando te ve llegar.",
     "bond.2": "{n} no se separa de ti en todo el día.", "bond.3": "{n} y tú se entienden sin palabras.",
     "bondWhy": "El Vínculo sube al viajar juntos (+1), al ganar (+1 más) y al acariciarla una vez al día (+1; si faltas, se guardan hasta 3 caricias). Cada nivel da +1,5 % a sus estadísticas y +1 % de crítico. Con Vínculo 5 y 10 sus cartas suben de rareza.",
@@ -40,7 +40,7 @@ const TX = {
     "tripNest": "En los Nidos, los que se quedaron en casa aprenden de tu viaje ({p} % de la experiencia).",
     "tripEggs": "El viaje calienta el Refugio: los huevos de la incubadora se adelantan {n} h.",
     "slot.lock": "Hueco libre con Nivel de Cuidador {n}", "slot.free": "Hueco libre",
-    "left": "Faltan {t}", "ready": "¡Se está moviendo!", "warm": "Dar calor (−2 h)", "warmWait": "Calentito ({m} min)", "talk": "Hablarle (−4 h)", "talkDone": "Ya le hablaste hoy", "open": "Abrir",
+    "left": "Faltan {t}", "ready": "¡Se está moviendo!", "warm": "Dar calor (−2 h)", "warmWait": "Calentito ({m} min)", "talk": "Hablarle (−4 h)", "talkDone": "Ya le hablaste hoy", "open": "Abrir", "openAll": "Abrir los listos ({n})", "careAll": "Calor y voz a todos ({n})", "careAll.got": "{n} huevos se calientan y te escuchan.",
     "bag": "Huevos en espera ({n})", "bagNone": "No tienes huevos esperando.", "incubate": "Incubar", "full": "La incubadora está llena.",
     "warmed": "El huevo se calienta. −2 h", "talked": "El huevo se mueve un poquito al oírte. −4 h", "who": "¿Quién será?",
     // pool
@@ -75,7 +75,7 @@ const TX = {
     "tab.refuge": "Refuge", "tab.inc": "Incubator", "tab.pool": "Egg Well", "tab.cl": "Keeper",
     "egg.0": "Bark egg", "egg.1": "Moss egg", "egg.2": "Sky egg", "egg.3": "Lilac egg", "egg.4": "Golden egg",
     "empty": "The Refuge is still empty. Pull at the Egg Well, incubate the egg and the creature will live here.",
-    "lvl": "Lv {n}", "bond": "Bond {n}", "bondMax": "Max Bond", "pet": "Pet", "petDone": "Already petted today",
+    "lvl": "Lv {n}", "bond": "Bond {n}", "bondMax": "Max Bond", "pet": "Pet", "petAll": "Pet everyone ({n})", "petAll.got": "You petted {n} creatures. +{b} Bond in total", "petDone": "Already petted today",
     "bond.0": "{n} watches you from its corner of the Refuge.", "bond.1": "{n} comes running when it sees you arrive.",
     "bond.2": "{n} stays by your side all day.", "bond.3": "{n} and you understand each other without words.",
     "bondWhy": "Bond grows when you travel together (+1), when you win (+1 more) and when you pet it once a day (+1; if you miss days, up to 3 pats wait for you). Each level gives +1.5% stats and +1% crit. At Bond 5 and 10 its cards go up a grade.",
@@ -94,7 +94,7 @@ const TX = {
     "tripNest": "In the Nests, those who stayed home learn from your trip ({p}% of the experience).",
     "tripEggs": "The trip warms the Refuge: the eggs in the incubator move {n} h closer.",
     "slot.lock": "Free slot at Keeper Level {n}", "slot.free": "Free slot",
-    "left": "{t} to go", "ready": "It's wiggling!", "warm": "Warm it (−2 h)", "warmWait": "Cosy ({m} min)", "talk": "Talk to it (−4 h)", "talkDone": "Talked today", "open": "Open",
+    "left": "{t} to go", "ready": "It's wiggling!", "warm": "Warm it (−2 h)", "warmWait": "Cosy ({m} min)", "talk": "Talk to it (−4 h)", "talkDone": "Talked today", "open": "Open", "openAll": "Open the ready ones ({n})", "careAll": "Warm and talk to all ({n})", "careAll.got": "{n} eggs get warm and hear you.",
     "bag": "Waiting eggs ({n})", "bagNone": "No eggs waiting.", "incubate": "Incubate", "full": "The incubator is full.",
     "warmed": "The egg warms up. −2 h", "talked": "The egg wiggles a little when it hears you. −4 h", "who": "Who will it be?",
     "pool.sub": "Drop in a Song Note and the Well sends back an egg. Its colour tells how rare it is; who's inside you'll find out when it opens.",
@@ -237,7 +237,8 @@ function pullOne(banner, forceGood) {
   EV.P.c.eggPulls = (EV.P.c.eggPulls || 0) + 1;
   return egg;
 }
-let last = null, born = null, tab = "refuge";
+let last = null, borns = [], tab = "refuge"; // borns: the births shown on top of the Refuge (several after "Open all")
+let bulk = false; // true while a do-all button runs: one save and one toast at the end
 function pull(n) {
   const g = G(), P = EV.P, B = BANNERS[g.banner];
   if (!poolOpen()) return;
@@ -285,25 +286,58 @@ function warm(id) {
   if (Date.now() - (e.warm || 0) < WARM_CD) return;
   e.cut = (e.cut || 0) + WARM_CUT; e.warm = Date.now();
   EV.P.c.eggWarm = (EV.P.c.eggWarm || 0) + 1;
+  if (bulk) return;
   EV.toast(tx("warmed"), "🔥"); EV.sfx("tap"); save();
 }
 function talk(id) {
   const e = G().inc.find((x) => x.id === id); if (!e || !left(e) || e.talk === today()) return;
   e.cut = (e.cut || 0) + TALK_CUT; e.talk = today();
+  if (bulk) return;
   EV.toast(tx("talked"), "♪"); EV.sfx("tap"); save();
 }
 function startLvl() { const S = EV.S; return S && S.rpg ? Math.max(1, S.rpg.lvl - 2) : 1; }
 function hatch(id) {
   const g = G(), i = g.inc.findIndex((x) => x.id === id);
   if (i < 0 || left(g.inc[i]) > 0) return;
+  if (!bulk) borns = [];
+  let born;
   const e = g.inc.splice(i, 1)[0], r = g.roster[e.kind];
   EV.P.c.eggHatched = (EV.P.c.eggHatched || 0) + 1;
   if (r && (r.st || 0) < STAR_MAX) { r.st = (r.st || 0) + 1; r.bxp++; born = { kind: e.kind, star: r.st, sib: RPG.rollBirth(RPG.birthKey(e.kind, r)) }; EV.P.c.eggStars = (EV.P.c.eggStars || 0) + 1; }
   else if (r) { r.bxp++; EV.P.dust = (EV.P.dust || 0) + DUP_DUST[e.tier]; born = { kind: e.kind, dup: DUP_DUST[e.tier], sib: RPG.rollBirth(RPG.birthKey(e.kind, r)) }; }
   else { g.roster[e.kind] = { lvl: startLvl(), xp: 0, bxp: 0, pet: null, at: Date.now(), bt: RPG.rollBirth() }; born = { kind: e.kind, bt: 1 }; }
+  borns.push(born);
   autoIncubate();
   tab = "refuge";
+  if (bulk) return;
   EV.sfx("hatch"); EV.buzz && EV.buzz(40);
+  save();
+}
+// do-all buttons (design rule 4: the daily round stays short)
+const readyEggs = () => G().inc.filter((e) => !left(e));
+const talkable = () => G().inc.filter((e) => left(e) && e.talk !== today());
+const warmable = () => G().inc.filter((e) => left(e) && Date.now() - (e.warm || 0) >= WARM_CD);
+function hatchAll() {
+  const ids = readyEggs().map((e) => e.id); if (!ids.length) return;
+  borns = []; bulk = true;
+  try { ids.forEach(hatch); } finally { bulk = false; }
+  EV.sfx("hatch"); EV.buzz && EV.buzz(40); save();
+}
+function careAll() {
+  const t = talkable(), w = warmable(); if (!t.length && !w.length) return;
+  bulk = true;
+  try { w.forEach((e) => warm(e.id)); t.forEach((e) => talk(e.id)); } finally { bulk = false; }
+  EV.toast(tx("careAll.got", { n: new Set([...t, ...w]).size }), "♪"); EV.sfx("tap"); save();
+}
+const pettable = () => Object.keys(G().roster).filter((k) => pats(G().roster[k]) > 0);
+function petAll() {
+  const ks = pettable(); if (!ks.length) return;
+  let n = 0, gain = 0, grew = false;
+  bulk = true;
+  try {
+    for (const k of ks) { const r = G().roster[k], b0 = bondLvl(r.bxp), x0 = r.bxp; while (pats(r) > 0) { pet(k); n++; } gain += r.bxp - x0; if (bondLvl(r.bxp) > b0) grew = true; }
+  } finally { bulk = false; }
+  EV.toast(tx("petAll.got", { n: ks.length, b: gain }), "♥"); EV.sfx(grew ? "grow" : "tap");
   save();
 }
 
@@ -319,6 +353,7 @@ function pet(k) {
   const gain = (EV.BUILD ? EV.BUILD.nestPet() : 1) + (RPG.BIRTH[RPG.birthKey(k, r)].pet || 0);
   r.pet = today(); r.pc.left--; r.bxp += gain;
   EV.P.c.refugePets = (EV.P.c.refugePets || 0) + 1;
+  if (bulk) return;
   EV.toast(tx("petted", { n: monName(k), b: gain }), "♥"); EV.sfx(bondLvl(r.bxp) > before ? "grow" : "tap");
   save();
 }
@@ -410,7 +445,8 @@ const eggCv = (tier, crack, w) => `<canvas class="egg-px" width="${w}" height="$
 // birth traits (data in rpg/data-talents.js)
 const btLabel = (key) => { const B = RPG.BIRTH[key]; return `${B[L()]} (${B.fx[L()]})`; };
 const btName = (k, r) => btLabel(RPG.birthKey(k, r));
-function sibTrait(w) {
+function sibTrait(arg) {
+  const [w, i] = String(arg).split(":"), born = borns[+i || 0];
   const r = born && born.sib && G().roster[born.kind]; if (!r) return;
   if (w === "take") { r.bt = born.sib; EV.toast(tx("btTaken", { n: monName(born.kind), t: RPG.BIRTH[r.bt][L()] }), "🥚"); }
   else r.bt = RPG.birthKey(born.kind, r);
@@ -419,7 +455,7 @@ function sibTrait(w) {
 function refugeHtml() {
   const g = G(), ks = Object.keys(g.roster);
   let h = "";
-  if (born) {
+  borns.forEach((born, bi) => {
     const n = monName(born.kind), st = born.star;
     const t = st ? tx("dupStar", { n, s: st }) : born.dup ? tx("dup", { n }) : tx("born", { n });
     let s = st ? tx("dupStarSub", { n, s: st }) : born.dup ? tx("dupSub", { n, d: born.dup }) : tx("bornSub");
@@ -431,11 +467,13 @@ function refugeHtml() {
     if (born.sib && r0) {
       const cur = RPG.birthKey(born.kind, r0);
       s += " " + tx("sibTrait", { n, t: btLabel(born.sib) });
-      pick = `<div class="rf-sib">${[["keep", cur], ["take", born.sib]].map(([w, key]) => `<button class="btn${w === "keep" ? " ghost" : ""}" type="button" data-rbt="${w}">${esc(tx("bt." + w, { t: btLabel(key) }))}</button>`).join("")}</div>`;
+      pick = `<div class="rf-sib">${[["keep", cur], ["take", born.sib]].map(([w, key]) => `<button class="btn${w === "keep" ? " ghost" : ""}" type="button" data-rbt="${w}:${bi}">${esc(tx("bt." + w, { t: btLabel(key) }))}</button>`).join("")}</div>`;
     }
     h += `<div class="rf-born"><canvas width="96" height="80" data-mon="${born.kind}"></canvas><div><h3>${esc(t)}</h3><p class="muted">${esc(s)}</p>${pick}</div></div>`;
-  }
+  });
   if (!ks.length) return h + `<p class="muted">${esc(tx("empty"))}</p>`;
+  const pk = pettable();
+  if (pk.length > 1) h += `<div class="rc-btns"><button class="btn" type="button" data-rpetall="1">${esc(tx("petAll", { n: pk.length }))}</button></div>`;
   h += `<div class="rf-grid">${ks.sort((a, b) => g.roster[b].lvl - g.roster[a].lvl).map((k) => {
     const r = g.roster[k], b = bondLvl(r.bxp), nx = BOND_AT[b], pv = BOND_AT[b - 1] || 0;
     const pct = b >= 10 ? 100 : Math.round(100 * (r.bxp - pv) / (nx - pv));
@@ -456,7 +494,12 @@ function refugeHtml() {
 }
 function incHtml() {
   const g = G(), n = slots();
-  let h = `<p class="muted" style="margin:0">${esc(tx("inc.sub"))}</p><div class="rf-slots">`;
+  let h = `<p class="muted" style="margin:0">${esc(tx("inc.sub"))}</p>`;
+  const rd = readyEggs().length, ca = new Set([...talkable(), ...warmable()]).size, all = [];
+  if (rd > 1) all.push(`<button class="btn" type="button" data-rhatchall="1">${esc(tx("openAll", { n: rd }))}</button>`);
+  if (ca > 1) all.push(`<button class="btn ghost" type="button" data-rcareall="1">${esc(tx("careAll", { n: ca }))}</button>`);
+  if (all.length) h += `<div class="rc-btns">${all.join("")}</div>`;
+  h += `<div class="rf-slots">`;
   for (let i = 0; i < Math.max(3, n); i++) {
     const e = g.inc[i];
     if (i >= n) { h += `<div class="rf-slot lock"><span>🔒</span><small>${esc(tx("slot.lock", { n: SLOT_LVL[i] }))}</small></div>`; continue; }
@@ -539,13 +582,16 @@ function refreshChip() {
 function onClick(e) {
   const b = e.target.closest("button"); if (!b || b.disabled) return;
   const d = b.dataset;
-  if (d.rtab) { tab = d.rtab; if (tab !== "refuge") born = null; if (tab !== "pool") last = null; EV.sfx("tap"); render(); }
+  if (d.rtab) { tab = d.rtab; if (tab !== "refuge") borns = []; if (tab !== "pool") last = null; EV.sfx("tap"); render(); }
   else if (d.rban) { G().banner = d.rban; last = null; EV.sfx("tap"); save(); }
   else if (d.rpull) pull(+d.rpull);
   else if (d.rinc) incubate(+d.rinc);
   else if (d.rwarm) warm(+d.rwarm);
   else if (d.rtalk) talk(+d.rtalk);
   else if (d.rhatch) hatch(+d.rhatch);
+  else if (d.rhatchall) hatchAll();
+  else if (d.rcareall) careAll();
+  else if (d.rpetall) petAll();
   else if (d.rpet) pet(d.rpet);
   else if (d.rbt) sibTrait(d.rbt);
   else if (d.rcl) claimCl();

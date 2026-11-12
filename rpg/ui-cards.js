@@ -236,9 +236,42 @@ function fusePlan() {
   return plan.sort((a, b) => b.top - a.top || cardName(a.id).localeCompare(cardName(b.id)));
 }
 function fuseAllBtn() {
-  const plan = fusePlan(); if (!plan.length) return "";
-  const n = plan.reduce((s, p) => s + p.steps.reduce((t, st) => t + st.n, 0), 0);
-  return `<div class="rc-btns fuse-all"><button class="btn" type="button" data-fuseall="1">${esc(tx("cards.fuseAll", { n }))}</button></div>`;
+  const plan = fusePlan(), dp = dustPlan(), b = [];
+  if (plan.length) b.push(`<button class="btn" type="button" data-fuseall="1">${esc(tx("cards.fuseAll", { n: plan.reduce((s, p) => s + p.steps.reduce((t, st) => t + st.n, 0), 0) }))}</button>`);
+  if (dp.cards.length) b.push(`<button class="btn ghost" type="button" data-dustall="1">${esc(tx("dust.all", { n: dp.cards.length }))}</button>`);
+  return b.length ? `<div class="rc-btns fuse-all">${b.join("")}</div>` : "";
+}
+/* "Deshacer sobrantes": copies below a card's best grade (they no longer add to its strength), and extra copies at the
+   top grade. Never favourites, never equipped copies, never a grade that already has enough copies to upgrade. */
+function dustPlan() {
+  const P = EV.P, R = rpgState(), fav = cfSlice().fav, top = GRADES.length - 1;
+  const eqSet = new Set([...(R ? Object.values(R.eq).filter(Boolean) : []), ...compUids()]);
+  const groups = {};
+  for (const c of P.cards) (groups[c.id] = groups[c.id] || []).push(c);
+  const cards = [], rows = [];
+  for (const id in groups) {
+    if (fav[id]) continue;
+    const list = groups[id], best = Math.max(...list.map((c) => c.g)), n = {};
+    for (const c of list) n[c.g] = (n[c.g] || 0) + 1;
+    let keptTop = list.some((c) => c.g === top && eqSet.has(c.uid));
+    const out = list.filter((c) => {
+      if (eqSet.has(c.uid) || (n[c.g] >= UPGRADE_N && c.g < top)) return false;
+      if (c.g === top) { if (!keptTop) { keptTop = true; return false; } return true; }
+      return c.g < best;
+    });
+    if (out.length) { cards.push(...out); rows.push({ id, best, out }); }
+  }
+  return { cards, rows, dust: cards.reduce((s, c) => s + DUST_OF(c.g), 0) };
+}
+function openDustAll() {
+  const dp = dustPlan(); if (!dp.cards.length) return;
+  const gName = (g) => `<b style="color:${GRADES[g].col}">${esc(GRADES[g][L()])}</b>`;
+  const rows = dp.rows.sort((a, b) => cardName(a.id).localeCompare(cardName(b.id))).map((r) => {
+    const n = {}; for (const c of r.out) n[c.g] = (n[c.g] || 0) + 1;
+    return `<li class="fa-row">${thumbHtml(r.id, r.best)}<div><strong>${esc(cardName(r.id))}</strong>${Object.keys(n).map((g) => `<span class="fa-step">${n[g]} ${gName(+g)} → ${n[g] * DUST_OF(+g)} ∴</span>`).join("")}</div></li>`;
+  }).join("");
+  openCardView(null, `<p class="muted" style="margin:0 0 8px">${esc(tx("dust.allDesc"))}</p><ul class="fa-list">${rows}</ul>
+    <div class="rc-btns"><button class="btn ghost" type="button" data-cp="close">${esc(tx("cards.fuseAllNo"))}</button><button class="btn" type="button" data-dustgo="1">${esc(tx("dust.allGo", { n: dp.cards.length, d: dp.dust }))}</button></div>`, tx("dust.allTitle"));
 }
 function openFuseAll() {
   const plan = fusePlan(); if (!plan.length) return;
@@ -296,6 +329,13 @@ function onCardsClick(e) {
   }
   if (t.dataset.unequip && R) { R.eq[t.dataset.unequip] = null; EV.sfx("tap"); EV.save(); renderCards(); return; }
   if (t.dataset.fuseall) { EV.sfx("tap"); openFuseAll(); return; }
+  if (t.dataset.dustall) { EV.sfx("tap"); openDustAll(); return; }
+  if (t.dataset.dustgo) {
+    const dp = dustPlan(); if (!dp.cards.length) return;
+    const gone = new Set(dp.cards);
+    P.cards = P.cards.filter((x) => !gone.has(x)); P.dust = (P.dust || 0) + dp.dust; P.c.dusted = (P.c.dusted || 0) + dp.cards.length;
+    EV.toast(tx("dust.allDone", { n: dp.cards.length, d: dp.dust }), "∴"); EV.sfx("coin"); EV.save(); EV.checkAch(); renderCards(); return;
+  }
   if (t.dataset.fusego) {
     const plan = fusePlan(); let n = 0;
     for (const p of plan) for (const st of p.steps) for (let i = 0; i < st.n; i++) if (fuseOnce(p.id, st.g)) n++;

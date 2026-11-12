@@ -227,8 +227,17 @@ function endHtml() {
   if (e.cards.length) html += `<div class="bminis">${e.cards.map((c) => miniCardHtml(c)).join("")}</div>`;
   if (e.lvlPick) {
     html += `<h3>${esc(tx("end.lvlPick"))}</h3><div class="bminis">${e.lvlPick.map((o, i) => miniCardHtml(o, `<button class="btn" type="button" data-lvlpick="${i}">${esc(tx("r.pick"))}</button>`)).join("")}</div>`;
-  } else html += `<div class="bctl"><button class="btn" type="button" data-x="home">${esc(tx("end.home"))}</button></div>`;
+  } else html += `<div class="bctl"><button class="btn" type="button" data-x="home">${esc(tx("end.home"))}</button>${X.echo || X.deep ? "" : `<button class="btn ghost" type="button" data-x="again">${esc(tx("end.again"))}</button>`}</div>`;
   return pauseBox("regreso") ? `<div class="panel">${pauseBox("regreso")}${html}</div>` : sceneCard(html);
+}
+// "Repetir": back to the same zone's team screen with the same companions picked (you still tap Go: energy shows there)
+function againTrip() {
+  const zone = X.zone, savia = X.savia, chosen = X.chosen.slice();
+  goHome(); startExpedition(); if (!X) return;
+  EV.showScreen();
+  if (view !== "zones") return; // a saved trip was resumed instead
+  pickZone(zone, { savia });
+  if (X && X.zone === zone) { const ok = chosen.filter((k) => X.offer.includes(k)); if (ok.length) { X.chosen = ok.slice(0, 2); render(); } }
 }
 function goHome() {
   if (battle) { cancelAnimationFrame(battle.raf); battle = null; }
@@ -294,5 +303,6 @@ function onExpClick(e) {
     case "evfight": X.talk = null; X.eventFight = false; preFight(false); break;
     case "prego": goFight(); break;
     case "home": goHome(); break;
+    case "again": againTrip(); break;
   }
 }
