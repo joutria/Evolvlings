@@ -133,13 +133,21 @@ function talkChips(g) {
   if (g.fight) c.push(["bad", Array.isArray(g.fight) ? tx("talk.fightVs", { n: g.fight.map((k) => monName(k)).join(", ") }) : tx("talk.fight")]);
   return c.length ? `<div class="talk-chips">${c.map(([k, t]) => `<span class="talk-chip ${k}">${esc(t)}</span>`).join("")}</div>` : "";
 }
+// the face beside a line (rpg/data-faces.js, art/faces/*.png): an <img> of the loaded picture, or "" while it is missing
+function faceImg(path) {
+  const im = path && window.EVART && EVART.image(path);
+  return im ? `<img class="talk-face" src="${im.src}" alt="" width="38" height="38">` : "";
+}
 function talkHtml() {
   const T = X.talk, ev = talkEv(T.id), W = talkText(T.id), F = EV.P.flags || {};
   const q = L() === "en" ? ["“", "”"] : ["«", "»"];
+  const lead = X.party && X.party[0], youFace = lead && faceImg("faces/mon-" + lead.kind + ".png");
   const lines = T.log.map((l) => {
-    if (l.you) return `<p class="talk-line you">${esc(W.opt(l.you[0], l.you[1]))}</p>`;
+    if (l.you) return `<div class="talk-line you${youFace ? " has-face" : ""}"><p>${esc(W.opt(l.you[0], l.you[1]))}</p>${youFace}</div>`;
     const t = W.say(l.n, l.i);
-    return l.who ? `<p class="talk-line"><b>${esc(W.who(l.who))}</b> ${esc(q[0] + t + q[1])}</p>` : `<p class="talk-line nar">${esc(t)}</p>`;
+    if (!l.who) return `<p class="talk-line nar">${esc(t)}</p>`;
+    const f = window.EVFACES && faceImg(EVFACES.of(ev.who[l.who] || l.who));
+    return `<div class="talk-line${f ? " has-face" : ""}">${f}<p><b>${esc(W.who(l.who))}</b> ${esc(q[0] + t + q[1])}</p></div>`;
   }).join("");
   let foot;
   if (T.end) foot = `${talkChips(T.gain)}<div class="bctl"><button class="btn" type="button" data-x="${X.eventFight ? "evfight" : "evnext"}">${esc(tx(X.eventFight ? "talk.toFight" : "r.continue"))}</button></div>`;

@@ -1,5 +1,5 @@
 {
- "v": 3320010693,
+ "v": 2021456191,
  "files": [
   {
    "path": "battle/aurora-day.png",
@@ -2107,7 +2107,502 @@
    "h": 192
   },
   {
+   "path": "faces/boy-1.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/boy.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/cavegirl-1.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/cavegirl.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/cavegirl2-1.png",
+   "w": 37,
+   "h": 38
+  },
+  {
+   "path": "faces/cavegirl2-2.png",
+   "w": 37,
+   "h": 38
+  },
+  {
+   "path": "faces/cavegirl2.png",
+   "w": 37,
+   "h": 38
+  },
+  {
+   "path": "faces/caveman.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/caveman2.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/child-1.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/child-2.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/child.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/eggboy.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/egggirl.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/eskimo-1.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/eskimo.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/fighterred.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/fighterwhite.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/hunter.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/icon-light.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/icon-sap.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/icon-stone.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/inspector-1.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/inspector-2.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/inspector.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/knight.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/knightgold-1.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/knightgold.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mangreen-1.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mangreen.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/master.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-ajolin.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-bostezo.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-brotin.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-canin.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-capuchon.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-carambano.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-centinela.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-chisporro.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-ecolito.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-espinardo.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-fizz.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-fuellito.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-fulgor.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-guardatumba.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-lumo.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-mecha.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-nim.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-ojuelo.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-pebb.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-relampin.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-remolin.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-sombrerin.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-topacio.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-trinilla.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-ululu.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-unisona.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-vidriela.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-yunqueron.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/monk-1.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/monk.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/monk2.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/ninjablue-1.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/ninjablue.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/ninjablue2.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/ninjadark.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/ninjaeskimo-1.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/ninjaeskimo.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/ninjagray.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/ninjagreen.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/ninjamageblack-1.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/ninjamageblack.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/noble.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/oldman.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/oldman2-1.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/oldman2.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/oldman3.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/oldwoman-1.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/oldwoman-2.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/oldwoman.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/princess-1.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/princess-2.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/princess-d.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/princess.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/samurai.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/samuraiblue.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/shaman.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/sorcererblack.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/sorcererorange.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/sultan.png",
+   "w": 38,
+   "h": 38
+  },
+  {
    "path": "faces/tila.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/villager-1.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/villager.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/villager2.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/villager3-1.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/villager3.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/villager4.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/villager5.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/woman-1.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/woman.png",
    "w": 38,
    "h": 38
   },
