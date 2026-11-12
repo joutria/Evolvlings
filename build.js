@@ -42,7 +42,7 @@ const TX = {
     "jobs": "Trabajos del Refugio", "jobs.sub": "Manda a un compañero a trabajar en un lugar. Rinde más si su tipo encaja y si el lugar está mejorado. Mientras trabaja no puede ir de expedición. Hasta {n} a la vez.",
     "jobs.none": "Todavía no hay nadie en el Refugio.", "job.idle": "Descansando en el Refugio", "job.send": "Mandar a trabajar", "job.cancel": "Cancelar",
     "job.full": "Ya hay {n} compañeros trabajando.", "job.sent": "{n} se va a trabajar a: {p}", "job.at": "Trabajando en: {p}", "job.will": "Traerá: {what}",
-    "job.done": "Terminó en: {p}", "job.collect": "Recoger", "job.got": "{n} vuelve del trabajo con: {what}. +1 Vínculo", "job.fit": "Su tipo encaja: rinde más",
+    "job.done": "Terminó en: {p}", "job.collect": "Recoger", "job.again": "Recoger y repetir", "job.all": "Recoger todos ({n})", "job.allAgain": "Recoger y repetir todos ({n})", "job.gotAll": "{n} compañeros vuelven del trabajo con: {what}. +1 Vínculo cada uno", "job.gotAgain": "{n} compañeros traen: {what}, y vuelven a trabajar.", "job.got": "{n} vuelve del trabajo con: {what}. +1 Vínculo", "job.fit": "Su tipo encaja: rinde más",
     "r.food": "🍓 ×{n}", "r.items": "🎒 ×{n}", "r.wood": "{n} de Madera",
     "ord": "Encargos del Vado", "ord.sub": "Cada día dos vecinos piden algo, y los encargos sin hacer esperan hasta 3 días. Pagan en Chispas y Madera, y a veces dejan una Nota.",
     "ord.need": "Piden {what} (tienes {have})", "ord.pay": "Pagan ✦ {c} y 🪵 {w}", "ord.give": "Entregar", "ord.giveTo": "Entregar a {n}", "ord.done": "Entregado. Vuelve mañana.",
@@ -84,7 +84,7 @@ const TX = {
     "jobs": "Refuge jobs", "jobs.sub": "Send a companion to work at a place. It earns more when its type fits and when the place is upgraded. While it works it can't go on expeditions. Up to {n} at a time.",
     "jobs.none": "Nobody lives in the Refuge yet.", "job.idle": "Resting in the Refuge", "job.send": "Send to work", "job.cancel": "Cancel",
     "job.full": "{n} companions are already working.", "job.sent": "{n} goes off to work at: {p}", "job.at": "Working at: {p}", "job.will": "Will bring: {what}",
-    "job.done": "Finished at: {p}", "job.collect": "Collect", "job.got": "{n} comes back from work with: {what}. +1 Bond", "job.fit": "Its type fits: earns more",
+    "job.done": "Finished at: {p}", "job.collect": "Collect", "job.again": "Collect and repeat", "job.all": "Collect all ({n})", "job.allAgain": "Collect and repeat all ({n})", "job.gotAll": "{n} companions come back from work with: {what}. +1 Bond each", "job.gotAgain": "{n} companions bring: {what}, and go back to work.", "job.got": "{n} comes back from work with: {what}. +1 Bond", "job.fit": "Its type fits: earns more",
     "r.food": "🍓 ×{n}", "r.items": "🎒 ×{n}", "r.wood": "{n} Wood",
     "ord": "El Vado requests", "ord.sub": "Every day two neighbours ask for something, and unfinished requests wait up to 3 days. They pay in Chispas and Wood, and sometimes leave a Note.",
     "ord.need": "They ask for {what} (you have {have})", "ord.pay": "They pay ✦ {c} and 🪵 {w}", "ord.give": "Hand over", "ord.giveTo": "Give to {n}", "ord.done": "Delivered. Come back tomorrow.",
@@ -261,6 +261,8 @@ function onClick(e) {
   if (t.dataset.jgo) { const [k, p, hh] = t.dataset.jgo.split(":"); sendJob(k, p, +hh); return; }
   if (t.dataset.jcancel) { pickJob = null; render(); return; }
   if (t.dataset.jget) { collect(t.dataset.jget); return; }
+  if (t.dataset.jagain) { collectAll(true, t.dataset.jagain); return; }
+  if (t.dataset.jall) { collectAll(t.dataset.jall === "again"); return; }
   if (t.dataset.ord) { const r = deliver(+t.dataset.ord); if (r) EV.toast(r.text, r.ok ? "✉" : "✕"); render(); }
 }
 function refreshBtn() {
@@ -295,12 +297,13 @@ function jobYield(k, place, h) {
   for (const [r, v] of Object.entries(JOBS[place].per)) out[r] = Math.max(1, Math.round(v * h * mult));
   return { out, fit };
 }
-function sendJob(k, place, h) {
+function sendJob(k, place, h, quiet) {
   const R = roster(); if (!R[k] || working(k) || !JOBS[place]) return;
   if (Object.keys(J()).length >= jobsMax()) { EV.toast(tx("job.full", { n: jobsMax() })); EV.sfx("deny"); return; }
   const y = jobYield(k, place, h);
   J()[k] = { place, h, start: Date.now(), end: Date.now() + jobMs(h), out: y.out, fit: y.fit };
   EV.P.c.jobs = (EV.P.c.jobs || 0) + 1;
+  if (quiet) return true;
   save(); EV.sfx("tap");
   EV.toast(tx("job.sent", { n: EV.RPG.monName(k), p: tx("p." + place) }), "🧺");
   pickJob = null; render();
@@ -311,7 +314,7 @@ function outText(out) {
   if (out.dust) parts.push("∴ " + out.dust); if (out.coins) parts.push("✦ " + out.coins); if (out.items) parts.push(tx("r.items", { n: out.items }));
   return parts.join(" · ");
 }
-function collect(k) {
+function collect(k, quiet) {
   const j = J()[k]; if (!j || Date.now() < j.end) return;
   const P = EV.P, b = B(), o = j.out, got = [];
   if (o.food) for (let i = 0; i < o.food; i++) { const f = GARDEN[lvl("garden")].pool[Math.floor(Math.random() * GARDEN[lvl("garden")].pool.length)]; P.inv[f] = (P.inv[f] || 0) + 1; }
@@ -321,23 +324,39 @@ function collect(k) {
   if (o.items) for (let i = 0; i < o.items; i++) { const it = NOOK_ITEMS[Math.floor(Math.random() * NOOK_ITEMS.length)]; P.inv[it] = (P.inv[it] || 0) + 1; }
   const r = roster()[k]; if (r) r.bxp += 1; // working side by side builds Bond
   delete J()[k];
+  if (quiet) return o;
   save(); EV.sfx("chirp");
   EV.toast(tx("job.got", { n: EV.RPG.monName(k), what: outText(o) }), "🧺");
   render();
 }
 const jobsReady = () => Object.values(J()).filter((j) => Date.now() >= j.end).length;
+// collect every finished job at once; again = send each one back to the same place for the same hours
+function collectAll(again, only) {
+  const ks = Object.keys(J()).filter((k) => Date.now() >= J()[k].end && (!only || k === only)); if (!ks.length) return;
+  const sum = {}; let sent = 0;
+  for (const k of ks) {
+    const { place, h } = J()[k], o = collect(k, true);
+    for (const r in o) sum[r] = (sum[r] || 0) + o[r];
+    if (again && sendJob(k, place, h, true)) sent++;
+  }
+  save(); EV.sfx("chirp");
+  EV.toast(tx(sent ? "job.gotAgain" : "job.gotAll", { n: ks.length, what: outText(sum) }), "🧺");
+  pickJob = null; render();
+}
 let pickJob = null; // { k, place }
 function jobsHtml() {
   const R = roster(), ks = Object.keys(R).filter((k) => !EV.RPG.MONS || EV.RPG.MONS[k]);
   let h = `<h3 class="cat-title">${esc(tx("jobs"))}</h3><p class="muted" style="margin:0">${esc(tx("jobs.sub", { n: jobsMax() }))}</p>`;
   if (!ks.length) return h + `<p class="muted">${esc(tx("jobs.none"))}</p>`;
+  const rd = jobsReady();
+  if (rd > 1) h += `<div class="rc-btns"><button class="btn" type="button" data-jall="get">${esc(tx("job.all", { n: rd }))}</button><button class="btn ghost" type="button" data-jall="again">${esc(tx("job.allAgain", { n: rd }))}</button></div>`;
   h += `<div class="bd-jobs">${ks.map((k) => {
     const j = J()[k], ty = typeOf(k);
     let x = `<div class="bd-jobrow"><canvas width="96" height="80" data-mon="${k}"></canvas><div class="bd-jtxt"><strong>${esc(EV.RPG.monName(k))}</strong>${ty ? EV.RPG.typeChip(ty) : ""}`;
     if (j) {
       const left = j.end - Date.now();
       if (left > 0) x += `<small>${esc(tx("job.at", { p: tx("p." + j.place) }))} · ${esc(tx("jobLeft", { t: fmt(left) }))}</small><div class="bar"><i style="width:${Math.round(100 * (1 - left / (j.end - j.start)))}%"></i></div><small class="muted">${esc(tx("job.will", { what: outText(j.out) }))}</small>`;
-      else x += `<small class="ok">${esc(tx("job.done", { p: tx("p." + j.place) }))}</small><small>${esc(outText(j.out))}</small><button class="btn" type="button" data-jget="${k}">${esc(tx("job.collect"))}</button>`;
+      else x += `<small class="ok">${esc(tx("job.done", { p: tx("p." + j.place) }))}</small><small>${esc(outText(j.out))}</small><div class="rc-btns"><button class="btn" type="button" data-jget="${k}">${esc(tx("job.collect"))}</button><button class="btn ghost" type="button" data-jagain="${k}">${esc(tx("job.again"))}</button></div>`;
     } else if (pickJob && pickJob.k === k) {
       x += `<div class="bd-places">${Object.keys(JOBS).map((p) => `<button type="button" class="wchip${pickJob.place === p ? " on" : ""}" data-jplace="${k}:${p}"><strong>${esc(tx("p." + p))}</strong><small class="${JOBS[p].fit.includes(ty) ? "ok" : ""}">${esc(JOBS[p].fit.includes(ty) ? tx("job.fit") : outText(JOBS[p].per).replace(/ ?×?[\d.]+/g, ""))}</small></button>`).join("")}</div>`;
       if (pickJob.place) x += `<div class="rc-btns">${JOB_H.map((hh) => `<button class="btn ghost" type="button" data-jgo="${k}:${pickJob.place}:${hh}">${esc(fmt(jobMs(hh)))} · ${esc(outText(jobYield(k, pickJob.place, hh).out))}</button>`).join("")}</div>`;

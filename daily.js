@@ -10,7 +10,7 @@ const $ = EV.$, esc = EV.escapeHtml, L = () => EV.LANG;
 /* ---------- Text ---------- */
 const TX = {
   es: {
-    "nav": "Tareas", "title": "Tareas y premios", "notes": "♪ {n} Notas del Canto",
+    "nav": "Tareas", "title": "Tareas y premios", "all.btn": "Recoger todo ({n})", "all.got": "Recogiste: {what}", "notes": "♪ {n} Notas del Canto",
     "notes.what": "Las Notas del Canto se gastan en el Pozo de los Ecos (Cartas → Pozo). Nunca caducan.",
     "day.title": "Tareas de hoy", "day.reset": "Se renuevan a las 05:00.", "day.claim": "Cobrar", "day.done": "Cobrada",
     "day.reroll": "Cambiar", "day.rerollUsed": "Ya cambiaste una tarea hoy.", "day.pending": "Pendiente de {d}",
@@ -35,7 +35,7 @@ const TX = {
     "w.stars3": "Conseguir 3 estrellas nuevas", "w.fuse3": "Mejorar 3 cartas", "w.pantry7": "Tirar 7 veces en la Despensa", "w.feed15": "Dar de comer 15 veces", "w.echo1": "Calmar al Eco del Guardián", "w.hatch1": "Abrir un huevo del Refugio",
   },
   en: {
-    "nav": "Tasks", "title": "Tasks and rewards", "notes": "♪ {n} Song Notes",
+    "nav": "Tasks", "title": "Tasks and rewards", "all.btn": "Collect all ({n})", "all.got": "Collected: {what}", "notes": "♪ {n} Song Notes",
     "notes.what": "Song Notes are spent at the Well of Echoes (Cards → Well). They never expire.",
     "day.title": "Today's tasks", "day.reset": "They refresh at 05:00.", "day.claim": "Claim", "day.done": "Claimed",
     "day.reroll": "Swap", "day.rerollUsed": "You already swapped a task today.", "day.pending": "Left over from {d}",
@@ -121,7 +121,10 @@ const CAL_FOOD = ["stew", "melon", "cookie", "tea"];
 
 /* ---------- State ---------- */
 const cnt = (k) => (EV.P.c[k] || 0);
-const addNotes = (n) => { const P = EV.P; P.notes = (P.notes || 0) + n; EV.toast(tx("toast.notes", { n }), "♪"); EV.sfx("coin"); };
+// bulk = true while "Collect all" runs: rewards add up quietly and one toast sums them at the end
+let bulk = false;
+const addNotes = (n) => { const P = EV.P; P.notes = (P.notes || 0) + n; if (bulk) return; EV.toast(tx("toast.notes", { n }), "♪"); EV.sfx("coin"); };
+const coins = (n) => EV.addCoins(n, bulk);
 function newTask(id) { return { id, base: cnt((DAILY[id] || WEEKLY[id]).c), got: false }; }
 function rollDaily() {
   const cats = { care: [], exp: [], coll: [], world: [] };
@@ -181,7 +184,7 @@ function claimTask(si, ti) {
   const d = D(), s = d.sets[si], t = s && s.tasks[ti];
   if (!t || t.got || !isDone(t)) return;
   t.got = true; EV.P.c.dailyDone = (EV.P.c.dailyDone || 0) + 1;
-  EV.addCoins(DAILY[t.id].r * (d.back > 0 ? 2 : 1));
+  coins(DAILY[t.id].r * (d.back > 0 ? 2 : 1));
   save();
 }
 function reroll(ti) {
@@ -204,7 +207,7 @@ function lightLamp(si) {
 function claimWeek(ti) {
   const d = D(), t = d.week.tasks[ti];
   if (!t || t.got || !isDone(t)) return;
-  t.got = true; EV.P.c.weeklyDone = (EV.P.c.weeklyDone || 0) + 1; EV.addCoins(WEEKLY[t.id].r); save();
+  t.got = true; EV.P.c.weeklyDone = (EV.P.c.weeklyDone || 0) + 1; coins(WEEKLY[t.id].r); save();
 }
 function claimWeekBonus() {
   const d = D();
@@ -217,8 +220,8 @@ function claimCal() {
   d.cal.n = d.cal.n % 28 + 1; d.cal.last = dayKey();
   const r = calReward(d.cal.n);
   if (r.notes) addNotes(r.notes);
-  if (r.coins) EV.addCoins(r.coins);
-  if (r.food) { EV.P.inv[r.food] = (EV.P.inv[r.food] || 0) + 1; EV.toast(itemName(r.food)); EV.sfx("coin"); }
+  if (r.coins) coins(r.coins);
+  if (r.food) { EV.P.inv[r.food] = (EV.P.inv[r.food] || 0) + 1; if (!bulk) { EV.toast(itemName(r.food)); EV.sfx("coin"); } }
   save();
 }
 function itemName(id) { const it = EV.STR[L()].item && EV.STR[L()].item[id]; return it ? it[0] : id; }
@@ -270,7 +273,33 @@ function takePick(i) {
   EV.toast(tx("chest.picked", { card: EV.RPG.cardName(o.id) })); EV.sfx("grow");
   save();
 }
-function save() { EV.save(); EV.checkAch(); render(); refreshChip(); }
+function save() { if (bulk) return; EV.save(); EV.checkAch(); render(); refreshChip(); }
+// what "Collect all" would take now (tasks of every pending day, lanterns, weekly tasks and bonus, calendar square)
+function readyCount() {
+  const d = D(); let n = 0;
+  for (const s of d.sets) { const open = s.tasks.filter((t) => !t.got); const ready = open.filter(isDone).length; n += ready; if (!s.lit && ready === open.length) n++; }
+  const wReady = d.week.tasks.filter((t) => !t.got && isDone(t)).length; n += wReady;
+  if (!d.week.bonus && d.week.tasks.filter((t) => t.got).length + wReady >= 4) n++;
+  if (d.cal.last !== dayKey()) n++;
+  return n;
+}
+function claimAll() {
+  const d = D(), P = EV.P, c0 = P.coins, n0 = P.notes || 0, food = [];
+  if (!readyCount()) return;
+  bulk = true;
+  try {
+    d.sets.forEach((s, si) => { s.tasks.forEach((t, ti) => claimTask(si, ti)); lightLamp(si); });
+    d.week.tasks.forEach((t, ti) => claimWeek(ti));
+    claimWeekBonus();
+    if (d.cal.last !== dayKey()) { const r = calReward(d.cal.n % 28 + 1); if (r.food) food.push(itemName(r.food)); claimCal(); }
+  } finally { bulk = false; }
+  const parts = [];
+  if (P.coins > c0) parts.push("+" + (P.coins - c0) + " ✦");
+  if ((P.notes || 0) > n0) parts.push("+" + ((P.notes || 0) - n0) + " ♪");
+  parts.push(...food);
+  EV.toast(tx("all.got", { what: parts.join(" · ") }), "✓"); EV.sfx("coin"); EV.buzz && EV.buzz(20);
+  save();
+}
 
 /* ---------- UI ---------- */
 const GR = () => EV.RPG && EV.RPG.GRADES;
@@ -283,6 +312,8 @@ function render() {
   tick();
   const d = D(), P = EV.P;
   let h = `<div class="panel-head"><h2>${esc(tx("title"))}</h2><span class="progress">${esc(tx("notes", { n: P.notes }))}</span></div><p class="muted">${esc(tx("notes.what"))}</p>`;
+  const ready = readyCount();
+  if (ready > 1) h += `<div class="rc-btns"><button class="btn" type="button" data-dall="1">${esc(tx("all.btn", { n: ready }))}</button></div>`;
   if (d.back > 0) h += `<p class="dback">🎉 ${esc(tx("back", { n: d.back }))}</p>`;
   // daily
   d.sets.forEach((s, si) => {
@@ -341,6 +372,7 @@ function onClick(e) {
   const b = e.target.closest("button"); if (!b || b.disabled) return;
   const ds = b.dataset;
   if (ds.dclaim) { const [si, ti] = ds.dclaim.split(":").map(Number); claimTask(si, ti); }
+  else if (ds.dall) claimAll();
   else if (ds.dreroll != null) reroll(+ds.dreroll);
   else if (ds.dlamp != null) lightLamp(+ds.dlamp);
   else if (ds.wclaim != null) claimWeek(+ds.wclaim);
