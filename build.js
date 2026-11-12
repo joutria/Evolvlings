@@ -485,7 +485,7 @@ function hello() {
 }
 hello(); tick(); refreshBtn();
 
-EV.BUILD = { B, lvl, harvest, gardenStock, grow, start, tick, jobLeft, render, COST, GARDEN, INC_CUT, MAX, PLACES,
+EV.BUILD = { busy: () => Object.keys(J()).filter((k) => roster()[k]).map((k) => ({ k, place: tx("p." + J()[k].place), done: J()[k].end <= Date.now() })), B, lvl, harvest, gardenStock, grow, start, tick, jobLeft, render, COST, GARDEN, INC_CUT, MAX, PLACES,
   incCut: () => INC_CUT[lvl("inc")] || 0, incExtra: () => (lvl("inc") >= MAX ? 1 : 0), tx, EFF, eff,
   pantryBonus: () => eff("pantry"), wellBonus: () => eff("well"), pathBonus: () => eff("path"), nookN: () => eff("nook"),
   sendJob, collect, jobsReady, working, J, JOBS, orders, deliver, ordersDialog, ordLabel, NEIGH,
