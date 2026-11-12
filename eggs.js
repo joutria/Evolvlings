@@ -328,10 +328,10 @@ function unitOf(k) {
   const bond = bondLvl(r.bxp);
   return { lvl: r.lvl, bond, grade: gradeOf(bond), star: r.st || 0 };
 }
-// Refuge companions offered first on the pick screen (up to 4, strongest first)
+// Refuge companions offered first on the pick screen, strongest first (all of them: the pick screen folds the rest away)
 function offer(species) {
   const R = G().roster;
-  return Object.keys(R).filter((k) => k !== species && RPG.MONS[k]).sort((a, b) => R[b].lvl - R[a].lvl || R[b].bxp - R[a].bxp).slice(0, 4);
+  return Object.keys(R).filter((k) => k !== species && RPG.MONS[k]).sort((a, b) => R[b].lvl - R[a].lvl || R[b].bxp - R[a].bxp);
 }
 const badge = (k) => { const u = unitOf(k); return u ? tx("badge", { l: u.lvl, b: u.bond }) + (u.star ? " · ★" + u.star : "") : ""; };
 // called by rpg/ui-events.js when a trip ends; returns lines for the end screen
