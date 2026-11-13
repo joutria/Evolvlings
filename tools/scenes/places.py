@@ -151,7 +151,7 @@ TEAM3 = [("lumo", 20, 84), ("pebb", 36, 90), ("fizz", 52, 82)]
 
 def team(s, pose="o", right=False):
     for i, (c, x, y) in enumerate(TEAM3):
-        if pose == "away": im = mon(c, "up"); x = s.w // 2 - 10 + i * 10; y = 70 + (i % 2) * 6
+        if pose == "away": im = mon(c, "up"); x = s.w // 2 - 14 + i * 14; y = 70 + (i % 2) * 6
         else:
             im = mon(c, "left" if right else "right")
             if right: x = s.w - x

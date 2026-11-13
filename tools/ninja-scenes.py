@@ -11,7 +11,7 @@ start of the conversation instead of the drawn one; events without a PNG keep th
 
 The scenes themselves live in tools/scenes/<zone>.py, one function per event, registered with @scene("id"); the cards'
 lore scenes sit at the end of the zone files with @card("id") and go to art/cards/<id>.png ("cards" or a card id)."""
-import sys, os, glob, math, json, importlib.util
+import sys, os, glob, math, json, weakref, importlib.util
 from PIL import Image, ImageDraw, ImageChops
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
@@ -20,6 +20,42 @@ NM = importlib.util.module_from_spec(_spec); _spec.loader.exec_module(NM)
 T, W, H = 16, 128, 96
 PACK = None
 _cache = {}
+# the pictures of people and creatures (char, animal, mon, guardian and their flipped, scaled or dimmed copies): Scene.put
+# remembers where they stand, so an ending can place the team and the foes where nobody already stands (Jose, 2026-11-13:
+# figures must not be drawn on top of each other)
+FIG = {}   # id -> weak reference (pictures cannot go in a set)
+
+
+def fig(im):
+    k = id(im); FIG[k] = weakref.ref(im, lambda r, k=k: FIG.pop(k, None)); return im
+
+
+def is_fig(im):
+    r = FIG.get(id(im)); return r is not None and r() is im
+
+
+def overlap(a, b):
+    """How much two placed pictures (x, y, picture) cover each other: the area shared by their drawn boxes, each box
+    trimmed by 1 px at the sides so that figures may stand side by side touching, but not one on another's head."""
+    def box(t):
+        x, y, im = t; bb = im.getbbox() or (0, 0, 0, 0)
+        return x + bb[0] + 1, y + bb[1], x + bb[2] - 1, y + bb[3]
+    (ax0, ay0, ax1, ay1), (bx0, by0, bx1, by1) = box(a), box(b)
+    return max(0, min(ax1, bx1) - max(ax0, bx0)) * max(0, min(ay1, by1) - max(ay0, by0))
+
+
+def free_spot(im, x, y, taken, toward=0, w=None, h=None):
+    """x, y (feet) moved to the nearest place where im covers no one in taken (a list of (x, y, picture) by top-left
+    corner): sideways first (toward -1/1 tries that side first), then a few pixels up or down. Returns the top-left
+    corner; the place asked for when there is no free one."""
+    w, h = w or W, h or H
+    tries = sorted(((dx, dy) for dx in range(-80, 81, 2) for dy in (0, 3, -3)),
+                   key=lambda d: (abs(d[0]) + 3 * abs(d[1]), 0 if d[0] * (toward or 1) >= 0 else 1))
+    for dx, dy in tries:
+        x0, y0 = int(x + dx) - im.width // 2, int(y + dy) - im.height
+        if x0 < -2 or x0 + im.width > w + 2 or y0 + im.height > h + 1: continue
+        if all(overlap((x0, y0, im), t) <= 2 for t in taken): return x0, y0
+    return int(x) - im.width // 2, int(y) - im.height
 
 
 def img(*parts):
@@ -48,11 +84,11 @@ def char(name, d="down", row=0):
     """One 16 x 16 frame of a pack character: d is where it faces; row 6 is the arms-up pose of most of them.
     In an ending where the people have left (npc false), an empty frame."""
     if END and END.get("npc") is False: return Image.new("RGBA", (T, T))
-    return img("Actor", "Characters", name, "SpriteSheet.png").crop((DIRS[d] * T, row * T, DIRS[d] * T + T, row * T + T))
+    return fig(img("Actor", "Characters", name, "SpriteSheet.png").crop((DIRS[d] * T, row * T, DIRS[d] * T + T, row * T + T)))
 
 
 def animal(name, sheet="SpriteSheet.png", c=0, r=0, w=16, h=16):
-    return img("Actor", "Animals", name, sheet).crop((c * w, r * h, c * w + w, r * h + h))
+    return fig(img("Actor", "Animals", name, sheet).crop((c * w, r * h, c * w + w, r * h + h)))
 
 
 def item(*path):
@@ -61,9 +97,8 @@ def item(*path):
 
 def mon(cid, d="down", stage=0):
     """One of our creatures at the size of the pack's people: read back from art/creatures/<id>.png (64 px cells, one row
-    per stage), facing d. The creatures are Tuxemon monsters drawn at 1x (tools/tuxemon.py), far bigger than the pack's
-    16 px people, so they are shrunk to SMALL[stage] pixels high (box filter, then hard alpha edges); a sheet still
-    drawn at 2x-4x is read back at 1x."""
+    per stage), facing d. The sheets draw the pack's monsters at 2x-3x (tools/ninja-lines.py), read back here at 1x; a
+    picture drawn at 1x and bigger than the pack's 16 px people is shrunk to SMALL[stage] pixels high instead."""
     key = ("mon", cid, d, stage)
     if key in _cache: return _cache[key]
     sh = Image.open(os.path.join(ROOT, "art", "creatures", cid + ".png")).convert("RGBA")
@@ -75,7 +110,7 @@ def mon(cid, d="down", stage=0):
     if s > 1: out = cell.resize((max(1, cell.width // s), max(1, cell.height // s)), Image.NEAREST)
     else: out = shrink(cell, SMALL[min(stage, 2)])
     if d == "left": out = out.transpose(Image.FLIP_LEFT_RIGHT)
-    _cache[key] = out; return out
+    _cache[key] = fig(out); return out
 
 
 SMALL = (16, 20, 24)   # creature height in a scene by stage (the pack's people are 16 px)
@@ -117,9 +152,9 @@ def dim(im, f=0.45, grey=False):
     """The same picture darker (an unlit lamp), or greyed out (flowers losing their colour)."""
     if grey:
         g = im.convert("LA").convert("RGBA"); g = ImageChops.multiply(g, Image.new("RGBA", im.size, (int(255 * f),) * 3 + (255,)))
-        g.putalpha(im.getchannel("A")); return g
+        g.putalpha(im.getchannel("A")); return keep(im, g)
     rgb = ImageChops.multiply(im.convert("RGB"), Image.new("RGB", im.size, (int(255 * f), int(255 * f), min(255, int(255 * f * 1.2)))))
-    out = rgb.convert("RGBA"); out.putalpha(im.getchannel("A")); return out
+    out = rgb.convert("RGBA"); out.putalpha(im.getchannel("A")); return keep(im, out)
 
 
 def frame(im, w, i=0):
@@ -132,10 +167,15 @@ def tint(im, col, a=0.5):
     out = Image.blend(im.convert("RGBA"), Image.new("RGBA", im.size, col + (255,)), a); out.putalpha(im.getchannel("A")); return out
 
 
-def flip(im): return im.transpose(Image.FLIP_LEFT_RIGHT)
+def keep(im, out):
+    """out is a copy of im: a figure stays a figure."""
+    return fig(out) if is_fig(im) else out
 
 
-def scale(im, k): return im.resize((im.width * k, im.height * k), Image.NEAREST)
+def flip(im): return keep(im, im.transpose(Image.FLIP_LEFT_RIGHT))
+
+
+def scale(im, k): return keep(im, im.resize((im.width * k, im.height * k), Image.NEAREST))
 
 
 # ground kinds: the row of the pack's floor sheet that holds its plain tiles, and the 4 x 4 path block 5 rows above
@@ -180,10 +220,16 @@ class Scene:
                 elif ch in deco: self.g.alpha_composite(deco[ch], (x * T, y * T))
         self.d = ImageDraw.Draw(self.g)
         self.glows = []
+        self.figs = []      # (x, y, picture) of every person and creature put down, by top-left corner
 
     def put(self, im, x, y):
-        """Draw im with its feet (bottom centre) at x, y."""
-        NM.paste_clip(self.g, im, int(x) - im.width // 2, int(y) - im.height)
+        """Draw im with its feet (bottom centre) at x, y. A person or creature that would cover one already standing
+        there moves to the nearest free spot instead."""
+        x0, y0 = int(x) - im.width // 2, int(y) - im.height
+        if is_fig(im):
+            if any(overlap((x0, y0, im), t) > 2 for t in self.figs): x0, y0 = free_spot(im, x, y, self.figs, 1, self.w, self.h)
+            self.figs.append((x0, y0, im))
+        NM.paste_clip(self.g, im, x0, y0)
         return self
 
     def at(self, im, x, y):
@@ -290,23 +336,27 @@ def mood(t, m, props):
 TEAM = [("lumo", 14, 88), ("pebb", 30, 94), ("fizz", 46, 86)]
 
 
-def end_front(g, spec):
-    """Your team (Lumo, Pebb, Fizz), the foes and the props of the outcome, over the lit scene."""
+def end_front(g, spec, figs=()):
+    """Your team (Lumo, Pebb, Fizz), the foes and the props of the outcome, over the lit scene. Each of them moves
+    sideways to the nearest spot where it covers none of the scene's people (figs) and none of the others."""
     d = ImageDraw.Draw(g)
     right = spec.get("side") == "right" or (not spec.get("foes") and spec.get("z"))
     team, foes, P = spec.get("team"), spec.get("foes") or [], spec.get("p") or []
     if foes: right = False
+    taken = list(figs)
+    if "lamp" in P: taken.append((96 - 8, 88 - 30, cut("TilesetElement", 96, 48, 16, 32)))   # drawn below, keep it clear
     for i, (c, x, y) in enumerate(TEAM):
         if team == "away":
-            im = mon(c, "up"); x, y = (100 + i * 9, 88 + (i % 2) * 3) if right else (28 - i * 9, 88 + (i % 2) * 3)
+            im = mon(c, "up"); x, y = (96 + i * 14, 88 + (i % 2) * 3) if right else (32 - i * 14, 88 + (i % 2) * 3)
         else:
             im = mon(c, "right" if team == "ready" or not right else "left")
             if right: x = W - x
             if team == "happy": y -= 3 if i % 2 == 0 else 1
             if team in ("sleep", "closed"): im = dim(im, 0.8)
-        NM.paste_clip(g, im, x - im.width // 2, y - im.height)
+        x0, y0 = free_spot(im, x, y, taken, -1 if x < W // 2 else 1); NM.paste_clip(g, im, x0, y0); taken.append((x0, y0, im))
     for i, f in enumerate(foes[:3]):
-        im = mon(f, "left", 1); NM.paste_clip(g, im, 92 + i * 18 - im.width // 2, 88 + (i % 2) * 6 - im.height)
+        im = mon(f, "left", 1); x0, y0 = free_spot(im, 92 + i * 18, 88 + (i % 2) * 6, taken, 1)
+        NM.paste_clip(g, im, x0, y0); taken.append((x0, y0, im))
     star = lambda x, y: [d.point((x + dx, y + dy), fill=(255, 226, 120, 255)) for dx, dy in ((0, -1), (-1, 0), (0, 0), (1, 0), (0, 1))]
     def card(x, y):
         for dx, dy in ((0, -10), (8, -6), (-8, -6), (10, 1), (-10, 1)): d.point((x + dx, y + dy), fill=(255, 236, 160, 255))
@@ -355,8 +405,10 @@ def render_end(eid, key, spec):
     finally:
         END = None
     g = (s.g if isinstance(s, Scene) else s).copy()
-    if spec.get("z"): g = flip(g)
-    return end_front(g, spec)
+    figs = list(s.figs) if isinstance(s, Scene) else []
+    if spec.get("z"):
+        g = flip(g); figs = [(g.width - x - im.width, y, im.transpose(Image.FLIP_LEFT_RIGHT)) for x, y, im in figs]
+    return end_front(g, spec, figs)
 
 
 SCENES = {}
@@ -388,7 +440,7 @@ def guardian(gid, k=1):
     sh = Image.open(os.path.join(ROOT, "art", "guardians", gid + ".png")).convert("RGBA")
     c = sh.crop((0, 0, 96, 96)); c = c.crop(c.getbbox()); p = pixel_size(c)
     c = c.resize((c.width // p, c.height // p), Image.NEAREST)
-    return scale(c, k) if k > 1 else c
+    return fig(scale(c, k) if k > 1 else c)
 
 
 def load_scenes():

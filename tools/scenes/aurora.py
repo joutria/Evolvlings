@@ -242,7 +242,7 @@ def c_ration():
     s.d.ellipse([28, 54, 48, 64], fill=(70, 66, 72, 255), outline=(30, 28, 34, 255)); s.d.ellipse([31, 55, 45, 59], fill=(200, 150, 80, 255))
     s.put(mon("mecha", "down"), 38, 72).glow(38, 64, 24, FIRE, 1.1)
     s.put(char("OldWoman", "right"), 18, 62)
-    for i, (n, x) in enumerate((("Villager", 58), ("Child", 70), ("Villager2", 82), ("OldMan3", 94), ("Villager3", 106), ("Villager4", 118))):
+    for i, (n, x) in enumerate((("Villager", 58), ("Child", 73), ("Villager2", 88), ("OldMan3", 103), ("Villager3", 118))):
         s.put(char(n, "left"), x, 64 + (i % 2) * 2)
     return s.lit("night")
 

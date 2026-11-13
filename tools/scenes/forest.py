@@ -208,7 +208,7 @@ def c_thorn():
     """Inside the Thorn Wall, a forest girl tries to peek out between the spines; behind her the elders watch without a word."""
     s = hedge(Scene("grass", ["........"] * 6, var=1), 34, thorny=True)
     s.put(char("Greenman", "up"), 64, 56)
-    for n, x in (("OldMan3", 40), ("OldWoman", 88)): s.put(char(n, "up"), x, 80)
+    for n, x in (("OldMan3", 40), ("OldWoman", 80)): s.put(char(n, "up"), x, 80)
     s.put(guardian("seto"), 112, 86)
     return s.lit("gloom")
 
