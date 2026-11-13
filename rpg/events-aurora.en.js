@@ -33,7 +33,7 @@ window.EVEVENTS_EN.aurora = {
     mapa: { say: ["Map.", "It's the fence, bar by bar. The guard posts. A well, and an arrow going down very deep.", "My mother goes in there every night. I want to know where she goes."] },
     hueco: { say: ["Three nights.", "He shows you his hands. His nails are black with earth.", "The wardens change shifts at midnight. It takes them as long as a song."] },
     mirar: { say: ["You lie down on the cold ground. On the other side there's a well mouth with iron rings and, inside, ropes covered in golden dust.", "The light doesn't shine upward. It pulls down, like water down a drain. It smells of wet earth.", "See? It's not a water well."] },
-    aceite: { say: ["No.", "He says it without looking up. Then he points at the well with the charcoal.", "They burn that."] },
+    aceite: { say: ["No.", "He says it without looking up. He glances at the well for a moment and goes back to his drawing.", "Ask your lantern what it drinks."] },
     tapar: { say: ["You push earth and grey flowers over the hole. Nim tucks the map stone under his jacket.", "Thanks.", "He vanishes into the grass before the warden arrives with his lantern. Where the stone was, something is shining."] },
     guarda: { say: ["The warden comes running with his lantern. Nim is already gone; only the hole is left.", "Good eye, Caretaker.", "He puts fifteen Chispas in your hand and writes something in a notebook.", "Tomorrow somebody in the Quarter will be out of a job. Or out of a home.", "He says it without malice, the way you'd talk about the weather."] },
   } },
