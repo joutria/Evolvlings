@@ -60,8 +60,10 @@ def item(*path):
 
 
 def mon(cid, d="down", stage=0):
-    """One of our creatures at the pack's own size: read back from art/creatures/<id>.png (64 px cells; the stage
-    rows are the monster at 2x, 3x, 4x and the wild ones at 3x), facing d."""
+    """One of our creatures at the size of the pack's people: read back from art/creatures/<id>.png (64 px cells, one row
+    per stage), facing d. The creatures are Tuxemon monsters drawn at 1x (tools/tuxemon.py), far bigger than the pack's
+    16 px people, so they are shrunk to SMALL[stage] pixels high (box filter, then hard alpha edges); a sheet still
+    drawn at 2x-4x is read back at 1x."""
     key = ("mon", cid, d, stage)
     if key in _cache: return _cache[key]
     sh = Image.open(os.path.join(ROOT, "art", "creatures", cid + ".png")).convert("RGBA")
@@ -70,9 +72,30 @@ def mon(cid, d="down", stage=0):
     cell = sh.crop((col * 64, row * 64, col * 64 + 64, row * 64 + 64))
     cell = cell.crop(cell.getbbox())
     s = pixel_size(cell)
-    out = cell.resize((max(1, cell.width // s), max(1, cell.height // s)), Image.NEAREST)
+    if s > 1: out = cell.resize((max(1, cell.width // s), max(1, cell.height // s)), Image.NEAREST)
+    else: out = shrink(cell, SMALL[min(stage, 2)])
     if d == "left": out = out.transpose(Image.FLIP_LEFT_RIGHT)
     _cache[key] = out; return out
+
+
+SMALL = (16, 20, 24)   # creature height in a scene by stage (the pack's people are 16 px)
+
+
+def shrink(im, h):
+    """A big picture made h pixels high (or as wide, if it is wider than high), keeping pixel-art edges."""
+    k = h / max(im.width, im.height)
+    if k >= 1: return im
+    w2, h2 = max(1, round(im.width * k)), max(1, round(im.height * k))
+    small = im.resize((w2, h2), Image.BOX)
+    a = small.getchannel("A").point(lambda v: 255 if v >= 110 else 0)
+    rgb = Image.new("RGBA", small.size); rgb.paste(small.convert("RGB"), (0, 0)); rgb.putalpha(a)
+    # un-premultiply the edge colours the box filter pulled towards black
+    px, src = rgb.load(), small.load()
+    for y in range(h2):
+        for x in range(w2):
+            r, g, b, al = src[x, y]
+            if al and px[x, y][3]: px[x, y] = (r, g, b, 255)
+    return rgb
 
 
 def pixel_size(im):
