@@ -178,7 +178,10 @@ function renderCards() {
     const ok = usable(id);
     const inUse = best.find((c) => eqSet.has(c.uid));
     const btns = [];
-    if (R && ok) for (const sl of ["a", "p", "s"]) btns.push(`<button class="btn ghost" type="button" data-equip="${(inUse || best[0]).uid}" data-slot="${sl}" ${R.lvl < SLOT_LVL[sl] ? "disabled" : ""}>${esc(tx("slot." + sl))}</button>`);
+    // equip a copy your creature already has, else a free one (best grade first); never one a Refuge companion carries
+    const lent = compUids(), own = R ? list.find((c) => Object.values(R.eq).includes(c.uid)) : null;
+    const free = own || list.filter((c) => !lent.has(c.uid)).sort((a, b) => b.g - a.g)[0] || best[0];
+    if (R && ok) for (const sl of ["a", "p", "s"]) btns.push(`<button class="btn ghost" type="button" data-equip="${free.uid}" data-slot="${sl}" ${R.lvl < SLOT_LVL[sl] ? "disabled" : ""}>${esc(tx("slot." + sl))}</button>`);
     const isFav = !!cfSlice().fav[id];
     btns.push(`<button class="btn ghost cf-fav" type="button" data-fav="${id}" aria-pressed="${isFav}">${isFav ? "★ " + esc(tx("cf.unfav")) : "☆ " + esc(tx("cf.fav"))}</button>`);
     if (inUse) btns.push(`<span class="progress">${esc(tx("cards.inUse"))}</span>`);
@@ -322,7 +325,8 @@ function onCardsClick(e) {
   if (t.dataset.equip && R) {
     const uid = t.dataset.equip, slot = t.dataset.slot;
     const c = cardByUid(uid);
-    if (!c || !usable(c.id) || compUids().has(uid)) { EV.sfx("deny"); return; }
+    if (!c || !usable(c.id)) { EV.sfx("deny"); return; }
+    if (compUids().has(uid)) { EV.toast(tx("cards.lent")); EV.sfx("deny"); return; }
     // no duplicate card on one creature: remove the same card id from other slots
     for (const k of ["a", "p", "s"]) { const o = R.eq[k] && cardByUid(R.eq[k]); if (o && (o.uid === uid || o.id === c.id)) R.eq[k] = null; }
     R.eq[slot] = uid; P.c.equips = (P.c.equips || 0) + 1; EV.sfx("card"); EV.save(); renderCards(); return;

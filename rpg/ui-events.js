@@ -292,7 +292,12 @@ function onExpClick(e) {
   if (d.m) { EV.P.rpgMode = d.m; EV.saveProfile(); t.parentNode.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === t))); if (battle) { if (d.m === "auto") battle.aim = null; renderTurn(); } return; }
   if (d.s) { EV.P.rpgSpeed = +d.s; EV.saveProfile(); t.parentNode.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === t))); return; }
   switch (d.x) {
-    case "go": EV.sfx("tap"); setOut(); break;
+    case "go": {
+      // someone sent to a Refuge job while this screen was open can't come
+      const away = EV.BUILD && EV.BUILD.busy ? EV.BUILD.busy().map((b) => b.k) : [], gone = X.chosen.filter((k) => away.includes(k));
+      if (gone.length) { X.chosen = X.chosen.filter((k) => !away.includes(k)); X.offer = X.offer.filter((k) => !away.includes(k)); EV.toast(tx("team.busyMon", { list: gone.map(monName).join(", ") })); EV.sfx("deny"); render(); break; }
+      EV.sfx("tap"); setOut(); break;
+    }
     case "cancel": X = null; goHome(); break;
     case "morehome": EV.sfx("tap"); X.allHome = true; render(); break;
     case "quit": finish("quit"); break;
