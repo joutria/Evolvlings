@@ -76,9 +76,70 @@ def backdrop(zone, size, path=None):
     return s
 
 
+# Battle grounds (2026-11-13): the flat floor of the first version looked empty next to the event scenes, so the ground
+# gets small details of the zone between the fighters' tiles, the sides get the zone's trees, rocks or walls (cut off by
+# the edge, like a clearing seen up close) and the corners darken a little. The fighters stand on 3 lanes (feet at y 49,
+# 76, 103 at this 180 x 120 size) at x 24 and 63 (yours) and 117 and 156 (theirs): no detail goes on those tiles.
+FEET = [(x, y) for x in (24, 63, 117, 156) for y in (49, 76, 103)]
+GROUND = {  # zone: (details from TilesetFloorDetail (col, row) or "peb" pebbles from TilesetNature, how many, a stone colour)
+    "aurora": ([(0, 2), (1, 2), (2, 2), (5, 3), (5, 2), "peb"], 26, False), "crater": (["peb", "peb", (1, 2)], 16, False),
+    "forest": ([(0, 2), (1, 2), (3, 2), (6, 2), (5, 3), "peb"], 30, False), "hollow": ([(0, 2), (1, 2), "x", "x", "peb"], 22, False),
+    "lake": ([(0, 2), (2, 2), "peb", "peb", (5, 2)], 22, False), "caves": (["peb"], 16, (120, 112, 104)),
+    "heights": (["peb"], 12, (176, 184, 200)), "deep": (["peb"], 10, (170, 196, 222)), "heart": ([(0, 2), (1, 2), "x", "peb"], 22, False)}
+SIDES = {  # zone: props for the left and right edges, from the bottom up: (sheet, x, y, w, h)
+    "aurora": [("TilesetNature", 256, 0, 32, 32), ("TilesetNature", 48, 288, 48, 48)],
+    "crater": [], "forest": [("TilesetNature", 256, 0, 32, 32), ("TilesetNature", 32, 0, 32, 32)],
+    "hollow": [("TilesetNature", 32, 0, 32, 32)], "lake": [("TilesetNature", 256, 0, 32, 32)], "caves": [("TilesetNature", 288, 144, 16, 16)],
+    "heights": [("TilesetNature", 288, 144, 16, 16)], "deep": [("TilesetNature", 288, 144, 16, 16)], "heart": [("TilesetNature", 256, 0, 32, 32)]}
+
+
+def dress(s, zone):
+    w, h = s.w, s.h
+    fd, nat = ts("TilesetFloorDetail"), ts("TilesetNature")
+    kinds, n, grey = GROUND[zone]
+    seed = sum(map(ord, zone)) * 37
+    def rnd(m):
+        nonlocal seed; seed = (seed * 9301 + 49297) % 233280; return seed % m
+    placed = 0
+    for _ in range(n * 6):
+        if placed >= n: break
+        x, y = 4 + rnd(w - 8), 34 + rnd(h - 38)
+        if any(abs(x - fx) < 20 and -6 < y - fy < 16 for fx, fy in FEET): continue
+        k = kinds[rnd(len(kinds))]
+        if k == "peb": im = cut("TilesetNature", 240 + rnd(4) * 16, 288, 16, 16)
+        elif k == "x": im = dim(tile(fd, 5, 3, trim=True), 0.75, grey=True)
+        else: im = tile(fd, k[0], k[1], trim=True)
+        if grey: im = tint(im, grey, 0.65)
+        s.put(im, x, y); placed += 1
+    props = SIDES[zone]
+    small = props and props[0][3] <= 16      # rocks: closer together, two abreast
+    for side in (0, 1) if props else ():
+        for i, y in enumerate(range(h + 6, 30, -12 if small else -26)):
+            sh, px, py, pw, ph = props[(i + side) % len(props)]
+            im = cut(sh, px, py, pw, ph)
+            if grey: im = tint(im, grey, 0.55)
+            x = (-4 + (i % 2) * 6) if side == 0 else (w + 4 - (i % 2) * 6)
+            if small: x = (4 + (i % 3) * 4) if side == 0 else (w - 4 - (i % 3) * 4)
+            s.put(im, x, y)
+            if small and i % 2: s.put(im, x + (-8 if side else 8), y - 4)
+    return s
+
+
+def vignette(g, a=0.3):
+    """Darkens the corners a little (more at the bottom), so the eye stays on the fighters."""
+    w, h = g.size
+    m = Image.new("L", (w, h)); px = m.load()
+    for y in range(h):
+        for x in range(w):
+            d = ((x - w / 2) / (w * 0.62)) ** 2 + ((y - h * 0.42) / (h * 0.7)) ** 2
+            px[x, y] = int(255 * a * min(1, max(0, (d - 0.45) / 0.55)))
+    return Image.composite(Image.new("RGBA", (w, h), (16, 12, 28, 255)), g, m)
+
+
 def battle(zone, night):
-    s = backdrop(zone, (180, 120))
+    s = dress(backdrop(zone, (180, 120)), zone)
     s.lit(NIGHT[zone] if night else DAY[zone])
+    s.g = vignette(s.g); s.d = ImageDraw.Draw(s.g)
     if zone == "hollow": s.fog(0.25 if night else 0.3, (196, 200, 214) if not night else (90, 90, 120))
     if zone == "heights" and not night: s.snow(30)
     if zone == "deep": s.snow(40)
