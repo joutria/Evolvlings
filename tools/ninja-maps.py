@@ -36,7 +36,7 @@ BOSSES = {"farol": "GiantSpirit", "forja": "GiantFlam", "seto": "GiantBamboo", "
 # young (Brotín green then red, Trinilla a red heart then a green one), so the stages did not read as the same creature and
 # the colour did not say the type. The stages listed here (0 baby, 1 young, 2 adult) move their main colour to the type's
 # colour of rpg/data-cards.js TYPES; eyes, outline and highlights stay. CC0 allows the change. Guardians the same way.
-TYPE_COL = {"fire": "#d9542c", "plant": "#4f9a3c", "light": "#e2ae2e", "bolt": "#d8b81c", "water": "#3f7fc9", "stone": "#8a7a64",
+TYPE_COL = {"fire": "#d9542c", "plant": "#4f9a3c", "light": "#e2ae2e", "bolt": "#d8b81c", "air": "#6fb8d0", "water": "#3f7fc9", "stone": "#8a7a64",
             "shadow": "#5b4b8e", "ice": "#8fcbe0", "mush": "#b0603c", "dream": "#8a78d4", "music": "#cf5f9f"}
 TINT = {"pebb": ("stone", (2,)), "brotin": ("plant", (2,)), "mecha": ("light", (0, 1, 2)), "nim": ("shadow", (0, 1, 2)),
         "ecolito": ("stone", (0, 1, 2)), "vidriela": ("water", (0, 1, 2)), "relampin": ("bolt", (0, 1, 2)),
