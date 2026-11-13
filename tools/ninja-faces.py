@@ -18,8 +18,9 @@ OUT = os.path.join(ROOT, "art", "faces")
 SKIN = {(239, 145, 79), (242, 173, 125), (215, 139, 74), (241, 196, 113), (163, 117, 78), (150, 83, 64), (207, 115, 109),
         (92, 45, 37), (255, 255, 255), (242, 234, 241)}
 
-def recolour(im, turn):
-    """Turns the hue of every coloured pixel that is not skin: clothes, hats and hair change colour."""
+def recolour(im, turn, face=True):
+    """Turns the hue of every coloured pixel that is not skin: clothes, hats and hair change colour. tools/ninja-scenes.py
+    turns the same person's 16 x 16 body with face=False, so the clothes in the scene match the face in the talk."""
     out = im.copy(); px = out.load()
     for y in range(im.height):
         for x in range(im.width):
@@ -28,7 +29,7 @@ def recolour(im, turn):
             h, s, v = colorsys.rgb_to_hsv(r / 255, g / 255, b / 255)
             if (r, g, b) in SKIN or s < 0.18 or v < 0.2: continue
             # the middle of the face (lips, nose, blush) keeps its warm colours
-            if (h > 0.9 or h < 0.14) and ((x - 19) / 11) ** 2 + ((y - 21) / 10) ** 2 < 1: continue
+            if face and (h > 0.9 or h < 0.14) and ((x - 19) / 11) ** 2 + ((y - 21) / 10) ** 2 < 1: continue
             r2, g2, b2 = colorsys.hsv_to_rgb((h + turn) % 1, s, v)
             px[x, y] = (round(r2 * 255), round(g2 * 255), round(b2 * 255), a)
     return out

@@ -11,7 +11,7 @@ start of the conversation instead of the drawn one; events without a PNG keep th
 
 The scenes themselves live in tools/scenes/<zone>.py, one function per event, registered with @scene("id"); the cards'
 lore scenes sit at the end of the zone files with @card("id") and go to art/cards/<id>.png ("cards" or a card id)."""
-import sys, os, glob, math, json, weakref, importlib.util
+import sys, os, re, glob, math, json, weakref, importlib.util
 from PIL import Image, ImageDraw, ImageChops
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
@@ -80,11 +80,53 @@ def tile(sheet, c, r, w=1, h=1, trim=False): return cut(sheet, c * T, r * T, w *
 DIRS = {"down": 0, "up": 1, "left": 2, "right": 3}
 
 
+_faces = None
+PEOPLE = {}       # while one event's scene is drawn: pack character -> its "~1"/"~2" colours (people_of)
+
+
+def faces():
+    global _faces
+    if not _faces:
+        spec = importlib.util.spec_from_file_location("ninja_faces", os.path.join(os.path.dirname(__file__), "ninja-faces.py"))
+        _faces = importlib.util.module_from_spec(spec); spec.loader.exec_module(_faces)
+    return _faces
+
+
+def people_of(eid):
+    """The people who speak in event eid (its who list in rpg/events-<zone>.js) whose face in rpg/data-faces.js is a
+    recoloured "Char~1"/"Char~2": their pack character is drawn in those same colours in the scene and its endings,
+    unless another speaker of the event uses that character in its own colours."""
+    if not hasattr(people_of, "who"):
+        faces_src = open(os.path.join(ROOT, "rpg", "data-faces.js"), encoding="utf8").read()
+        people_of.face = dict(re.findall(r'"([^"]+)": "([A-Za-z0-9]+(?:~[12d])?)"', faces_src))
+        people_of.who = {}
+        for path in glob.glob(os.path.join(ROOT, "rpg", "events-*.js")):
+            if path.endswith(".en.js"): continue
+            for e, w in re.findall(r'^\s*(\w+): \{ kind: "[^"]+",[^\n]*?who: \{([^}]*)\}', open(path, encoding="utf8").read(), re.M):
+                people_of.who[e] = re.findall(r'"([^"]+)"', w)
+    looks = [people_of.face.get(n) for n in people_of.who.get(eid, [])]
+    looks = [l for l in looks if l]
+    plain = {l for l in looks if "~" not in l}
+    out = {}
+    for l in looks:
+        base, _, var = l.partition("~")
+        if var in ("1", "2") and base not in plain: out[base] = l
+    return out
+
+
 def char(name, d="down", row=0):
     """One 16 x 16 frame of a pack character: d is where it faces; row 6 is the arms-up pose of most of them.
-    In an ending where the people have left (npc false), an empty frame."""
+    "Char~1"/"Char~2" turns its clothes to the colours of that face (tools/ninja-faces.py); a plain name takes them too
+    when the event's speaker drawn by it has a recoloured face (PEOPLE). In an ending where the people have left
+    (npc false), an empty frame."""
     if END and END.get("npc") is False: return Image.new("RGBA", (T, T))
-    return fig(img("Actor", "Characters", name, "SpriteSheet.png").crop((DIRS[d] * T, row * T, DIRS[d] * T + T, row * T + T)))
+    if "~" not in name and name in PEOPLE: name = PEOPLE[name]
+    base, _, var = name.partition("~")
+    key = ("people", name)
+    if key not in _cache:
+        sh = img("Actor", "Characters", base, "SpriteSheet.png")
+        _cache[key] = faces().recolour(sh, {"1": 0.33, "2": 0.62}[var], face=False) if var else sh
+    return fig(_cache[key].crop((DIRS[d] * T, row * T, DIRS[d] * T + T, row * T + T)))
 
 
 def animal(name, sheet="SpriteSheet.png", c=0, r=0, w=16, h=16):
@@ -478,16 +520,20 @@ def main(pack, names):
     if names == []: return
     out = os.path.join(ROOT, "art", "events"); os.makedirs(out, exist_ok=True)
     todo = [e for e in SCENES if not names or e in names or ZONE_OF[e] in names]
+    global PEOPLE
     for eid in todo:
+        PEOPLE = people_of(eid)
         s = SCENES[eid]()
         im = s.g if isinstance(s, Scene) else s
         im.convert("RGB").resize((W * 2, H * 2), Image.NEAREST).save(os.path.join(out, eid + ".png"))
     ends = json.load(open(os.path.join(os.path.dirname(__file__), "scenes", "endings.json"), encoding="utf8"))
     n = 0
     for eid in todo:
+        PEOPLE = people_of(eid)
         for key, spec in (ends.get(eid) or {}).items():
             if not spec: continue
             render_end(eid, key, spec).convert("RGB").resize((W * 2, H * 2), Image.NEAREST).save(os.path.join(out, eid + "--" + key + ".png")); n += 1
+    PEOPLE = {}
     print("ok", len(todo), "scenes and", n, "endings:", " ".join(todo))
 
 
