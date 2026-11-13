@@ -97,7 +97,7 @@ const TX = {
     "h": "{n} h", "m": "{n} min", "hm": "{h} h {m} min",
   },
 };
-const tx = (k, v) => { let s = TX[L()][k]; if (s == null) s = TX.en[k]; if (s == null) return k; if (v) s = s.replace(/\{(\w+)\}/g, (m, n) => (v[n] != null ? v[n] : m)); return s; };
+const tx = EV.text("build", TX);
 
 /* ---------- Rules ---------- */
 const MAX = 5;
@@ -379,7 +379,7 @@ const NEIGH = {
   esporina: { asks: [["melon", 1], ["dust", 10], ["tea", 1]], c: 25, w: 3 },
   mirlo: { asks: [["cookie", 1], ["stew", 1], ["wood", 3]], c: 30, w: 2, rumour: true },
 };
-const dayKey = () => (EV.DAILY ? EV.DAILY.dayKey() : new Date().toISOString().slice(0, 10));
+const dayKey = EV.dayKey;
 function hashStr(s) { let h = 2166136261; for (const ch of s) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
 function orders() {
   const b = B(), d = dayKey();

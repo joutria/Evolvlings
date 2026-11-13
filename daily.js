@@ -60,7 +60,7 @@ const TX = {
     "w.stars3": "Earn 3 new stars", "w.fuse3": "Upgrade 3 cards", "w.pantry7": "Pull 7 times at the Pantry", "w.feed15": "Feed 15 times", "w.echo1": "Calm the Guardian's Echo", "w.hatch1": "Hatch a Refuge egg",
   },
 };
-const tx = (k, v) => { let s = TX[L()][k]; if (s == null) s = TX.en[k]; if (s == null) return k; if (v) s = s.replace(/\{(\w+)\}/g, (m, n) => (v[n] != null ? v[n] : m)); return s; };
+const tx = EV.text("daily", TX);
 
 /* ---------- Time: days start at 05:00 local, weeks on Monday ---------- */
 const pad = (n) => String(n).padStart(2, "0");

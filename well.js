@@ -54,7 +54,7 @@ const TX = {
     "got": "From the Well: {card}", "ach.well1": ["First echo", "Pull at the Well of Echoes for the first time."], "ach.legend1": ["Root-light", "Get a Legendary card."],
   },
 };
-const tx = (k, v) => { let s = TX[L()][k]; if (s == null) s = TX.en[k]; if (s == null) return k; if (v) s = s.replace(/\{(\w+)\}/g, (m, n) => (v[n] != null ? v[n] : m)); return s; };
+const tx = EV.text("well", TX);
 
 /* ---------- Rules ---------- */
 const ODDS = [38.2, 28, 18, 10, 5, 0.8]; // % by grade index: Común … Legendaria
@@ -65,7 +65,7 @@ const BANNERS = {
   perm: { featured: null, boost: [] },
 };
 const POOL = () => RPG.DROP_POOL;
-const pick = (a) => a[Math.floor(Math.random() * a.length)];
+const pick = EV.pick;
 const SPECIES = { lumo: "Lumo", fizz: "Fizz", pebb: "Pebb" };
 
 const wellSlice = EV.slice("well", () => ({ pity: 0, floor: 0, promise: false, banner: "s1", hist: [], dn: { month: null, n: 0 } }));

@@ -14,7 +14,7 @@ const TX = {
   en: { clear: "Clear", rain: "Rain", fog: "Fog", snow: "Snow",
     "fx.rain": "the garden grows 25% faster", "fx.fog": "your creature tires 15% more slowly", "fx.snow": "your creature gets bored 20% more slowly"  },
 };
-const tx = (k) => (TX[EV.LANG] || TX.en)[k] || TX.en[k] || k;
+const tx = EV.text("weather", TX);
 const ICON = { clear: "☀️", rain: "🌧️", fog: "🌫️", snow: "❄️" };
 // what each weather multiplies (only ever in the player's favour)
 const MUL = { rain: { garden: 1.25 }, fog: { energy: 0.85 }, snow: { fun: 0.8 } };
