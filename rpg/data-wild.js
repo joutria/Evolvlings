@@ -1,5 +1,5 @@
 /* Evolvlings RPG: wild creatures, filler foes of each zone.
-   Their pictures come from the CC0 Ninja Adventure pack (art/creatures/<id>.png, built by tools/ninja-maps.py; see CREDITS.md).
+   Their pictures are Tuxemon monsters (art/creatures/<id>.png, built by tools/tuxemon.py; see CREDITS.md).
    wild: true keeps them out of eggs, duels and card owner lists: they only show up as foes on expeditions.
    They borrow the cards of a creature of their own type. Loaded after rpg/registry.js. */
 "use strict";

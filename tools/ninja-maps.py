@@ -38,10 +38,9 @@ BOSSES = {"farol": "GiantSpirit", "forja": "GiantFlam", "seto": "GiantBamboo", "
 # colour of rpg/data-cards.js TYPES; eyes, outline and highlights stay. CC0 allows the change. Guardians the same way.
 TYPE_COL = {"fire": "#d9542c", "plant": "#4f9a3c", "light": "#e2ae2e", "bolt": "#d8b81c", "air": "#6fb8d0", "water": "#3f7fc9", "stone": "#8a7a64",
             "shadow": "#5b4b8e", "ice": "#8fcbe0", "mush": "#b0603c", "dream": "#8a78d4", "music": "#cf5f9f"}
-TINT = {"pebb": ("stone", (2,)), "brotin": ("plant", (2,)), "mecha": ("light", (0, 1, 2)), "nim": ("shadow", (0, 1, 2)),
-        "ecolito": ("stone", (0, 1, 2)), "vidriela": ("water", (0, 1, 2)), "relampin": ("bolt", (0, 1, 2)),
-        "trinilla": ("music", (0, 1, 2)), "centinela": ("shadow", (0, 1, 2)),
-        "bostezo": ("dream", (0, 1, 2)), "capuchon": ("mush", (0, 1, 2))}
+# Since 2026-11-13 every creature and wild foe sheet is a Tuxemon line made by tools/tuxemon.py (run it after this tool: it
+# overwrites the creature sheets written here and tints them itself), so no creature is tinted here any more.
+TINT = {}
 GTINT = {"trono": "shadow", "grava": "stone", "micelio": "mush"}
 
 def tint(im, col):
