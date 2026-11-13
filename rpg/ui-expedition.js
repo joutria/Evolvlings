@@ -614,8 +614,12 @@ function openPick(who, slot) {
     el.addEventListener("click", onPickClick);
   }
   const nm = who === "own" ? EV.S.name : monName(who), rows = pickRows(who, slot);
+  // cards that fit but whose every copy someone else carries don't get a row: say how many and who has them
+  const shownIds = new Set(rows.map((r) => r.id)), held = {};
+  for (const c of EV.P.cards) if (!shownIds.has(c.id) && (who === "own" ? usable(c.id) : compFits(who, c.id))) held[c.id] = 1;
+  const nHeld = Object.keys(held).length, heldNote = nHeld ? `<p class="muted" style="margin:4px 12px">${esc(tx("load.held", { n: nHeld }))}</p>` : "";
   el.innerHTML = `<div class="cpick-back" data-cp="close"></div><div class="cpick" role="dialog" aria-modal="true"><div class="cp-head"><div><span class="sub">${esc(nm)}</span><h3>${esc(tx("load.pickTitle", { s: tx("slot." + slot) }))}</h3></div><button class="sheet-x" type="button" data-cp="close" aria-label="${esc(tx("load.close"))}">✕</button></div>` +
-    `${rows.length > 4 ? cfFilterHtml("pick", TYPE_ORDER.filter((t) => rows.some((r) => r.uid && CARDS[r.id].type === t))) : ""}<div class="cp-list">${rows.map((r) => `<button type="button" class="lrow pickrow${r.on ? " on" : ""}" data-cpu="${r.uid}"${r.uid ? ` data-cpk="${r.uid}"` : ""}>${r.empty ? `<div class="lr-empty">∅</div><div class="lr-txt"><span class="lr-slot">${esc(tx("slot." + slot))}</span><strong>${esc(tx("cards.empty"))}</strong><span class="lr-fx">${esc(tx("load.emptyFx"))}</span></div>` : cardRowInner(r.id, r.g, slot, r.on ? tx("load.equipped") : r.tag)}</button>`).join("")}</div></div>`;
+    `${rows.length > 4 ? cfFilterHtml("pick", TYPE_ORDER.filter((t) => rows.some((r) => r.uid && CARDS[r.id].type === t))) : ""}<div class="cp-list">${rows.map((r) => `<button type="button" class="lrow pickrow${r.on ? " on" : ""}" data-cpu="${r.uid}"${r.uid ? ` data-cpk="${r.uid}"` : ""}>${r.empty ? `<div class="lr-empty">∅</div><div class="lr-txt"><span class="lr-slot">${esc(tx("slot." + slot))}</span><strong>${esc(tx("cards.empty"))}</strong><span class="lr-fx">${esc(tx("load.emptyFx"))}</span></div>` : cardRowInner(r.id, r.g, slot, r.on ? tx("load.equipped") : r.tag)}</button>`).join("")}</div>${heldNote}</div>`;
   el.hidden = false;
   const cards = rows.filter((r) => r.uid), eqSet = new Set(["a", "p", "s"].map((k) => (who === "own" ? (rpgState() || { eq: {} }).eq[k] : (compCard(who, k) || {}).uid)).filter(Boolean));
   for (const u of compUids()) eqSet.add(u);
@@ -695,9 +699,9 @@ function renderTeams() {
   if (!R) { el.innerHTML = html + `<p class="muted">${esc(tx("cards.noCreature"))}</p>`; return; }
   html += `<h3 class="cat-title">${esc(tx("team.now"))}</h3>`;
   html += `<div class="tm-block"><div class="tm-head"><strong>${esc(S.name)}</strong><span class="progress">${esc(tx("cards.lvl", { n: R.lvl }))}</span></div>${slotRowsHtml("own")}</div>`;
-  const kinds = Object.keys(ro);
+  const kinds = Object.keys(ro), away = EV.BUILD && EV.BUILD.busy ? EV.BUILD.busy().map((b) => b.k) : [];
   html += `<div class="tm-block"><div class="tm-head"><strong>${esc(tx("team.comps"))}</strong><span class="progress">${T.comp.length}/2</span></div>` +
-    (kinds.length ? `<div class="tm-comps">${kinds.map((k) => `<button type="button" class="tm-comp" data-tcomp="${k}" aria-pressed="${T.comp.includes(k)}"><canvas width="96" height="80" data-mon="${k}"></canvas><span>${esc(monName(k))}</span><small>${esc(tx("cards.lvl", { n: ro[k].lvl }))}</small></button>`).join("")}</div>` : `<p class="muted">${esc(tx("team.noRefuge"))}</p>`) + `</div>`;
+    (kinds.length ? `<div class="tm-comps">${kinds.map((k) => `<button type="button" class="tm-comp" data-tcomp="${k}" aria-pressed="${T.comp.includes(k)}"><canvas width="96" height="80" data-mon="${k}"></canvas><span>${esc(monName(k))}</span><small>${esc(tx("cards.lvl", { n: ro[k].lvl }))}</small>${away.includes(k) ? `<small class="muted">${esc(tx("team.working"))}</small>` : ""}</button>`).join("")}</div>${away.some((k) => T.comp.includes(k)) ? `<p class="muted">${esc(tx("team.workingNote"))}</p>` : ""}` : `<p class="muted">${esc(tx("team.noRefuge"))}</p>`) + `</div>`;
   for (const k of T.comp) html += `<div class="tm-block"><div class="tm-head"><strong>${esc(monName(k))}</strong><span class="progress">${esc(tx("cards.lvl", { n: ro[k].lvl }))}</span></div>${slotRowsHtml(k)}</div>`;
   html += `<h3 class="cat-title">${esc(tx("team.sets"))}</h3><div class="tm-sets">${T.sets.map((st, i) => {
     const name = st ? st.n : tx("team.setN", { n: i + 1 });
@@ -725,7 +729,8 @@ function loadSet(i, offer) {
   const ro = (EV.P.eg && EV.P.eg.roster) || {}, miss = [];
   let comp = st.comp.filter((k) => ro[k]);
   st.comp.filter((k) => !ro[k]).forEach((k) => miss.push(monName(k)));
-  if (offer) { comp.filter((k) => !offer.includes(k)).forEach((k) => miss.push(monName(k))); comp = comp.filter((k) => offer.includes(k)); }
+  const away = EV.BUILD && EV.BUILD.busy ? EV.BUILD.busy().map((b) => b.k) : [], busy = [];
+  if (offer) { comp.filter((k) => !offer.includes(k)).forEach((k) => (away.includes(k) ? busy : miss).push(monName(k))); comp = comp.filter((k) => offer.includes(k)); }
   const who = ["own"].concat(comp);
   // free the cards of everyone in the set first, then hand out copies, best grade first
   R.eq = { a: null, p: null, s: null };
@@ -747,7 +752,7 @@ function loadSet(i, offer) {
   if (st.fm) T.form = Object.assign({}, T.form || {}, st.fm);
   if (X && view === "pick") X.chosen = T.comp.filter((k) => X.offer.includes(k));
   EV.save(); EV.sfx("card");
-  const parts = []; if (miss.length) parts.push(tx("team.missMon", { list: miss.join(", ") })); if (lost) parts.push(tx("team.missCards", { n: lost }));
+  const parts = []; if (miss.length) parts.push(tx("team.missMon", { list: miss.join(", ") })); if (busy.length) parts.push(tx("team.busyMon", { list: busy.join(", ") })); if (lost) parts.push(tx("team.missCards", { n: lost }));
   EV.toast(tx("team.loaded", { n: st.n }) + (parts.length ? " " + parts.join(" ") : ""));
 }
 function onTeamsClick(e) {

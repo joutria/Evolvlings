@@ -41,7 +41,7 @@ const TX = {
     "welcome": "La comida gratis ahora crece en el Huerto, junto al comedero. Te dejo {n} bayas para empezar.",
     "jobs": "Trabajos del Refugio", "jobs.sub": "Manda a un compañero a trabajar en un lugar. Rinde más si su tipo encaja y si el lugar está mejorado. Mientras trabaja no puede ir de expedición. Hasta {n} a la vez.",
     "jobs.none": "Todavía no hay nadie en el Refugio.", "job.idle": "Descansando en el Refugio", "job.send": "Mandar a trabajar", "job.cancel": "Cancelar",
-    "job.full": "Ya hay {n} compañeros trabajando.", "job.sent": "{n} se va a trabajar a: {p}", "job.at": "Trabajando en: {p}", "job.will": "Traerá: {what}",
+    "job.full": "Ya hay {n} compañeros trabajando.", "job.trip": "{n} está en una expedición a medias. Termínala para mandarlo a trabajar.", "job.sent": "{n} se va a trabajar a: {p}", "job.at": "Trabajando en: {p}", "job.will": "Traerá: {what}",
     "job.done": "Terminó en: {p}", "job.collect": "Recoger", "job.again": "Recoger y repetir", "job.all": "Recoger todos ({n})", "job.allAgain": "Recoger y repetir todos ({n})", "job.gotAll": "{n} compañeros vuelven del trabajo con: {what}. +1 Vínculo cada uno", "job.gotAgain": "{n} compañeros traen: {what}, y vuelven a trabajar.", "job.got": "{n} vuelve del trabajo con: {what}. +1 Vínculo", "job.fit": "Su tipo encaja: rinde más",
     "r.food": "🍓 ×{n}", "r.items": "🎒 ×{n}", "r.wood": "{n} de Madera",
     "ord": "Encargos del Vado", "ord.sub": "Cada día dos vecinos piden algo, y los encargos sin hacer esperan hasta 3 días. Pagan en Chispas y Madera, y a veces dejan una Nota.",
@@ -83,7 +83,7 @@ const TX = {
     "welcome": "Free food now grows in the Garden, next to the bowl. Here are {n} berries to start.",
     "jobs": "Refuge jobs", "jobs.sub": "Send a companion to work at a place. It earns more when its type fits and when the place is upgraded. While it works it can't go on expeditions. Up to {n} at a time.",
     "jobs.none": "Nobody lives in the Refuge yet.", "job.idle": "Resting in the Refuge", "job.send": "Send to work", "job.cancel": "Cancel",
-    "job.full": "{n} companions are already working.", "job.sent": "{n} goes off to work at: {p}", "job.at": "Working at: {p}", "job.will": "Will bring: {what}",
+    "job.full": "{n} companions are already working.", "job.trip": "{n} is on an expedition left halfway. Finish it to send it to work.", "job.sent": "{n} goes off to work at: {p}", "job.at": "Working at: {p}", "job.will": "Will bring: {what}",
     "job.done": "Finished at: {p}", "job.collect": "Collect", "job.again": "Collect and repeat", "job.all": "Collect all ({n})", "job.allAgain": "Collect and repeat all ({n})", "job.gotAll": "{n} companions come back from work with: {what}. +1 Bond each", "job.gotAgain": "{n} companions bring: {what}, and go back to work.", "job.got": "{n} comes back from work with: {what}. +1 Bond", "job.fit": "Its type fits: earns more",
     "r.food": "🍓 ×{n}", "r.items": "🎒 ×{n}", "r.wood": "{n} Wood",
     "ord": "El Vado requests", "ord.sub": "Every day two neighbours ask for something, and unfinished requests wait up to 3 days. They pay in Chispas and Wood, and sometimes leave a Note.",
@@ -291,6 +291,8 @@ const roster = () => (EV.EGGS ? EV.EGGS.G().roster : {});
 const jobsMax = () => (lvl("nest") >= 3 ? 3 : 2);
 function J() { const b = B(); if (!b.jobs) b.jobs = {}; return b.jobs; }
 const working = (k) => !!J()[k];
+// a companion on an expedition left halfway (P.run) is still out on the trail
+const onTrip = (k) => { const r = EV.P && EV.P.run && EV.P.run.x; return !!(r && r.party && r.party.some((m) => !m.own && m.kind === k)); };
 function jobYield(k, place, h) {
   const fit = JOBS[place].fit.includes(typeOf(k)), mult = (fit ? 1.5 : 1) * (1 + 0.1 * (lvl(place === "craft" ? "craft" : place) - 1));
   const out = {};
@@ -299,6 +301,7 @@ function jobYield(k, place, h) {
 }
 function sendJob(k, place, h, quiet) {
   const R = roster(); if (!R[k] || working(k) || !JOBS[place]) return;
+  if (onTrip(k)) { if (!quiet) { EV.toast(tx("job.trip", { n: EV.RPG.monName(k) })); EV.sfx("deny"); } return; }
   if (Object.keys(J()).length >= jobsMax()) { EV.toast(tx("job.full", { n: jobsMax() })); EV.sfx("deny"); return; }
   const y = jobYield(k, place, h);
   J()[k] = { place, h, start: Date.now(), end: Date.now() + jobMs(h), out: y.out, fit: y.fit };
@@ -361,7 +364,8 @@ function jobsHtml() {
       x += `<div class="bd-places">${Object.keys(JOBS).map((p) => `<button type="button" class="wchip${pickJob.place === p ? " on" : ""}" data-jplace="${k}:${p}"><strong>${esc(tx("p." + p))}</strong><small class="${JOBS[p].fit.includes(ty) ? "ok" : ""}">${esc(JOBS[p].fit.includes(ty) ? tx("job.fit") : outText(JOBS[p].per).replace(/ ?×?[\d.]+/g, ""))}</small></button>`).join("")}</div>`;
       if (pickJob.place) x += `<div class="rc-btns">${JOB_H.map((hh) => `<button class="btn ghost" type="button" data-jgo="${k}:${pickJob.place}:${hh}">${esc(fmt(jobMs(hh)))} · ${esc(outText(jobYield(k, pickJob.place, hh).out))}</button>`).join("")}</div>`;
       x += `<button class="btn ghost" type="button" data-jcancel="1">${esc(tx("job.cancel"))}</button>`;
-    } else x += `<small class="muted">${esc(tx("job.idle"))}</small><button class="btn ghost" type="button" data-jpick="${k}" ${Object.keys(J()).length >= jobsMax() ? "disabled" : ""}>${esc(tx("job.send"))}</button>`;
+    } else if (onTrip(k)) x += `<small class="muted">${esc(tx("job.trip", { n: EV.RPG.monName(k) }))}</small>`;
+    else x += `<small class="muted">${esc(tx("job.idle"))}</small><button class="btn ghost" type="button" data-jpick="${k}" ${Object.keys(J()).length >= jobsMax() ? "disabled" : ""}>${esc(tx("job.send"))}</button>`;
     return x + "</div></div>";
   }).join("")}</div>`;
   return h;
