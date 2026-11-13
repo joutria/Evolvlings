@@ -91,6 +91,35 @@ function sims(n) {
     }
   }
   console.log(`path conversations: ${n} checked`);
+  /* decisions that come back and story endings (rpg/data-echoes.js): the line goes to a real node and speaker, the
+     flag is set somewhere, every ending has its text in lore.js */
+  {
+    const ex = { EVECHO: null }, xc = vm.createContext({ window: ex });
+    vm.runInContext(fs.readFileSync(path.join(ROOT, "rpg", "data-echoes.js"), "utf8"), xc, { filename: "rpg/data-echoes.js" });
+    const lore = require(path.join(ROOT, "lore.js")), src = files.map((f) => fs.readFileSync(path.join(ROOT, "rpg", f), "utf8")).join("\n")
+      + fs.readFileSync(path.join(ROOT, "lore.js"), "utf8") + fs.readFileSync(path.join(ROOT, "rpg", "data-events.js"), "utf8");
+    const setsFlag = (f) => new RegExp(`flag: *"${f}"`).test(src);
+    const { ECHOES, EPI } = ex.EVECHO;
+    ECHOES.forEach((e, i) => {
+      const [z, id] = e.ev.split("/"), ev = (w.EVEVENTS[z] || {})[id], at = `echo ${i} (${e.ev})`;
+      if (!ev) return err(`${at}: unknown event`);
+      if (!ev.nodes[e.node]) err(`${at}: unknown node "${e.node}"`);
+      if (e.who && !ev.who[e.who]) err(`${at}: "${e.who}" does not speak in that event`);
+      if (!e.es || !e.en) err(`${at}: needs Spanish and English`);
+      if (!setsFlag(e.flag)) err(`${at}: no event sets flag "${e.flag}"`);
+    });
+    for (const ch in EPI) {
+      const r = EPI[ch], at = `epilogue ${ch}`;
+      if (!R.ZONES[r.zone]) err(`${at}: unknown zone "${r.zone}"`);
+      if (r.rules[r.rules.length - 1].any) err(`${at}: the last rule must have no condition`);
+      for (const x of r.rules) {
+        if (!lore.LORE_EPILOGOS.some((p) => p.char === ch && p.end === x.end)) err(`${at}: no text for end ${x.end} in lore.js`);
+        for (const f of x.any || []) if (!setsFlag(f)) err(`${at}: no event sets flag "${f}"`);
+      }
+    }
+    for (const p of lore.LORE_EPILOGOS) if (!EPI[p.char] || !EPI[p.char].rules.some((x) => x.end === p.end)) err(`lore.js epilogue ${p.char} ${p.end}: no rule leads to it`);
+    console.log(`echoes: ${ECHOES.length}, story endings: ${Object.keys(EPI).length} people`);
+  }
 }
 
 /* ---------- 2. data tables in the browser ---------- */

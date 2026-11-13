@@ -397,6 +397,8 @@ function peoplePage(p) {
   if (I.said.length) h += `<p class="bk-q">${esc(bt("heardFrom"))}</p>` + quotes(I.said, 4);
   if (I.about.length) h += `<p class="bk-q">${esc(bt("saidAbout"))}</p>` + quotes(I.about, 4);
   if (!I.ev.length && !I.about.length) h += `<p class="bk-say n">${esc(bt("onlyName"))}</p>`;
+  const after = epiFor(p).map(epiText).filter(Boolean);
+  if (after.length) h += `<p class="bk-q">${esc(bt("after"))}</p>` + after.map((t) => `<p class="bk-say epi">${esc(t)}</p>`).join("");
   return h;
 }
 
@@ -497,6 +499,7 @@ function refreshBookBtn() {
 .bk-pic canvas{width:100%;max-width:420px;image-rendering:pixelated;border:2px solid var(--bi);border-radius:4px;display:block;margin:6px 0 12px}
 .bk-say{margin:0 0 6px;font-size:15px}
 .bk-say.n{font-style:italic;color:var(--bi2)}
+.bk-say.epi{font-style:italic;border-left:3px solid var(--bi2);padding-left:8px}
 .bk-q{margin:10px 0 4px;font-weight:700;color:var(--bg2)}
 .bk-grey{color:var(--bf);border-bottom:1px dashed var(--bf);display:inline-block;margin:4px 0;padding-bottom:1px}
 .bk-branch{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin:8px 0}

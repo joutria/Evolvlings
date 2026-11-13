@@ -86,6 +86,32 @@ function talkText(id) {
     opt: (n, i) => (en && en.nodes[n] && en.nodes[n].opts && en.nodes[n].opts[i]) || ev.nodes[n].opts[i].t,
   };
 }
+// an echo line in the current language; narration hides names you have not heard yet, like any other narration
+function echoText(k) {
+  const e = EVECHO.ECHOES[k], t = (L() === "en" && e.en) || e.es;
+  return e.who ? t : maskNames(t);
+}
+/* ---------- how each story ends (rpg/data-echoes.js EPI, texts in lore.js LORE_EPILOGOS): EV.P.epi[char] = end ---------- */
+const epiSlice = EV.slice("epi", () => ({}));
+// called after every guardian win: the stories that close now, with the end your choices gave them (fixed from then on)
+function epiClose() {
+  if (!window.EVECHO || !LORE) return [];
+  const E = epiSlice(), P = EV.P, F = P.flags || {}, lay = LORE.loreLayer(P.cleared), out = [];
+  for (const ch in EVECHO.EPI) {
+    const r = EVECHO.EPI[ch], know = r.know === undefined ? ch : r.know;
+    if (E[ch] || !(P.cleared || {})[r.zone] || lay < r.layer || (know && !isKnown(know))) continue;
+    const end = EVECHO.epiEnd(ch, F); if (!end) continue;
+    E[ch] = end; out.push(ch);
+  }
+  if (out.length) EV.P.bookNew = Object.assign(EV.P.bookNew || {}, { gente: 1 });
+  return out;
+}
+function epiText(ch) {
+  const end = epiSlice()[ch], ep = end && LORE && LORE.LORE_EPILOGOS.find((x) => x.char === ch && x.end === end);
+  return ep ? maskNames(L() === "en" ? ep.en : ep.es) : "";
+}
+// the stories whose ending shows on this person's page of the Book
+const epiFor = (p) => Object.keys(epiSlice()).filter((ch) => ((window.EVECHO && EVECHO.EPI[ch] && EVECHO.EPI[ch].page) || ch) === p);
 function talkStart(id) {
   X.talk = { id, log: [], used: {}, hub: null, end: null, gain: {} };
   const R = diaryRec(id); if (R) R.n++;
@@ -96,6 +122,8 @@ function talkAdd(f) { const g = X.talk.gain; for (const k of ["xp", "coins", "he
 function talkVisit(nid) {
   const T = X.talk, ev = talkEv(T.id), n = ev.nodes[nid];
   n.say.forEach((s, i) => { T.log.push({ n: nid, i, who: s[0] }); if (s[0]) hearNames(s[1]); });
+  // decisions that come back (rpg/data-echoes.js): a line about something you chose in an earlier conversation
+  if (window.EVECHO) for (const [e, k] of EVECHO.echoesFor(talkZone(T.id) + "/" + T.id, nid, EV.P.flags || {})) { T.log.push({ echo: k, who: e.who }); if (e.who) hearNames(e.es); }
   const R = diaryRec(T.id); if (R) R.v[nid] = 1;
   if (n.fx) { runFx(n.fx, {}, ""); talkAdd(n.fx); }
   if (n.end) {
@@ -144,7 +172,7 @@ function talkHtml() {
   const lead = X.party && X.party[0], youFace = lead && faceImg("faces/mon-" + lead.kind + ".png");
   const lines = T.log.map((l) => {
     if (l.you) return `<div class="talk-line you${youFace ? " has-face" : ""}"><p>${esc(W.opt(l.you[0], l.you[1]))}</p>${youFace}</div>`;
-    const t = W.say(l.n, l.i);
+    const t = l.echo != null ? echoText(l.echo) : W.say(l.n, l.i);
     if (!l.who) return `<p class="talk-line nar">${esc(t)}</p>`;
     const f = window.EVFACES && faceImg(EVFACES.of(ev.who[l.who] || l.who));
     return `<div class="talk-line${f ? " has-face" : ""}">${f}<p><b>${esc(W.who(l.who))}</b> ${esc(q[0] + t + q[1])}</p></div>`;

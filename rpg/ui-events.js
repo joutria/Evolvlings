@@ -144,6 +144,7 @@ function finish(res) {
   X.keyGot = null;
   if (res === "win" && !X.deep && !X.echo && !((P.cleared || {})[X.zone])) for (const k in KEYS) if (KEYS[k].from === X.zone && !(P.keys || {})[k]) { P.keys = P.keys || {}; P.keys[k] = 1; X.keyGot = k; }
   if (res === "win" && !X.deep) { P.c.guard = (P.c.guard || 0) + 1; P.cleared = P.cleared || {}; if (!X.echo) P.cleared[X.zone] = (P.cleared[X.zone] || 0) + 1; }
+  X.epiNew = res === "win" && !X.deep && !X.echo ? epiClose() : [];
   X.deepRew = X.deep && res === "win" ? deepWin(X.deep, X.stars || 1) : null;
   // the Guardian's Echo: Stardust and Chispas instead of zone stars
   X.echoRew = null;
@@ -215,6 +216,7 @@ function endHtml() {
     if (r.first) html += `<p class="evt-out">✦ ${esc(tx("deep.first", r.first))}</p>`;
     for (const c of r.chests) html += `<p class="evt-out">🎁 ${esc(tx("deep.chest", { n: c.need, what: c.what }))}${c.esct ? "<br>📜 " + esc(tx("deep.esc", { t: c.esct })) : ""}</p>`;
   }
+  if (X.epiNew && X.epiNew.length) html += `<div class="end-epi"><b>${esc(tx("end.epi"))}</b>${X.epiNew.map((ch) => `<p>${esc(epiText(ch))}</p>`).join("")}</div>`;
   if (X.unisona) html += `<p class="evt-out">✦ ${esc(tx(X.unisona === "first" ? "end.unisona" : "end.unisonaUp"))}</p>`;
   if (X.keyGot) html += `<p class="evt-out key-got"><canvas class="key-ic" width="16" height="16" data-key="${X.keyGot}" aria-hidden="true"></canvas> <b>${esc(tx("key." + X.keyGot))}</b> · ${esc(tx("key.got." + X.keyGot, { to: zt("to", null, KEYS[X.keyGot].opens) }))}</p>`;
   if (X.echoRew) html += `<p class="evt-out">∴ ${esc(tx("end.echo", X.echoRew))}</p>`;

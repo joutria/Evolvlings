@@ -176,6 +176,9 @@ const css = `
 .xpbar { height: 8px; }
 .evt-text { margin: 0; font-size: 15px; line-height: 1.55; }
 .evt-out { margin: 0; font-weight: 600; }
+.end-epi { border-left: 3px solid var(--line); padding: 2px 0 2px 10px; display: flex; flex-direction: column; gap: 4px; }
+.end-epi b { font-family: var(--font-display); font-size: 13px; letter-spacing: .06em; color: var(--muted); }
+.end-epi p { margin: 0; font-style: italic; }
 .bend-pan { padding: 0; overflow: hidden; }
 .xtabs { display: flex; gap: 4px; margin: 10px 0 0; border-bottom: 3px solid var(--line); overflow-x: auto; scrollbar-width: none; }
 .xtabs button { flex: 1 1 auto; border: 2px solid var(--line); border-bottom: 0; background: var(--bg); color: var(--muted); font: inherit; font-weight: 600; padding: 7px 12px; cursor: pointer; white-space: nowrap; }
