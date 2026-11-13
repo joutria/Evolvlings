@@ -395,9 +395,9 @@ body.sheet-on { overflow: hidden; }
 .talk-line p { margin: 0; }
 .talk-line.has-face { display: flex; align-items: flex-start; gap: 10px; }
 .talk-line.you.has-face { padding: 4px 4px 4px 10px; align-items: center; }
-.talk-face { flex: none; width: 57px; height: 57px; image-rendering: pixelated; border: 2px solid var(--line); background: var(--surface-2, #eee6d6); }
+/* faces only at whole scales of the 38 px pack picture (x1, x2): x1.5 made uneven pixels */
+.talk-face { flex: none; width: 76px; height: 76px; image-rendering: pixelated; border: 2px solid var(--line); background: var(--surface-2, #eee6d6); }
 .talk-line.you .talk-face { width: 38px; height: 38px; }
-@media (min-width: 700px) { .talk-face { width: 76px; height: 76px; } .talk-line.you .talk-face { width: 48px; height: 48px; } }
 .talk-opts { margin-top: 10px; }
 .talk-opts .btn { text-align: left; }
 .talk-why { display: block; font-weight: 400; font-size: 11px; color: var(--muted); }
