@@ -66,7 +66,7 @@ const TX = {
     "toast.wax": "+{n} Wax", "toast.lvl": "Keeper's Journal: level {n}", "poor": "Not enough Wax.",
   },
 };
-const tx = (k, v) => { let s = TX[L()][k]; if (s == null) s = TX.en[k]; if (s == null) return k; if (v) s = s.replace(/\{(\w+)\}/g, (m, n) => (v[n] != null ? v[n] : m)); return s; };
+const tx = EV.text("seasons", TX);
 
 /* ---------- Calendar ---------- */
 const EPOCH = "2026-11-02", SEASON_DAYS = 42, EVENT_DAYS = 21;

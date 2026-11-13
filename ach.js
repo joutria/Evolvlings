@@ -15,6 +15,7 @@ const UI = {
     "ach.f.all": "All", "ach.f.todo": "To do", "ach.f.got": "Unlocked",
     "ach.c.care": "Care", "ach.c.exp": "Expedition", "ach.c.stars": "Stars", "ach.c.cards": "Cards", "ach.c.types": "Types", "ach.c.world": "World", "ach.c.secret": "Secrets", "ach.c.other": "Other" },
 };
+EV.TEXTS["achievements UI"] = UI;
 for (const lg of ["es", "en"]) Object.assign(EV.STR[lg], UI[lg]);
 
 /* The achievements that already exist: category and tier only (their rewards stay as they were) */

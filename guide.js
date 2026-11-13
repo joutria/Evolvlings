@@ -71,7 +71,8 @@ const TX = {
   es: { nav: "Guía", title: "Guía del Cuidador", sub: "Todo lo que te contamos la primera vez, para volver a leerlo cuando quieras.", ok: "Entendido", open: "Abrir la guía", gloss: "Monedas del Claro", how: "Se gana", use: "Sirve para", tips: "Sistemas", reset: "Volver a mostrar las notas", resetDone: "Las notas volverán a salir la próxima vez." },
   en: { nav: "Guide", title: "Caretaker's Guide", sub: "Everything we told you the first time, to read again whenever you like.", ok: "Got it", open: "Open the guide", gloss: "Glade currencies", how: "Earned", use: "Used for", tips: "Systems", reset: "Show the notes again", resetDone: "The notes will show again next time." },
 };
-const tx = (k) => (TX[L()] || TX.en)[k] || TX.en[k] || k;
+const tx = EV.text("guide", TX);
+EV.TEXTS["guide tips"] = TIPS; EV.TEXTS["guide glossary"] = GLOSS; // so tools/check.js compares them too
 const tip = (k) => (TIPS[L()] || TIPS.en)[k] || TIPS.en[k];
 
 /* ---------- State ---------- */

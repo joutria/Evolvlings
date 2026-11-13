@@ -79,7 +79,7 @@ const TX = {
     "s.fed": "Meals", "s.cuddles": "Cuddles", "s.plays": "Games", "s.messes": "Messes cleaned", "s.expDone": "Expeditions", "s.dailyDone": "Tasks",
   },
 };
-const tx = (k, v) => { let s = (TX[L()] || TX.en)[k]; if (s == null) s = TX.en[k]; if (s == null) return k; if (v) s = s.replace(/\{(\w+)\}/g, (m, n) => (v[n] != null ? v[n] : m)); return s; };
+const tx = EV.text("world", TX);
 
 /* ---------- Steps ("pasos"), per creature ---------- */
 // walking between maps and setting out are free (design rule 5: no steps gate on just playing or moving);

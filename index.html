@@ -2144,13 +2144,28 @@ if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
   window.addEventListener("load", () => { navigator.serviceWorker.register("sw.js").catch(() => {}); });
 }
 
+/* ---------- Shared kit for add-on modules ----------
+   EV.text(name, TX) -> tx(key, vars): the text in the current language (English, then the key itself, when missing),
+   with {name} filled from vars. Every module registers its TX here, so tools/check.js can compare Spanish and English.
+   EV.dayKey() -> the game day (it turns at 05:00, from daily.js; plain date until daily.js is loaded). */
+const TEXTS = {};
+function text(name, TX) {
+  TEXTS[name] = TX;
+  return (k, v) => {
+    let s = (TX[LANG] || TX.en)[k]; if (s == null) s = TX.en[k]; if (s == null) return k;
+    if (v) s = s.replace(/\{(\w+)\}/g, (m, n) => (v[n] != null ? v[n] : m));
+    return s;
+  };
+}
+const dayKey = () => (window.EV && EV.DAILY && EV.DAILY.dayKey ? EV.DAILY.dayKey() : new Date().toISOString().slice(0, 10));
+
 /* ---------- Hooks for add-on modules (rpg/*.js and the others) ---------- */
 const HOOKS = {};
 window.EV = {
   get S() { return S; }, get P() { return P; }, get LANG() { return LANG; },
   feed, cleanUp, toggleSleep, startPlay, cuddle, ITEMS,
   // what the side scene is showing right now, so the view from above can draw the same hearts, bubbles and speech
-  get FX() { return { effects, bubble, petX, foodAnim, mini }; }, miniOn: () => !!mini, itemName, quietOn, STR, ACH, ACH_META, SPECIES, SFX, HOOKS, $, clamp, rand, pick, t, tone, sfx, buzz, save, saveProfile, flush, slice, SLICES, SAVE_INFO: { SAVE_V, PROFILE_V, MIGRATE, upgrade }, get saveReadOnly() { return readOnly; }, addCoins, spendCoins, toast, addLog,
+  get FX() { return { effects, bubble, petX, foodAnim, mini }; }, miniOn: () => !!mini, itemName, quietOn, STR, ACH, ACH_META, SPECIES, SFX, HOOKS, $, clamp, rand, pick, text, TEXTS, dayKey, t, tone, sfx, buzz, save, saveProfile, flush, slice, SLICES, SAVE_INFO: { SAVE_V, PROFILE_V, MIGRATE, upgrade }, get saveReadOnly() { return readOnly; }, addCoins, spendCoins, toast, addLog,
   renderAll, renderStats, showScreen, stocked, every, applyStatic, escapeHtml, drawCreature, setupCanvas, ell, drawStar, checkAch, togglePanel, closeSheets, stageName, careNow, pixelText,
 };
 

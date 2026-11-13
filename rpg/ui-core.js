@@ -17,7 +17,7 @@ const esc = EV.escapeHtml;
 const TX = { es: RPG_ES.TX, en: RPG_EN.TX }; // texts live in rpg/text-es.js and rpg/text-en.js
 const ZT = { es: RPG_ES.ZT, en: RPG_EN.ZT };
 const zt = (k, v, zone) => { let s = ZT[L()][zone || (X && X.zone) || "aurora"][k]; if (v) s = s.replace(/\{(\w+)\}/g, (m, n) => (v[n] != null ? v[n] : m)); return s; };
-const tx = (k, v) => { let s = TX[L()][k]; if (s == null) s = TX.en[k]; if (s == null) return k; if (v) s = s.replace(/\{(\w+)\}/g, (m, n) => (v[n] != null ? v[n] : m)); return s; };
+const tx = EV.text("rpg", TX);
 
 const MON_NAMES = {
   unisona: "Unísona", lumo: "Lumo", fizz: "Fizz", pebb: "Pebb", fuellito: "Fuellito", brotin: "Brotín", remolin: "Remolín", bostezo: "Bostezo",
@@ -307,7 +307,7 @@ const DUST_OF = (gi) => Math.pow(UPGRADE_N, gi), CRAFT_BASE = 10, PACK = { price
 const GRIM_ORDER = TYPE_ORDER;
 const grimIds = (types) => Object.keys(CARDS).filter((id) => types.includes(CARDS[id].type));
 const grimDone = (p, types) => grimIds(types).every((id) => (p.grim || {})[id]);
-const dayKeyNow = () => (EV.DAILY && EV.DAILY.dayKey ? EV.DAILY.dayKey() : new Date().toDateString());
+const dayKeyNow = EV.dayKey;
 function canTypesText() {
   const S = EV.S; if (!S || !COMPAT[S.species]) return "";
   const ts = COMPAT[S.species].slice();

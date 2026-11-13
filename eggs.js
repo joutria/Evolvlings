@@ -121,7 +121,7 @@ const TX = {
     "ach.egg1": ["First nest", "Hatch a Refuge egg."], "ach.bond10": ["Inseparable", "Reach Bond 10 with a Refuge companion."], "ach.cl10": ["Keeper of el Vado", "Reach Keeper Level 10."],
   },
 };
-const tx = (k, v) => { let s = TX[L()][k]; if (s == null) s = TX.en[k]; if (s == null) return k; if (v) s = s.replace(/\{(\w+)\}/g, (m, n) => (v[n] != null ? v[n] : m)); return s; };
+const tx = EV.text("eggs", TX);
 
 /* ---------- Rules ---------- */
 const HOUR = 3600e3;
@@ -150,7 +150,7 @@ const WELCOME = [
   { id: "bond2", n: 10, ok: () => Object.values(G().roster).some((r) => bondLvl(r.bxp) >= 2) },
   { id: "cl5", n: 5, ok: () => clLvl() >= 5 },
 ];
-const pick = (a) => a[Math.floor(Math.random() * a.length)];
+const pick = EV.pick;
 /* ---------- Stars for repeats (Jose, 2026-11-04) ----------
    A repeat hatch gives that creature a star, up to 5: +4 % stats each, a trait and a piece of its story at ★2 and ★4,
    a golden border at ★5. While a rarity still has creatures you don't own, a repeat roll has a 50 % chance to swap to a new one. */

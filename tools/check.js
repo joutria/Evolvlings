@@ -122,6 +122,25 @@ function sims(n) {
   }
 }
 
+/* ---------- 1b. file lists: index.html scripts, the offline cache in sw.js, and the code inside index.html ---------- */
+{
+  const html = fs.readFileSync(path.join(ROOT, "index.html"), "utf8"), sw = fs.readFileSync(path.join(ROOT, "sw.js"), "utf8");
+  const pageJs = [...html.matchAll(/<script src="([^"]+\.js)"/g)].map((m) => m[1]);
+  const coreM = sw.match(/const CORE = (\[[^\]]*\])/);
+  if (!coreM) err("sw.js: CORE list not found");
+  else {
+    const core = JSON.parse(coreM[1]).map((f) => f.replace(/^\.\//, ""));
+    for (const f of pageJs) if (!core.includes(f)) err(`sw.js CORE is missing ${f} (index.html loads it, so the game breaks offline)`);
+    for (const f of core) if (f && !fs.existsSync(path.join(ROOT, f))) err(`sw.js CORE lists ${f}, which does not exist`);
+    for (const f of core) if (f.endsWith(".js") && f !== "sw.js" && !pageJs.includes(f)) warn(`sw.js CORE caches ${f}, but index.html does not load it`);
+  }
+  for (const f of pageJs) if (!fs.existsSync(path.join(ROOT, f))) err(`index.html loads ${f}, which does not exist`);
+  [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].forEach((m, i) => {
+    try { new vm.Script(m[1], { filename: `index.html inline script ${i + 1}` }); } catch (e) { err(`index.html inline script ${i + 1}: ${e.message}`); }
+  });
+  console.log(`files: ${pageJs.length} scripts in index.html, all cached by sw.js`);
+}
+
 /* ---------- 2. data tables in the browser ---------- */
 const TYPES = { ".html": "text/html", ".js": "text/javascript", ".json": "application/json", ".webmanifest": "application/manifest+json", ".png": "image/png", ".svg": "image/svg+xml" };
 function serve() {
@@ -209,6 +228,8 @@ function inPage(facts) {
   const same = (a, b, what) => { for (const k of Object.keys(a)) if (!(k in b)) E(`${what}: "${k}" is in es but not en`); for (const k of Object.keys(b)) if (!(k in a)) E(`${what}: "${k}" is in en but not es`); };
   same(TX.es, TX.en, "rpg TX");
   if (EV.STR) { same(EV.STR.es, EV.STR.en, "index.html STR"); if (EV.STR.es.ach) same(EV.STR.es.ach, EV.STR.en.ach, "achievements"); }
+  // every module text table registered with EV.text (Tasks, Well, Refuge, Builds, Map, Seasons, Guide, Weather...)
+  for (const [name, T] of Object.entries(EV.TEXTS || {})) { if (!T.es || !T.en) { E(`${name} texts: missing es or en`); continue; } same(T.es, T.en, name + " texts"); }
   same(EVT.es, EVT.en, "EVT"); same(ZT.es, ZT.en, "ZT"); same(D.EVT_ALT.es, D.EVT_ALT.en, "EVT_ALT");
   for (const k of Object.keys(FX)) if (!D.EVENTS.includes(k)) W(`event ${k} has effects but is not in EVENTS`);
   return out;
