@@ -9,7 +9,7 @@ with autotiled edges, trees on the border (#), rocks (r). Ponds and paths pick e
 autotile block by looking at the neighbours. Out come art/maps/<map>.png (720 x 528, the 16 px tiles at 3x) and
 art/objects/tree.png, flower.png, well.png and tila.png, which replace the drawn ones, and art/faces/tila.png, Tila's
 face in conversations (the pack's Woman), and art/creatures/<id>.png for every creature (story, common and the wild foes in rpg/data-wild.js)."""
-import sys, os, re
+import sys, os, re, colorsys
 from PIL import Image, ImageDraw
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
@@ -17,11 +17,11 @@ T = 16
 
 # creatures: every creature in the game is a monster of the pack (Jose, 2026-11-07). The first monster draws the baby and
 # young stages, the last one the adult. Picked so the colour reads as the creature's type (2026-11-12 art review:
-# Fizz airy blue, Bostezo a night owl, ice in ice blues, Capuchón a real mushroom, fire adults in reds).
+# Fizz airy blue, Mecha all lantern and Yunquerón all fire red (2026-11-13), Bostezo a night owl, ice in ice blues, Capuchón a real mushroom, fire adults in reds).
 SHEETS = {
     "lumo": ("Spirit", "Spirit2"), "fizz": ("Octopus2", "ButterflyBlue"), "pebb": ("Mole2", "Mole"), "unisona": ("GoldRacoon",),
     "fuellito": ("DragonYellow",), "brotin": ("KappaGreen", "KappaRed"), "remolin": ("Reptile",),
-    "bostezo": ("Slime", "Owl2"), "mecha": ("LanternRed", "LanternGreen"), "yunqueron": ("Beast2", "Beast"),
+    "bostezo": ("Slime", "Owl2"), "mecha": ("LanternRed",), "yunqueron": ("Beast",),
     "espinardo": ("Larva",), "nim": ("SpiderRed", "SpiderYellow"), "centinela": ("Skull",),
     "vidriela": ("Fish", "FishRed"), "ecolito": ("Mollusc2", "Mollusc"), "relampin": ("Mouse", "MouseBlack"),
     "trinilla": ("HeartRed", "HeartGreen"), "carambano": ("AxolotBlue",), "capuchon": ("Mushroom2",),
@@ -31,6 +31,68 @@ WILD = {"fulgor": "Flam2", "chisporro": "Flam", "canin": "Bamboo", "ojuelo": "Ey
 # guardians: the pack's bosses, each its own figure (Mira was Raíz's cyclops and Seto was Micelio's frog until 2026-11-12)
 BOSSES = {"farol": "GiantSpirit", "forja": "GiantFlam", "seto": "GiantBamboo", "mira": "GiantSlime", "grava": "GiantRacoon",
           "trono": "TenguRed", "veleta": "TenguBlue", "micelio": "GiantFrog2", "raiz": "DemonCyclop"}
+
+# One colour per creature (2026-11-13 consistency pass): the pack often draws a creature's adult in another colour than its
+# young (Brotín green then red, Trinilla a red heart then a green one), so the stages did not read as the same creature and
+# the colour did not say the type. The stages listed here (0 baby, 1 young, 2 adult) move their main colour to the type's
+# colour of rpg/data-cards.js TYPES; eyes, outline and highlights stay. CC0 allows the change. Guardians the same way.
+TYPE_COL = {"fire": "#d9542c", "plant": "#4f9a3c", "light": "#e2ae2e", "bolt": "#d8b81c", "water": "#3f7fc9", "stone": "#8a7a64",
+            "shadow": "#5b4b8e", "ice": "#8fcbe0", "mush": "#b0603c", "dream": "#8a78d4", "music": "#cf5f9f"}
+TINT = {"pebb": ("stone", (2,)), "brotin": ("plant", (2,)), "mecha": ("light", (0, 1, 2)), "nim": ("shadow", (0, 1, 2)),
+        "ecolito": ("stone", (0, 1, 2)), "vidriela": ("water", (0, 1, 2)), "relampin": ("bolt", (0, 1, 2)),
+        "trinilla": ("music", (0, 1, 2)), "centinela": ("shadow", (0, 1, 2)),
+        "bostezo": ("dream", (0, 1, 2)), "capuchon": ("mush", (0, 1, 2))}
+GTINT = {"trono": "shadow", "grava": "stone", "micelio": "mush"}
+
+def tint(im, col):
+    """Moves the main colour family of a sprite to the colour `col`: the most common saturated hue and the hues near it turn
+    to the new hue (keeping their light and shade), the saturation follows the new colour. Running it twice changes nothing."""
+    tr, tg, tb = (int(col[i:i + 2], 16) / 255 for i in (1, 3, 5)); th, ts, _ = colorsys.rgb_to_hsv(tr, tg, tb)
+    px = im.load(); hist = [0.0] * 36; sat = []
+    for y in range(im.height):
+        for x in range(im.width):
+            r, g, b, a = px[x, y]
+            if a < 128: continue
+            h, s, v = colorsys.rgb_to_hsv(r / 255, g / 255, b / 255)
+            if s >= 0.2 and v >= 0.18: hist[int(h * 36) % 36] += s
+    if not any(hist): return im
+    k = max(range(36), key=lambda i: hist[i - 1] + 2 * hist[i] + hist[(i + 1) % 36]); dom = (k + 0.5) / 36
+    near = lambda h: min(abs(h - dom), 1 - abs(h - dom)) < 0.14
+    for y in range(im.height):
+        for x in range(im.width):
+            r, g, b, a = px[x, y]
+            if not a: continue
+            h, s, v = colorsys.rgb_to_hsv(r / 255, g / 255, b / 255)
+            if s >= 0.2 and v >= 0.18 and near(h): sat.append(s)
+    ms = sum(sat) / len(sat)
+    for y in range(im.height):
+        for x in range(im.width):
+            r, g, b, a = px[x, y]
+            if not a: continue
+            h, s, v = colorsys.rgb_to_hsv(r / 255, g / 255, b / 255)
+            if s < 0.2 or v < 0.18 or not near(h): continue
+            d = h - dom; d = d - 1 if d > 0.5 else d + 1 if d < -0.5 else d
+            r2, g2, b2 = colorsys.hsv_to_rgb((th + d) % 1, min(1, s * ts / ms), v)
+            px[x, y] = (round(r2 * 255), round(g2 * 255), round(b2 * 255), a)
+    return im
+
+def tint_art(root=None):
+    """Applies TINT and GTINT to the creature and guardian sheets already in art/ (and to the creature's face)."""
+    root = root or ROOT
+    for id_, (t, rows) in TINT.items():
+        f = os.path.join(root, "art", "creatures", id_ + ".png"); im = Image.open(f).convert("RGBA")
+        for r in rows:
+            for c in range(im.width // 64):
+                box = (c * 64, r * 64, c * 64 + 64, r * 64 + 64); im.paste(tint(im.crop(box), TYPE_COL[t]), box)
+        im.save(f)
+        ff = os.path.join(root, "art", "faces", "mon-" + id_ + ".png")
+        if 2 in rows and os.path.exists(ff): tint(Image.open(ff).convert("RGBA"), TYPE_COL[t]).save(ff)
+    for id_, t in GTINT.items():
+        f = os.path.join(root, "art", "guardians", id_ + ".png"); im = Image.open(f).convert("RGBA")
+        for c in range(im.width // 96):
+            box = (c * 96, 0, c * 96 + 96, 96); im.paste(tint(im.crop(box), TYPE_COL[t]), box)
+        im.save(f)
+    print("ok tint", len(TINT), "creatures,", len(GTINT), "guardians")
 
 def main(pack):
     ts = lambda n: Image.open(os.path.join(pack, "Backgrounds", "Tilesets", n + ".png")).convert("RGBA")
@@ -224,4 +286,5 @@ def auto(block, same):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2: print(__doc__)
-    else: main(sys.argv[1])
+    elif sys.argv[1] == "--tint": tint_art()
+    else: main(sys.argv[1]); tint_art()
