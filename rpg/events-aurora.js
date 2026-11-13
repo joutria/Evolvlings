@@ -100,7 +100,7 @@ window.EVEVENTS.aurora = {
     mirar: { say: [[null, "Te tumbas en la tierra fría. Al otro lado hay una boca de pozo con aros de hierro y, dentro, cuerdas cubiertas de polvo dorado."],
                    [null, "La luz no alumbra hacia arriba. Tira hacia abajo, como el agua por un desagüe. Huele a tierra mojada."],
                    ["nim", "¿Lo ves? No es un pozo de agua."]], fx: { xp: 10, flag: "vistoPozo" }, back: "a" },
-    aceite: { say: [["nim", "No."], [null, "Lo dice sin levantar la vista. Luego señala el pozo con el carbón."], ["nim", "Queman eso."]],
+    aceite: { say: [["nim", "No."], [null, "Lo dice sin levantar la vista. Mira el pozo un momento y vuelve a su dibujo."], ["nim", "Pregúntale a tu farol de qué bebe."]],
               fx: { xp: 12, flag: "farolRaiz" }, back: "a" },
     tapar: { say: [[null, "Entre los dos echan tierra y flores grises encima del hueco. Nim se guarda la piedra del mapa debajo de la chaqueta."],
                    ["nim", "Gracias."], [null, "Desaparece entre la hierba antes de que llegue el guarda con su farol. Donde estaba la piedra ha quedado algo que brilla."]],
