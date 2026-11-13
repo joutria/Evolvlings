@@ -224,7 +224,7 @@ def c_yawn():
     """Bostezo yawns in the snowy square of the White Deep and the Regent's line of guards catches it one after another."""
     s = Scene("snow", ["........", "........", "..====..", "..====..", "..====..", "........"])
     s.put(mon("bostezo", "down", 1), 26, 66)
-    for i, x in enumerate(range(48, 128, 14)): s.put(char("Eskimo" if i % 2 else "EskimoNinja", "down" if i < 3 else "left"), x, 56 + (i % 2))
+    for i, x in enumerate(range(50, 128, 17)): s.put(char("Eskimo" if i % 2 else "EskimoNinja", "down" if i < 3 else "left"), x, 56 + (i % 2))
     for x in (34, 40): s.d.point((x, 50), fill=(250, 240, 200, 255))
     return s.snow(20).lit("cold")
 
