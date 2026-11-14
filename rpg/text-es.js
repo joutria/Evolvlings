@@ -119,7 +119,7 @@ const RPG_ES = {
     "book.notLivedLong": "Un encuentro de {z} sin descubrir. No se dice nada más.", "book.unasked": "¿ ... ?", "book.otherWay": "Otro camino",
     "book.fork": "El camino se bifurca:", "book.end": "Cómo acabó:", "book.comesBack": "Esto vuelve en:", "book.anotherTalk": "otro encuentro que aún no has vivido",
     "book.times": "vivido {n} veces", "book.once": "vivido una vez", "book.old": "Lo viviste antes de tener el libro: solo se guardó el principio. Si vuelve a salir, se escribe entero.",
-    "book.pickCard": "Elige una carta de la lista.", "book.pickEsc": "Elige un Escrito de la lista.", "book.empty": "Todavía no hay nada escrito aquí.",
+    "book.pickCard": "Elige una carta de la lista.", "book.pickEsc": "Elige un Escrito de la lista.", "book.empty": "Todavía no hay nada escrito aquí.", "book.back": "Volver al índice",
     "grim.desc": "Todas las cartas del Claro. Las que aún no has visto aparecen en silueta. Completa un círculo entero para ganar un logro.",
     "grim.count": "{n} de {m} descubiertas", "grim.unknown": "Carta sin descubrir", "grim.boss": "Solo la entrega un guardián.", "grim.by": "La lleva {mon}.",
     "grim.craft": "Crear Común · {c} ∴", "grim.crafted": "¡Has creado {card}!", "grim.circle.sol": "Círculo del Sol", "grim.circle.sky": "Círculo del Cielo", "grim.circle.lake": "Círculo del Lago", "grim.circle.frost": "Círculo de la Escarcha", "grim.circle.star": "Estrella",
