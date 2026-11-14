@@ -439,6 +439,7 @@ function pauseMount(root) {
     let cv = null; try { cv = EVSCENE.pause(X.zone, box.dataset.pause, pauseMode()); } catch (e) { /* art is decoration */ }
     if (!cv) { box.remove(); return; }
     cv.setAttribute("role", "img"); cv.setAttribute("aria-label", zt("name")); box.appendChild(cv);
+    if (typeof sceneIn === "function") sceneIn(box, "pause|" + X.zone + "|" + box.dataset.pause);
   });
 }
 // a short look at the zone before each fight; it moves on by itself, or with a tap
@@ -451,6 +452,7 @@ function preFight(boss) {
 function goFight() { clearTimeout(preTimer); if (!X || !X.pre) return; const b = X.pre.boss; saveRun("prefight"); X.pre = null; startBattle(b); }
 function render() {
   const el = $("scrExp"); if (!el) return;
+  if (typeof twStop === "function") twStop(false);
   if (!X) { el.innerHTML = ""; return; }
   const z = ZONES[X.zone];
   const head = `<div class="panel"><div class="panel-head"><div><div class="sub">${esc(view === "zones" ? tx("zones.sub") : X.duel ? tx("duel.title") : zt("sub"))}</div><h2>${esc(view === "zones" ? tx("zones.title") : (X.duel ? tx("duel.vs", { n: duelFoe(X.duel) ? duelFoe(X.duel).n : "" }) : zt("name")) + (X.savia ? " · " + tx("sav.tag") : X.echo ? " · " + tx("echo.tag") : X.deep ? " · " + tx("deep.tag", { n: X.deep }) : ""))}</h2></div>${view !== "pick" && view !== "zones" && view !== "end" && view !== "battle" && !(view === "reward" && X.shot) ? `<button class="btn ghost" type="button" data-x="quit">${esc(tx("quit"))}</button>` : ""}</div>${view !== "pick" && view !== "zones" && !X.duel ? trailHtml() : ""}</div>`;

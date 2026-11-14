@@ -170,16 +170,18 @@ function talkHtml() {
   const T = X.talk, ev = talkEv(T.id), W = talkText(T.id), F = EV.P.flags || {};
   const q = L() === "en" ? ["“", "”"] : ["«", "»"];
   const lead = X.party && X.party[0], youFace = lead && faceImg("faces/mon-" + lead.kind + ".png");
-  const lines = T.log.map((l) => {
-    if (l.you) return `<div class="talk-line you${youFace ? " has-face" : ""}"><p>${esc(W.opt(l.you[0], l.you[1]))}</p>${youFace}</div>`;
+  // lines from before the last render are already on screen; the new ones type themselves out (twStart)
+  const seen = T.shown || 0, tw = (i, q) => (i >= seen ? (q ? " tw tw-quick" : " tw") : "");
+  const lines = T.log.map((l, i) => {
+    if (l.you) return `<div class="talk-line you${youFace ? " has-face" : ""}${tw(i, 1)}"><p>${esc(W.opt(l.you[0], l.you[1]))}</p>${youFace}</div>`;
     const t = l.echo != null ? echoText(l.echo) : W.say(l.n, l.i);
-    if (!l.who) return `<p class="talk-line nar">${esc(t)}</p>`;
+    if (!l.who) return `<p class="talk-line nar${tw(i)}">${esc(t)}</p>`;
     const f = window.EVFACES && faceImg(EVFACES.of(ev.who[l.who] || l.who));
-    return `<div class="talk-line${f ? " has-face" : ""}">${f}<p><b>${esc(W.who(l.who))}</b> ${esc(q[0] + t + q[1])}</p></div>`;
+    return `<div class="talk-line${f ? " has-face" : ""}${tw(i)}">${f}<p><b>${esc(W.who(l.who))}</b> ${esc(q[0] + t + q[1])}</p></div>`;
   }).join("");
   let foot;
-  if (T.end) foot = `${talkChips(T.gain)}<div class="bctl"><button class="btn" type="button" data-x="${X.eventFight ? "evfight" : "evnext"}">${esc(tx(X.eventFight ? "talk.toFight" : "r.continue"))}</button></div>`;
-  else foot = `<div class="choices talk-opts">${ev.nodes[T.hub].opts.map((o, i) => {
+  if (T.end) foot = `<div class="tw-wait">${talkChips(T.gain)}<div class="bctl"><button class="btn" type="button" data-x="${X.eventFight ? "evfight" : "evnext"}">${esc(tx(X.eventFight ? "talk.toFight" : "r.continue"))}</button></div></div>`;
+  else foot = `<div class="choices talk-opts tw-wait">${ev.nodes[T.hub].opts.map((o, i) => {
     if (o.once && T.used[T.hub + ":" + i]) return "";
     if (o.cNeed && !F[o.cNeed]) return "";
     const poor = o.fx && o.fx.cost > EV.P.coins;
@@ -199,6 +201,103 @@ function talkMount(root) {
     const n = EVSCENE.EVNOTE[box.dataset.evscene];
     cv.setAttribute("role", "img"); if (n && n.scene) cv.setAttribute("aria-label", n.scene);
     box.appendChild(cv);
+    sceneIn(box, "ev|" + id + "|" + (end == null ? "" : end));
   });
   const lg = $("talkLog"); if (lg) lg.scrollTop = lg.scrollHeight;
+  twStart(root);
+  if (X.talk) X.talk.shown = X.talk.log.length;
+  X.twSeen = evTwKey();
 }
+// a picture fades in from dark the first time it shows (an ending's picture too), not on every render
+function sceneIn(box, key) {
+  if (X.sceneKey === key) return;
+  X.sceneKey = key;
+  if (twMs()) box.classList.add("scene-in");
+}
+/* ---------- letters one by one: conversations and path events type themselves out ---------- */
+/* After a render, every element with class "tw" is typed in order (lines that were already on screen keep the
+   class off, so only what is new types). Text keeps its full width from the start (the rest waits invisible in a
+   .tw-off span), so nothing jumps as it grows. ".tw-wait" elements (the choices, Continue) show when the typing ends.
+   A tap or Space/Enter on the expedition screen shows everything at once. Speed: EV.P.textSpeed (normal, fast,
+   instant); with reduced motion and no choice made, text shows at once. */
+const TW_MS = { normal: 28, fast: 11 };
+const TW_REDUCE = typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+let twRun = null;
+const twMs = () => { const s = EV.P.textSpeed || (TW_REDUCE ? "instant" : "normal"); return TW_MS[s] || 0; };
+const twTyping = () => !!twRun;
+// splits an element's text into typed + waiting halves; speaker names (<b>) and faces show whole
+function twPrep(el) {
+  const parts = [], walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, { acceptNode: (n) => (n.parentNode.closest("b") ? NodeFilter.FILTER_REJECT : n.data.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT) });
+  const nodes = []; while (walk.nextNode()) nodes.push(walk.currentNode);
+  for (const t of nodes) {
+    const ch = Array.from(t.data), on = document.createTextNode(""), off = document.createElement("span");
+    off.className = "tw-off"; off.textContent = t.data;
+    t.parentNode.insertBefore(on, t); t.parentNode.replaceChild(off, t);
+    parts.push({ ch, on, off, k: 0 });
+  }
+  return parts;
+}
+function twShowWait(root, anim) { root.querySelectorAll(".tw-wait").forEach((w) => { w.classList.remove("tw-wait"); if (anim) w.classList.add("tw-in"); }); }
+function twScroll() { const lg = $("talkLog"); if (lg) lg.scrollTop = lg.scrollHeight; }
+// stops the run; with done=true everything left shows at once
+function twStop(done) {
+  const R = twRun; if (!R) return; twRun = null; cancelAnimationFrame(R.raf);
+  if (!done) return;
+  for (const L of R.lines) {
+    L.el.classList.remove("tw-later", "tw-now"); L.el.classList.add("tw-done");
+    for (const p of L.parts || []) { p.on.data = p.ch.join(""); p.off.remove(); }
+  }
+  twShowWait(R.root, true); twScroll();
+}
+function twStart(root) {
+  twStop(false);
+  const els = [...root.querySelectorAll(".tw")], ms = twMs();
+  els.forEach((e) => e.classList.remove("tw"));
+  if (!els.length || !ms) { twShowWait(root, false); return; }
+  const lines = els.map((el) => ({ el, quick: el.classList.contains("tw-quick") }));
+  lines.forEach((L) => L.el.classList.add("tw-later"));
+  const R = twRun = { root, lines, i: -1, wait: 0, last: performance.now(), raf: 0, blip: 0 };
+  const next = () => {
+    R.i++;
+    const L = R.lines[R.i]; if (!L) return false;
+    L.el.classList.remove("tw-later"); L.el.classList.add("tw-now");
+    if (!L.quick) L.parts = twPrep(L.el);
+    L.pi = 0; twScroll();
+    // a narrator line sounds lower than a voice
+    L.pitch = L.el.classList.contains("nar") || L.el.classList.contains("evt-text") ? 520 : 760;
+    return true;
+  };
+  const step = (now) => {
+    if (twRun !== R) return;
+    let dt = Math.min(200, now - R.last); R.last = now;
+    while (dt > 0) {
+      if (R.wait > dt) { R.wait -= dt; dt = 0; break; }
+      dt -= R.wait; R.wait = 0;
+      let L = R.lines[R.i];
+      if (!L || L.quick || L.pi >= (L.parts || []).length) {
+        if (L) { L.el.classList.remove("tw-now"); L.el.classList.add("tw-done"); }
+        if (!next()) { twRun = null; twShowWait(root, true); twScroll(); return; }
+        L = R.lines[R.i];
+        R.wait = R.i ? ms * 7 : ms * 3;
+        if (L.quick) R.wait = ms * 4;
+        continue;
+      }
+      const p = L.parts[L.pi], c = p.ch[p.k++];
+      p.on.data += c; p.off.textContent = p.ch.slice(p.k).join("");
+      if (p.k >= p.ch.length) { p.off.remove(); L.pi++; }
+      if (/\S/.test(c) && ++R.blip % 3 === 0 && EV.tone) EV.tone(L.pitch + Math.random() * 60, 0.025, { type: "square", vol: 0.012 });
+      R.wait = ".!?…".includes(c) ? ms * 9 : ",;:".includes(c) ? ms * 4 : ms;
+    }
+    R.raf = requestAnimationFrame(step);
+  };
+  R.raf = requestAnimationFrame(step);
+}
+// a tap on the screen while letters are coming shows the whole text (and does nothing else)
+$("scrExp").addEventListener("click", (e) => {
+  if (!twRun) return;
+  e.stopImmediatePropagation(); e.preventDefault(); twStop(true);
+}, true);
+document.addEventListener("keydown", (e) => {
+  if (!twRun || (e.key !== " " && e.key !== "Enter") || $("scrExp").hidden) return;
+  e.preventDefault(); twStop(true);
+});
