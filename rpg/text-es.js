@@ -39,7 +39,7 @@ const RPG_ES = {
     "slot.a": "Activa", "slot.p": "Pasiva", "slot.s": "Soporte", "slot.lock": "Nivel {n}",
     "cards.title": "Cartas", "cards.lvl": "Nivel {n}", "cards.xp": "{x} / {y} XP", "cards.equip": "Equipar en", "cards.empty": "Hueco vacío",
     "cards.owned": "Tu colección ({n})", "cards.fuse": "Mejorar {n} {a} → 1 {g}", "cards.fused": "¡Mejora! Ahora tienes {card} {g}.",
-    "cards.cant": "{name} no puede usar cartas de {type}", "cards.canTypes": "{name} puede usar cartas de: {types}, y las suyas propias.", "cards.copies": "Copias",
+    "cards.whoGive": "Pueden llevarla tus criaturas del Refugio:", "cards.usual": "Es carta propia de {name}: cuando su hueco está vacío la usa sola, con tu mejor copia libre.", "cards.carries": "La lleva", "cards.given": "{name} lleva ahora {card} ({s}).", "cards.cant": "{name} no puede usar cartas de {type}", "cards.canTypes": "{name} puede usar cartas de: {types}, y las suyas propias.", "cards.copies": "Copias",
     "cards.desc": "Cada carta trae tres efectos; solo funciona el del hueco donde la pongas. Si el tipo de la carta coincide con el de tu criatura, resuena (+15 %).",
     "cards.noCreature": "Ten una criatura joven para usar cartas.", "cards.stats": "Vida {hp} · Fuerza {str} · Defensa {def} · Velocidad {spd} · Crítico {cr} %",
     "sh.title": "Ficha de combate", "sh.lvl": "Nivel {n}", "sh.sub": "Nivel {n}. Los cuidados de hoy suman hasta un 25 % a cada valor.", "sh.hp": "Vida", "sh.str": "Fuerza", "sh.def": "Defensa", "sh.spd": "Velocidad", "sh.cr": "Crítico", "sh.dodge": "Esquiva", "sh.by": "por {c}", "sh.need": "Aparece cuando tu criatura sea joven.",

@@ -361,13 +361,14 @@ function memberUnit(m) {
   if (m.own) return makeUnit(Object.assign(ownUnitOpts(m.hp), { pos: m.pos }));
   // Unísona uses your best copy of each of its cards, so it grows as you fuse them
   // Refuge companions' cards grow with Bond
-  const rg = m.roster && refOf(m.kind) ? refOf(m.kind).grade : 0;
-  const gr = (id) => (m.kind === "unisona" ? Math.max(0, ...EV.P.cards.filter((c) => c.id === id).map((c) => c.g)) : rg);
-  const mc = MONS[m.kind].cards;
-  const cards = { a: scaled(mc[0], gr(mc[0])), p: scaled(mc[1], gr(mc[1])) };
-  if (m.lvl >= SLOT_LVL.s || m.kind === "unisona") cards.s = scaled(mc[2], gr(mc[2]));
-  // a Refuge companion carries the cards you gave it; empty slots keep its usual ones
-  if (m.roster) for (const k of ["a", "p", "s"]) { const c = compCard(m.kind, k); if (c) cards[k] = scaled(c.id, c.g); }
+  // a Refuge companion carries the cards you gave it; empty slots keep its usual ones (see compLoadout)
+  const mc = MONS[m.kind].cards, cards = {};
+  if (m.roster && refOf(m.kind)) { const lo = compLoadout(m.kind, m.lvl); for (const k in lo) cards[k] = scaled(lo[k][0], lo[k][1]); }
+  else {
+    const gr = (id) => (m.kind === "unisona" ? Math.max(0, ...EV.P.cards.filter((c) => c.id === id).map((c) => c.g)) : 0);
+    cards.a = scaled(mc[0], gr(mc[0])); cards.p = scaled(mc[1], gr(mc[1]));
+    if (m.lvl >= SLOT_LVL.s || m.kind === "unisona") cards.s = scaled(mc[2], gr(mc[2]));
+  }
   const ro = m.roster && EV.P.eg && EV.P.eg.roster[m.kind];
   return makeUnit({ kind: m.kind, lvl: m.lvl, side: "ally", name: monName(m.kind), wild: true, cards, hpPct: m.hp, stage: 1, form: "bright", bond: m.bond || 0, star: m.star || 0, tal: ro ? companionTal(m.kind, m.lvl, ro) : [], pos: m.pos });
 }
@@ -521,7 +522,7 @@ function slotRowsHtml(who) {
     if (lvl < SLOT_LVL[k]) return `<div class="lrow locked"><div class="lr-empty">🔒</div><div class="lr-txt"><span class="lr-slot">${esc(tx("slot." + k))}</span><span class="lr-fx">${esc(tx("load.lock", { n: SLOT_LVL[k] }))}</span></div></div>`;
     let inner;
     if (own) { const c = R.eq[k] && cardByUid(R.eq[k]); inner = c ? cardRowInner(c.id, c.g, k) : `<div class="lr-empty">＋</div><div class="lr-txt"><span class="lr-slot">${esc(tx("slot." + k))}</span><strong>${esc(tx("cards.empty"))}</strong><span class="lr-fx">${esc(tx("load.emptyFx"))}</span></div>`; }
-    else { const c = compCard(who, k), def = MONS[who].cards[{ a: 0, p: 1, s: 2 }[k]], ref = refOf(who); inner = c ? cardRowInner(c.id, c.g, k) : cardRowInner(def, ref ? ref.grade : 0, k, tx("cload.def")); }
+    else { const c = compCard(who, k), u = usualCard(who, k); inner = c ? cardRowInner(c.id, c.g, k) : cardRowInner(u.id, u.g, k, tx("cload.def")); }
     return `<div class="lrow">${inner}<button class="btn ghost lr-chg" type="button" data-chg="${who}:${k}">${esc(tx("load.change"))}</button></div>`;
   }).join("")}</div>`;
 }
@@ -545,10 +546,8 @@ function setLoad(slot, uid) {
 /* Refuge companions can carry your cards: their circle's types, Star cards and their own.
    Each copy of a card goes to one creature at a time. Companions you don't own keep their usual cards. */
 const rosterOf = (k) => (EV.P.eg && EV.P.eg.roster && EV.P.eg.roster[k]) || null;
-function compFits(kind, id) {
-  const c = CARDS[id], m = MONS[kind]; if (!c || !m) return false;
-  return c.by === kind || c.type === "star" || CIRCLE[c.type] === CIRCLE[m.types[0]];
-}
+// same rule as your own creature (canUse in rpg/data-cards.js); companions are always shown as babies/young
+const compFits = (kind, id) => !!MONS[kind] && canUse(kind, null, id);
 // copies currently lent to Refuge companions
 function compUids() { const u = new Set(), ro = (EV.P.eg && EV.P.eg.roster) || {}; for (const k in ro) for (const s of ["a", "p", "s"]) if (ro[k].eq && ro[k].eq[s]) u.add(ro[k].eq[s]); return u; }
 function usedUids(skipKind, skipSlot) {
@@ -565,10 +564,28 @@ function compCard(kind, slot) {
   if (!c || !compFits(kind, c.id) || r.lvl < SLOT_LVL[slot]) return null;
   return c;
 }
+// a companion's usual card in an empty slot: its own signature card at its Bond grade, or at the grade of your
+// best copy of that card when that is higher and no other creature carries it (so upgrading Forge Bread helps Fuellito)
+function usualCard(kind, slot) {
+  const id = MONS[kind].cards[{ a: 0, p: 1, s: 2 }[slot]], ref = refOf(kind);
+  let g = ref ? ref.grade : 0;
+  if (ref) { const used = usedUids(kind, "-"); for (const c of EV.P.cards) if (c.id === id && !used.has(c.uid) && c.g > g) g = c.g; }
+  return { id, g };
+}
+// the cards a companion takes into battle: what you gave it, else its usual cards (support slot from its level 8)
+function compLoadout(kind, lvl) {
+  const out = {};
+  for (const k of ["a", "p", "s"]) {
+    const c = rosterOf(kind) && compCard(kind, k);
+    if (c) out[k] = [c.id, c.g];
+    else if (k !== "s" || lvl >= SLOT_LVL.s) { const u = usualCard(kind, k); out[k] = [u.id, u.g]; }
+  }
+  return out;
+}
 function compLoadHtml(kind) {
   const r = rosterOf(kind); if (!r) return "";
   r.eq = r.eq || {};
-  const nm = monName(kind), circleTypes = Object.keys(CIRCLE).filter((t) => CIRCLE[t] === CIRCLE[MONS[kind].types[0]]).map((t) => TYPES[t][L()]).join(", ");
+  const nm = monName(kind), circleTypes = typesFor(kind).map((t) => TYPES[t][L()]).join(", ");
   return `<div class="panel"><h3>${esc(tx("cload.title", { name: nm }))}</h3><p class="muted" style="margin:0">${esc(tx("cload.sub", { name: nm, types: circleTypes }))}</p>${slotRowsHtml(kind)}</div>`;
 }
 function setCompLoad(kind, slot, uid) {
@@ -597,10 +614,10 @@ function pickRows(who, slot) {
       rows.push({ uid: c.uid, id: c.id, g: c.g, on: !!(cur && cur.uid === c.uid), tag: other ? tx("load.inSlot", { s: tx("slot." + other) }) : "" });
     }
   } else {
-    const cur = compCard(who, slot), used = usedUids(who, slot), best = {}, ref = refOf(who);
+    const cur = compCard(who, slot), used = usedUids(who, slot), best = {}, u = usualCard(who, slot);
     for (const c of P.cards) if (compFits(who, c.id) && (!used.has(c.uid) || (cur && cur.uid === c.uid)) && (!best[c.id] || c.g > best[c.id].g)) best[c.id] = c;
     if (cur) best[cur.id] = cur;
-    rows.push({ uid: "", id: MONS[who].cards[{ a: 0, p: 1, s: 2 }[slot]], g: ref ? ref.grade : 0, on: !cur, tag: tx("cload.def") });
+    rows.push({ uid: "", id: u.id, g: u.g, on: !cur, tag: tx("cload.def") });
     for (const c of Object.values(best).sort((a, b) => b.g - a.g || cardName(a.id).localeCompare(cardName(b.id)))) {
       const other = ["a", "p", "s"].find((k) => k !== slot && (compCard(who, k) || {}).id === c.id);
       rows.push({ uid: c.uid, id: c.id, g: c.g, on: !!(cur && cur.uid === c.uid), tag: other ? tx("load.inSlot", { s: tx("slot." + other) }) : "" });

@@ -678,5 +678,5 @@ B.runAll = function (maxRounds) {
 };
 
 
-const api = { IMP, DEFEND, CELLS, cellRow, cellLane, autoForm, cardShape, shapeCells, nearCells, AUTO_DODGE, GRADE_VIS, COMPAT, canUse, UPGRADE_N, TYPES, BEATS, OPPOSITE, typeMult, GRADES, rollGrade, STATUS, CARDS, DROP_POOL, scaled, MONS, makeUnit, Battle, lvlScale, xpNeed, SLOT_LVL, ZONES, EVENTS, isDayNow };
+const api = { IMP, DEFEND, CELLS, cellRow, cellLane, autoForm, cardShape, shapeCells, nearCells, AUTO_DODGE, GRADE_VIS, COMPAT, canUse, typesFor, UPGRADE_N, TYPES, BEATS, OPPOSITE, typeMult, GRADES, rollGrade, STATUS, CARDS, DROP_POOL, scaled, MONS, makeUnit, Battle, lvlScale, xpNeed, SLOT_LVL, ZONES, EVENTS, isDayNow };
 if (typeof window !== "undefined") window.EvoEngine = api;

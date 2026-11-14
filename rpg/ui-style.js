@@ -132,6 +132,12 @@ const css = `
 .rc-lore { margin: 0; font-size: 12px; font-style: italic; color: var(--muted); }
 .rcard.ghost .tcg { --tc: #b9b1a6 !important; opacity: .8; }
 .rcard.ghost .tcg-art { filter: grayscale(1); }
+.rc-give { margin-top: 8px; border-top: 1px dashed rgba(127,127,127,.35); padding-top: 6px; }
+.rc-give .sub { margin: 0 0 4px; }
+.rc-giverow { display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap; margin: 4px 0; }
+.rc-giverow .rc-btns { margin-top: 0; }
+.rc-givenm { font-size: 13px; font-weight: 600; }
+.rc-givenm i { font-weight: 400; font-size: 11px; opacity: .8; }
 .rc-btns { display: flex; gap: 6px; flex-wrap: wrap; margin-top: auto; }
 .ctabs { margin-left: auto; }
 .rc-btns .btn { padding: 6px 10px; font-size: 12px; min-height: 34px; }

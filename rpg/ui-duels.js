@@ -42,13 +42,7 @@ function neighbourTeam(n) {
 }
 /* ---------- team codes ---------- */
 // the cards a companion takes on a trip, the same way partyUnits builds them
-function compCardsOf(k, lvl) {
-  const ref = refOf(k), g = ref ? ref.grade : 0, mc = MONS[k].cards;
-  const c = { a: [mc[0], g], p: [mc[1], g] };
-  if (lvl >= SLOT_LVL.s) c.s = [mc[2], g];
-  for (const s of ["a", "p", "s"]) { const cc = compCard(k, s); if (cc) c[s] = [cc.id, cc.g]; }
-  return c;
-}
+const compCardsOf = (k, lvl) => compLoadout(k, lvl);
 function myTeam() {
   const S = EV.S, R = rpgState(); if (!S || !R || S.stage < 1) return null;
   const c = {};

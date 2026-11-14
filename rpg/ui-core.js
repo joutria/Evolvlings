@@ -309,10 +309,8 @@ const grimIds = (types) => Object.keys(CARDS).filter((id) => types.includes(CARD
 const grimDone = (p, types) => grimIds(types).every((id) => (p.grim || {})[id]);
 const dayKeyNow = EV.dayKey;
 function canTypesText() {
-  const S = EV.S; if (!S || !COMPAT[S.species]) return "";
-  const ts = COMPAT[S.species].slice();
-  const ad = MONS[S.species].adult && S.form && MONS[S.species].adult[S.form];
-  if (ad && !ts.includes(ad)) ts.push(ad);
+  const S = EV.S; if (!S || !MONS[S.species]) return "";
+  const ts = typesFor(S.species, S.form);
   return tx("cards.canTypes", { name: S.name, types: ts.map((t) => TYPES[t].icon + " " + TYPES[t][L()]).join(", ") });
 }
 function cantNote(id) {
