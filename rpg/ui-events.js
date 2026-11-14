@@ -75,19 +75,21 @@ if (LORE) for (const lg of ["es", "en"]) Object.assign(EVT[lg], LORE.LORE_EVT[lg
 // a short event shows its own scene when it has one, else the zone's path picture
 // after a choice it asks for that outcome's picture (EVSCENE.end(id, choice)), keeping the event's own picture until one exists
 const shortScene = () => (window.EVSCENE && EVSCENE.EVNOTE && EVSCENE.EVNOTE[X.event] ? `<div class="talk-scene" data-evscene="${X.event}"${X.eventOut != null && X.eventPick != null ? ` data-evend="${X.eventPick}"` : ""}></div>` : pauseBox("camino"));
+// which text of a short event is on screen: its question, or the outcome of one choice (typed once, see twStart)
+const evTwKey = () => X.event + "|" + (X.eventOut == null ? "" : X.eventPick);
 function eventHtml() {
   if (X.talk && X.talk.id === X.event) return talkHtml();
-  const E = EVT[L()][X.event];
+  const E = EVT[L()][X.event], tw = X.twSeen === evTwKey() ? "" : " tw";
   if (X.eventOut == null) {
     const ch = X.event === "orilla" && hasLetter() ? E.cL : E.c, fx = fxOf(X.event);
     const le = loreEv(X.event);
-    return `<div class="panel"><div class="sub">${esc(tx("node.event"))}</div><p class="evt-text">${esc(E.t)}</p><div class="choices">${ch.map((c, i) => {
+    return `<div class="panel"><div class="sub">${esc(tx("node.event"))}</div><p class="evt-text${tw}">${esc(E.t)}</p><div class="choices tw-wait">${ch.map((c, i) => {
       if (le && le.cNeed && le.cNeed[i] && !(EV.P.flags || {})[le.cNeed[i]]) return "";
       const poor = ((fx[i] || {}).cost || 0) > EV.P.coins;
       return `<button class="btn ghost" type="button" data-ev="${i}" ${poor ? "disabled" : ""}>${esc(c)}</button>`;
     }).join("")}</div></div><div class="panel"><h3>${esc(tx("exp.party"))}</h3>${partyHtml()}</div>`.replace('<div class="panel"><div class="sub">', `<div class="panel">${shortScene()}<div class="sub">`);
   }
-  return `<div class="panel">${shortScene()}<div class="sub">${esc(tx("node.event"))}</div><p class="evt-text">${esc(X.eventOut)}</p><div class="bctl"><button class="btn" type="button" data-x="${X.eventFight ? "evfight" : "evnext"}">${esc(tx("r.continue"))}</button></div></div><div class="panel"><h3>${esc(tx("exp.party"))}</h3>${partyHtml()}${lootHtml()}</div>`;
+  return `<div class="panel">${shortScene()}<div class="sub">${esc(tx("node.event"))}</div><p class="evt-text${tw}">${esc(X.eventOut)}</p><div class="bctl tw-wait"><button class="btn" type="button" data-x="${X.eventFight ? "evfight" : "evnext"}">${esc(tx("r.continue"))}</button></div></div><div class="panel"><h3>${esc(tx("exp.party"))}</h3>${partyHtml()}${lootHtml()}</div>`;
 }
 const hasLetter = () => !!(EV.P.flags && EV.P.flags.olaLetter && !EV.P.flags.olaDelivered);
 const hurtParty = (f) => { for (const m of X.party) if (m.hp > 0) m.hp = Math.max(0.05, m.hp - f); };
@@ -273,7 +275,7 @@ function onExpClick(e) {
     else if (n === "boss") preFight(true);
     else if (n === "rest") { healParty(0.35); for (const m of X.party) if (m.hp <= 0) m.hp = 0.2; EV.sfx("heal"); X.reward = { title: tx("node.rest"), text: tx("node.rest.d"), after: "next", kind: "descanso" }; show("reward"); }
     else if (n === "chest") { const w = rnd() < 0.35 ? escritoFor("chest", X.zone) : null; if (w) giveEscrito(w); X.reward = { title: tx("node.chest"), offer: offerCards(3, 0), after: "next", kind: "cofre" }; show("reward"); }
-    else if (n === "event") { X.event = rollEvent(); X.eventOut = null; X.talk = null; if (talkEv(X.event)) talkStart(X.event); show("event"); }
+    else if (n === "event") { X.event = rollEvent(); X.eventOut = null; X.talk = null; X.twSeen = null; if (talkEv(X.event)) talkStart(X.event); show("event"); }
     return;
   }
   if (d.tk != null) { talkPick(+d.tk); return; }
