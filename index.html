@@ -1169,7 +1169,7 @@ function step(dt, offline, away) {
   s.full = clamp(s.full - PER_MIN.full * r.full * dt * (sl ? 0.5 : 1));
   // the weather only ever slows the decline (weather.js; design rule 2)
   const wm = (k) => (!offline && window.EV && window.EV.WEATHER ? window.EV.WEATHER.mul(k) : 1);
-  s.fun = clamp(s.fun - PER_MIN.fun * r.fun * dt * (sl ? 0.3 : 1) * (S.sick ? 1.5 : 1) * wm("fun"));
+  s.fun = clamp(s.fun - PER_MIN.fun * r.fun * dt * (sl ? 0.3 : 1) * (S.sick ? 1.5 : 1) * wm("fun") * (1 - (S.disc || 0) / 1000)); // discipline.js: up to 10 % slower
   s.clean = clamp(s.clean - (PER_MIN.clean * r.clean + S.messes.length * 0.12) * dt);
   if (sl) s.energy = clamp(s.energy + 0.55 * dt);
   else s.energy = clamp(s.energy - PER_MIN.energy * r.energy * dt * wm("energy"));
@@ -1233,7 +1233,7 @@ function grow(offline) {
   const before = stageName();
   S.stage++;
   if (S.stage === 2) {
-    const avg = S.careN ? S.careSum / S.careN : 50;
+    const avg = (S.careN ? S.careSum / S.careN : 50) + (S.disc || 0) / 10; // discipline (discipline.js) adds up to 10
     S.form = avg >= 58 ? "bright" : "scruffy";
     P.seen.forms[S.species + ":" + S.form] = 1; P.c.adults++;
     addCoins(S.form === "bright" ? 70 : 40, offline);
@@ -1360,6 +1360,7 @@ function cuddle() {
   const now = performance.now();
   if (now - lastCuddle > 400) { P.c.cuddles++; sfx("chirp"); buzz(12); }
   lastCuddle = now;
+  if (HOOKS.cuddled) HOOKS.cuddled(); // discipline.js: comforting answers a tantrum
   save(); renderStats(); checkAch();
 }
 // Play opens the mini-game chooser (minigames.js); the star catch below is one of its games
@@ -1989,6 +1990,7 @@ function renderStats() {
   const nextAt = S.stage === 0 ? TEEN_AT : S.stage === 1 ? ADULT_AT : null;
   const fromAt = S.stage === 1 ? TEEN_AT : 0, growBar = nextAt ? `<span class="bar age-bar" aria-hidden="true"><i style="width:${Math.round(100 * clamp((S.age - fromAt) / (nextAt - fromAt), 0, 1))}%"></i></span>` : "";
   $("petAge").innerHTML = `${t("age.age", { d: fmtDur(S.age) })}<br>${nextAt ? t("age.grows", { d: fmtDur(Math.max(0, nextAt - S.age)) }) + growBar : t("age.grown")}${S.speed > 1 ? `<br>${t("age.speed", { n: S.speed })}` : ""}`;
+  if (HOOKS.statsDrawn) HOOKS.statsDrawn();
   const sl = S.sleeping, busy = !!mini;
   $("aFeed").disabled = sl || busy; $("aPlay").disabled = sl || busy; $("aClean").disabled = busy;
   $("aHeal").disabled = busy; $("aPet").disabled = sl || busy; $("aSleep").disabled = busy; $("aItems").disabled = busy;
@@ -2323,6 +2325,7 @@ requestAnimationFrame(frame);
 <script src="ach.js"></script>
 <script src="minigames.js"></script>
 <script src="photo.js"></script>
+<script src="discipline.js"></script>
 <script src="weather.js"></script>
 <script src="world.js"></script>
 <script src="guide.js"></script>
