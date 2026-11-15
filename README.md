@@ -70,6 +70,7 @@ To host it on **GitHub Pages**: open the repo's *Settings → Pages*, choose *De
   - *Foraging nook*: once a day per creature, for 2 steps, each circle searches its own way. Sol harvests a melon, Sky catches breezes (+12 Chispas and fun), Lake digs up 8 to 14 Stardust, Frost gathers leaves for a tea, and Star (Unísona) sings for Chispas and Stardust. The nook looks different for each circle.
   - *Portraits with feelings*: Tila's portrait smiles or worries with the conversation, and your creature's face shows its reaction next to every dialogue.
 - **Parchment map and key items** (`rpg/ui-expedition.js`, second part of phase 5): the expedition screen opens on a parchment map of the valley. The Dayside is above the stream, the Underside below it, and El Vado sits on the ford. Locked places show "?", and gold stamps show your stars. Tapping a place walks your creature's token there along the path and opens it; the list of zones stays below. Two zones now need a key item from the story. Mirror Lake needs a raft, which the loggers give you the first time you calm the Deep Wood's guardian. The Heights need a rope, which the miners give you for the Echo Caves' guardian. Saves that already cleared those zones count as having them. The lock text says what's missing and where to get it.
+- **The valley map** (2026-11-15): the parchment became a painted map of the valley made from the Ninja Adventure tiles, like the home maps (`art/maps/valley.png`, 480 × 304, built by `python3 tools/ninja-scenes.py <pack folder> valley` from `tools/scenes/valley.py`). Every zone has its landmark: the snowy cliff of the Heights with the rope hanging where the paths climb, the forge and ember pools of the Crater, the Meadow's lanterns, the thick Deep Wood, the great stump of the Heart, El Vado's houses and stepping stones on the stream, and below it, in the dusk of the Underside, the ruins of the Hollow, Mirror Lake with its boat, the Echo Caves with torches and the snow of the White Deep. The game draws on top: a name plate per place, gold stars and the Savia drops under it, a pulsing cream diamond on places you have not calmed yet, and clouds over the places you can't reach (their plate says "?"). The paths bend along the tiles: `PMAP` and `PEDGES` in `rpg/ui-expedition.js` list the places and the corners of each path (the tool reads the same lists, so moving a place means running the tool again), and your creature walks along them, through El Vado or any place on the way, facing where it goes. On a PC the plate under the mouse lights up. The classic drawings setting keeps the old parchment.
 - **Lore threads**: when you own both writings of a pair, the Grimoire adds a line that ties them together.
 - **Spanish and English**: picked from the browser language, switchable in Settings.
 - **Sound effects** generated with Web Audio (no audio files), plus optional vibration on phones. Mute from the header.
@@ -170,7 +171,7 @@ The old `rpg.js` is now split into `rpg/`. They are still plain scripts, loaded 
 | `ui-core.js` | text helpers, card text and card HTML, saved data |
 | `ui-style.js` | CSS for expeditions, battles and cards |
 | `ui-art.js` | extra sounds, achievements, drawing of the other creatures |
-| `ui-expedition.js` | expedition state, zones, key items, parchment map, views, card picker, teams |
+| `ui-expedition.js` | expedition state, zones, key items, valley map, views, card picker, teams |
 | `ui-battle.js` | battle presentation and drawing |
 | `ui-events.js` | path events, ending the trip, click wiring |
 | `ui-cards.js` | cards panel (collection, shop; the Grimoire tab opens the book) |
@@ -274,7 +275,7 @@ Every path conversation (all 93) starts on a picture composed from the same pack
 
 ## Savia levels per zone
 
-Every zone shows how much Black Sap is left in it (visual language guide, section 8): a zone you have never calmed is dripping (2), calming its guardian leaves veins (1), and three stars clean it (0). The guardian's fight, the Guardian's Echo and Savia Mode always show the Root (3). The level appears as dark drops on the parchment map and a line in the zone list, and battles paint it over the zone background: veins in the ground, puddles dripping upward with less colour, and a vignette of veins for the Root. The end-of-trip card says when the Sap pulls back. It only changes how things look (`saviaLvl(id)` and `drawSap` in `rpg/ui-expedition.js`).
+Every zone shows how much Black Sap is left in it (visual language guide, section 8): a zone you have never calmed is dripping (2), calming its guardian leaves veins (1), and three stars clean it (0). The guardian's fight, the Guardian's Echo and Savia Mode always show the Root (3). The level appears as dark drops on the valley map and a line in the zone list, and battles paint it over the zone background: veins in the ground, puddles dripping upward with less colour, and a vignette of veins for the Root. The end-of-trip card says when the Sap pulls back. It only changes how things look (`saviaLvl(id)` and `drawSap` in `rpg/ui-expedition.js`).
 
 ## Gentle weather
 

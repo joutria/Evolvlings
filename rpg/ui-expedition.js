@@ -227,14 +227,31 @@ function drawSap(c, lv, t, W, H) {
   c.restore();
 }
 /* ---------- The parchment map of the valley ---------- */
-// Dayside above the stream, the Underside below it; the Ford (home) sits on the stream. Coordinates in a 240 x 152 sheet.
-const PMAP = { heights: [120, 17], crater: [50, 44], aurora: [120, 42], forest: [190, 44], heart: [120, 68], vado: [120, 88], hollow: [52, 108], lake: [120, 114], caves: [188, 108], deep: [120, 138] };
-const PEDGES = [["vado", "aurora"], ["aurora", "crater"], ["aurora", "forest"], ["vado", "heart"], ["crater", "heights", "rope"], ["forest", "heights", "rope"], ["vado", "hollow"], ["vado", "lake", "raft"], ["vado", "caves"], ["lake", "deep"]];
-let pm = null; // { from, to, t0 } while the token walks
+// Dayside above the stream, the Underside below it; the Ford (home) sits on the stream. Coordinates in a 240 x 152 sheet:
+// every place and path corner is the centre of a 16 px tile of the painted valley (art/maps/valley.png, 480 x 304, made by
+// tools/ninja-scenes.py valley from these same lists), so tile (c, r) is at (8c + 4, 8r + 4).
+const PMAP = { heights: [124, 12], crater: [44, 52], aurora: [124, 52], forest: [204, 52], heart: [124, 68], vado: [124, 92], hollow: [44, 116], lake: [164, 116], caves: [204, 116], deep: [124, 140] };
+// [from, to, key item, corners on the way, where the key item is drawn]: the paths run along the tiles, so they bend
+const PEDGES = [
+  ["vado", "aurora", null, [[124, 84], [92, 84], [92, 52]]], ["aurora", "crater"], ["aurora", "forest"], ["vado", "heart"],
+  ["crater", "heights", "rope", [[44, 28], [108, 28], [108, 12]], [108, 20]], ["forest", "heights", "rope", [[204, 28], [140, 28], [140, 12]], [140, 20]],
+  ["vado", "hollow", null, [[124, 108], [44, 108]]], ["vado", "lake", "raft", [[124, 116]], [182, 126]], ["vado", "caves", null, [[124, 108], [204, 108]]],
+  ["lake", "deep", null, [[124, 116]]],
+];
+// the points a token walks through from a to b (either way along an edge), or a straight line when no edge joins them
+function proute(a, b) {
+  const e = PEDGES.find((d) => (d[0] === a && d[1] === b) || (d[0] === b && d[1] === a));
+  const way = e && e[3] ? (e[0] === a ? e[3] : e[3].slice().reverse()) : [];
+  return [PMAP[a]].concat(way, [PMAP[b]]);
+}
+let pm = null; // { pts, t0, ms, to } while the token walks
+let pmHover = null; // the place under the mouse (PC)
 function pmapHtml() {
   const have = Object.keys(KEYS).filter(hasKey).map((k) => tx("key." + k));
-  return `<div class="pmap-wrap"><canvas id="pmap" width="480" height="304" role="img" aria-label="${esc(tx("pmap.aria"))}"></canvas></div><p class="muted pmap-note">${esc(tx("pmap.hint"))} ${esc(have.length ? tx("pmap.keys", { list: have.join(", ") }) : tx("pmap.nokeys"))}</p>`;
+  return `<div class="pmap-wrap${pmapArt() ? " art" : ""}"><canvas id="pmap" width="480" height="304" role="img" aria-label="${esc(tx("pmap.aria"))}"></canvas></div><p class="muted pmap-note">${esc(tx("pmap.hint"))} ${esc(have.length ? tx("pmap.keys", { list: have.join(", ") }) : tx("pmap.nokeys"))}</p>`;
 }
+// the painted valley (art/maps/valley.png), unless the player chose the classic drawings in Settings
+const pmapArt = () => (typeof EVART !== "undefined" && !(EVART.classic && EVART.classic()) && EVART.image("maps/valley.png")) || null;
 // the raft and the rope, drawn small (8x8 at scale s)
 function drawKeyIcon(g, k, cx, cy, have) {
   const ink = "#241030", col = (a) => (have ? a : "#a8977a");
@@ -244,71 +261,164 @@ function drawKeyIcon(g, k, cx, cy, have) {
   else { g.strokeStyle = ink; g.lineWidth = 3; g.beginPath(); g.arc(cx, cy, 4.5, 0, Math.PI * 2); g.stroke(); g.strokeStyle = col("#d9b26a"); g.lineWidth = 1.5; g.beginPath(); g.arc(cx, cy, 4.5, 0, Math.PI * 2); g.stroke(); r(3, 3, 2, 4, ink); }
   g.restore();
 }
-function pmapDraw(now) {
-  const cv = $("pmap"); if (!cv) return false;
-  const g = cv.getContext("2d"), P = EV.P;
-  g.setTransform(2, 0, 0, 2, 0, 0); g.imageSmoothingEnabled = false;
-  // parchment with darker, uneven edges
+const pmOpen = (id) => id === "vado" || zoneOpen(id);
+// where a key item sits on the map: its own spot, or halfway along the path
+function keySpot(e) { if (e[4]) return e[4]; const pts = [PMAP[e[0]]].concat(e[3] || [], [PMAP[e[1]]]), m = pts[Math.floor(pts.length / 2)], n = pts[Math.floor(pts.length / 2) - 1] || m; return [(m[0] + n[0]) / 2, (m[1] + n[1]) / 2]; }
+// the old parchment, kept for the classic drawings
+function pmapParchment(g) {
   g.fillStyle = "#e9d8b4"; g.fillRect(0, 0, 240, 152);
   g.fillStyle = "#d8c193"; for (let i = 0; i < 240; i += 2) { const a = 2 + ((i * 7) % 5), b = 2 + ((i * 11) % 4); g.fillRect(i, 0, 2, a); g.fillRect(i, 152 - b, 2, b); }
   for (let j = 0; j < 152; j += 2) { const a = 2 + ((j * 5) % 4), b = 2 + ((j * 13) % 5); g.fillRect(0, j, a, 2); g.fillRect(240 - b, j, b, 2); }
   g.fillStyle = "#c9b07e"; for (let i = 0; i < 70; i++) g.fillRect((i * 97) % 236 + 2, (i * 53) % 148 + 2, 1, 1);
-  // the stream between the two halves of the valley
-  g.strokeStyle = "#7cc8e3"; g.lineWidth = 3; g.beginPath(); g.moveTo(4, 92);
-  for (let x = 4; x <= 236; x += 4) g.lineTo(x, 89 + Math.sin(x / 14) * 3);
-  g.stroke(); g.fillStyle = "#a8834e"; g.fillRect(114, 84, 12, 9); // the ford's stepping stones
-  g.fillStyle = "#3b1d4a"; g.font = '600 6px "EvNum", "Pixelify Sans", monospace'; g.textAlign = "left"; g.textBaseline = "alphabetic";
-  // paths
-  const open = (id) => id === "vado" || zoneOpen(id);
-  for (const [a, b, key] of PEDGES) {
-    const [x1, y1] = PMAP[a], [x2, y2] = PMAP[b], on = open(a) && open(b);
+  const sy = PMAP.vado[1] + 4; // the stream between the two halves of the valley, the ford's stepping stones
+  g.strokeStyle = "#7cc8e3"; g.lineWidth = 4; g.beginPath(); g.moveTo(4, sy);
+  for (let x = 4; x <= 236; x += 4) g.lineTo(x, sy + Math.sin(x / 14) * 2);
+  g.stroke(); g.fillStyle = "#a8834e"; g.fillRect(PMAP.vado[0] - 6, sy - 4, 12, 8);
+  for (const e of PEDGES) {
+    const pts = [PMAP[e[0]]].concat(e[3] || [], [PMAP[e[1]]]), on = pmOpen(e[0]) && pmOpen(e[1]);
     g.strokeStyle = on ? "#6b4a3a" : "#bba57a"; g.lineWidth = 1; g.setLineDash([3, 2]);
-    g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke(); g.setLineDash([]);
-    // the raft waits on the stream by the ford; the rope hangs on the mountain paths
-    if (key === "raft") drawKeyIcon(g, key, 100, 98, hasKey(key));
-    else if (key) drawKeyIcon(g, key, (x1 + x2) / 2, (y1 + y2) / 2, hasKey(key));
+    g.beginPath(); g.moveTo(pts[0][0], pts[0][1]); for (const p of pts.slice(1)) g.lineTo(p[0], p[1]); g.stroke(); g.setLineDash([]);
   }
-  // places
-  const cl = P.cleared || {}, st = P.stars || {};
-  g.textAlign = "center";
+  for (const id in PMAP) {
+    if (id === "vado") continue;
+    const [x, y] = PMAP[id], o = zoneOpen(id);
+    g.fillStyle = "#241030"; g.beginPath(); g.arc(x, y, 7.5, 0, Math.PI * 2); g.fill();
+    g.fillStyle = o ? ZONES[id].sky[1] : "#cdb98c"; g.beginPath(); g.arc(x, y, 6, 0, Math.PI * 2); g.fill();
+    if (!o) { g.fillStyle = "#6b4a3a"; g.font = '600 6px "EvNum", "Pixelify Sans", monospace'; g.textAlign = "center"; g.fillText("?", x, y + 2.5); }
+  }
+}
+// clouds over a place you can't reach yet: the map is only drawn where you have been told the way
+function pmapCloud(g, x, y, r, t) {
+  const puffs = [[0, 0, 1], [-0.8, 0.15, 0.7], [0.8, 0.1, 0.72], [-0.4, -0.45, 0.62], [0.45, -0.4, 0.6], [0, 0.45, 0.66]];
+  const dx = Math.sin(t / 2600 + x) * 1.2;
+  g.fillStyle = "rgba(59,29,74,.45)";
+  for (const [a, b, k] of puffs) { g.beginPath(); g.arc(x + a * r + dx + 1, y + b * r * 0.7 + 1.5, k * r * 0.62, 0, Math.PI * 2); g.fill(); }
+  g.fillStyle = "#efe7f4";
+  for (const [a, b, k] of puffs) { g.beginPath(); g.arc(x + a * r + dx, y + b * r * 0.7, k * r * 0.62, 0, Math.PI * 2); g.fill(); }
+  g.fillStyle = "#fbf6ef";
+  for (const [a, b, k] of puffs.slice(0, 3)) { g.beginPath(); g.arc(x + a * r + dx - 1, y + b * r * 0.7 - 1.5, k * r * 0.4, 0, Math.PI * 2); g.fill(); }
+}
+// a name plate: dark plate, cream letters; gold edge when it is under the mouse
+function pmapPlate(g, text, x, y, o) {
+  g.font = '600 6px "EvNum", "Pixelify Sans", monospace'; g.textAlign = "center"; g.textBaseline = "middle";
+  const w = Math.ceil(g.measureText(text).width) + 6, h = 9, x0 = Math.round(Math.max(2, Math.min(238 - w, x - w / 2))), y0 = Math.round(y - h / 2);
+  g.fillStyle = "rgba(36,16,48,.35)"; g.fillRect(x0 + 1, y0 + 1, w, h);
+  g.fillStyle = o.hover ? "#e2ae2e" : o.locked ? "#6e6283" : "#241030"; g.fillRect(x0 - 0.5, y0 - 0.5, w + 1, h + 1);
+  g.fillStyle = o.locked ? "#9d93ad" : "#3b1d4a"; g.fillRect(x0, y0, w, h);
+  g.fillStyle = o.locked ? "#e5ddeb" : "#fbf6ef"; g.fillText(text, x0 + w / 2, y0 + h / 2 + 0.5);
+  g.textBaseline = "alphabetic";
+  return [x0, y0, w, h];
+}
+// where each name plate sits from its place (most go above; the Heights' sits on the cliff top, the Deep's leaves the lake free)
+const PLABEL = { heights: [0, -6], deep: [-16, -13], lake: [-10, -13], caves: [8, -13] };
+// a 5 x 5 pixel star with a dark rim, and a Savia drop (pointed on top, round below)
+function pmStar(g, x, y, on) {
+  const rows = ["..#..", ".###.", "#####", ".###.", ".#.#."];
+  g.fillStyle = "#241030"; rows.forEach((r, j) => [...r].forEach((c, i) => { if (c === "#") g.fillRect(x + i - 0.5, y + j - 0.5, 2, 2); }));
+  g.fillStyle = on ? "#e2ae2e" : "#9d93ad"; rows.forEach((r, j) => [...r].forEach((c, i) => { if (c === "#") g.fillRect(x + i, y + j, 1, 1); }));
+  if (on) { g.fillStyle = "#fff0b8"; g.fillRect(x + 2, y + 1, 1, 1); }
+}
+const DROP = ["...#...", "...#...", "..###..", "..###..", ".#####.", ".#####.", "#######", "#######", ".#####.", "..###.."];
+function pmDrop(g, x, y) {
+  DROP.forEach((r, j) => [...r].forEach((c, i) => { if (c === "#") { g.fillStyle = i === 2 && j === 5 ? SAP.sheen : SAP.c0; g.fillRect(x - 1.5 + i * 0.5, y + j * 0.5, 0.5, 0.5); } }));
+}
+function pmapDraw(now) {
+  const cv = $("pmap"); if (!cv) return false;
+  const g = cv.getContext("2d"), P = EV.P, art = pmapArt();
+  g.setTransform(1, 0, 0, 1, 0, 0); g.imageSmoothingEnabled = false;
+  if (art) g.drawImage(art, 0, 0, 480, 304);
+  g.setTransform(2, 0, 0, 2, 0, 0); g.imageSmoothingEnabled = false;
+  if (!art) pmapParchment(g);
+  const cl = P.cleared || {}, st = P.stars || {}, t = now || 0;
+  // clouds over the places you can't reach yet (the painted map only)
+  if (art) for (const id in PMAP) if (id !== "vado" && !zoneOpen(id)) pmapCloud(g, PMAP[id][0], PMAP[id][1] - 2, id === "heights" ? 18 : 20, t);
+  // key items: the rope on the cliff, the raft by the lake shore
+  for (const e of PEDGES) if (e[2]) { const [kx, ky] = keySpot(e); drawKeyIcon(g, e[2], kx, ky, hasKey(e[2])); }
+  // name plates, stars, the Savia drops and a pulsing diamond on open places you haven't calmed yet
   for (const id in PMAP) {
     const [x, y] = PMAP[id];
-    if (id === "vado") { g.fillStyle = "#6b4a3a"; g.fillRect(x - 4, y - 9, 8, 5); g.fillStyle = "#d9542c"; g.fillRect(x - 5, y - 11, 10, 2); g.fillStyle = "#3b1d4a"; g.textAlign = "right"; g.fillText(tx("pmap.vado"), x - 8, y - 4); g.textAlign = "center"; continue; }
-    const z = ZONES[id], o = zoneOpen(id);
-    g.fillStyle = "#241030"; g.beginPath(); g.arc(x, y, 7.5, 0, Math.PI * 2); g.fill();
-    g.fillStyle = o ? z.sky[1] : "#cdb98c"; g.beginPath(); g.arc(x, y, 6, 0, Math.PI * 2); g.fill();
-    if (!o) { g.fillStyle = "#6b4a3a"; g.fillText("?", x, y + 2.5); }
-    else if (cl[id]) { // a gold stamp per star
-      const n = st[id] || 0; g.fillStyle = "#e2ae2e"; for (let i = 0; i < n; i++) g.fillRect(x - 5 + i * 4, y + 9, 3, 3);
+    if (id === "vado") { pmapPlate(g, tx("pmap.vado"), x - 28, y - 6, {}); continue; }
+    const o = zoneOpen(id), [lx, ly] = PLABEL[id] || [0, -13];
+    if (!o && !art) continue; // the parchment marks locked places with its own "?" circle
+    const [x0, y0, w, h] = pmapPlate(g, o ? zt("name", null, id) : "?", x + lx, y + ly, { locked: !o, hover: pmHover === id });
+    if (!o) continue;
+    // under the plate: a gold star per star won (dim ones still to win), then its Savia level as dark drops
+    const n = cl[id] ? st[id] || 0 : -1, sl = saviaLvl(id), row = (n >= 0 ? 18 : 0) + sl * 5, cx = x0 + w / 2;
+    let sx = Math.round(cx - row / 2), sy2 = y0 + h + 2;
+    for (let i = 0; n >= 0 && i < 3; i++, sx += 6) pmStar(g, sx, sy2, i < n);
+    for (let i = 0; i < sl; i++, sx += 5) pmDrop(g, sx + (n >= 0 ? 1 : 0), sy2);
+    if (n < 0) { // new: a cream diamond that pulses (the visual language's "something to find here")
+      const k = 1 + Math.round((Math.sin(t / 260) + 1) * 0.75), dx = x0 + w + 4, dy = y0 + 4.5;
+      g.fillStyle = "#241030"; g.beginPath(); g.moveTo(dx, dy - k - 2); g.lineTo(dx + k + 2, dy); g.lineTo(dx, dy + k + 2); g.lineTo(dx - k - 2, dy); g.fill();
+      g.fillStyle = "#fbf6ef"; g.beginPath(); g.moveTo(dx, dy - k); g.lineTo(dx + k, dy); g.lineTo(dx, dy + k); g.lineTo(dx - k, dy); g.fill();
     }
-    if (o) { // its Savia level: dark drops on the right of the circle
-      const sl = saviaLvl(id);
-      for (let i = 0; i < sl; i++) { g.fillStyle = SAP.c0; g.fillRect(x + 9, y + 3 - i * 4, 2, 3); g.fillStyle = SAP.sheen; g.fillRect(x + 9, y + 3 - i * 4, 1, 1); }
-    }
-    g.fillStyle = o ? "#241030" : "#a8977a"; g.fillText(zt("name", null, id), x, y - 10);
   }
-  // your creature as a little token, walking along the path you picked
+  // your creature as a little token with its shadow, walking along the path you picked
   const S = EV.S, at = P.mapAt && PMAP[P.mapAt] ? P.mapAt : "vado";
-  let [tx2, ty2] = PMAP[at], walking = false;
-  if (pm) { const k = Math.min(1, (now - pm.t0) / 700), [ax, ay] = PMAP[pm.from], [bx, by] = PMAP[pm.to]; tx2 = ax + (bx - ax) * k; ty2 = ay + (by - ay) * k - Math.abs(Math.sin(k * Math.PI * 4)) * 2; walking = k < 1; if (!walking) { const id = pm.to; pm = null; P.mapAt = id; EV.saveProfile(); pickZone(id); return false; } }
-  if (S && typeof EVS !== "undefined" && EVS.KINDS.includes(S.species)) {
-    try { const sp = EV.shiny(EVS.sprite(S.species, 12, Math.max(0, Math.min(2, S.stage || 0)), walking ? Math.floor(now / 140) % 2 : 0, "happy")); g.drawImage(sp, Math.round(tx2 - sp.width / 2 + 9), Math.round(ty2 - sp.height + 4)); } catch (e) {}
+  let [tx2, ty2] = PMAP[at], walking = false, dir = "front", flip = false;
+  if (pm) {
+    const k = Math.min(1, (t - pm.t0) / pm.ms);
+    let d = k * pm.len, i = 0;
+    while (i < pm.seg.length - 1 && d > pm.seg[i]) { d -= pm.seg[i]; i++; }
+    const [ax, ay] = pm.pts[i], [bx, by] = pm.pts[i + 1], f = pm.seg[i] ? Math.min(1, d / pm.seg[i]) : 1;
+    tx2 = ax + (bx - ax) * f; ty2 = ay + (by - ay) * f;
+    dir = Math.abs(bx - ax) > Math.abs(by - ay) ? "side" : by < ay ? "back" : "front"; flip = bx < ax;
+    walking = k < 1;
+    if (!walking) { const id = pm.to; pm = null; P.mapAt = id; EV.saveProfile(); pickZone(id); return false; }
   }
-  return walking;
+  g.fillStyle = "rgba(36,16,48,.35)"; EV.ell(g, tx2, ty2 + 3, 6, 2); g.fill();
+  if (S && typeof EVS !== "undefined" && EVS.KINDS.includes(S.species)) {
+    try {
+      const sp = EV.shiny(EVS.sprite(S.species, 14, Math.max(0, Math.min(2, S.stage || 0)), walking ? Math.floor(t / 140) % 2 : Math.floor(t / 600) % 2, walking ? "normal" : "happy", false, walking ? dir : "front"));
+      const bob = walking ? 0 : Math.round(Math.sin(t / 400));
+      g.save(); g.translate(Math.round(tx2), Math.round(ty2 + 4 + bob)); if (flip) g.scale(-1, 1);
+      g.drawImage(sp, -Math.round(sp.width / 2), -sp.height); g.restore();
+    } catch (e) {}
+  }
+  return true;
 }
-function pmapMount() { const loop = (now) => { if (pmapDraw(now)) requestAnimationFrame(loop); }; requestAnimationFrame(loop); }
-function pmapTap(e) {
-  if (pm) return;
+// one drawing loop while the map is on screen: the token walks, the diamonds pulse and the clouds drift (about 15 frames a second when idle)
+let pmLoop = 0;
+function pmapMount() {
+  const id = ++pmLoop; let last = 0, cv = $("pmap");
+  if (cv) { cv.onmousemove = pmapMove; cv.onmouseleave = () => { pmHover = null; }; }
+  const loop = (now) => {
+    if (id !== pmLoop || !$("pmap")) return;
+    if (pm || now - last > 66) { last = now; if (!pmapDraw(now)) return; }
+    requestAnimationFrame(loop);
+  };
+  requestAnimationFrame(loop);
+}
+function pmapAt(e) {
   const cv = e.target, r = cv.getBoundingClientRect();
   const x = ((e.clientX - r.left) / r.width) * 240, y = ((e.clientY - r.top) / r.height) * 152;
-  let best = null, bd = 14;
-  for (const id in PMAP) { if (id === "vado") continue; const d = Math.hypot(PMAP[id][0] - x, PMAP[id][1] - y); if (d < bd) { bd = d; best = id; } }
+  let best = null, bd = 18;
+  for (const id in PMAP) { if (id === "vado") continue; const d = Math.hypot(PMAP[id][0] - x, PMAP[id][1] - 4 - y); if (d < bd) { bd = d; best = id; } }
+  return best;
+}
+// the places between a and b along the paths (breadth first), [a, b] when none join them
+function pmHops(a, b) {
+  const prev = { [a]: null }, q = [a];
+  while (q.length) {
+    const id = q.shift(); if (id === b) break;
+    for (const e of PEDGES) { const n = e[0] === id ? e[1] : e[1] === id ? e[0] : null; if (n && !(n in prev) && PMAP[n]) { prev[n] = id; q.push(n); } }
+  }
+  if (!(b in prev)) return [a, b];
+  const out = []; for (let id = b; id; id = prev[id]) out.unshift(id); return out;
+}
+function pmapMove(e) { const id = pmapAt(e); if (id !== pmHover) { pmHover = id; e.target.style.cursor = id ? "pointer" : "default"; e.target.title = id ? zt("name", null, id) : ""; } }
+function pmapTap(e) {
+  if (pm) return;
+  const best = pmapAt(e);
   if (!best) return;
   if (!zoneOpen(best)) { EV.sfx("deny"); EV.toast(keyLock(best) || tx("pmap.locked")); return; }
   EV.sfx("tap");
   const at = EV.P.mapAt && PMAP[EV.P.mapAt] ? EV.P.mapAt : "vado";
   if (at === best) { pickZone(best); return; }
-  pm = { from: at, to: best, t0: performance.now() }; pmapMount();
+  // along the paths: the fewest places on the way, El Vado included
+  const hops = pmHops(at, best), pts = hops.slice(1).reduce((acc, id, i) => acc.concat(proute(hops[i], id).slice(1)), [PMAP[at]]);
+  const seg = pts.slice(1).map((p, i) => Math.hypot(p[0] - pts[i][0], p[1] - pts[i][1])), len = seg.reduce((a, b) => a + b, 0);
+  pm = { pts, seg, len, to: best, t0: performance.now(), ms: Math.max(500, Math.min(1600, len * 9)) };
 }
 function zonesHtml() {
   const cl = EV.P.cleared || {};
