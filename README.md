@@ -179,6 +179,7 @@ The old `rpg.js` is now split into `rpg/`. They are still plain scripts, loaded 
 | `data-lore-mons.js` | creature lore for the Book: habits, what their people say, what the Sap does (es/en) |
 | `data-lore-cards.js` | card lore for the Book: scene, what nobody sees, thread (es/en) |
 | `data-people.js` | the people of the conversations: name, trade label before the name is heard, Diary titles |
+| `data-eras.js`, `ui-eras.js` | the ten eras of the Glade: era texts and endings, which era is on, the Chronicle page of the Book |
 | `ui-hooks.js` | hooks into the main game and the `EV.RPG` export |
 | `registry.js` | one entry per zone, creature and card, and the way to add new ones |
 
@@ -304,6 +305,16 @@ The path events now include illustrated conversations, in the style of Life in A
 - **The deck:** `rpg/ui-talk.js` keeps a shuffled bag for each zone (`P.evDeck`). It holds the zone's old short events plus the conversations that are open now. Draws never repeat until the bag is empty, and the same event never comes twice in a row. Lore events from `lore.js` keep their 45 % chance first.
 - **Common events:** events under the zone key `common` (campfires, treasures...) can come up anywhere. Each time a zone reshuffles its bag, up to 3 of them join it (`COMMON_SHARE`); an optional `zones: [...]` limits one to some zones.
 - **Checks:** `node tools/check.js` validates every conversation file. That covers where options lead, speakers, matching English line and option counts, effect keys, known foes, and ids that clash with short events.
+
+## The ten eras
+
+The lore runs in ten eras, each one turn of the lullaby cycle (plan: [Las diez eras del Claro](https://claude.ai/artifact/RFy6uGdhz9DJeW7e9ZfdkE)). Era 1 is the story the game started with; era 2, La Calma, is the first one added.
+
+- **State:** `P.era` (1 when missing), `P.eraWins` (guardians beaten per zone since the era began), `P.eras` (how each era closed), `P.eraOffer` (the next era, once it can begin).
+- **Gating:** an event's `need.era` says which era it belongs to (a number or `[first, last]`); events without it belong to era 1, and the common events belong to every era. After era 1, `need.layer` counts `P.eraWins`, so each era is discovered from the start. `need.eraWin: "<zone>"` asks for that zone's guardian beaten in this era. An event with `first: true` comes up before anything else in its zone's bag, and `once: true` is told a single time.
+- **Moving on:** era 1 closes when the Heart is calmed and offers era 2 right away. A later era closes when its final choice sets one of the `ends` flags of `rpg/data-eras.js`; the next one begins when you retire your creature to the Hall of Fame (`P.hof` grows) or with the button on its Chronicle page. Changing era empties the event bags and swaps the zone texts the era rewrites.
+- **Content:** `rpg/events-era<N>.js` and `.en.js` add each era's conversations to the zones. The peoples you bring together set the era's `peoples` flags; with all of them, its `unite` flag opens the best ending.
+- **Checks:** `node tools/check.js` also checks that every era event belongs to a ready era and that every ending and people flag is set by some event.
 
 ## Nothing daily expires (design rule 4)
 

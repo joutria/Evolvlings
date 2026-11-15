@@ -46,7 +46,8 @@ function sims(n) {
 // every option leads somewhere, every line has a speaker, the English text matches, effects and foes are known
 {
   const FX = new Set(["xp", "coins", "heal", "hurt", "cost", "card", "fight", "foes", "foeBuff", "flag", "escrito", "xpPerZone"]);
-  const files = fs.readdirSync(path.join(ROOT, "rpg")).filter((f) => /^events-[a-z]+\.js$/.test(f));
+  // the era files (events-era2.js...) add to the zone files, so they load after them, as in index.html
+  const files = fs.readdirSync(path.join(ROOT, "rpg")).filter((f) => /^events-[a-z0-9]+\.js$/.test(f)).sort((a, b) => (/^events-era/.test(a) - /^events-era/.test(b)) || a.localeCompare(b));
   const w = { EVEVENTS: {}, EVEVENTS_EN: {} }; const ectx = vm.createContext({ window: w });
   for (const f of files) {
     vm.runInContext(fs.readFileSync(path.join(ROOT, "rpg", f), "utf8"), ectx, { filename: "rpg/" + f });
@@ -120,6 +121,34 @@ function sims(n) {
     for (const p of lore.LORE_EPILOGOS) if (!EPI[p.char] || !EPI[p.char].rules.some((x) => x.end === p.end)) err(`lore.js epilogue ${p.char} ${p.end}: no rule leads to it`);
     console.log(`echoes: ${ECHOES.length}, story endings: ${Object.keys(EPI).length} people`);
   }
+}
+
+/* ---------- 1c. the ten eras (rpg/data-eras.js): every era event belongs to an era with content, and every end and
+   people of an era is set by some event (otherwise that ending or that people can never be reached) ---------- */
+{
+  const ew = {}, xc = vm.createContext({ window: ew });
+  vm.runInContext(fs.readFileSync(path.join(ROOT, "rpg", "data-eras.js"), "utf8"), xc, { filename: "rpg/data-eras.js" });
+  const { ERAS } = ew.EVERAS, w = { EVEVENTS: {}, EVEVENTS_EN: {} }, ec = vm.createContext({ window: w });
+  const evFiles = fs.readdirSync(path.join(ROOT, "rpg")).filter((f) => /^events-era\d+\.js$/.test(f));
+  for (const f of evFiles) vm.runInContext(fs.readFileSync(path.join(ROOT, "rpg", f), "utf8"), ec, { filename: "rpg/" + f });
+  const src = evFiles.map((f) => fs.readFileSync(path.join(ROOT, "rpg", f), "utf8")).join("\n");
+  const sets = (f) => new RegExp(`flag: *(\\[[^\\]]*)?"${f}"`).test(src);
+  let n = 0;
+  for (const z in w.EVEVENTS) for (const id in w.EVEVENTS[z]) {
+    const ev = w.EVEVENTS[z][id], era = ev.need && ev.need.era, at = `era event ${z}/${id}`; n++;
+    const e = ERAS.find((x) => x.n === era);
+    if (!e) err(`${at}: need.era ${era} is not an era`); else if (!e.ready) err(`${at}: era ${era} is not marked ready`);
+    if (ev.need && ev.need.eraWin && !R.ZONES[ev.need.eraWin]) err(`${at}: eraWin "${ev.need.eraWin}" is not a zone`);
+  }
+  for (const e of ERAS) {
+    if (!e.es || !e.en || !e.es.name || !e.en.name) err(`era ${e.n}: needs a Spanish and an English name`);
+    if (!e.ready || e.n === 1) continue;
+    for (const x of e.ends || []) if (!sets(x.flag)) err(`era ${e.n} end ${x.key}: no event sets flag "${x.flag}"`);
+    for (const [f] of e.peoples || []) if (!sets(f)) err(`era ${e.n}: no event sets people flag "${f}"`);
+    if (e.unite && !new RegExp(`cNeed: *"${e.unite}"`).test(src)) warn(`era ${e.n}: no option asks for its unite flag "${e.unite}"`);
+    for (const lg of ["es", "en"]) for (const z in (e.zones || {})[lg] || {}) if (!R.ZONES[z]) err(`era ${e.n}: zone text for unknown zone "${z}"`);
+  }
+  console.log(`eras: ${ERAS.length}, era events: ${n}`);
 }
 
 /* ---------- 1b. file lists: index.html scripts, the offline cache in sw.js, and the code inside index.html ---------- */

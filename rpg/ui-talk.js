@@ -15,12 +15,17 @@ const talkEv = (id, zone) => { const z = talkZone(id, zone); return z ? TALK[z][
 const deckSlice = EV.slice("evDeck", () => ({}));
 // the events a zone can draw right now
 function deckPool(zone) {
-  const open = (z) => Object.keys(TALK[z] || {}).filter((id) => (!LORE || LORE.needOk(TALK[z][id].need, EV.P)) && (!TALK[z][id].zones || TALK[z][id].zones.includes(zone)));
+  // common events belong to every era; "once" events (an era's final choice) are told a single time
+  const seen = EV.P.talkSeen || {}, opt = (z) => (z === "common" ? { anyEra: true } : null);
+  const open = (z) => Object.keys(TALK[z] || {}).filter((id) => { const ev = TALK[z][id]; return (!LORE || LORE.needOk(ev.need, EV.P, opt(z))) && (!ev.zones || ev.zones.includes(zone)) && !(ev.once && seen[id]); });
   return ZONES[zone].events.concat(open(zone), open("common"));
 }
+// an event marked "first" (the closing choice of an era) comes up before anything else in the bag
+const deckFirst = (pool) => pool.find((id) => { const ev = talkEv(id); return !!(ev && ev.first); }) || null;
 function drawDeck(zone) {
   const D = deckSlice(), d = D[zone] = D[zone] || { bag: [], last: null };
-  const pool = deckPool(zone), ok = (id) => pool.includes(id);
+  const pool = deckPool(zone), ok = (id) => pool.includes(id), urgent = deckFirst(pool);
+  if (urgent) { d.last = urgent; return urgent; }
   let pick = d.bag.find(ok);
   if (!pick) {
     // the zone's own events, plus a few common ones picked at random for this round
@@ -188,7 +193,7 @@ function talkHtml() {
     return `<button class="btn ghost${o.cNeed ? " talk-new" : ""}" type="button" data-tk="${i}" ${poor ? "disabled" : ""}>${esc(W.opt(T.hub, i))}${o.fx && o.fx.cost ? ` <small>(✦ ${o.fx.cost})</small>` : ""}${o.cNeed ? `<small class="talk-why">${esc(tx("talk.new"))}</small>` : ""}</button>`;
   }).join("")}</div>`;
   const scene = window.EVSCENE && EVSCENE.event && EVSCENE.EVNOTE && EVSCENE.EVNOTE[T.id];
-  return `<div class="panel talk"><div class="sub">${esc(tx("node.event"))} · ${esc(tx("talk.k." + ev.kind))}</div>${scene ? `<div class="talk-scene" data-evscene="${T.id}"${T.end ? ` data-evend="${T.end}"` : ""}></div>` : ""}<div class="talk-log" id="talkLog" aria-live="polite">${lines}</div>${foot}</div><div class="panel"><h3>${esc(tx("exp.party"))}</h3>${partyHtml()}</div>`;
+  return `<div class="panel talk"><div class="sub">${esc(tx("node.event"))} · ${esc(tx("talk.k." + ev.kind))}</div>${scene ? `<div class="talk-scene" data-evscene="${T.id}"${T.end ? ` data-evend="${T.end}"` : ""}></div>` : ev.need && ev.need.era > 1 ? pauseBox("camino") : ""}<div class="talk-log" id="talkLog" aria-live="polite">${lines}</div>${foot}</div><div class="panel"><h3>${esc(tx("exp.party"))}</h3>${partyHtml()}</div>`;
 }
 // puts the event's picture in place after a render (the canvas is drawn once and reused). At an ending it shows that
 // ending's own picture (EVSCENE.end(id, end node or choice index)) when the scenes module has one.

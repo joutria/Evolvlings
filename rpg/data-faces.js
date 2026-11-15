@@ -39,6 +39,9 @@
     // Corazón del Claro
     "Brezo, guarda del Tocón": "ManGreen~1", "Cincel, escultor": "FighterWhite", "Antífona, peregrina": "Monk~1",
     "Barrena, de los Pozos": "NinjaDark", "Hollín, farolero": "Knight", "Una voz clara": "icon-light", "Una voz oscura": "icon-sap",
+    // era 2, La Calma
+    "Cirio, guarda del tablón": "KnightGold~1", "Umbría": "NinjaMageBlack~1", "Lucerna Destello": "Princess", "Maestra de coro": "Inspector",
+    "Brida, capataz": "NinjaDark", "Ceniza": "NinjaMageBlack", "Rey Lóbrego": "SorcererBlack",
     // anywhere
     "Retal, el que va y viene": "Hunter", "Doña Alforja": "Noble",
   };

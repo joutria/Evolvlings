@@ -114,7 +114,7 @@ const RPG_EN = {
     "book.weak": "Weak to", "book.strong": "Strong against", "book.statsAt": "How it was at the levels you beat it", "book.lvl": "Lv {n}",
     "book.st.hp": "Health", "book.st.str": "Strength", "book.st.def": "Defence", "book.st.spd": "Speed", "book.st.crit": "Critical", "book.skills": "Skills",
     "book.yourMark": "You have beaten it {w} times. Highest level beaten: {l}.", "book.newBeast": "New Bestiary page: {n}",
-    "book.btn": "Book", "book.title": "Caretaker's Book", "book.tab.diario": "Diary", "book.tab.cartas": "Cards", "book.tab.escritos": "Writings",
+    "book.btn": "Book", "book.title": "Caretaker's Book", "book.tab.diario": "Diary", "book.tab.cartas": "Cards", "book.tab.escritos": "Writings", "book.tab.cronica": "Chronicle",
     "book.diarioSub": "{n} of {m} encounters · {a} of {b} paths", "book.common": "All over the Glade", "book.notLived": "Undiscovered",
     "book.notLivedLong": "An undiscovered encounter in {z}. Nothing more is said.", "book.unasked": "… ?", "book.otherWay": "Another way",
     "book.fork": "The path forks:", "book.end": "How it ended:", "book.comesBack": "This comes back in:", "book.anotherTalk": "another encounter you haven't lived yet",

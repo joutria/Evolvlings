@@ -114,7 +114,7 @@ const RPG_ES = {
     "book.weak": "Débil contra", "book.strong": "Fuerte contra", "book.statsAt": "Así era en los niveles en que la venciste", "book.lvl": "Nv. {n}",
     "book.st.hp": "Vida", "book.st.str": "Fuerza", "book.st.def": "Defensa", "book.st.spd": "Velocidad", "book.st.crit": "Crítico", "book.skills": "Habilidades",
     "book.yourMark": "La has vencido {w} veces. Nivel más alto vencido: {l}.", "book.newBeast": "Nueva página en el Bestiario: {n}",
-    "book.btn": "Libro", "book.title": "Libro del Cuidador", "book.tab.diario": "Diario", "book.tab.cartas": "Cartas", "book.tab.escritos": "Escritos",
+    "book.btn": "Libro", "book.title": "Libro del Cuidador", "book.tab.diario": "Diario", "book.tab.cartas": "Cartas", "book.tab.escritos": "Escritos", "book.tab.cronica": "Crónica",
     "book.diarioSub": "{n} de {m} encuentros · {a} de {b} caminos", "book.common": "Por todo el Claro", "book.notLived": "Sin descubrir",
     "book.notLivedLong": "Un encuentro de {z} sin descubrir. No se dice nada más.", "book.unasked": "¿ ... ?", "book.otherWay": "Otro camino",
     "book.fork": "El camino se bifurca:", "book.end": "Cómo acabó:", "book.comesBack": "Esto vuelve en:", "book.anotherTalk": "otro encuentro que aún no has vivido",

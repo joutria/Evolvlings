@@ -40,6 +40,28 @@
     { ev: "heights/cadenas", node: "a", flag: "pasoAbierto", who: "tormo",
       es: "Y ahora baja gente del Fondo Blanco por un túnel nuevo en la nieve. Me han puesto a vigilar ese también. Con la misma manta.",
       en: "And now folk from the White Deep come down through a new tunnel in the snow. They've put me on that one too. Same blanket." },
+    // era 2, La Calma (rpg/events-era2.js): what you chose in the first era comes back in the second
+    { ev: "aurora/e2-velada", node: "abuela", flag: "alvarEstrellas", who: "alvar",
+      es: "Desde aquella noche en que me escapé a ver las estrellas, mi abuela deja una ventana sin farol. Dice que es para acordarse de algo.",
+      en: "Ever since the night I slipped out to see the stars, my grandmother leaves one window without a lantern. She says it's so she remembers something." },
+    { ev: "crater/e2-tubos", node: "para", flag: "damOpen", who: "tizon",
+      es: "Y no me hables de presas. Desde que alguien abrió aquella compuerta, en el Consejo me miran como si yo supiera quién fue.",
+      en: "And don't talk to me about dams. Ever since someone opened that sluice, the Council looks at me as if I knew who did it." },
+    { ev: "lake/e2-ciego", node: "orilla", flag: "diarioEnterrado", who: "orilla",
+      es: "El cuaderno que enterraste lo desenterré yo, con las uñas. No te lo perdono. Pero aquí está, y lo leo.",
+      en: "The notebook you buried, I dug up myself, with my nails. I don't forgive you. But here it is, and I'm reading it." },
+    { ev: "caves/e2-noche", node: "a", flag: "mapasRobados", who: "pirita",
+      es: "Dicen que alguien le robó los mapas al agrimensor de Albor. Mandaron tres más. Los túneles nuevos los cavaron esos tres.",
+      en: "They say someone stole the Albor surveyor's maps. They sent three more. Those three dug the new tunnels." },
+    { ev: "heights/e2-bajan", node: "a", flag: "pasoAbierto", who: "tormo",
+      es: "Y por el túnel de la nieve siguen bajando los del Fondo Blanco. Ahora bajan todos, de arriba y de abajo. El Prado no va a dar abasto.",
+      en: "And the White Deep folk keep coming down through the snow tunnel. Now everyone comes down, from above and below. The Meadow won't cope." },
+    { ev: "hollow/e2-nombres", node: "a", flag: "chivato", who: "ceniza",
+      es: "Espera. Tú eres quien llamó a los guardas en la verja, ¿no? Te reconozco. No sé por qué te estoy hablando.",
+      en: "Wait. You're the one who called the wardens at the gate, aren't you? I recognise you. I don't know why I'm talking to you." },
+    { ev: "deep/e2-setas", node: "esporina", flag: "albinaHija", who: "esporina",
+      es: "Mi madre me mandó una manta la semana pasada. Sin nota. Es lo primero que me manda en veinte años. Supongo que alguien le contó algo.",
+      en: "My mother sent me a blanket last week. No note. It's the first thing she's sent me in twenty years. I suppose someone told her something." },
   ];
 
   const EPI = {
