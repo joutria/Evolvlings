@@ -27,7 +27,8 @@ const TX = {
     leave: "Dejar {card}", cancel: "Todavía no",
     entry: "{kind} · nivel {l} · {days} días", left: "Dejó: {card} (Legendaria)", gen: "Generación {n}",
     legacy: "Legado de {name}", legacyFx: "+{a} % vida, fuerza y defensa, +{b} % velocidad", heirOf: "Heredero de {name}",
-    log: "{name} se retiró al Salón de la fama y dejó un huevo heredero.", toast: "{name} entra en el Salón de la fama", endRetired: "se retiró al Salón",
+    succAsk: "¿Quién toma el relevo de {name} en casa?", succEgg: "Su huevo heredero", succMon: "{mon} del Refugio (nivel {l})", succNone: "Cuando tengas criaturas en el Refugio, también podrás elegir una de ellas.", nextOf: "Sucede a {name}",
+    log: "{name} se retiró al Salón de la fama y dejó un huevo heredero.", logMon: "{name} se retiró al Salón de la fama. {mon} vuelve del Refugio para tomar el relevo.", toast: "{name} entra en el Salón de la fama", endRetired: "se retiró al Salón",
   },
   en: {
     elder: "Elder", nowElder: "{name} is an elder now. Whenever you like, the Journal lets you retire it to the Hall of Fame.",
@@ -38,7 +39,8 @@ const TX = {
     leave: "Leave {card}", cancel: "Not yet",
     entry: "{kind} · level {l} · {days} days", left: "Left: {card} (Legendary)", gen: "Generation {n}",
     legacy: "Legacy of {name}", legacyFx: "+{a}% life, strength and defence, +{b}% speed", heirOf: "Heir of {name}",
-    log: "{name} retired to the Hall of Fame and left an heir egg.", toast: "{name} joins the Hall of Fame", endRetired: "retired to the Hall",
+    succAsk: "Who takes over from {name} at home?", succEgg: "Its heir egg", succMon: "{mon} from the Refuge (level {l})", succNone: "Once you have creatures in the Refuge you can pick one of them too.", nextOf: "Follows {name}",
+    log: "{name} retired to the Hall of Fame and left an heir egg.", logMon: "{name} retired to the Hall of Fame. {mon} comes home from the Refuge to take over.", toast: "{name} joins the Hall of Fame", endRetired: "retired to the Hall",
   },
 };
 const tx = EV.text("elder", TX);
@@ -94,7 +96,29 @@ function equipped() {
   return out;
 }
 
-function retire(cardId) {
+/* A Refuge companion as the new main creature (Jose, 2026-11-15). The home code only knows Lumo, Fizz and Pebb, so
+   the kind gets a small species entry (names, needs, colours, texts) that is also saved in S.spDef: index.html reads
+   it back at boot before anything asks SPECIES. The companion leaves the Refuge and comes home with its level,
+   talents and experience, already grown up. */
+function spDefFor(k) {
+  const RPG = EV.RPG, name = RPG.monName(k), ty = typeof MONS !== "undefined" && MONS[k] ? MONS[k].types[0] : "plant";
+  const col = (typeof TYPES !== "undefined" && TYPES[ty] && TYPES[ty].col) || "#6b8f5a";
+  const d = (lg) => { const t = (RPG.MON_DESC && RPG.MON_DESC[lg] && RPG.MON_DESC[lg][k]) || name; return t.charAt(0).toLowerCase() + t.slice(1); };
+  return {
+    sp: { synthetic: true, names: [name, name, name, name], rates: { full: 1, fun: 1, energy: 1, clean: 1 },
+      col: { body: col, belly: "#f4ede0", line: "#1d1626", cheek: "#f29ab8", accent: col }, dull: { body: "#9a9590", belly: "#d4d0c8", line: "#3a3640", cheek: "#b8a0aa", accent: "#9a9590" }, eggCol: ["#f4ede0", col, "#1d1626"] },
+    es: { egg: "huevo de " + name, blurb: "", trait: "", desc: [d("es"), d("es"), d("es"), d("es")] },
+    en: { egg: name + " egg", blurb: "", trait: "", desc: [d("en"), d("en"), d("en"), d("en")] },
+  };
+}
+function applySpDef(k, def) {
+  if (!EV.SPECIES[k]) EV.SPECIES[k] = def.sp;
+  for (const lg of ["es", "en"]) if (EV.STR[lg] && EV.STR[lg].sp && !EV.STR[lg].sp[k]) EV.STR[lg].sp[k] = def[lg];
+}
+const roster = () => (EV.P.eg && EV.P.eg.roster) || {};
+function refugeKinds() { const S = EV.S; return Object.keys(roster()).filter((k) => k !== S.species && typeof MONS !== "undefined" && MONS[k] && !MONS[k].boss); }
+
+function retire(cardId, succ) {
   const S = EV.S, P = EV.P; if (!canRetire()) return;
   const sm = summary(), elder = !!S.elder;
   const RPG = EV.RPG, form = S.form, sp = S.species, gen = ((S.heir && S.heir.gen) || 0) + 1;
@@ -104,14 +128,28 @@ function retire(cardId) {
   if (RPG && RPG.takeCard) RPG.takeCard(cardId, LG);
   // the old Journal keeps one line for every creature that ever left
   try { const key = "glimmerglade.journal.v1", j = JSON.parse(localStorage.getItem(key) || "[]"); j.unshift({ name: S.name, kind: EV.stageName ? EV.stageName() : entry.kind, age: entry.age, end: "retired" }); localStorage.setItem(key, JSON.stringify(j.slice(0, 40))); } catch (e) { /* the Hall of Fame is the record that counts */ }
-  EV.addLog(tx("log", { name: S.name }));
+  const comer = succ && roster()[succ] ? EV.RPG.monName(succ) : null;
+  EV.addLog(comer ? tx("logMon", { name: S.name, mon: comer }) : tx("log", { name: S.name }));
   EV.toast(tx("toast", { name: S.name }), "🏛");
   const eq = S.rpg && S.rpg.eq ? Object.assign({}, S.rpg.eq) : { a: null, p: null, s: null };
   const keep = { speed: S.speed, log: S.log || [] };
-  // a fresh egg of the same kind, with the loadout and the heir's head start already in place
+  const spDef = S.spDef || null;
   for (const k of Object.keys(S)) delete S[k];
-  Object.assign(S, { v: 1, phase: "egg", species: sp, egg: 0, lastReal: Date.now(), speed: keep.speed, log: keep.log,
-    snapNow: 1, heir: { name: entry.name, gen, card: cardId }, rpg: { lvl: Math.max(1, Math.min(10, Math.floor(entry.lvl / 3))), xp: 0, eq } });
+  const r = succ && roster()[succ];
+  if (r) {
+    // a Refuge companion comes home grown up, with its level, talents and experience; it leaves the Refuge
+    const def = spDefFor(succ); applySpDef(succ, def);
+    delete roster()[succ];
+    Object.assign(S, { v: 1, phase: "alive", species: succ, spDef: EV.SPECIES[succ].synthetic ? def : undefined, name: EV.RPG.monName(succ).slice(0, 14),
+      age: 240, stage: 2, form: "bright", sleeping: false, sick: false, messes: [], pendingMess: [], careSum: 0, careN: 0, born: Date.now(),
+      stats: { full: 80, fun: 80, energy: 80, clean: 90, health: 100 }, lastReal: Date.now(), speed: keep.speed, log: keep.log, snapNow: 1,
+      prev: { name: entry.name }, fromRefuge: r, rpg: { lvl: r.lvl || 1, xp: r.xp || 0, tal: r.tal || "", eq } });
+    EV.P.seen.species[succ] = 1;
+  } else {
+    // a fresh egg of the same kind, with the loadout and the heir's head start already in place
+    Object.assign(S, { v: 1, phase: "egg", species: sp, spDef: spDef || undefined, egg: 0, lastReal: Date.now(), speed: keep.speed, log: keep.log,
+      snapNow: 1, heir: { name: entry.name, gen, card: cardId }, rpg: { lvl: Math.max(1, Math.min(10, Math.floor(entry.lvl / 3))), xp: 0, eq } });
+  }
   P.c.retired = (P.c.retired || 0) + 1;
   EV.sfx("grow"); EV.save(); EV.flush && EV.flush();
   EV.togglePanel("journal"); EV.showScreen();
@@ -119,14 +157,17 @@ function retire(cardId) {
 }
 
 /* ---------- the Hall of Fame, at the top of the Journal ---------- */
-let asking = false;
+let asking = false, card = null; // asking: "card" (which card it leaves), then "succ" (who comes next)
 function hofHtml() {
   const S = EV.S, list = hof();
   let h = `<div class="hof"><h3 class="cat-title">🏛 ${esc(tx("hof"))}</h3><p class="muted">${esc(tx("hofSub"))}</p>`;
   if (S && S.phase === "alive" && S.stage === 2) {
     if (!isElder()) h += `<p class="muted">${esc(tx("need", { name: S.name, d: days(S.age), l: lvl() }))}</p>`;
     if (!asking) h += `<button class="btn" type="button" data-hof="ask">${esc(tx("retire", { name: S.name }))}</button>`;
-    else {
+    else if (asking === "succ") {
+      const RPG = EV.RPG, ks = refugeKinds();
+      h += `<div class="hof-ask"><p>${esc(tx("succAsk", { name: S.name }))}</p><div class="hof-btns"><button class="btn" type="button" data-hof="succ:">🥚 ${esc(tx("succEgg", { name: S.name }))}</button>${ks.map((k) => `<button class="btn ghost" type="button" data-hof="succ:${esc(k)}">${esc(tx("succMon", { mon: RPG.monName(k), l: roster()[k].lvl || 1 }))}</button>`).join("")}<button class="btn ghost" type="button" data-hof="no">${esc(tx("cancel"))}</button></div>${ks.length ? "" : `<p class="muted">${esc(tx("succNone"))}</p>`}</div>`;
+    } else {
       const RPG = EV.RPG;
       h += `<div class="hof-ask"><p>${esc(tx("ask", { name: S.name, l: Math.max(1, Math.min(10, Math.floor(lvl() / 3))) }))}</p><div class="hof-btns">${equipped().map((id) => `<button class="btn" type="button" data-hof="go:${esc(id)}">${esc(tx("leave", { card: RPG ? RPG.cardName(id) : id }))}</button>`).join("")}<button class="btn ghost" type="button" data-hof="no">${esc(tx("cancel"))}</button></div></div>`;
     }
@@ -148,9 +189,10 @@ function drawHof() {
 function onClick(e) {
   const b = e.target.closest("[data-hof]"); if (!b) return;
   const v = b.dataset.hof;
-  if (v === "ask") { asking = true; EV.sfx("tap"); drawHof(); }
-  else if (v === "no") { asking = false; EV.sfx("tap"); drawHof(); }
-  else if (v.startsWith("go:")) { asking = false; retire(v.slice(3)); }
+  if (v === "ask") { asking = "card"; EV.sfx("tap"); drawHof(); }
+  else if (v === "no") { asking = false; card = null; EV.sfx("tap"); drawHof(); }
+  else if (v.startsWith("go:")) { card = v.slice(3); asking = "succ"; EV.sfx("tap"); drawHof(); }
+  else if (v.startsWith("succ:")) { asking = false; const c = card; card = null; retire(c, v.slice(5) || null); }
 }
 // redraw whenever the Journal opens (watching the panel: guide.js owns HOOKS.panelOpened)
 const jp = document.getElementById("journalPanel");
@@ -163,6 +205,7 @@ EV.HOOKS.statsDrawn = () => {
   const S = EV.S, sp = document.getElementById("petSpecies"); if (!S || !sp) return;
   const bits = [];
   if (S.elder) bits.push("🌙 " + tx("elder"));
+  if (S.prev) bits.push(tx("nextOf", { name: S.prev.name }));
   if (S.heir) { const L = legacyTal(); bits.push(tx("heirOf", { name: S.heir.name })); sp.title = `${tx("legacy", { name: S.heir.name })}: ${tx("legacyFx", { a: L.hp, b: L.spd })}`; }
   if (bits.length) sp.textContent += " · " + bits.join(" · ");
 };

@@ -181,7 +181,7 @@ function pet(sq, emo) {
   const S = EV.S, A = root.EVART, st = Math.max(0, Math.min(2, S.stage || 0));
   const art = A && !(A.classic && A.classic()) && A.creature(S.species, st, sq, emo, "front");
   if (art) return EV.shiny(art);
-  return root.PX ? EV.shiny(root.PX.sprite(S.species, [20, 28, 36][st], st, sq, emo, S.form === "scruffy")) : null;
+  try { return root.PX ? EV.shiny(root.PX.sprite(S.species, [20, 28, 36][st], st, sq, emo, S.form === "scruffy")) : null; } catch (e) { return root.EVS ? EV.shiny(root.EVS.sprite(S.species, [20, 28, 36][st], st, sq, emo)) : null; }
 }
 function drawPet(g, x, y, sq, emo, k) {
   const sp = pet(sq, emo); if (!sp) return;
