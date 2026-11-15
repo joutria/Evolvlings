@@ -81,6 +81,17 @@ Progress is saved in your browser's `localStorage`: the creature in `glimmerglad
 
 An RPG expedition mode, a creature encyclopedia, more evolution branches and creature lines, more mini-games, and idle progression. See the project plan.
 
+## Mini-games
+
+Play opens a small chooser with four games (`minigames.js`, phase 3 of the feature plan):
+
+- **Catch the starseeds**: the original side-view game.
+- **Glade pairs**: 12 tiles, 6 pairs of Glade types, 45 seconds.
+- **Song rehearsal**: notes slide to a ring next to your creature; tap (or press space) on time and it dances. Streaks add bonus points.
+- **Pebble hail**: drag or use the arrow keys to dodge falling pebbles for 25 seconds; three hits end the round, golden starseeds add 3 points. It costs 14 energy instead of 10.
+
+Every game pays like the catch game (fun, Chispas, the burr ball's bonus) and keeps its own record, shown in the chooser. Beating a record you already had gives +5 Chispas. Records are in `P.mg.best` (the catch game keeps `P.c.bestRound`).
+
 ## Compact home
 
 The home fits on one phone screen. Five status icons sit above the window (tap them to see names and numbers), the eight care buttons are one row under it, and the battle stats start folded. Every menu (shop, tasks, season, refuge, cards, map, achievements, settings, food and bag) opens as a sheet over the game instead of at the end of the page. The shop, the food menu and the bag are grids of pixel icons; tapping one opens a small card with the picture, price or amount, description, effects and one confirm button.

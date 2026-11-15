@@ -734,7 +734,7 @@ const STR = {
     "shop.title": "Shop", "shop.desc": "Spend Chispas on treats, medicine and toys. You earn Chispas by caring well, playing and growing up.",
     "shop.wallet": "You have {n} Chispas", "shop.buy": "Buy", "shop.owned": "Owned", "shop.have": "In bag: {n}",
     "cat.food": "Food", "cat.med": "Medicine & care", "cat.toy": "Toys (permanent)",
-    "ach.title": "Achievements", "ach.progress": "{n} of {m} unlocked", "toast.ach": "Achievement: {name}", "toast.poor": "Not enough Chispas yet.",
+    "ach.title": "Achievements", "ach.progress": "{n} of {m} unlocked", "toast.ach": "Achievement: {name}", "toast.poor": "Not enough Chispas yet.", "toast.record": "New record! +5 Chispas",
     "toast.bought": "Bought {item}",
     sp: {
       lumo: { egg: "Glow egg", blurb: "Warm to the touch, with a soft light inside.", trait: "Playful · gets bored fast",
@@ -840,7 +840,7 @@ const STR = {
     "shop.title": "Tienda", "shop.desc": "Gasta Chispas en caprichos, medicinas y juguetes. Las Chispas se ganan cuidando bien, jugando y creciendo.",
     "shop.wallet": "Tienes {n} Chispas", "shop.buy": "Comprar", "shop.owned": "Ya es tuyo", "shop.have": "En la mochila: {n}",
     "cat.food": "Comida", "cat.med": "Medicinas y cuidado", "cat.toy": "Juguetes (para siempre)",
-    "ach.title": "Logros", "ach.progress": "{n} de {m} conseguidos", "toast.ach": "Logro: {name}", "toast.poor": "Todavía no tienes Chispas suficientes.",
+    "ach.title": "Logros", "ach.progress": "{n} de {m} conseguidos", "toast.ach": "Logro: {name}", "toast.poor": "Todavía no tienes Chispas suficientes.", "toast.record": "¡Nuevo récord! +5 Chispas",
     "toast.bought": "Compraste {item}",
     sp: {
       lumo: { egg: "huevo luminoso", blurb: "Está tibio y tiene una luz suave dentro.", trait: "Juguetón · se aburre rápido",
@@ -1362,7 +1362,14 @@ function cuddle() {
   lastCuddle = now;
   save(); renderStats(); checkAch();
 }
+// Play opens the mini-game chooser (minigames.js); the star catch below is one of its games
 function startPlay() {
+  if (!EV.MINI) return startCatch();
+  closeMenus();
+  if (S.stats.energy < 15) { say(t("say.tooSleepy")); hint(t("hint.tooTired", { name: S.name })); sfx("deny"); return; }
+  sfx("tap"); EV.MINI.choose();
+}
+function startCatch() {
   closeMenus();
   if (S.stats.energy < 15) { say(t("say.tooSleepy")); hint(t("hint.tooTired", { name: S.name })); sfx("deny"); return; }
   const len = P.owned.kite ? 15000 : 10000;
@@ -1376,7 +1383,10 @@ function endPlay() {
   const c = mini.caught; mini = null;
   const s = S.stats, ball = !!P.owned.ball;
   s.fun = clamp(s.fun + (10 + c * 4) * (ball ? 1.5 : 1)); s.energy = clamp(s.energy - 10); s.full = clamp(s.full - 4);
+  // beating a record you already had pays +5 Chispas (minigames.js keeps the other games' records)
+  const beat = P.c.bestRound > 0 && c > P.c.bestRound;
   P.c.plays++; P.c.stars += c; P.c.bestRound = Math.max(P.c.bestRound, c);
+  if (beat) { addCoins(5); toast(t("toast.record"), "⭐"); }
   const h = new Date().getHours(); if (h < 5) P.c.nightPlay++;
   addLog(t("log.played", { name: S.name, n: c }));
   say(c >= 6 ? t("say.again") : c >= 3 ? t("say.fun") : t("say.hehe"));
@@ -2185,7 +2195,7 @@ function text(name, TX) {
 const dayKey = () => (window.EV && EV.DAILY && EV.DAILY.dayKey ? EV.DAILY.dayKey() : new Date().toISOString().slice(0, 10));
 
 /* ---------- Hooks for add-on modules (rpg/*.js and the others) ---------- */
-const HOOKS = {};
+const HOOKS = { startCatch: () => startCatch() };
 window.EV = {
   get S() { return S; }, get P() { return P; }, get LANG() { return LANG; },
   feed, cleanUp, toggleSleep, startPlay, cuddle, ITEMS,
@@ -2271,6 +2281,7 @@ requestAnimationFrame(frame);
 <script src="build.js"></script>
 <script src="seasons.js"></script>
 <script src="ach.js"></script>
+<script src="minigames.js"></script>
 <script src="weather.js"></script>
 <script src="world.js"></script>
 <script src="guide.js"></script>
