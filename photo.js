@@ -60,7 +60,12 @@ function take() {
   if (!url) { v.innerHTML = h + `<p class="ph-note">${esc(tx("blocked"))}</p></div>`; v.hidden = false; return; }
   h += `<img class="ph-img" src="${url}" alt="${esc(tx("title"))}"><div class="ph-row"><a class="btn" href="${url}" download="${esc(name)}" data-phsave="1">${esc(tx("save"))}</a></div><p class="ph-note">${esc(tx("hold"))}</p></div>`;
   v.innerHTML = h; v.hidden = false;
-  const a = v.querySelector("[data-phsave]"); a.addEventListener("click", () => { EV.toast(tx("saved"), "📷"); EV.P.c.photos = (EV.P.c.photos || 0) + 1; EV.save(); });
+  // EV.saveFile asks the claude.ai viewer for the download when the page runs there (plain links do nothing in it)
+  const a = v.querySelector("[data-phsave]");
+  a.addEventListener("click", (e) => {
+    e.preventDefault();
+    cv.toBlob((blob) => { if (!blob) return; EV.saveFile(name, blob, () => { EV.toast(tx("saved"), "📷"); EV.P.c.photos = (EV.P.c.photos || 0) + 1; EV.save(); }); }, "image/png");
+  });
   a.focus({ preventScroll: true });
 }
 document.addEventListener("keydown", (e) => { if (el && !el.hidden && e.key === "Escape") { e.stopPropagation(); el.hidden = true; } }, true);

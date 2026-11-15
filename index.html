@@ -692,7 +692,7 @@ const STR = {
     "set.hard": "Hard mode", "set.hardNote": "Off: your creature never leaves. While you're away its needs never drop below a quarter, and if its health runs out it rests at the Refuge and comes back with its level and cards. On: the old rules, where a creature whose health reaches zero leaves for good.",
     "set.backup": "Backup", "set.export": "Save a copy", "set.import": "Load a copy",
     "bk.never": "Your game lives only in this browser. Save a copy now and then, so clearing the browser or changing phones doesn't lose it.", "bk.last": "Last copy: {d}.",
-    "bk.done": "Copy saved", "bk.bad": "That file isn't an Evolvlings copy.", "bk.ask": "Load this copy from {d}? It replaces the game you have now.", "bk.loaded": "Copy loaded", "save.other": "Your game was opened in another tab. Reload this one to keep saving here.", "save.newer": "This game was saved by a newer version. Reload to update; nothing is saved until then.",
+    "bk.done": "Copy saved", "bk.fail": "The file could not be saved here.", "bk.bad": "That file isn't an Evolvlings copy.", "bk.ask": "Load this copy from {d}? It replaces the game you have now.", "bk.loaded": "Copy loaded", "save.other": "Your game was opened in another tab. Reload this one to keep saving here.", "save.newer": "This game was saved by a newer version. Reload to update; nothing is saved until then.",
     "bk.remind": "It's been a week: you can save a copy of your game in Settings.",
     "rest.log": "{name} ran out of strength. Tila carried it to the Refuge to rest, and it's back now with its level and its cards. It needs a bit more care.",
     "rest.toast": "{name} rested at the Refuge",
@@ -798,7 +798,7 @@ const STR = {
     "set.hard": "Modo difícil", "set.hardNote": "Desactivado: tu criatura nunca se marcha. Mientras no estás, sus necesidades nunca bajan de una cuarta parte, y si se queda sin salud descansa en el Refugio y vuelve con su nivel y sus cartas. Activado: las reglas antiguas, en las que una criatura sin salud se marcha para siempre.",
     "set.backup": "Copia de seguridad", "set.export": "Guardar copia", "set.import": "Cargar copia",
     "bk.never": "Tu partida vive solo en este navegador. Guarda una copia de vez en cuando, por si borras el navegador o cambias de celular.", "bk.last": "Última copia: {d}.",
-    "bk.done": "Copia guardada", "bk.bad": "Ese archivo no es una copia de Evolvlings.", "bk.ask": "¿Cargar esta copia del {d}? Sustituye la partida que tienes ahora.", "bk.loaded": "Copia cargada", "save.other": "Tu partida se abrió en otra pestaña. Recarga esta para seguir guardando aquí.", "save.newer": "Esta partida es de una versión más nueva del juego. Recarga para actualizar; hasta entonces no se guarda nada.",
+    "bk.done": "Copia guardada", "bk.fail": "Aquí no se pudo guardar el archivo.", "bk.bad": "Ese archivo no es una copia de Evolvlings.", "bk.ask": "¿Cargar esta copia del {d}? Sustituye la partida que tienes ahora.", "bk.loaded": "Copia cargada", "save.other": "Tu partida se abrió en otra pestaña. Recarga esta para seguir guardando aquí.", "save.newer": "Esta partida es de una versión más nueva del juego. Recarga para actualizar; hasta entonces no se guarda nada.",
     "bk.remind": "Ya ha pasado una semana: puedes guardar una copia de tu partida en Ajustes.",
     "rest.log": "{name} se quedó sin fuerzas. Tila lo llevó a descansar al Refugio y ya está de vuelta, con su nivel y sus cartas. Necesita que lo cuides un poco más.",
     "rest.toast": "{name} descansó en el Refugio",
@@ -2158,12 +2158,20 @@ function exportGame() {
   if (S && S.phase === "alive") catchUp();
   P.bkAt = Date.now(); save();
   const data = { game: "evolvlings", v: 1, at: new Date().toISOString(), save: S, profile: P, journal: loadJournal() };
+  saveFile("evolvlings-" + new Date().toISOString().slice(0, 10) + ".json", new Blob([JSON.stringify(data)], { type: "application/json" }), () => { toast(t("bk.done"), "💾"); renderSettings(); });
+}
+/* Saving a file: inside the claude.ai viewer plain download links do nothing, so the page asks the viewer's
+   "downloads" capability there (it shows a confirmation); everywhere else (GitHub Pages, the installed app)
+   a normal download link. done() runs once the file is on its way. */
+const dlCap = window.claude && window.claude.use ? window.claude.use("downloads").catch(() => null) : Promise.resolve(null);
+let dlNow = null; dlCap.then((d) => { dlNow = d; });
+function saveFile(name, blob, done) {
+  if (dlNow) { dlNow.save({ filename: name, data: blob }).then(() => done && done(), (e) => { if (e && e.code !== "declined") toast(t("bk.fail"), "⚠️"); }); return; }
   const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([JSON.stringify(data)], { type: "application/json" }));
-  a.download = "evolvlings-" + new Date().toISOString().slice(0, 10) + ".json";
+  a.href = URL.createObjectURL(blob); a.download = name;
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-  toast(t("bk.done"), "💾"); renderSettings();
+  if (done) done();
 }
 function importGame(text) {
   let d = null; try { d = JSON.parse(text); } catch (e) {}
@@ -2230,7 +2238,7 @@ const dayKey = () => (window.EV && EV.DAILY && EV.DAILY.dayKey ? EV.DAILY.dayKey
 const HOOKS = { startCatch: () => startCatch() };
 window.EV = {
   get S() { return S; }, get P() { return P; }, get LANG() { return LANG; },
-  feed, cleanUp, toggleSleep, startPlay, cuddle, ITEMS, shiny: shinyCv,
+  feed, cleanUp, toggleSleep, startPlay, cuddle, ITEMS, shiny: shinyCv, saveFile,
   // what the side scene is showing right now, so the view from above can draw the same hearts, bubbles and speech
   get FX() { return { effects, bubble, petX, foodAnim, mini }; }, miniOn: () => !!mini, itemName, quietOn, STR, ACH, ACH_META, SPECIES, SFX, HOOKS, $, clamp, rand, pick, text, TEXTS, dayKey, t, tone, sfx, buzz, save, saveProfile, flush, slice, SLICES, SAVE_INFO: { SAVE_V, PROFILE_V, MIGRATE, upgrade }, get saveReadOnly() { return readOnly; }, addCoins, spendCoins, toast, addLog,
   renderAll, renderStats, showScreen, stocked, every, applyStatic, escapeHtml, drawCreature, setupCanvas, ell, drawStar, checkAch, togglePanel, closeSheets, stageName, careNow, pixelText,

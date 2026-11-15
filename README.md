@@ -326,3 +326,5 @@ A small camera button in the top-right corner of the game window (`photo.js`) ta
 ## Rare colours
 
 About 1 hatch in 50 is born with rare colours (`S.shiny`): its sprite is turned 150° round the colour wheel and a little brighter, and a ✧ follows its name. Every place that draws your own creature (home from above and from the side, the map walker, battles, mini-games) passes the sprite through `EV.shiny(canvas)` in `index.html`, so wild creatures of the same kind keep their usual colours. The colours are changed on the pixels when the browser allows reading them (`PX.readOk`), with the canvas filter otherwise, and left alone if neither works.
+
+Saving files (photos and the backup copy) goes through `saveFile(name, blob, done)` in `index.html`: inside the claude.ai artifact viewer, where plain download links do nothing, it asks the viewer's `downloads` capability (the viewer confirms the save); everywhere else it uses a normal download link.
