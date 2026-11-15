@@ -260,6 +260,7 @@ def taken(src, name):
 
 def paste_clip(dst, im, x, y):
     # alpha_composite refuses negative offsets: crop what falls outside first
+    if x >= dst.width or y >= dst.height or x + im.width <= 0 or y + im.height <= 0: return   # wholly outside
     cx, cy = max(0, -x), max(0, -y)
     part = im.crop((cx, cy, min(im.width, dst.width - x), min(im.height, dst.height - y)))
     if part.width > 0 and part.height > 0: dst.alpha_composite(part, (x + cx, y + cy))

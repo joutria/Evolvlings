@@ -58,7 +58,7 @@
   /* ---------- expedition: picture on one side, choices on the other ---------- */
   .exp { gap: 10px; }
   .exp .panel { padding: 12px 16px; }
-  /* the parchment map with the zone list beside it */
+  /* the valley map with the zone list beside it */
   .exp > .panel:has(> .pmap-wrap) { display: grid; grid-template-columns: minmax(0, clamp(420px, calc((100dvh - 250px) * 1.578), 820px)) minmax(330px, 1fr); grid-template-areas: "rumor tabs" "map body" "note ctl"; column-gap: 18px; row-gap: 8px; align-items: start; }
   .exp > .panel:has(> .pmap-wrap) > .rumor { grid-area: rumor; }
   .exp > .panel:has(> .pmap-wrap) > .pmap-wrap { grid-area: map; margin: 0; }
