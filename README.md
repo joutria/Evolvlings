@@ -332,3 +332,7 @@ Saving files (photos and the backup copy) goes through `saveFile(name, blob, don
 ## Tantrums and discipline
 
 Now and then, while the game is open, your creature throws a tantrum (`discipline.js`, at most 4 a day, one every 20-50 real minutes). A strip under the status icons offers Cuddle or Ignore. A **real** tantrum has a visible reason (a need under 35, a mess, sickness): comfort it. A **fake** one, when everything is fine, is an act: ignore it, and if you leave it 5 minutes it counts as ignored. The right answer gives +10 Discipline (`S.disc`, 0-100, shown under the age), the wrong one −5. Discipline only helps: every 10 points add 1 to the care average that picks the adult form, and it makes Fun drop up to 10 % more slowly.
+
+## Accessories
+
+Little pixel hats and a scarf (`accessories.js`): leaf cap, wool beanie, bow and flower crown for the head, a scarf for the neck. They are drawn straight onto your creature's sprite wherever it appears (both home views, the map walker, battles, mini-games, photos), through the same `EV.shiny()` pipeline as rare colours (`ownCv` in `index.html` ends in `HOOKS.dress`). Buy them with Chispas in Season → Keepsakes; the flower crown comes from the 54-star Constellation chest, which used to say "coming soon". Saved in `P.cosm.acc`, `P.cosm.head`, `P.cosm.neck`.

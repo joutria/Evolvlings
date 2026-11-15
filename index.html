@@ -1751,7 +1751,7 @@ const PET_N = [20, 28, 36];
 function petSprite(o) {
   const sq = Math.floor(o.t * (o.sleeping ? 1 : 2)) % 2;
   const emo = o.sleeping || o.blink ? "sleep" : o.eat ? "surprised" : o.sick || o.mood < 35 ? "sad" : o.mood > 70 ? "happy" : "normal";
-  return shinyCv(PX.sprite(o.kind, PET_N[o.stage], o.stage, sq, emo, o.form === "scruffy"));
+  return ownCv(PX.sprite(o.kind, PET_N[o.stage], o.stage, sq, emo, o.form === "scruffy"));
 }
 /* Rare colours (feature plan idea 10): about 1 hatch in 50 (S.shiny) wears another palette. Every place that draws
    YOUR creature passes its sprite through EV.shiny(cv); wild creatures of the same kind keep their colours.
@@ -1764,6 +1764,8 @@ function hueMatrix(deg) {
     0.213 - c * 0.213 + s * 0.143, 0.715 + c * 0.285 + s * 0.140, 0.072 - c * 0.072 - s * 0.283,
     0.213 - c * 0.213 - s * 0.787, 0.715 - c * 0.715 + s * 0.715, 0.072 + c * 0.928 + s * 0.072];
 }
+// every sprite of YOUR creature: rare colours first, then what it wears (accessories.js HOOKS.dress)
+function ownCv(cv) { const o = shinyCv(cv); return HOOKS.dress ? HOOKS.dress(o) : o; }
 function shinyCv(cv) {
   if (!cv || !S || !S.shiny) return cv;
   const hit = shinyCache.get(cv); if (hit) return hit;
@@ -2240,7 +2242,7 @@ const dayKey = () => (window.EV && EV.DAILY && EV.DAILY.dayKey ? EV.DAILY.dayKey
 const HOOKS = { startCatch: () => startCatch() };
 window.EV = {
   get S() { return S; }, get P() { return P; }, get LANG() { return LANG; },
-  feed, cleanUp, toggleSleep, startPlay, cuddle, ITEMS, shiny: shinyCv, saveFile,
+  feed, cleanUp, toggleSleep, startPlay, cuddle, ITEMS, shiny: ownCv, saveFile,
   // what the side scene is showing right now, so the view from above can draw the same hearts, bubbles and speech
   get FX() { return { effects, bubble, petX, foodAnim, mini }; }, miniOn: () => !!mini, itemName, quietOn, STR, ACH, ACH_META, SPECIES, SFX, HOOKS, $, clamp, rand, pick, text, TEXTS, dayKey, t, tone, sfx, buzz, save, saveProfile, flush, slice, SLICES, SAVE_INFO: { SAVE_V, PROFILE_V, MIGRATE, upgrade }, get saveReadOnly() { return readOnly; }, addCoins, spendCoins, toast, addLog,
   renderAll, renderStats, showScreen, stocked, every, applyStatic, escapeHtml, drawCreature, setupCanvas, ell, drawStar, checkAch, togglePanel, closeSheets, stageName, careNow, pixelText,
@@ -2326,6 +2328,7 @@ requestAnimationFrame(frame);
 <script src="minigames.js"></script>
 <script src="photo.js"></script>
 <script src="discipline.js"></script>
+<script src="accessories.js"></script>
 <script src="weather.js"></script>
 <script src="world.js"></script>
 <script src="guide.js"></script>
