@@ -66,7 +66,7 @@
             bossD: "La Raíz en Vela, que no ataca por dolor sino por insomnio.", win: "¡La Raíz en Vela cae... y se levanta!", winText: "La Raíz cae y vuelve a levantarse, despierta. Cada nana la enfurece más. Tila y Nim te esperan en el Corazón: hay que decidir algo. {name} vuelve a casa sin poder dormir." },
         },
         en: {
-          aurora: { desc: "The Meadow blooms out of season and every night there are more lanterns. The new matriarch promises light for the Dark Quarter. In the cracks of the squares, something dark is slowly rising.",
+          aurora: { desc: "The Meadow blooms out of season and every night there are more lanterns. The new matriarch promises light for the Dim Quarter. In the cracks of the squares, something dark is slowly rising.",
             bossD: "The Bottomless Lantern, drinking from a well nobody sees.", win: "The Bottomless Lantern goes out for a moment!", winText: "The lantern flickers and goes dark. Beneath the square, something keeps swallowing. {name} heads home unsure it won anything." },
           crater: { desc: "The forges never stop: the matriarch ordered tubes three times longer and pays in advance. For the first time the Fire has a seat on the Council.",
             bossD: "The Wakeful Forge, hotter than ever.", win: "The Wakeful Forge cools!", winText: "The furnace drops to a dull red. Behind it, the long tubes still lean against the walls. {name} heads home smelling of glass." },
@@ -97,7 +97,7 @@
   ];
   const PEOPLES = {
     es: { barrio: "El Barrio Apagado", luz: "Las Casas del Farol", fuego: "El Gremio de la Brasa", planta: "El Concejo del Musgo", altos: "Los Altos", sombra: "La Corte Velada", agua: "Las Mareas Errantes", piedra: "La Hondura", escarcha: "El Fondo Blanco" },
-    en: { barrio: "The Dark Quarter", luz: "The Lantern Houses", fuego: "The Ember Guild", planta: "The Moss Council", altos: "The Heights", sombra: "The Veiled Court", agua: "The Wandering Tides", piedra: "The Hondura", escarcha: "The White Deep" },
+    en: { barrio: "The Dim Quarter", luz: "The Lantern Houses", fuego: "The Ember Guild", planta: "The Moss Council", altos: "The Heights", sombra: "The Veiled Court", agua: "The Wandering Tides", piedra: "The Hondura", escarcha: "The White Deep" },
   };
   root.EVERAS = { ERAS, PEOPLES, era: (n) => ERAS.find((e) => e.n === n) || null };
 })(typeof window !== "undefined" ? window : globalThis);

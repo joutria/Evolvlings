@@ -93,7 +93,7 @@
     // named by others in the conversations and on the cards, never speakers themselves
     ola: P([], ["Ola"], "Hermana del lago", "la hermana del lago", "Sister from the lake", "the sister from the lake"),
     coplo: P([], ["Coplo"], "Cantor de la plaza", "el cantor de la plaza", "Square singer", "the square singer"),
-    aurelia: P([], ["Aurelia Albor", "Aurelia"], "Señora de la Casa Albor", "la señora de la Casa Albor", "Lady of House Albor", "the lady of House Albor"),
+    aurelia: P(["Aurelia Albor"], ["Aurelia Albor", "Aurelia"], "Señora de la Casa Albor", "la señora de la Casa Albor", "Lady of House Albor", "the lady of House Albor"),
   };
   // titles for the book's Diary (no names in them: they would give away who you meet)
   const TITLES = {
@@ -211,6 +211,28 @@
     "e2-estatuas": ["Cuatro bocas abiertas", "Four open mouths"],
     "e2-coros": ["Cuatro coros", "Four choirs"],
     "e2-final": ["La Raíz en Vela", "The Wakeful Root"],
+    // era 2, entrega 2 (el Día)
+    "e2-aurelia": ["Órdenes a un geranio", "Orders to a geranium"],
+    "e2-pabilo": ["Una luz que no se agacha", "A light that doesn't duck"],
+    "e2-brizna": ["Doce piedras con nombre", "Twelve stones with names"],
+    "e2-penumbra": ["Cintas grises", "Grey ribbons"],
+    "e2-romero": ["Rosas de corazón negro", "Black-hearted roses"],
+    "e2-cira": ["El verso que falta", "The missing verse"],
+    "e2-destello": ["Té del Barrio", "Quarter tea"],
+    "e2-termas": ["La tierra con fiebre", "The earth has a fever"],
+    "e2-fogarin": ["Un tubo que canta", "A tube that sings"],
+    "e2-miga": ["Pan de la tierra", "Earth bread"],
+    "e2-remache": ["Dos columnas", "Two columns"],
+    "e2-guijo": ["El número 41", "Number 41"],
+    "e2-fragua": ["El Fuego pone el precio", "Fire sets the price"],
+    "e2-ascuas": ["La Noche de Ascuas", "The Night of Embers"],
+    "e2-agalla": ["Comerse el año que viene", "Eating next year"],
+    "e2-yedra": ["Manzanas a dos el saco", "Apples, two a sack"],
+    "e2-bruma": ["La casa del molino", "The mill house"],
+    "e2-concejo": ["Votar la cosecha", "Voting on the harvest"],
+    "e2-cripta": ["Árbol cargado, árbol pelado", "Laden tree, bare tree"],
+    "e2-llovizna": ["Una mochila hecha", "A packed bag"],
+    "e2-raices": ["Planté un muro", "I planted a wall"],
   };
   const BY_WHO = {};
   for (const id in PEOPLE) for (const w of PEOPLE[id].who) BY_WHO[w] = id;

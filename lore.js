@@ -139,7 +139,7 @@
   };
 
   /* ---------- Escritos (cartas sin efecto en combate, se leen en el Grimorio) ---------- */
-  // from: "event" | "chest" | "shop" | "guardian" · zone: dónde sale en cofres · unlock: condición extra
+  // from: "event" | "chest" | "shop" | "guardian" · zone: dónde sale en cofres · unlock: condición extra · era: desde qué era cuenta (1 si falta)
   const LORE_ESCRITOS = [
     { id: "umbral", layer: 1, from: "event", kind: "decree",
       es: { title: "Ley del Umbral, artículo cuarto", text: "Los faroles de los asentamientos provisionales recibirán la ración mínima de aceite, en atención a que sus ocupantes no contribuyen al sostenimiento de la luz común. Firmado: el Consejo de las Casas." },
@@ -260,6 +260,19 @@
     { id: "ayunos", char: "marejada", layer: 3, from: "chest", zone: "lake", kind: "record",
       es: { title: "Cuenta de ayunos de la Madre", text: "Cuarenta y dos noches seguidas sin comer después del ocaso. Nadie sabe por qué ayuna la Madre. Las barcas creen que reza por el agua. Ella no lo desmiente." },
       en: { title: "Tally of the Mother's fasts", text: "Forty-two nights in a row without eating after dusk. Nobody knows why the Mother fasts. The boats believe she prays for water. She doesn't deny it." } },
+    /* --- Escritos de la era 2, La Calma (rpg/events-era2.js): solo cuentan desde esa era (`era`) --- */
+    { id: "e2-libro-albor", era: 2, layer: 1, from: "event", kind: "ledger", unlock: { flag: "e2_libroAlbor" },
+      es: { title: "Cuaderno rojo de los pozos de Albor", text: "Año 1: un pozo, luz para la Torre. Año 9: cuatro pozos, luz para tres Casas; el agua del Lago baja un palmo. Año 21: once pozos; las primeras gotas negras, «por el calor». Año 32, con otra letra: «Cavamos más hondo para no molestar. Más hondo no hay otra cosa. Hay lo mismo, más cerca». Debajo, la letra de Aurelia, de joven: «No se lo digo a madre»." },
+      en: { title: "Red notebook of the Albor wells", text: "Year 1: one well, light for the Tower. Year 9: four wells, light for three Houses; the Lake drops a hand's breadth. Year 21: eleven wells; the first black drops, \"from the heat\". Year 32, in another hand: \"We dig deeper so as not to disturb. Deeper there is nothing else. There is the same thing, closer.\" Below, in Aurelia's hand, young: \"I won't tell mother.\"" } },
+    { id: "e2-verso-cira", era: 2, layer: 1, from: "event", kind: "song", unlock: { flag: "e2_versoCira" },
+      es: { title: "El verso de Ama Cira", text: "Escrito en el reverso de un mapa, tres veces, con una palabra distinta cada vez: «Y si despiertas, no estarás sin nadie; / lo que tomamos lo vamos a devolver». Al margen: «No es para dormir. Mi abuela lo cantaba cuando creía que yo ya dormía»." },
+      en: { title: "Old Cira's verse", text: "Written on the back of a map, three times, with one word different each time: \"And if you wake, you won't wake alone; / what we have taken, we will give back.\" In the margin: \"It isn't for sleeping. My grandmother sang it when she thought I was asleep.\"" } },
+    { id: "e2-encargos", era: 2, layer: 1, from: "event", kind: "ledger", unlock: { flag: "e2_libroGremio" },
+      es: { title: "Encargos del Gremio de la Brasa", text: "Casa Destello: 200 tubos largos, pagados por adelantado. Entregados: 190 («diez rotos en el temple»). Casa Alba, Casa Orza, Casa Brasa: 600 tubos. Entrega por el túnel norte, de noche. Sello de Maese Fragua. Al pie, con la letra de Remache: «Aquí nadie miente. Solo nadie pregunta»." },
+      en: { title: "Orders of the Ember Guild", text: "House Destello: 200 long tubes, paid in advance. Delivered: 190 (\"ten broken in tempering\"). House Alba, House Orza, House Brasa: 600 tubes. Delivery by the north tunnel, at night. Seal of Master Fragua. At the foot, in Remache's hand: \"Nobody lies here. Nobody asks, that's all.\"" } },
+    { id: "e2-tablillas", era: 2, layer: 1, from: "event", kind: "record", unlock: { flag: "e2_tablillas" },
+      es: { title: "Las tablillas de la Cripta", text: "Copiadas a mano por una niña con una cuchara y un Cuidador. Árbol cargado. Árbol pelado, y debajo alguien que canta frente a un círculo. Árbol común, cuarenta veces. Árbol cargado. Árbol pelado, alguien que canta. Así hasta donde llega la vela. La última tablilla clavada tiene un árbol cargado. La siguiente todavía no está." },
+      en: { title: "The Crypt tablets", text: "Copied by hand by a girl with a spoon and a Caretaker. Laden tree. Bare tree, and below it someone singing before a circle. Ordinary tree, forty times. Laden tree. Bare tree, someone singing. On and on, as far as the candle reaches. The last tablet nailed up has a laden tree. The next one isn't there yet." } },
   ];
 
   /* ---------- Hilos del Grimorio: dos Escritos que juntos revelan algo ---------- */
