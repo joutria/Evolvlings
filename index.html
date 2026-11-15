@@ -2247,7 +2247,7 @@ const dayKey = () => (window.EV && EV.DAILY && EV.DAILY.dayKey ? EV.DAILY.dayKey
 const HOOKS = { startCatch: () => startCatch() };
 window.EV = {
   get S() { return S; }, get P() { return P; }, get LANG() { return LANG; },
-  feed, cleanUp, toggleSleep, startPlay, cuddle, ITEMS, shiny: ownCv, saveFile,
+  feed, cleanUp, toggleSleep, startPlay, cuddle, catchUp, ITEMS, shiny: ownCv, saveFile,
   // what the side scene is showing right now, so the view from above can draw the same hearts, bubbles and speech
   get FX() { return { effects, bubble, petX, foodAnim, mini }; }, miniOn: () => !!mini, itemName, quietOn, STR, ACH, ACH_META, SPECIES, SFX, HOOKS, $, clamp, rand, pick, text, TEXTS, dayKey, t, tone, sfx, buzz, save, saveProfile, flush, slice, SLICES, SAVE_INFO: { SAVE_V, PROFILE_V, MIGRATE, upgrade }, get saveReadOnly() { return readOnly; }, addCoins, spendCoins, toast, addLog,
   renderAll, renderStats, showScreen, stocked, every, applyStatic, escapeHtml, drawCreature, setupCanvas, ell, drawStar, checkAch, togglePanel, closeSheets, stageName, careNow, pixelText,
@@ -2337,6 +2337,7 @@ requestAnimationFrame(frame);
 <script src="discipline.js"></script>
 <script src="accessories.js"></script>
 <script src="elder.js"></script>
+<script src="notify.js"></script>
 <script src="weather.js"></script>
 <script src="world.js"></script>
 <script src="guide.js"></script>
