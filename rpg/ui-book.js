@@ -29,10 +29,25 @@ const BOOK_ICON = {
   gente: '<circle cx="9" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="16.5" cy="9" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3.5 19c0-3.5 2.5-5.5 5.5-5.5s5.5 2 5.5 5.5M14 14c3.5-.8 6.5 1 6.5 4.5" fill="none" stroke="currentColor" stroke-width="2"/>',
   escritos: '<path d="M6 4h10l3 3v13H6z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 10h7M9 14h7" stroke="currentColor" stroke-width="2"/>',
 };
+const BOOK_SVG = (k) => `<svg viewBox="0 0 24 24" aria-hidden="true">${BOOK_ICON[k]}</svg>`;
 const BOOK_TABS = [["diario", "#a3343b"], ["criaturas", "#b0782a"], ["gente", "#3f7f86"], ["zonas", "#8a6a3a"], ["bestiario", "#4f9a3c"], ["cartas", "#2f5d96"], ["escritos", "#6e6283"]];
-const BK = { open: false, tab: "diario", sel: {} };
+// view: on a narrow screen the book shows one page at a time, "list" or "page" (wider screens always show both)
+const BK = { open: false, tab: "diario", sel: {}, view: "list", paintRun: 0 };
+const bookNarrow = () => matchMedia("(max-width: 599px)").matches;
 const bookNew = () => EV.P.bookNew || (EV.P.bookNew = {});
 const bt = (k, v) => tx("book." + k, v);
+// every page opens with a picture (a "plate") and every list line has a small one. PNG art goes in by its path, which
+// works before the file has finished loading (the one-file build has it inline); drawn scenes are painted in bookMount.
+const artSrc = (p) => { const A = window.EVART; if (!A) return null; const im = A.image(p); if (im) return im.src; const I = window.EVART_INLINE; return I && I[p] ? I[p] : A.files.includes(p) ? "art/" + p : null; };
+const artImg = (p, cls, alt) => { const s = artSrc(p); return s ? `<img class="${cls}" src="${s}" alt="${esc(alt || "")}" loading="lazy" decoding="async">` : ""; };
+const zoneBg = (z) => artSrc("battle/" + (ZONES[z] ? z : "aurora") + "-day.png");
+// a person's face (rpg/data-faces.js): the first trade label that has one
+const personFace = (p) => { const F = window.EVFACES; if (!F || !PPL[p]) return null; for (const w of PPL[p].who) { const f = F.of(w); if (f) return f; } return null; };
+const plate = (inner, cls, bg) => `<figure class="bk-plate${cls ? " " + cls : ""}"${bg ? ` style="background-image:url('${bg}')"` : ""}>${inner}</figure>`;
+// a drawn scene: "ev:<event id>[:zone]" (falls back to the zone's road) or "pz:<zone>:<pause kind>"
+const sceneBox = (key, cls) => `<canvas class="${cls || "bk-scn"}" width="256" height="192" data-bkpic="${key}" role="img" aria-hidden="true"></canvas>`;
+const thumbBox = (key, dark) => `<canvas class="bk-th${dark ? " dark" : ""}" width="64" height="48" data-bkpic="${key}" aria-hidden="true"></canvas>`;
+const monThumb = (k, sil) => `<canvas class="bk-th mon${sil ? " sil" : ""}" width="96" height="80" data-mon="${k}" aria-hidden="true"></canvas>`;
 
 /* ---------- old saves: conversations lived before the book keep their opening lines ---------- */
 function bookSeed() {
@@ -72,8 +87,8 @@ function diaryList() {
     const ids = Object.keys(TALK[z]).sort((a, b) => ((D[z + "/" + a] || {}).t || 1e9) - ((D[z + "/" + b] || {}).t || 1e9));
     for (const id of ids) {
       const k = z + "/" + id, R = D[k], ev = TALK[z][id], E = evEnds(ev);
-      if (!R) { h += `<li><button type="button" class="bk-it locked" data-bksel="${k}"${BK.sel.diario === k ? ' aria-current="true"' : ""}><span class="bk-nm">???<small>${esc(bt("notLived"))}</small></span><span class="bk-ct">0 / ${E.length}</span></button></li>`; continue; }
-      h += `<li><button type="button" class="bk-it" data-bksel="${k}"${BK.sel.diario === k ? ' aria-current="true"' : ""}><span class="bk-nm">${esc(evTitle(id))}<small>${esc(tx("talk.k." + ev.kind))}</small></span><span class="bk-ct">${E.filter((n) => R.v[n]).length} / ${E.length}</span></button></li>`;
+      if (!R) { h += `<li><button type="button" class="bk-it locked" data-bksel="${k}"${BK.sel.diario === k ? ' aria-current="true"' : ""}><span class="bk-th q">?</span><span class="bk-nm">???<small>${esc(bt("notLived"))}</small></span><span class="bk-ct">0 / ${E.length}</span></button></li>`; continue; }
+      h += `<li><button type="button" class="bk-it" data-bksel="${k}"${BK.sel.diario === k ? ' aria-current="true"' : ""}>${thumbBox("ev:" + id + ":" + z)}<span class="bk-nm">${esc(evTitle(id))}<small>${esc(tx("talk.k." + ev.kind))}</small></span><span class="bk-ct">${E.filter((n) => R.v[n]).length} / ${E.length}</span></button></li>`;
     }
     h += `</ul>`;
   }
@@ -94,7 +109,7 @@ function flagReturns(flag, selfKey) {
 function diaryPage(k) {
   const [z, id] = k.split("/"), ev = TALK[z] && TALK[z][id]; if (!ev) return "";
   const R = diarySlice()[k];
-  if (!R) return `<h3>???</h3><p class="bk-sub">${esc(bt("notLivedLong", { z: zoneLabel(z) }))}</p>`;
+  if (!R) return `<h3>???</h3><p class="bk-sub">${esc(bt("notLivedLong", { z: zoneLabel(z) }))}</p>${plate(sceneBox("pz:" + z + ":camino"), "dark")}`;
   const W = talkText(id), q = L() === "en" ? ["“", "”"] : ["«", "»"], shown = new Set(), flags = [];
   const lines = (nid) => ev.nodes[nid].say.map((s, i) => {
     const t = W.say(nid, i);
@@ -128,8 +143,7 @@ function diaryPage(k) {
   for (const f of new Set(flags)) for (const k2 of flagReturns(f, k)) if (!back.includes(k2)) back.push(k2);
   if (back.length) body += back.map((k2) => `<div class="bk-margin">${esc(bt("comesBack"))} <b>${esc(D[k2] ? evTitle(k2.split("/")[1]) : bt("anotherTalk"))}</b></div>`).join("");
   if (R.old) body += `<p class="bk-ex">${esc(bt("old"))}</p>`;
-  const scene = window.EVSCENE && EVSCENE.EVNOTE && EVSCENE.EVNOTE[id];
-  return `<h3>${esc(evTitle(id))}</h3><p class="bk-sub">${esc(zoneLabel(z))} · ${esc(tx("talk.k." + ev.kind))} · ${esc((R.n || 1) > 1 ? bt("times", { n: R.n }) : bt("once"))}</p>${scene ? `<div class="bk-pic" data-bkscene="${id}"></div>` : ""}${body}`;
+  return `<h3>${esc(evTitle(id))}</h3><p class="bk-sub">${esc(zoneLabel(z))} · ${esc(tx("talk.k." + ev.kind))} · ${esc((R.n || 1) > 1 ? bt("times", { n: R.n }) : bt("once"))}</p>${plate(sceneBox("ev:" + id + ":" + z))}${body}`;
 }
 
 /* ---------- Cards (the Grimoire) ---------- */
@@ -142,8 +156,8 @@ function cardsList() {
     h += `<p class="bk-grp">${esc(tx("grim.circle." + ck))} <small>${ids.filter((id) => g[id]).length} / ${ids.length}</small></p><ul class="bk-list">`;
     for (const ty of types) for (const id of grimIds([ty])) {
       const on = BK.sel.cartas === id ? ' aria-current="true"' : "";
-      h += g[id] ? `<li><button type="button" class="bk-it" data-bksel="${id}"${on}><span class="bk-ic">${tyIcon(CARDS[id].type)}</span><span class="bk-nm">${esc(cardName(id))}<small>${esc(TYPES[CARDS[id].type][L()])}</small></span></button></li>`
-        : `<li><button type="button" class="bk-it locked" data-bksel="${id}"${on}><span class="bk-ic">${tyIcon(CARDS[id].type)}</span><span class="bk-nm">???<small>${esc(TYPES[CARDS[id].type][L()])}</small></span></button></li>`;
+      h += g[id] ? `<li><button type="button" class="bk-it" data-bksel="${id}"${on}><canvas class="rc-thumb bk-th" width="64" height="48" data-thumb="${id}" aria-hidden="true"></canvas><span class="bk-nm">${esc(cardName(id))}<small>${tyIcon(CARDS[id].type)} ${esc(TYPES[CARDS[id].type][L()])}</small></span></button></li>`
+        : `<li><button type="button" class="bk-it locked" data-bksel="${id}"${on}><canvas class="rc-thumb bk-th" width="64" height="48" data-thumb="${id}" data-sil="1" aria-hidden="true"></canvas><span class="bk-nm">???<small>${tyIcon(CARDS[id].type)} ${esc(TYPES[CARDS[id].type][L()])}</small></span></button></li>`;
     }
     h += `</ul>`;
   }
@@ -185,19 +199,19 @@ function monsList() {
   let h = `<ul class="bk-list">`;
   for (const k of have) {
     const m = myMon(k), on = BK.sel.criaturas === k ? ' aria-current="true"' : "";
-    h += `<li><button type="button" class="bk-it" data-bksel="${k}"${on}><span class="bk-ic">${tyIcon(MONS[k].types[0])}</span><span class="bk-nm">${esc(monName(k))}<small>${esc(m.own ? EV.S.name : bt("companion"))}</small></span><span class="bk-ct">${esc(bt("lvl", { n: m.lvl }))}${m.st ? " " + "★".repeat(m.st) : ""}</span></button></li>`;
+    h += `<li><button type="button" class="bk-it" data-bksel="${k}"${on}>${monThumb(k)}<span class="bk-nm">${esc(monName(k))}<small>${esc(m.own ? EV.S.name : bt("companion"))}</small></span><span class="bk-ct">${esc(bt("lvl", { n: m.lvl }))}${m.st ? " " + "★".repeat(m.st) : ""}</span></button></li>`;
   }
   // the ones you have not met stay one grey line: their names would give them away
   const left = all.length - have.length;
-  if (left) h += `<li><button type="button" class="bk-it locked" data-bksel="@none"${BK.sel.criaturas === "@none" ? ' aria-current="true"' : ""}><span class="bk-ic">?</span><span class="bk-nm">${esc(bt("monsLeft", { n: left }))}<small>${esc(bt("notYet"))}</small></span></button></li>`;
+  if (left) h += `<li><button type="button" class="bk-it locked" data-bksel="@none"${BK.sel.criaturas === "@none" ? ' aria-current="true"' : ""}><span class="bk-th q">?</span><span class="bk-nm">${esc(bt("monsLeft", { n: left }))}<small>${esc(bt("notYet"))}</small></span></button></li>`;
   return h + `</ul>`;
 }
 function monsPage(k) {
   const M = MONS[k], m = M && myMon(k);
-  if (!m) return `<h3>???</h3><p class="bk-sub">${esc(bt("monHow"))}</p>`;
+  if (!m) return `<h3>???</h3><p class="bk-sub">${esc(bt("monHow"))}</p>${plate('<span class="bk-q-big">?</span>', "dark", artSrc("maps/home.png"))}`;
   const S = EV.S;
   const pics = [0, 1, 2].map((st) => `<canvas class="bk-mon${st > m.stage ? " sil" : ""}" width="96" height="80" data-mstage="${k}:${st}" role="img" aria-label="${esc(bt("stage." + st))}"></canvas>`).join("");
-  let h = `<h3>${esc(monName(k))}${m.own ? ` · ${esc(S.name)}` : ""}</h3><p class="bk-sub">${M.types.map(typeChip).join(" ")} · ${esc(bt("lvl", { n: m.lvl }))}${m.st ? " · " + "★".repeat(m.st) : ""}</p><div class="bk-stages">${pics}</div>`;
+  let h = `<h3>${esc(monName(k))}${m.own ? ` · ${esc(S.name)}` : ""}</h3><p class="bk-sub">${M.types.map(typeChip).join(" ")} · ${esc(bt("lvl", { n: m.lvl }))}${m.st ? " · " + "★".repeat(m.st) : ""}</p>${plate(`<div class="bk-stages">${pics}</div>`, "mons", artSrc("maps/home.png"))}`;
   const u = makeUnit(m.own ? ownUnitOpts(1) : { kind: k, lvl: m.lvl, side: "ally", name: monName(k), stage: 1, cards: {} });
   h += `<div class="bk-stats">${[["hp", u.maxHp], ["str", u.base.str], ["def", u.base.def], ["spd", u.base.spd], ["crit", Math.round(u.crit) + "%"]].map(([s, v]) => `<div><b>${typeof v === "number" ? Math.round(v) : v}</b><small>${esc(bt("st." + s))}</small></div>`).join("")}</div>`;
   const rec = m.own ? rpgState() : m.r, tal = talentsOf(k, m.lvl, rec && rec.tal);
@@ -231,21 +245,23 @@ function escList() {
   let h = `<p class="bk-sub">${esc(tx("esc.desc"))} ${esc(tx("grim.count", { n: all.filter((w) => have[w.id]).length, m: all.length }))}</p><ul class="bk-list">`;
   for (const w of all) {
     const on = BK.sel.escritos === w.id ? ' aria-current="true"' : "";
-    h += have[w.id] ? `<li><button type="button" class="bk-it" data-bksel="${w.id}"${on}><span class="bk-nm">${esc(maskNames((w[L()] || w.es).title))}</span></button></li>`
-      : `<li><button type="button" class="bk-it locked" data-bksel="${w.id}"${on}><span class="bk-nm">???</span></button></li>`;
+    h += have[w.id] ? `<li><button type="button" class="bk-it" data-bksel="${w.id}"${on}><span class="bk-th q doc">${BOOK_SVG("escritos")}</span><span class="bk-nm">${esc(maskNames((w[L()] || w.es).title))}</span></button></li>`
+      : `<li><button type="button" class="bk-it locked" data-bksel="${w.id}"${on}><span class="bk-th q">?</span><span class="bk-nm">???</span></button></li>`;
   }
   const H = (LORE.LORE_HILOS || []).filter((x) => have[x.a] && have[x.b]);
-  if (H.length) h += `<li><button type="button" class="bk-it" data-bksel="@hilos"${BK.sel.escritos === "@hilos" ? ' aria-current="true"' : ""}><span class="bk-nm">${esc(tx("esc.hilos"))}<small>${H.length}</small></span></button></li>`;
+  if (H.length) h += `<li><button type="button" class="bk-it" data-bksel="@hilos"${BK.sel.escritos === "@hilos" ? ' aria-current="true"' : ""}><span class="bk-th q doc">${BOOK_SVG("diario")}</span><span class="bk-nm">${esc(tx("esc.hilos"))}<small>${H.length}</small></span></button></li>`;
   return h + `</ul>`;
 }
 function escPage(id) {
   if (!LORE) return "";
   const have = EV.P.escritos || {};
-  if (id === "@hilos") { const H = (LORE.LORE_HILOS || []).filter((x) => have[x.a] && have[x.b]); return `<h3>${esc(tx("esc.hilos"))}</h3><ul class="hilos">${H.map((x) => `<li>${esc(maskNames(x[L()] || x.es))}</li>`).join("")}</ul>`; }
+  if (id === "@hilos") { const H = (LORE.LORE_HILOS || []).filter((x) => have[x.a] && have[x.b]); return `<h3>${esc(tx("esc.hilos"))}</h3>${plate(sceneBox("pz:heart:descanso"))}<ul class="hilos">${H.map((x) => `<li>${esc(maskNames(x[L()] || x.es))}</li>`).join("")}</ul>`; }
   const w = LORE.LORE_ESCRITOS.find((x) => x.id === id); if (!w) return `<p class="bk-sub">${esc(bt("pickEsc"))}</p>`;
-  if (!have[w.id]) return `<h3>???</h3><p class="bk-sub">${esc(isOrphan(w) ? tx("esc.from.deep") : tx("esc.from." + w.from, { z: w.zone ? zt("name", null, w.zone) : "" }))}</p>`;
+  // the place a Writing turns up: a chest, a stall, a guardian or the road, in its zone
+  const pic = (dark) => plate(sceneBox("pz:" + (w.zone && ZONES[w.zone] ? w.zone : isOrphan(w) ? "deep" : "aurora") + ":" + ({ chest: "cofre", shop: "descanso", guardian: "jefe" }[w.from] || "camino")), dark ? "dark" : "");
+  if (!have[w.id]) return `<h3>???</h3><p class="bk-sub">${esc(isOrphan(w) ? tx("esc.from.deep") : tx("esc.from." + w.from, { z: w.zone ? zt("name", null, w.zone) : "" }))}</p>${pic(true)}`;
   const t = w[L()] || w.es;
-  return `<h3>${esc(maskNames(t.title))}</h3>${t.text.split(/\n+/).map((p) => `<p class="bk-say">${esc(maskNames(p))}</p>`).join("")}`;
+  return `<h3>${esc(maskNames(t.title))}</h3>${pic(false)}${t.text.split(/\n+/).map((p) => `<p class="bk-say">${esc(maskNames(p))}</p>`).join("")}`;
 }
 
 /* ---------- Bestiary: wins per foe (EV.P.bst) ---------- */
@@ -280,16 +296,17 @@ function zonesList() {
     const g = (zt("sub", null, id) || "").split(" · ")[0];
     if (g !== grp) { if (grp !== null) h += `</ul>`; h += `<p class="bk-grp">${esc(g)}</p><ul class="bk-list">`; grp = g; }
     const on = BK.sel.zonas === id ? ' aria-current="true"' : "", st = (EV.P.stars || {})[id] || 0;
-    h += zoneSeen(id) ? `<li><button type="button" class="bk-it" data-bksel="${id}"${on}><span class="bk-ic">${tyIcon(ZONES[id].type)}</span><span class="bk-nm">${esc(zt("name", null, id))}<small>${esc(TYPES[ZONES[id].type][L()])}</small></span><span class="bk-ct">${starStr(st)}</span></button></li>`
-      : `<li><button type="button" class="bk-it locked" data-bksel="${id}"${on}><span class="bk-ic">🔒</span><span class="bk-nm">${esc(zt("name", null, id))}<small>${esc(bt("notYet"))}</small></span></button></li>`;
+    h += zoneSeen(id) ? `<li><button type="button" class="bk-it" data-bksel="${id}"${on}>${artImg("battle/" + id + "-day.png", "bk-th")}<span class="bk-nm">${esc(zt("name", null, id))}<small>${tyIcon(ZONES[id].type)} ${esc(TYPES[ZONES[id].type][L()])}</small></span><span class="bk-ct">${starStr(st)}</span></button></li>`
+      : `<li><button type="button" class="bk-it locked" data-bksel="${id}"${on}>${artImg("battle/" + id + "-day.png", "bk-th dark")}<span class="bk-nm">${esc(zt("name", null, id))}<small>${esc(bt("notYet"))}</small></span></button></li>`;
   }
   return h + `</ul>`;
 }
 function zonePage(id) {
   const z = ZONES[id]; if (!z) return "";
-  if (!zoneSeen(id)) return `<h3>${esc(zt("name", null, id))}</h3><p class="bk-sub">${esc(bt("notYetLong"))}</p><p class="bk-say n">${esc(keyLock(id) || tx(z.unlockAll ? "zones.lockHeart" : Array.isArray(z.unlock) ? (z.unlock.includes("hollow") ? "zones.lockHigh" : "zones.lockEnv") : "zones.lock"))}</p>`;
+  const pic = plate(artImg("battle/" + id + "-day.png", "bk-scn", zt("name", null, id)) + (zoneSeen(id) ? "" : '<span class="bk-lock">🔒</span>'), zoneSeen(id) ? "" : "dark");
+  if (!zoneSeen(id)) return `<h3>${esc(zt("name", null, id))}</h3><p class="bk-sub">${esc(bt("notYetLong"))}</p>${pic}<p class="bk-say n">${esc(keyLock(id) || tx(z.unlockAll ? "zones.lockHeart" : Array.isArray(z.unlock) ? (z.unlock.includes("hollow") ? "zones.lockHigh" : "zones.lockEnv") : "zones.lock"))}</p>`;
   const cl = (EV.P.cleared || {})[id] || 0, sap = saviaLvl(id), c = TALK[id] ? diaryCounts(id) : null;
-  let h = `<h3>${esc(zt("name", null, id))}</h3><p class="bk-sub">${esc(zt("sub", null, id))}</p><p class="bk-say">${esc(zt("desc", null, id))}</p>`;
+  let h = `<h3>${esc(zt("name", null, id))}</h3><p class="bk-sub">${esc(zt("sub", null, id))}</p>${pic}<p class="bk-say">${esc(zt("desc", null, id))}</p>`;
   h += `<p class="bk-q">${esc(bt("canMeet"))}</p>` + zoneOdds(id).map(([k, p]) => `<div class="bk-bar"><span class="${beastKnown(k) ? "" : "unk"}">${esc(foeName(k))}</span><span class="tr"><i style="width:${p}%"></i></span><span>${p} %</span></div>`).join("");
   h += `<p class="bk-q">${esc(bt("guardian"))}</p><p class="bk-say">${esc(zt("bossD", null, id))}${cl ? " " + esc(tx("zones.done", { n: cl })) : ""}</p>`;
   if (cl) h += `<p class="bk-say n">${esc(tx("zones.verse", { v: zt("verse", null, id) }))}</p>`;
@@ -314,8 +331,8 @@ function beastList() {
   for (const [g, k] of all) {
     if (g !== grp) { if (grp !== null) h += `</ul>`; h += `<p class="bk-grp">${esc(g === "@g" ? bt("guardians") : g === "@x" ? bt("elsewhere") : zt("name", null, g))}</p><ul class="bk-list">`; grp = g; }
     const r = B[k] || { w: 0 }, on = BK.sel.bestiario === k ? ' aria-current="true"' : "", need = beastNeed(k);
-    h += beastKnown(k) ? `<li><button type="button" class="bk-it" data-bksel="${k}"${on}><span class="bk-ic">${tyIcon(MONS[k].types[0])}</span><span class="bk-nm">${esc(foeName(k))}<small>${MONS[k].types.map((t) => esc(TYPES[t][L()])).join(" · ")}</small></span><span class="bk-ct">${r.w} ✓</span></button></li>`
-      : `<li><button type="button" class="bk-it locked" data-bksel="${k}"${on}><span class="bk-ic">?</span><span class="bk-nm">???<small>${esc(r.w ? bt("beaten", { n: r.w, m: need }) : bt("unseen"))}</small></span><span class="bk-ct">${r.w} / ${need}</span></button></li>`;
+    h += beastKnown(k) ? `<li><button type="button" class="bk-it" data-bksel="${k}"${on}>${monThumb(k)}<span class="bk-nm">${esc(foeName(k))}<small>${MONS[k].types.map((t) => esc(TYPES[t][L()])).join(" · ")}</small></span><span class="bk-ct">${r.w} ✓</span></button></li>`
+      : `<li><button type="button" class="bk-it locked" data-bksel="${k}"${on}>${r.w ? monThumb(k, true) : '<span class="bk-th q">?</span>'}<span class="bk-nm">???<small>${esc(r.w ? bt("beaten", { n: r.w, m: need }) : bt("unseen"))}</small></span><span class="bk-ct">${r.w} / ${need}</span></button></li>`;
   }
   return h + `</ul>`;
 }
@@ -323,7 +340,7 @@ function beastPage(k) {
   const m = MONS[k]; if (!m) return "";
   const r = beastSlice()[k] || { w: 0, lv: 0, l: {} }, need = beastNeed(k), boss = isGuardian(k);
   const where = Object.keys(ZONES).filter((id) => zoneSeen(id) && (ZONES[id].foes.includes(k) || ZONES[id].boss === k));
-  const pic = `<canvas class="bk-mon${beastKnown(k) ? "" : " sil"}" width="96" height="80" data-mon="${k}"></canvas>`;
+  const pic = plate(`<canvas class="bk-mon${beastKnown(k) ? "" : " sil"}" width="96" height="80" data-mon="${k}"></canvas>`, "mon", zoneBg(where[0]));
   if (!beastKnown(k)) return `<h3>???</h3>${pic}<p class="bk-sub">${esc(r.w ? bt("beaten", { n: r.w, m: need }) : bt("unseen"))}</p><p class="bk-say n">${esc(bt("beastHow", { n: need }))}</p>${where.length ? `<p class="bk-say"><b>${esc(bt("livesIn"))}</b> ${where.map((id) => esc(zt("name", null, id))).join(", ")}</p>` : ""}`;
   const lvls = Object.keys(r.l).map(Number).sort((a, b) => a - b), lv = lvls.includes(BK.lvl && BK.lvl[k]) ? BK.lvl[k] : lvls[lvls.length - 1] || 1;
   const u = makeUnit({ kind: k, lvl: lv, side: "foe", name: monName(k, !boss), hollow: !boss, boss, stage: 1, cards: {} });
@@ -380,19 +397,22 @@ function peopleList() {
     h += `<p class="bk-grp">${esc(g === "@heard" ? bt("heardOf") : zoneLabel(g))}</p><ul class="bk-list">`;
     for (const p of groups[g]) {
       const on = BK.sel.gente === p ? ' aria-current="true"' : "", n = I[p] ? I[p].ev.length : 0;
-      h += `<li><button type="button" class="bk-it" data-bksel="${p}"${on}><span class="bk-nm">${esc(personName(p))}<small>${esc(isKnown(p) ? PPL[p].a[L()] || PPL[p].a.es : bt("noName"))}</small></span><span class="bk-ct">${n ? `💬 ${n}` : ""}</span></button></li>`;
+      h += `<li><button type="button" class="bk-it" data-bksel="${p}"${on}>${artImg(personFace(p) || "", "bk-th face") || '<span class="bk-th q">?</span>'}<span class="bk-nm">${esc(personName(p))}<small>${esc(isKnown(p) ? PPL[p].a[L()] || PPL[p].a.es : bt("noName"))}</small></span><span class="bk-ct">${n ? `💬 ${n}` : ""}</span></button></li>`;
     }
     h += `</ul>`;
   }
   const left = all.length - seen.length;
-  if (left) h += `<ul class="bk-list"><li><button type="button" class="bk-it locked" data-bksel="@none"${BK.sel.gente === "@none" ? ' aria-current="true"' : ""}><span class="bk-ic">?</span><span class="bk-nm">${esc(bt("peopleLeft", { n: left }))}<small>${esc(bt("notYet"))}</small></span></button></li></ul>`;
+  if (left) h += `<ul class="bk-list"><li><button type="button" class="bk-it locked" data-bksel="@none"${BK.sel.gente === "@none" ? ' aria-current="true"' : ""}><span class="bk-th q">?</span><span class="bk-nm">${esc(bt("peopleLeft", { n: left }))}<small>${esc(bt("notYet"))}</small></span></button></li></ul>`;
   return h;
 }
 function peoplePage(p) {
-  if (!PPL[p]) return `<h3>???</h3><p class="bk-sub">${esc(bt("peopleHow"))}</p>`;
+  if (!PPL[p]) return `<h3>???</h3><p class="bk-sub">${esc(bt("peopleHow"))}</p>${plate('<span class="bk-q-big">?</span>', "dark", zoneBg("aurora"))}`;
   const I = peopleIndex()[p] || { ev: [], said: [], about: [] }, Z = personZones()[p];
   let h = `<h3>${esc(personName(p))}</h3><p class="bk-sub">${esc(isKnown(p) ? PPL[p].a[L()] || PPL[p].a.es : bt("noNameLong"))}${Z && I.ev.length ? " · " + esc(zoneLabel(Z)) : ""}</p>`;
-  if (I.ev.length) h += `<p class="bk-q">${esc(bt("metIn"))}</p><ul class="bk-list">` + I.ev.map((k) => `<li><button type="button" class="bk-it" data-bkgo="${k}"><span class="bk-nm">${esc(evTitle(k.split("/")[1]))}<small>${esc(zoneLabel(k.split("/")[0]))}</small></span><span class="bk-ct">→</span></button></li>`).join("") + `</ul>`;
+  // the place you met them, with their face over it
+  const first = I.ev[0], face = artImg(personFace(p) || "", "bk-face", personName(p));
+  h += plate((first ? sceneBox("ev:" + first.split("/")[1] + ":" + first.split("/")[0]) : sceneBox("pz:" + (Z && Z !== "common" ? Z : "aurora") + ":camino")) + face, "person");
+  if (I.ev.length) h += `<p class="bk-q">${esc(bt("metIn"))}</p><ul class="bk-list">` + I.ev.map((k) => `<li><button type="button" class="bk-it" data-bkgo="${k}">${thumbBox("ev:" + k.split("/")[1] + ":" + k.split("/")[0])}<span class="bk-nm">${esc(evTitle(k.split("/")[1]))}<small>${esc(zoneLabel(k.split("/")[0]))}</small></span><span class="bk-ct">→</span></button></li>`).join("") + `</ul>`;
   const quotes = (list, max) => list.slice(-max).map(([k, n, i]) => sayLine(k, n, i)).filter(Boolean).map((t) => `<p class="bk-say">«${esc(t)}»</p>`).join("");
   if (I.said.length) h += `<p class="bk-q">${esc(bt("heardFrom"))}</p>` + quotes(I.said, 4);
   if (I.about.length) h += `<p class="bk-q">${esc(bt("saidAbout"))}</p>` + quotes(I.about, 4);
@@ -417,21 +437,48 @@ function bookHtml() {
   if (BK.sel[BK.tab] == null) BK.sel[BK.tab] = S.first() || null;
   const tabs = BOOK_TABS.map(([k, col]) => `<button type="button" class="bk-tab" role="tab" data-bktab="${k}" aria-selected="${BK.tab === k}" style="background:${col}" aria-label="${esc(bt("tab." + k))}"><svg viewBox="0 0 24 24" aria-hidden="true">${BOOK_ICON[k]}</svg><span class="bk-tt">${esc(bt("tab." + k))}</span>${N[k] ? '<i class="dot"></i>' : ""}</button>`).join("");
   const sub = S.sub();
-  return `<div class="bk-back" data-bkclose="1"></div><div class="bk-book" role="dialog" aria-modal="true" aria-label="${esc(bt("title"))}">
-    <section class="bk-page l"><div class="bk-head"><h2>${esc(bt("tab." + BK.tab))}</h2><button type="button" class="sheet-x" data-bkclose="1" aria-label="${esc(tx("load.close"))}">✕</button></div>${sub ? `<p class="bk-sub">${esc(sub)}</p>` : ""}${S.list()}</section>
-    <section class="bk-page r" aria-live="polite">${BK.sel[BK.tab] != null ? S.page(BK.sel[BK.tab]) : `<p class="bk-sub">${esc(bt("empty"))}</p>`}</section>
+  const close = `<button type="button" class="sheet-x" data-bkclose="1" aria-label="${esc(tx("load.close"))}">✕</button>`;
+  return `<div class="bk-back" data-bkclose="1"></div><div class="bk-book${BK.view === "page" ? " show-page" : ""}" role="dialog" aria-modal="true" aria-label="${esc(bt("title"))}">
+    <div class="bk-cover"><section class="bk-page l"><div class="bk-head"><h2>${esc(bt("tab." + BK.tab))}</h2>${close}</div>${sub ? `<p class="bk-sub">${esc(sub)}</p>` : ""}${S.list()}</section>
+    <section class="bk-page r" aria-live="polite"><div class="bk-head bk-nav"><button type="button" class="bk-backbtn" data-bkview="list">← ${esc(bt("back"))}</button>${close}</div><div class="bk-leaf">${BK.sel[BK.tab] != null ? S.page(BK.sel[BK.tab]) : `<p class="bk-sub">${esc(bt("empty"))}</p>`}</div></section></div>
     <div class="bk-tabs" role="tablist" aria-label="${esc(bt("title"))}">${tabs}</div></div>`;
 }
 function bookMount(el) {
   el.querySelectorAll("canvas[data-mon]").forEach((cv) => { try { paintMon(cv); } catch (e) { /* art is decoration */ } });
   el.querySelectorAll("canvas[data-mstage]").forEach((cv) => { try { paintStage(cv); } catch (e) { /* art is decoration */ } });
-  el.querySelectorAll("[data-bkscene]").forEach((box) => { try { const cv = EVSCENE.event(box.dataset.bkscene); if (cv) { const c = document.createElement("canvas"); c.width = cv.width; c.height = cv.height; c.getContext("2d").drawImage(cv, 0, 0); c.setAttribute("role", "img"); const n = EVSCENE.EVNOTE[box.dataset.bkscene]; if (n && n.scene) c.setAttribute("aria-label", maskNames(n.scene)); box.appendChild(c); } } catch (e) { /* art is decoration */ } });
+  // drawn scenes: the big plate now, the list thumbnails a few per frame so a long Diary opens at once
+  const pics = [...el.querySelectorAll("canvas[data-bkpic]")], big = pics.filter((c) => !c.classList.contains("bk-th")), small = pics.filter((c) => c.classList.contains("bk-th"));
+  big.forEach(paintPic);
+  const run = ++BK.paintRun, step = () => { if (run !== BK.paintRun) return; small.splice(0, 6).forEach(paintPic); if (small.length) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
 }
-function renderBook() {
+// one drawn picture: "ev:<id>:<zone>" an event's scene (or its zone's road when it has none), "pz:<zone>:<kind>" a pause
+function paintPic(cv) {
+  try {
+    const [kind, a, b] = cv.dataset.bkpic.split(":"), Z = (z) => (ZONES[z] ? z : "aurora");
+    let src = null;
+    if (kind === "ev") src = EVSCENE.event(a) || EVSCENE.pause(Z(b), "camino");
+    else src = EVSCENE.pause(Z(a), b || "camino");
+    if (!src) return;
+    const g = cv.getContext("2d"); g.imageSmoothingEnabled = false; g.drawImage(src, 0, 0, cv.width, cv.height);
+    if (kind === "ev" && cv.classList.contains("bk-scn")) { const n = EVSCENE.EVNOTE && EVSCENE.EVNOTE[a]; if (n && n.scene) { cv.setAttribute("aria-label", maskNames(n.scene)); cv.removeAttribute("aria-hidden"); } }
+  } catch (e) { /* art is decoration */ }
+}
+// top: a new section starts the list from its top; otherwise the list keeps where you were
+function renderBook(top) {
   const el = $("bookView"); if (!el || !BK.open) return;
-  const sc = el.querySelector(".bk-page.l"), st = sc ? sc.scrollTop : 0;
+  const sc = el.querySelector(".bk-page.l"), st = sc && !top ? sc.scrollTop : 0, rc = el.querySelector(".bk-page.r"), rt = rc ? rc.scrollTop : 0;
   el.innerHTML = bookHtml(); bookMount(el);
   const l2 = el.querySelector(".bk-page.l"); if (l2) l2.scrollTop = st;
+  const r2 = el.querySelector(".bk-page.r"); if (r2) r2.scrollTop = rt;
+}
+// show the picked entry on the right page (on a phone: turn to that page, with a way back to the list)
+function turnTo(newList) {
+  BK.view = "page"; renderBook(newList);
+  const el = $("bookView"), r = el.querySelector(".bk-page.r"); if (!r) return;
+  r.scrollTop = 0; const lf = r.querySelector(".bk-leaf"); if (lf) lf.classList.add("turn");
+  if (newList) { const s = el.querySelector(`[data-bksel="${CSS.escape(String(BK.sel[BK.tab]))}"]`); if (s) s.scrollIntoView({ block: "center" }); }
+  if (bookNarrow()) { const b = r.querySelector(".bk-backbtn"); if (b) b.focus({ preventScroll: true }); }
 }
 function openBook(tab) {
   bookSeed();
@@ -441,9 +488,9 @@ function openBook(tab) {
     el.addEventListener("click", onBookClick);
   }
   if (tab) BK.tab = tab;
-  BK.open = true; el.hidden = false;
+  BK.open = true; el.hidden = false; BK.view = "list";
   delete bookNew()[BK.tab];
-  renderBook(); refreshBookBtn();
+  renderBook(true); refreshBookBtn();
   if (EV.GUIDE) setTimeout(() => EV.GUIDE.showTip("book"), 0);
   const f = el.querySelector(".bk-tab[aria-selected=true]"); if (f) f.focus({ preventScroll: true });
 }
@@ -451,17 +498,18 @@ function closeBook() { BK.open = false; const el = $("bookView"); if (el) el.hid
 function onBookClick(e) {
   const t = e.target.closest("[data-bkclose],[data-bktab],[data-bksel],button"); if (!t) return;
   if (t.dataset.bkclose) { closeBook(); return; }
-  if (t.dataset.bktab) { EV.sfx("tap"); BK.tab = t.dataset.bktab; delete bookNew()[BK.tab]; renderBook(); refreshBookBtn(); return; }
-  if (t.dataset.bksel != null) {
-    EV.sfx("tap"); BK.sel[BK.tab] = t.dataset.bksel; renderBook();
-    const r = $("bookView").querySelector(".bk-page.r"); if (r) { r.scrollTop = 0; if (matchMedia("(max-width: 760px)").matches) r.scrollIntoView({ block: "start", behavior: "smooth" }); }
-    return;
-  }
-  if (t.dataset.bkgo) { EV.sfx("tap"); BK.tab = "diario"; BK.sel.diario = t.dataset.bkgo; renderBook(); return; }
+  if (t.dataset.bktab) { EV.sfx("tap"); BK.tab = t.dataset.bktab; BK.view = "list"; delete bookNew()[BK.tab]; renderBook(true); refreshBookBtn(); return; }
+  if (t.dataset.bkview) { EV.sfx("tap"); BK.view = "list"; renderBook(); const s = $("bookView").querySelector(`[data-bksel="${CSS.escape(String(BK.sel[BK.tab]))}"]`); if (s) s.focus({ preventScroll: false }); return; }
+  if (t.dataset.bksel != null) { EV.sfx("tap"); BK.sel[BK.tab] = t.dataset.bksel; turnTo(); return; }
+  if (t.dataset.bkgo) { EV.sfx("tap"); BK.tab = "diario"; BK.sel.diario = t.dataset.bkgo; turnTo(true); return; }
   if (t.dataset.bklvl) { EV.sfx("tap"); (BK.lvl = BK.lvl || {})[BK.sel.bestiario] = +t.dataset.bklvl; renderBook(); return; }
   if (t.dataset.craft) { onCardsClick(e); renderBook(); }
 }
-document.addEventListener("keydown", (e) => { if (e.key === "Escape" && BK.open && !($("cview") && !$("cview").hidden)) { e.stopImmediatePropagation(); closeBook(); } }, true);
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape" || !BK.open || ($("cview") && !$("cview").hidden)) return;
+  e.stopImmediatePropagation();
+  if (bookNarrow() && BK.view === "page") { BK.view = "list"; renderBook(); } else closeBook();
+}, true);
 function refreshBookBtn() {
   const b = $("btnBook"); if (!b) return;
   const S = EV.S, alive = S && S.phase === "alive";
@@ -472,31 +520,60 @@ function refreshBookBtn() {
 (function bookStyle() {
   const s = document.createElement("style");
   s.textContent = `
-.bk-wrap{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:16px}
+.bk-wrap{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:12px}
 .bk-wrap[hidden]{display:none}
-.bk-back{position:absolute;inset:0;background:rgba(20,14,26,.62)}
-.bk-book{--bp:#f2e6cc;--bp2:#e8d8b6;--bi:#3a2a22;--bi2:#6e5848;--bf:#a8957a;--bg2:#b0782a;--bs:#4b3a6e;--bh:#e9cf8f;position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr) auto;width:min(1040px,100%);height:min(720px,calc(100dvh - 32px));color:var(--bi)}
-.bk-page{background:var(--bp);padding:18px 20px 22px;min-width:0;overflow:auto;overscroll-behavior:contain;box-shadow:inset 0 0 40px rgba(120,80,30,.12)}
-.bk-page.l{border-radius:10px 0 0 10px;background:linear-gradient(90deg,var(--bp) 88%,var(--bp2))}
-.bk-page.r{border-radius:0 6px 6px 0;background:linear-gradient(270deg,var(--bp) 90%,var(--bp2))}
+.bk-back{position:absolute;inset:0;background:rgba(20,14,26,.66)}
+.bk-book{--bp:#f2e6cc;--bp2:#e3d0aa;--bi:#3a2a22;--bi2:#6e5848;--bf:#a8957a;--bg2:#9a6420;--bs:#4b3a6e;--bh:#e9cf8f;--lea:#6b4228;--lea2:#4a2c1a;position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;width:min(1100px,100%);height:min(760px,calc(100dvh - 24px));color:var(--bi)}
+/* the cover: leather around two facing pages, a fold in the middle and the edges of the other pages underneath */
+.bk-cover{position:relative;display:grid;grid-template-columns:minmax(210px,.8fr) minmax(0,1.3fr);min-height:0;padding:10px 10px 14px;background:linear-gradient(160deg,var(--lea),var(--lea2));border-radius:14px;box-shadow:0 14px 34px rgba(0,0,0,.45),inset 0 0 0 2px rgba(255,220,160,.12)}
+.bk-page{position:relative;background:var(--bp);padding:16px 18px 22px;min-width:0;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--bf) transparent}
+.bk-page.l{border-radius:8px 2px 2px 8px;background:linear-gradient(90deg,var(--bp) 0,var(--bp) 86%,var(--bp2) 100%);box-shadow:-3px 3px 0 -1px #e6d5b3,-6px 6px 0 -2px #cdb68c}
+.bk-page.r{border-radius:2px 8px 8px 2px;background:linear-gradient(270deg,var(--bp) 0,var(--bp) 88%,var(--bp2) 100%);box-shadow:3px 3px 0 -1px #e6d5b3,6px 6px 0 -2px #cdb68c;perspective:900px}
+.bk-cover::after{content:"";position:absolute;top:10px;bottom:14px;left:calc(10px + (100% - 20px) * .8 / 2.1);width:2px;background:rgba(80,50,20,.35);pointer-events:none}
 .bk-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.bk-nav{display:none}
+.bk-backbtn{appearance:none;border:2px solid var(--bi);background:var(--bp);color:var(--bi);font:600 14px var(--font-body);border-radius:8px;padding:6px 12px;min-height:40px;cursor:pointer}
+.bk-backbtn:focus-visible{outline:2px solid var(--bg2);outline-offset:2px}
 .bk-book h2{font-family:var(--font-display);font-size:22px;margin:0;color:var(--bi)}
-.bk-book h3{font-family:var(--font-display);font-size:18px;margin:0 0 4px;color:var(--bi)}
+.bk-book h3{font-family:var(--font-display);font-size:19px;margin:0 0 4px;color:var(--bi)}
 .bk-book .sheet-x{position:static;color:var(--bi);flex:0 0 auto}
 .bk-sub{color:var(--bi2);font-size:14px;margin:2px 0 10px}
-.bk-grp{font:700 13px var(--font-display);letter-spacing:.06em;color:var(--bg2);margin:12px 0 2px;display:flex;justify-content:space-between}
+.bk-grp{font:700 13px var(--font-display);letter-spacing:.06em;color:var(--bg2);margin:14px 0 4px;display:flex;justify-content:space-between;border-bottom:1px solid rgba(154,100,32,.3);padding-bottom:2px}
 .bk-grp small{color:var(--bi2);font-weight:400}
 .bk-list{list-style:none;margin:0;padding:0;display:grid;gap:2px}
-.bk-it{appearance:none;width:100%;text-align:left;border:0;background:transparent;color:var(--bi);font:inherit;cursor:pointer;display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;padding:5px 8px;border-radius:6px;min-height:40px}
+.bk-it{appearance:none;width:100%;text-align:left;border:0;background:transparent;color:var(--bi);font:inherit;cursor:pointer;display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:10px;align-items:center;padding:4px 8px 4px 4px;border-radius:6px;min-height:46px}
 .bk-it:hover{background:rgba(176,120,42,.12)}
 .bk-it[aria-current=true]{background:var(--bh)}
 .bk-it:focus-visible{outline:2px solid var(--bg2)}
-.bk-it .bk-nm{grid-column:2;min-width:0;font-weight:600}
+.bk-it .bk-nm{grid-column:2;min-width:0;font-weight:600;overflow-wrap:anywhere}
 .bk-it .bk-nm small{display:block;color:var(--bi2);font-size:12px;font-weight:400}
-.bk-it .bk-ct{grid-column:3;font-size:13px;color:var(--bi2);font-variant-numeric:tabular-nums}
+.bk-it .bk-nm small svg,.bk-it .bk-nm small img{vertical-align:-2px}
+.bk-it .bk-ct{grid-column:3;font-size:13px;color:var(--bi2);font-variant-numeric:tabular-nums;white-space:nowrap}
 .bk-it .bk-ic{grid-column:1;width:22px;display:grid;place-items:center}
 .bk-it.locked .bk-nm{color:var(--bf)}
-.bk-pic canvas{width:100%;max-width:420px;image-rendering:pixelated;border:2px solid var(--bi);border-radius:4px;display:block;margin:6px 0 12px}
+/* the small picture at the start of each line */
+.bk-th{grid-column:1;width:48px;height:36px;display:block;object-fit:cover;image-rendering:pixelated;border:1.5px solid var(--bi);border-radius:3px;background:var(--bp2)}
+.bk-th.mon{border:0;background:none;width:48px;height:40px;object-fit:contain}
+.bk-th.face{width:38px;height:38px;justify-self:center;background:#e9dcc0}
+.bk-th.q{display:grid;place-items:center;border-style:dashed;border-color:var(--bf);color:var(--bf);font:700 18px var(--font-display);background:transparent}
+.bk-th.q.doc{border-style:solid;border-color:var(--bg2);color:var(--bg2)}
+.bk-th.q svg{width:22px;height:22px}
+.bk-th.dark{filter:brightness(.4) grayscale(.6)}
+.bk-th.sil,.bk-mon.sil{filter:brightness(0) opacity(.45)}
+/* the plate: the big picture at the top of the right page */
+.bk-plate{position:relative;margin:8px 0 14px;max-width:460px;aspect-ratio:4/3;border:2px solid var(--bi);border-radius:4px;overflow:hidden;background:var(--bp2) center/cover no-repeat;image-rendering:pixelated;box-shadow:3px 3px 0 rgba(58,42,34,.18);display:grid;place-items:center}
+.bk-plate > .bk-scn{width:100%;height:100%;display:block;object-fit:cover;image-rendering:pixelated}
+.bk-plate.dark > .bk-scn,.bk-plate.dark{filter:none}
+.bk-plate.dark > .bk-scn{filter:brightness(.38) grayscale(.6)}
+.bk-plate.dark::before{content:"";position:absolute;inset:0;background:rgba(29,22,38,.55)}
+.bk-plate.mons{aspect-ratio:16/8;place-items:end center;background-size:150%;background-position:center 70%}
+.bk-plate.mons::before,.bk-plate.mon::before{content:"";position:absolute;inset:0;background:linear-gradient(transparent 40%,rgba(242,230,204,.35))}
+.bk-plate.mon{aspect-ratio:3/2;place-items:end center}
+.bk-plate.mon .bk-mon{position:relative;width:50%;height:auto;aspect-ratio:6/5;margin-bottom:4%}
+.bk-plate .bk-face{position:absolute;left:10px;bottom:10px;width:26%;max-width:110px;aspect-ratio:1;image-rendering:pixelated;border:2px solid var(--bi);border-radius:4px;background:#e9dcc0;box-shadow:2px 2px 0 rgba(0,0,0,.3)}
+.bk-lock,.bk-q-big{position:absolute;inset:0;display:grid;place-items:center;font:700 56px var(--font-display);color:#f2e6cc;text-shadow:0 2px 0 rgba(0,0,0,.4)}
+.bk-leaf.turn{animation:bkturn .3s ease-out;transform-origin:left center}
+@keyframes bkturn{from{opacity:0;transform:rotateY(-14deg) translateX(10px)}to{opacity:1;transform:none}}
 .bk-say{margin:0 0 6px;font-size:15px}
 .bk-say.n{font-style:italic;color:var(--bi2)}
 .bk-say.epi{font-style:italic;border-left:3px solid var(--bi2);padding-left:8px}
@@ -509,10 +586,10 @@ function refreshBookBtn() {
 .bk-margin{border-left:3px solid var(--bs);padding:4px 10px;margin:12px 0;color:var(--bs);font-size:14px}
 .bk-ex{font-size:12px;color:var(--bi2);font-style:italic}
 .bk-card .rcard{margin:0 auto}
-.bk-mon{width:144px;height:120px;image-rendering:pixelated;display:block;margin:4px 0 6px}
+.bk-mon{width:192px;height:160px;image-rendering:pixelated;display:block}
 .bk-mon.sil{filter:brightness(0) opacity(.45)}
-.bk-stages{display:flex;gap:4px;align-items:flex-end;flex-wrap:wrap}
-.bk-stages .bk-mon{width:96px;height:80px;margin:0}
+.bk-stages{position:relative;display:flex;gap:2%;align-items:flex-end;justify-content:center;width:100%;height:100%;padding:0 4% 4%}
+.bk-stages .bk-mon{width:30%;height:auto;aspect-ratio:6/5;margin:0}
 .bk-lore{border-left:3px solid var(--bg2);padding:2px 10px;margin:8px 0}
 .bk-lore b{font:700 13px var(--font-display);color:var(--bg2);letter-spacing:.03em}
 .bk-lore.off{border-left-style:dashed;border-color:var(--bf)}
@@ -532,28 +609,41 @@ function refreshBookBtn() {
 .bk-seg button{appearance:none;border:2px solid var(--bi);background:transparent;color:var(--bi);font:600 13px var(--font-body);border-radius:14px;padding:2px 10px;cursor:pointer;min-height:32px}
 .bk-seg button[aria-pressed=true]{background:var(--bi);color:var(--bp)}
 .zone-odds .unk{opacity:.7}
-.bk-tabs{display:flex;flex-direction:column;gap:6px;padding-top:22px;margin-left:-2px}
-.bk-tab{appearance:none;border:0;cursor:pointer;width:50px;height:46px;border-radius:0 10px 10px 0;display:grid;place-items:center;color:#fff;opacity:.75;transform:translateX(-6px);transition:transform .15s,opacity .15s;position:relative}
+.bk-tabs{display:flex;flex-direction:column;gap:6px;padding-top:26px;margin-left:-4px}
+.bk-tab{appearance:none;border:0;cursor:pointer;width:50px;height:46px;border-radius:0 10px 10px 0;display:grid;place-items:center;color:#fff;opacity:.8;transform:translateX(-6px);transition:transform .15s,opacity .15s;position:relative}
 .bk-tab svg{width:22px;height:22px}
 .bk-tab[aria-selected=true]{opacity:1;transform:none;box-shadow:2px 2px 0 rgba(0,0,0,.25)}
 .bk-tab:focus-visible{outline:3px solid var(--bh);outline-offset:2px}
 .bk-tab .dot{position:absolute;top:5px;right:6px;width:8px;height:8px;border-radius:50%;background:#ffd25e;box-shadow:0 0 0 2px rgba(0,0,0,.25)}
 .bk-tt{position:absolute;left:56px;white-space:nowrap;background:var(--bp);color:var(--bi);font:600 13px var(--font-body);padding:2px 8px;border-radius:4px;opacity:0;pointer-events:none}
 .bk-tab:hover .bk-tt,.bk-tab:focus-visible .bk-tt{opacity:1}
-@media (prefers-color-scheme:dark){.bk-book{--bp:#2c2620;--bp2:#241f1a;--bi:#ecdcbc;--bi2:#bba68a;--bf:#7d6f5c;--bg2:#e0b060;--bs:#a08ce0;--bh:#4a3d24}}
-@media (max-width:760px){
-  .bk-wrap{padding:0;place-items:stretch}
-  .bk-book{display:flex;flex-direction:column;height:100dvh;width:100%;overflow:auto}
-  .bk-tabs{order:-1;flex-direction:row;padding:8px 8px 0;margin:0;position:sticky;top:0;z-index:1;background:#1d1626}
-  .bk-tab{border-radius:10px 10px 0 0;transform:translateY(4px);width:48px;height:42px}
+@media (prefers-color-scheme:dark){.bk-book{--bp:#2c2620;--bp2:#221d18;--bi:#ecdcbc;--bi2:#bba68a;--bf:#7d6f5c;--bg2:#e0b060;--bs:#a08ce0;--bh:#4a3d24;--lea:#3a2416;--lea2:#24160c}
+  .bk-page.l{box-shadow:-3px 3px 0 -1px #3a332b,-6px 6px 0 -2px #4a4036}.bk-page.r{box-shadow:3px 3px 0 -1px #3a332b,6px 6px 0 -2px #4a4036}}
+/* medium screens (the game window beside a chat, a tablet): ribbons on top, still two facing pages */
+@media (max-width:899px){
+  .bk-wrap{padding:6px}
+  .bk-book{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);height:calc(100dvh - 12px)}
+  .bk-tabs{order:-1;flex-direction:row;padding:0 14px;margin:0 0 -2px;gap:4px;overflow-x:auto;scrollbar-width:none}
+  .bk-tab{border-radius:10px 10px 0 0;transform:translateY(5px);width:46px;height:40px;flex:0 0 auto}
   .bk-tab[aria-selected=true]{transform:none}
   .bk-tt{display:none}
+  .bk-cover{grid-template-columns:minmax(190px,.85fr) minmax(0,1.25fr);padding:8px 8px 12px}
+  .bk-cover::after{left:calc(8px + (100% - 16px) * .85 / 2.1)}
+  .bk-page{padding:14px 14px 20px}
+  .bk-book h2{font-size:18px}
   .bk-stats{grid-template-columns:repeat(3,1fr)}
-  .bk-tabs{overflow-x:auto}
-  .bk-page{overflow:visible;flex:0 0 auto}
-  .bk-tabs{flex:0 0 auto}
-  .bk-page.l{border-radius:0}
-  .bk-page.r{border-radius:0;border-top:2px dashed var(--bf);min-height:50dvh}
+}
+/* phones: one page at a time; picking an entry turns to its page, with a button back to the list */
+@media (max-width:599px){
+  .bk-wrap{padding:0}
+  .bk-book{height:100dvh;width:100%}
+  .bk-tabs{padding:6px 8px 0;background:#1d1626;margin:0}
+  .bk-cover{grid-template-columns:minmax(0,1fr);padding:0;border-radius:0}
+  .bk-cover::after{display:none}
+  .bk-page.l,.bk-page.r{border-radius:0;box-shadow:none}
+  .bk-book.show-page .bk-page.l,.bk-book:not(.show-page) .bk-page.r{display:none}
+  .bk-nav{display:flex;margin:-4px 0 6px}
+  .bk-plate{max-width:none}
 }
 @media (prefers-reduced-motion:reduce){.bk-tab{transition:none}}`;
   (document.body || document.head).appendChild(s);

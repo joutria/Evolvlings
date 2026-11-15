@@ -119,7 +119,7 @@ const RPG_EN = {
     "book.notLivedLong": "An undiscovered encounter in {z}. Nothing more is said.", "book.unasked": "… ?", "book.otherWay": "Another way",
     "book.fork": "The path forks:", "book.end": "How it ended:", "book.comesBack": "This comes back in:", "book.anotherTalk": "another encounter you haven't lived yet",
     "book.times": "lived {n} times", "book.once": "lived once", "book.old": "You lived this before you had the book: only the beginning was kept. If it comes up again, it is written in full.",
-    "book.pickCard": "Pick a card from the list.", "book.pickEsc": "Pick a Writing from the list.", "book.empty": "Nothing is written here yet.",
+    "book.pickCard": "Pick a card from the list.", "book.pickEsc": "Pick a Writing from the list.", "book.empty": "Nothing is written here yet.", "book.back": "Back to the list",
     "grim.desc": "Every card of the Glade. The ones you haven't seen yet show as silhouettes. Complete a whole circle to earn an achievement.",
     "grim.count": "{n} of {m} discovered", "grim.unknown": "Undiscovered card", "grim.boss": "Only a guardian gives it.", "grim.by": "Carried by {mon}.",
     "grim.craft": "Make Common · {c} ∴", "grim.crafted": "You made {card}!", "grim.circle.sol": "Circle of the Sun", "grim.circle.sky": "Circle of the Sky", "grim.circle.lake": "Circle of the Lake", "grim.circle.frost": "Circle of the Frost", "grim.circle.star": "Star",
