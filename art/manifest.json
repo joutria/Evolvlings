@@ -1,5 +1,5 @@
 {
- "v": 927261974,
+ "v": 3019982076,
  "files": [
   {
    "path": "battle/aurora-day.png",
@@ -2660,6 +2660,11 @@
    "path": "maps/vado.png",
    "w": 720,
    "h": 528
+  },
+  {
+   "path": "maps/valley.png",
+   "w": 480,
+   "h": 304
   },
   {
    "path": "objects/bed.png",

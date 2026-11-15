@@ -509,6 +509,9 @@ def main(pack, names):
         for z in ZONES:
             for k in PAUSES: PLACES["pause"](z, k).convert("RGB").resize((256, 192), Image.NEAREST).save(os.path.join(po, z + "-" + k + ".png"))
         print("ok pauses:", len(ZONES) * len(PAUSES))
+    if not names or "valley" in names:          # art/maps/valley.png, 480 x 304: the expedition screen's map
+        PLACES["valley"]().convert("RGB").save(os.path.join(ROOT, "art", "maps", "valley.png"))
+        print("ok valley map")
     if not names or "cards" in names or any(n in CARDS for n in names):   # art/cards/<id>.png, 256 x 192
         co = os.path.join(ROOT, "art", "cards"); os.makedirs(co, exist_ok=True)
         todo = [c for c in CARDS if not names or "cards" in names or c in names]
@@ -516,7 +519,7 @@ def main(pack, names):
             s = CARDS[cid]()
             (s.g if isinstance(s, Scene) else s).convert("RGB").resize((W * 2, H * 2), Image.NEAREST).save(os.path.join(co, cid + ".png"))
         print("ok cards:", len(todo))
-    names = [n for n in names if n not in ("battle", "pause", "cards") and n not in CARDS] if names else names
+    names = [n for n in names if n not in ("battle", "pause", "cards", "valley") and n not in CARDS] if names else names
     if names == []: return
     out = os.path.join(ROOT, "art", "events"); os.makedirs(out, exist_ok=True)
     todo = [e for e in SCENES if not names or e in names or ZONE_OF[e] in names]
