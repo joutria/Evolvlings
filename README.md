@@ -318,3 +318,7 @@ Daily things now pile up for up to 3 days instead of being lost when you skip a 
 | Steps | up to 20 saved | up to 30 saved |
 
 Daily and weekly tasks already kept 2 unfinished days, and the 28-day calendar only moves when you claim it, so neither of them changed.
+
+## Photos
+
+A small camera button in the top-right corner of the game window (`photo.js`) takes a picture of whatever the window shows, adds a strip with your creature's name, its form and the date, and opens a preview with a Save button (on phones you can also press and hold the picture). Browsers that hide canvas pictures for privacy (LibreWolf, Firefox with resistFingerprinting) get a note on how to allow it instead of a blank photo.
