@@ -697,7 +697,7 @@ const STR = {
     "rest.log": "{name} ran out of strength. Tila carried it to the Refuge to rest, and it's back now with its level and its cards. It needs a bit more care.",
     "rest.toast": "{name} rested at the Refuge",
     "jr.title": "Glade journal", "jr.desc": "Every creature you've raised, newest first.", "jr.empty": "No entries yet. Creatures appear here after they leave your care.",
-    "end.released": "released", "end.gone": "wandered off",
+    "end.released": "released", "end.gone": "wandered off", "end.retired": "retired to the Hall of Fame",
     "ch.title": "Three eggs were found in the moss. Pick one to warm up.",
     "ch.lead": "Each kind hatches into a different creature with its own habits. Care for it well and it grows into a bright, healthy adult.",
     "egg.warming": "Warming the {egg}…", "egg.hatched": "It hatched!", "egg.tap": "Tap the egg to keep it warm. It will hatch on its own in a little while too.",
@@ -803,7 +803,7 @@ const STR = {
     "rest.log": "{name} se quedó sin fuerzas. Tila lo llevó a descansar al Refugio y ya está de vuelta, con su nivel y sus cartas. Necesita que lo cuides un poco más.",
     "rest.toast": "{name} descansó en el Refugio",
     "jr.title": "Recuerdos del claro", "jr.desc": "Todas las criaturas que has criado, de la más reciente a la más antigua.", "jr.empty": "Aún no hay nada. Las criaturas aparecen aquí cuando dejan de estar a tu cuidado.",
-    "end.released": "en libertad", "end.gone": "se marchó",
+    "end.released": "en libertad", "end.gone": "se marchó", "end.retired": "se retiró al Salón de la fama",
     "ch.title": "Hay tres huevos entre el musgo. Elige uno para darle calor.",
     "ch.lead": "De cada tipo nace una criatura distinta con sus propias costumbres. Si la cuidas bien, crecerá sana y brillante.",
     "egg.warming": "Calentando el {egg}…", "egg.hatched": "¡Ha eclosionado!", "egg.tap": "Toca el huevo para darle calor. También eclosionará solo dentro de un rato.",
@@ -2015,7 +2015,7 @@ function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (ch) => ({ "&": "&
 function renderAll() { renderStats(); renderLog(); }
 function renderJournal() {
   const j = loadJournal();
-  $("journalList").innerHTML = j.length ? j.map((e) => `<li><span><b>${escapeHtml(e.name)}</b>, ${escapeHtml(e.kind)} (${e.end === "released" ? t("end.released") : t("end.gone")})</span><span>${fmtDur(e.age)}</span></li>`).join("") : `<li><span>${t("jr.empty")}</span><span></span></li>`;
+  $("journalList").innerHTML = j.length ? j.map((e) => `<li><span><b>${escapeHtml(e.name)}</b>, ${escapeHtml(e.kind)} (${e.end === "released" ? t("end.released") : e.end === "retired" ? t("end.retired") : t("end.gone")})</span><span>${fmtDur(e.age)}</span></li>`).join("") : `<li><span>${t("jr.empty")}</span><span></span></li>`;
 }
 function renderSettings() {
   for (const [seg, on] of [["soundSeg", P.sound], ["hapticSeg", P.haptics], ["quietSeg", quietOn()], ["hardSeg", P.hard]]) document.querySelectorAll(`#${seg} button`).forEach((b) => b.setAttribute("aria-pressed", String((b.dataset.v === "1") === !!on)));
@@ -2329,6 +2329,7 @@ requestAnimationFrame(frame);
 <script src="photo.js"></script>
 <script src="discipline.js"></script>
 <script src="accessories.js"></script>
+<script src="elder.js"></script>
 <script src="weather.js"></script>
 <script src="world.js"></script>
 <script src="guide.js"></script>
