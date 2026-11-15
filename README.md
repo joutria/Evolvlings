@@ -340,3 +340,21 @@ A small camera button in the top-right corner of the game window (`photo.js`) ta
 About 1 hatch in 50 is born with rare colours (`S.shiny`): its sprite is turned 150° round the colour wheel and a little brighter, and a ✧ follows its name. Every place that draws your own creature (home from above and from the side, the map walker, battles, mini-games) passes the sprite through `EV.shiny(canvas)` in `index.html`, so wild creatures of the same kind keep their usual colours. The colours are changed on the pixels when the browser allows reading them (`PX.readOk`), with the canvas filter otherwise, and left alone if neither works.
 
 Saving files (photos and the backup copy) goes through `saveFile(name, blob, done)` in `index.html`: inside the claude.ai artifact viewer, where plain download links do nothing, it asks the viewer's `downloads` capability (the viewer confirms the save); everywhere else it uses a normal download link.
+
+## Tantrums and discipline
+
+Now and then, while the game is open, your creature throws a tantrum (`discipline.js`, at most 4 a day, one every 20-50 real minutes). A strip under the status icons offers Cuddle or Ignore. A **real** tantrum has a visible reason (a need under 35, a mess, sickness): comfort it. A **fake** one, when everything is fine, is an act: ignore it, and if you leave it 5 minutes it counts as ignored. The right answer gives +10 Discipline (`S.disc`, 0-100, shown under the age), the wrong one −5. Discipline only helps: every 10 points add 1 to the care average that picks the adult form, and it makes Fun drop up to 10 % more slowly.
+
+## Accessories
+
+Little pixel hats and a scarf (`accessories.js`): leaf cap, wool beanie, bow and flower crown for the head, a scarf for the neck. They are drawn straight onto your creature's sprite wherever it appears (both home views, the map walker, battles, mini-games, photos), through the same `EV.shiny()` pipeline as rare colours (`ownCv` in `index.html` ends in `HOOKS.dress`). Buy them with Chispas in Season → Keepsakes; the flower crown comes from the 54-star Constellation chest, which used to say "coming soon". Saved in `P.cosm.acc`, `P.cosm.head`, `P.cosm.neck`.
+
+## Elders, the Hall of Fame and heirs
+
+`elder.js` (feature plan idea 11, shaped by Jose). Any adult can retire whenever you decide, from the Journal; an adult that has lived 7 game days and reached level 15 is also marked 🌙 Elder. Retiring shows a summary of how its choices changed the Glade (echo lines from `rpg/data-echoes.js` whose flags were set and epilogues that closed during its life, plus trips and guardians; creatures hatched from now on keep a snapshot from birth in `S.snap`), writes it into the Hall of Fame (`P.hof`, at the top of the Journal), gives a Legendary copy of one of its equipped cards, and leaves an heir egg of the same kind. The heir keeps the collection and loadout, starts at a third of its parent's level (up to 10) and has the trait "Legacy of <name>" (+5 % life, strength and defence, +3 % speed in battle, one more percent per generation up to +10 %), added in `ownUnitOpts` through `HOOKS.legacyTal`.
+
+Instead of the heir egg you can pick a creature from the Refuge to take over: it comes home grown up with its level, talents and experience and leaves the Refuge (the name line says "Follows <name>"). Refuge kinds the home game doesn't know get a species entry built from `rpg/data-mons.js`, saved in `S.spDef` and restored at boot.
+
+## Notifications
+
+`notify.js` (feature plan idea 29), off unless turned on in Settings. While the game is open in a background tab, or installed as an app, it catches the creature up every 5 minutes and sends one notice per reason (hungry, bored, tired, dirty, a mess, sick, egg about to hatch); a reason can notify again only after it was seen to (`S.ntf`). Never between 22:00 and 8:00, nothing while it sleeps except sickness. Uses the service worker's `showNotification` when there is one (needed on phones) and `sw.js` focuses the game on a tap. A closed tab can't notify, and the claude.ai viewer blocks notifications; the setting says so.

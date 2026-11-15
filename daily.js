@@ -26,7 +26,7 @@ const TX = {
     "stars.title": "Estrellas y Cofres de Constelación", "stars.sub": "Cada guardián da hasta 3 estrellas según la vida con la que termine el equipo, y otras 3 en Modo Savia. Tienes {n} de {m}.",
     "chest.open": "Abrir", "chest.opened": "Abierto", "chest.soon": "Llegará con los huevos",
     "chest.pick": "Elige una carta", "chest.picked": "¡{card} es tuya!",
-    "r.coins": "{n} Chispas", "r.notes": "{n} Notas", "r.food": "{item}", "r.cardPick": "Carta {g} a elegir", "r.cosm": "Cosmético (próximamente)",
+    "r.coins": "{n} Chispas", "r.notes": "{n} Notas", "r.food": "{item}", "r.cardPick": "Carta {g} a elegir", "r.cosm": "Corona de flores (accesorio)",
     "toast.notes": "+{n} Notas del Canto", "toast.poor": "No tienes Chispas suficientes.",
     "t.feed3": "Dar de comer 3 veces", "t.bath": "Bañar a tu criatura", "t.pet5": "Mimarla 5 veces", "t.play1": "Jugar a cazar estrellas",
     "t.win3": "Ganar 3 combates", "t.trip1": "Terminar una expedición", "t.support1": "Que salte una carta de Soporte del equipo", "t.adv3": "Golpear 3 veces con ventaja de tipo",
@@ -51,7 +51,7 @@ const TX = {
     "stars.title": "Stars and Constellation chests", "stars.sub": "Each guardian gives up to 3 stars depending on the health the team ends with, and 3 more in Savia Mode. You have {n} of {m}.",
     "chest.open": "Open", "chest.opened": "Opened", "chest.soon": "Arrives with eggs",
     "chest.pick": "Pick a card", "chest.picked": "{card} is yours!",
-    "r.coins": "{n} Chispas", "r.notes": "{n} Notes", "r.food": "{item}", "r.cardPick": "{g} card of your choice", "r.cosm": "Cosmetic (coming soon)",
+    "r.coins": "{n} Chispas", "r.notes": "{n} Notes", "r.food": "{item}", "r.cardPick": "{g} card of your choice", "r.cosm": "Flower crown (accessory)",
     "toast.notes": "+{n} Song Notes", "toast.poor": "You don't have enough Chispas.",
     "t.feed3": "Feed 3 times", "t.bath": "Give your creature a bath", "t.pet5": "Cuddle it 5 times", "t.play1": "Play star catch",
     "t.win3": "Win 3 battles", "t.trip1": "Finish an expedition", "t.support1": "Have a team Support card trigger", "t.adv3": "Land 3 hits with type advantage",
@@ -174,7 +174,7 @@ function hasNews() {
   for (const s of d.sets) { if (s.tasks.some((t) => !t.got && isDone(t))) return true; if (!s.lit && s.tasks.every((t) => t.got)) return true; }
   if (d.week.tasks.some((t) => !t.got && isDone(t))) return true;
   if (!d.week.bonus && d.week.tasks.filter((t) => t.got).length >= 4) return true;
-  if (CHESTS.some((c) => !c.cosm && !d.chests[c.at] && totalStars() >= c.at)) return true;
+  if (CHESTS.some((c) => (!c.cosm || EV.ACC) && !d.chests[c.at] && totalStars() >= c.at)) return true;
   return false;
 }
 const totalStars = () => [EV.P.stars, EV.P.starsS].reduce((t, o) => t + Object.values(o || {}).reduce((a, n) => a + n, 0), 0); // normal + Savia Mode
@@ -260,8 +260,9 @@ function exchange() {
 }
 function openChest(at) {
   const d = D(), c = CHESTS.find((x) => x.at === at);
-  if (!c || c.cosm || d.chests[at] || totalStars() < at) return;
+  if (!c || (c.cosm && !EV.ACC) || d.chests[at] || totalStars() < at) return;
   d.chests[at] = 1;
+  if (c.cosm) EV.ACC.give("crown"); // the flower crown (accessories.js)
   if (c.notes) addNotes(c.notes);
   if (c.card && EV.RPG) d.pick = EV.RPG.pickUsable(3, c.card);
   save();
@@ -351,7 +352,7 @@ function render() {
   const ts = totalStars(), max = Object.keys((EV.RPG && EV.RPG.ZONES) || {}).length * 6;
   h += `<div class="dsec"><h3>${esc(tx("stars.title"))}</h3><p class="muted">${esc(tx("stars.sub", { n: ts, m: max }))}</p><div class="dchests">${CHESTS.map((c) => {
     const what = c.notes ? tx("r.notes", { n: c.notes }) : c.card ? tx("r.cardPick", { g: GR() ? GR()[c.card][L()] : "" }) : tx("r.cosm");
-    const opened = d.chests[c.at], can = !opened && !c.cosm && ts >= c.at;
+    const opened = d.chests[c.at], can = !opened && (!c.cosm || !!EV.ACC) && ts >= c.at;
     return `<div class="dch${opened ? " got" : ""}"><b>★ ${c.at}</b><small>${esc(what)}</small>${opened ? `<span class="progress">✓ ${esc(tx("chest.opened"))}</span>` : `<button class="btn${can ? "" : " ghost"}" type="button" data-dchest="${c.at}" ${can ? "" : "disabled"}>${esc(tx("chest.open"))}</button>`}</div>`;
   }).join("")}</div>`;
   if (d.pick && EV.RPG) h += `<h3>${esc(tx("chest.pick"))}</h3><div class="rcards">${d.pick.map((o, i) => EV.RPG.cardHtml(o.id, o.g, { foot: `<div class="rc-btns"><button class="btn" type="button" data-dpick="${i}">${esc(tx("chest.pick"))}</button></div>` })).join("")}</div>`;

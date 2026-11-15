@@ -225,6 +225,7 @@ function cosmHtml() {
   let h = `<p class="muted" style="margin:0">${esc(tx("cosm.sub"))}</p>`;
   h += `<h3 class="cat-title">${esc(tx("cosm.frames"))}</h3>` + row("frame", Object.keys(C.frames), C.frame, "f.");
   h += `<h3 class="cat-title">${esc(tx("cosm.titles"))}</h3>` + row("title", Object.keys(C.titles), C.title, "t.");
+  if (EV.HOOKS.accHtml) h += EV.HOOKS.accHtml(); // hats and scarves (accessories.js)
   const mem = Object.keys(C.mem);
   h += `<h3 class="cat-title">${esc(tx("cosm.mem"))}</h3>` + (mem.length ? `<ul>${mem.map((m) => `<li>🏮 <b>${esc(tx("m." + m))}</b> · <span class="muted">${esc(tx("m." + m + ".d"))}</span></li>`).join("")}</ul>` : `<p class="muted">${esc(tx("cosm.none"))}</p>`);
   return h;
@@ -267,6 +268,7 @@ function onClick(e) {
   else if (d.shelp) help();
   else if (d.slight) light();
   else if (d.sbuy) buy(d.sbuy);
+  else if (d.acc && EV.HOOKS.accClick) { EV.HOOKS.accClick(d.acc); save(); EV.renderAll(); }
   else if (d.scosm != null) { const [k, id] = d.scosm.split(":"); EV.P.cosm[k] = id || null; EV.sfx("tap"); save(); }
 }
 
