@@ -322,3 +322,7 @@ Daily and weekly tasks already kept 2 unfinished days, and the 28-day calendar o
 ## Photos
 
 A small camera button in the top-right corner of the game window (`photo.js`) takes a picture of whatever the window shows, adds a strip with your creature's name, its form and the date, and opens a preview with a Save button (on phones you can also press and hold the picture). Browsers that hide canvas pictures for privacy (LibreWolf, Firefox with resistFingerprinting) get a note on how to allow it instead of a blank photo.
+
+## Rare colours
+
+About 1 hatch in 50 is born with rare colours (`S.shiny`): its sprite is turned 150° round the colour wheel and a little brighter, and a ✧ follows its name. Every place that draws your own creature (home from above and from the side, the map walker, battles, mini-games) passes the sprite through `EV.shiny(canvas)` in `index.html`, so wild creatures of the same kind keep their usual colours. The colours are changed on the pixels when the browser allows reading them (`PX.readOk`), with the canvas filter otherwise, and left alone if neither works.

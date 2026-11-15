@@ -727,7 +727,7 @@ const STR = {
     "log.wokeGrumpy": "Woke {name} early. It's grumpy.", "log.wokeUp": "{name} woke up.", "log.lightsOut": "Lights out. {name} curled up to sleep.",
     "log.herbs": "{name} chewed some bitter herbs and feels better.", "log.used": "Used {item} on {name}.",
     "log.played": (v) => `Played catch with ${v.name}: ${v.n} ${plural(v.n, "starseed", "starseeds")} caught.`,
-    "log.hatched": "{name} hatched from a {egg}. Welcome to the glade!", "log.bought": "Bought {item}.", "log.ach": "Achievement unlocked: {name}.",
+    "log.hatched": "{name} hatched from a {egg}. Welcome to the glade!", "log.shiny": "{name} was born with rare colours! (about 1 in 50)", "shiny.tip": "Rare colours: about 1 hatch in 50", "log.bought": "Bought {item}.", "log.ach": "Achievement unlocked: {name}.",
     "gone.title": "{name} wandered off", "gone.released": "{name} hopped back into the tall grass. It's happy out there, and it'll remember you.",
     "gone.sad": "{name} wasn't feeling cared for and went to look for a cozier glade. Creatures need food, play, rest and a tidy home every few hours. It's fine, there are more eggs in the moss.",
     "gone.btn": "Find a new egg", footer: "Evolvlings is a working name. Progress saves in this browser only; you can save a copy in Settings.",
@@ -833,7 +833,7 @@ const STR = {
     "log.wokeGrumpy": "Despertaste a {name} antes de tiempo y está de mal humor.", "log.wokeUp": "{name} se ha despertado.", "log.lightsOut": "Luces fuera. {name} se acurrucó para dormir.",
     "log.herbs": "{name} masticó unas hierbas amargas y se encuentra mejor.", "log.used": "Usaste {item} con {name}.",
     "log.played": (v) => `Jugaste con ${v.name}: ${v.n} ${plural(v.n, "semilla estrella atrapada", "semillas estrella atrapadas")}.`,
-    "log.hatched": "{name} salió de un {egg}. ¡Bienvenido al claro!", "log.bought": "Compraste {item}.", "log.ach": "Logro conseguido: {name}.",
+    "log.hatched": "{name} salió de un {egg}. ¡Bienvenido al claro!", "log.shiny": "¡{name} nació con colores raros! (pasa más o menos 1 de cada 50)", "shiny.tip": "Colores raros: más o menos 1 de cada 50 crías", "log.bought": "Compraste {item}.", "log.ach": "Logro conseguido: {name}.",
     "gone.title": "{name} se ha marchado", "gone.released": "{name} volvió saltando a la hierba alta. Allí es feliz, y se acordará de ti.",
     "gone.sad": "{name} no se sentía bien cuidado y se fue a buscar un claro más acogedor. Las criaturas necesitan comida, juego, descanso y un hogar limpio cada pocas horas. No pasa nada, hay más huevos entre el musgo.",
     "gone.btn": "Buscar otro huevo", footer: "Evolvlings es un nombre provisional. La partida se guarda solo en este navegador; puedes guardar una copia en Ajustes.",
@@ -1750,7 +1750,38 @@ const PET_N = [20, 28, 36];
 function petSprite(o) {
   const sq = Math.floor(o.t * (o.sleeping ? 1 : 2)) % 2;
   const emo = o.sleeping || o.blink ? "sleep" : o.eat ? "surprised" : o.sick || o.mood < 35 ? "sad" : o.mood > 70 ? "happy" : "normal";
-  return PX.sprite(o.kind, PET_N[o.stage], o.stage, sq, emo, o.form === "scruffy");
+  return shinyCv(PX.sprite(o.kind, PET_N[o.stage], o.stage, sq, emo, o.form === "scruffy"));
+}
+/* Rare colours (feature plan idea 10): about 1 hatch in 50 (S.shiny) wears another palette. Every place that draws
+   YOUR creature passes its sprite through EV.shiny(cv); wild creatures of the same kind keep their colours.
+   The hue turn is done on the pixels when the browser lets us read them (PX.readOk), with the canvas filter
+   otherwise, and left as it is when neither works. Cached per source canvas. */
+const SHINY_TURN = 150, shinyCache = new WeakMap();
+function hueMatrix(deg) {
+  const a = deg * Math.PI / 180, c = Math.cos(a), s = Math.sin(a);
+  return [0.213 + c * 0.787 - s * 0.213, 0.715 - c * 0.715 - s * 0.715, 0.072 - c * 0.072 + s * 0.928,
+    0.213 - c * 0.213 + s * 0.143, 0.715 + c * 0.285 + s * 0.140, 0.072 - c * 0.072 - s * 0.283,
+    0.213 - c * 0.213 - s * 0.787, 0.715 - c * 0.715 + s * 0.715, 0.072 + c * 0.928 + s * 0.072];
+}
+function shinyCv(cv) {
+  if (!cv || !S || !S.shiny) return cv;
+  const hit = shinyCache.get(cv); if (hit) return hit;
+  const out = document.createElement("canvas"); out.width = cv.width; out.height = cv.height;
+  const g = out.getContext("2d"); g.imageSmoothingEnabled = false;
+  try {
+    if (PX.readOk) {
+      g.drawImage(cv, 0, 0);
+      const im = g.getImageData(0, 0, out.width, out.height), d = im.data, m = hueMatrix(SHINY_TURN);
+      for (let i = 0; i < d.length; i += 4) {
+        if (!d[i + 3]) continue;
+        const r = d[i], gg = d[i + 1], b = d[i + 2], k = 1.08; // a touch brighter as well
+        d[i] = Math.min(255, (m[0] * r + m[1] * gg + m[2] * b) * k); d[i + 1] = Math.min(255, (m[3] * r + m[4] * gg + m[5] * b) * k); d[i + 2] = Math.min(255, (m[6] * r + m[7] * gg + m[8] * b) * k);
+      }
+      g.putImageData(im, 0, 0);
+    } else if ("filter" in g) { g.filter = `hue-rotate(${SHINY_TURN}deg) brightness(1.08)`; g.drawImage(cv, 0, 0); }
+    else return cv;
+  } catch (e) { return cv; }
+  shinyCache.set(cv, out); return out;
 }
 function petTop(o) { const n = PET_N[o.stage] + 2; return GROUND - n - Math.round(o.jump / 2) - (o.kind === "fizz" ? 6 + (Math.floor(o.t * 2) % 2) : 0); }
 function drawPetLow(g, cx, o) {
@@ -1928,10 +1959,11 @@ function hatchName() {
   Object.assign(S, {
     phase: "alive", name: n.slice(0, 14), age: 0, stage: 0, form: null, sleeping: false, sick: false,
     messes: [], pendingMess: [], careSum: 0, careN: 0, born: Date.now(),
-    stats: { full: 70, fun: 70, energy: 80, clean: 90, health: 100 }, log: [],
+    stats: { full: 70, fun: 70, energy: 80, clean: 90, health: 100 }, log: [], shiny: Math.random() < 1 / 50,
   });
   P.c.hatched++; P.seen.species[S.species] = 1;
   addLog(t("log.hatched", { name: S.name, egg: spT(S.species).egg.toLowerCase() }));
+  if (S.shiny) { P.c.shiny = (P.c.shiny || 0) + 1; addLog(t("log.shiny", { name: S.name })); toast(t("log.shiny", { name: S.name }), "✧"); }
   save(); showScreen(); say(t("say.hi")); sfx("hatch"); buzz(30); checkAch();
 }
 
@@ -1952,7 +1984,7 @@ function renderStats() {
   if (S.stats.energy < 20 && !S.sleeping) b.push([t("badge.sleepy"), "bad"]);
   if (!b.length && careNow() > 75) b.push([t("badge.happy"), "good"]);
   $("badges").innerHTML = b.map(([tx, c]) => `<span class="badge ${c}">${tx}</span>`).join("");
-  $("petName").textContent = S.name;
+  $("petName").textContent = S.name + (S.shiny ? " ✧" : ""); $("petName").title = S.shiny ? t("shiny.tip") : "";
   $("petSpecies").textContent = `${t("stage." + S.stage)} · ${stageName()}, ${stageDesc()}`;
   const nextAt = S.stage === 0 ? TEEN_AT : S.stage === 1 ? ADULT_AT : null;
   const fromAt = S.stage === 1 ? TEEN_AT : 0, growBar = nextAt ? `<span class="bar age-bar" aria-hidden="true"><i style="width:${Math.round(100 * clamp((S.age - fromAt) / (nextAt - fromAt), 0, 1))}%"></i></span>` : "";
@@ -2198,7 +2230,7 @@ const dayKey = () => (window.EV && EV.DAILY && EV.DAILY.dayKey ? EV.DAILY.dayKey
 const HOOKS = { startCatch: () => startCatch() };
 window.EV = {
   get S() { return S; }, get P() { return P; }, get LANG() { return LANG; },
-  feed, cleanUp, toggleSleep, startPlay, cuddle, ITEMS,
+  feed, cleanUp, toggleSleep, startPlay, cuddle, ITEMS, shiny: shinyCv,
   // what the side scene is showing right now, so the view from above can draw the same hearts, bubbles and speech
   get FX() { return { effects, bubble, petX, foodAnim, mini }; }, miniOn: () => !!mini, itemName, quietOn, STR, ACH, ACH_META, SPECIES, SFX, HOOKS, $, clamp, rand, pick, text, TEXTS, dayKey, t, tone, sfx, buzz, save, saveProfile, flush, slice, SLICES, SAVE_INFO: { SAVE_V, PROFILE_V, MIGRATE, upgrade }, get saveReadOnly() { return readOnly; }, addCoins, spendCoins, toast, addLog,
   renderAll, renderStats, showScreen, stocked, every, applyStatic, escapeHtml, drawCreature, setupCanvas, ell, drawStar, checkAch, togglePanel, closeSheets, stageName, careNow, pixelText,

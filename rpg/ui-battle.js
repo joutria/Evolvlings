@@ -460,7 +460,8 @@ const artBg = (zone, day) => (HAS_ART && !(EVART.classic && EVART.classic()) && 
 function artUnit(u, sq, emo) {
   if (!HAS_ART) return null;
   const dir = emo === "normal" ? "side" : null, st = u.own ? Math.max(0, Math.min(2, u.stage)) : 1;
-  return (u.boss && EVART.guardian(u.kind, sq, emo, dir)) || EVART.creature(u.kind, st, sq, emo, dir);
+  const cv = (u.boss && EVART.guardian(u.kind, sq, emo, dir)) || EVART.creature(u.kind, st, sq, emo, dir);
+  return u.own && EV.shiny ? EV.shiny(cv) : cv; // your creature keeps its rare colours (index.html shinyCv)
 }
 // one scale per creature, measured on its standing side frame, so no frame grows or shrinks; returns { im, y } where y is
 // where the picture's top edge goes, measured from the feet
