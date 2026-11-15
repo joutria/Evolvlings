@@ -697,7 +697,7 @@ const STR = {
     "rest.log": "{name} ran out of strength. Tila carried it to the Refuge to rest, and it's back now with its level and its cards. It needs a bit more care.",
     "rest.toast": "{name} rested at the Refuge",
     "jr.title": "Glade journal", "jr.desc": "Every creature you've raised, newest first.", "jr.empty": "No entries yet. Creatures appear here after they leave your care.",
-    "end.released": "released", "end.gone": "wandered off",
+    "end.released": "released", "end.gone": "wandered off", "end.retired": "retired to the Hall of Fame",
     "ch.title": "Three eggs were found in the moss. Pick one to warm up.",
     "ch.lead": "Each kind hatches into a different creature with its own habits. Care for it well and it grows into a bright, healthy adult.",
     "egg.warming": "Warming the {egg}…", "egg.hatched": "It hatched!", "egg.tap": "Tap the egg to keep it warm. It will hatch on its own in a little while too.",
@@ -803,7 +803,7 @@ const STR = {
     "rest.log": "{name} se quedó sin fuerzas. Tila lo llevó a descansar al Refugio y ya está de vuelta, con su nivel y sus cartas. Necesita que lo cuides un poco más.",
     "rest.toast": "{name} descansó en el Refugio",
     "jr.title": "Recuerdos del claro", "jr.desc": "Todas las criaturas que has criado, de la más reciente a la más antigua.", "jr.empty": "Aún no hay nada. Las criaturas aparecen aquí cuando dejan de estar a tu cuidado.",
-    "end.released": "en libertad", "end.gone": "se marchó",
+    "end.released": "en libertad", "end.gone": "se marchó", "end.retired": "se retiró al Salón de la fama",
     "ch.title": "Hay tres huevos entre el musgo. Elige uno para darle calor.",
     "ch.lead": "De cada tipo nace una criatura distinta con sus propias costumbres. Si la cuidas bien, crecerá sana y brillante.",
     "egg.warming": "Calentando el {egg}…", "egg.hatched": "¡Ha eclosionado!", "egg.tap": "Toca el huevo para darle calor. También eclosionará solo dentro de un rato.",
@@ -1169,7 +1169,7 @@ function step(dt, offline, away) {
   s.full = clamp(s.full - PER_MIN.full * r.full * dt * (sl ? 0.5 : 1));
   // the weather only ever slows the decline (weather.js; design rule 2)
   const wm = (k) => (!offline && window.EV && window.EV.WEATHER ? window.EV.WEATHER.mul(k) : 1);
-  s.fun = clamp(s.fun - PER_MIN.fun * r.fun * dt * (sl ? 0.3 : 1) * (S.sick ? 1.5 : 1) * wm("fun"));
+  s.fun = clamp(s.fun - PER_MIN.fun * r.fun * dt * (sl ? 0.3 : 1) * (S.sick ? 1.5 : 1) * wm("fun") * (1 - (S.disc || 0) / 1000)); // discipline.js: up to 10 % slower
   s.clean = clamp(s.clean - (PER_MIN.clean * r.clean + S.messes.length * 0.12) * dt);
   if (sl) s.energy = clamp(s.energy + 0.55 * dt);
   else s.energy = clamp(s.energy - PER_MIN.energy * r.energy * dt * wm("energy"));
@@ -1233,7 +1233,7 @@ function grow(offline) {
   const before = stageName();
   S.stage++;
   if (S.stage === 2) {
-    const avg = S.careN ? S.careSum / S.careN : 50;
+    const avg = (S.careN ? S.careSum / S.careN : 50) + (S.disc || 0) / 10; // discipline (discipline.js) adds up to 10
     S.form = avg >= 58 ? "bright" : "scruffy";
     P.seen.forms[S.species + ":" + S.form] = 1; P.c.adults++;
     addCoins(S.form === "bright" ? 70 : 40, offline);
@@ -1360,6 +1360,7 @@ function cuddle() {
   const now = performance.now();
   if (now - lastCuddle > 400) { P.c.cuddles++; sfx("chirp"); buzz(12); }
   lastCuddle = now;
+  if (HOOKS.cuddled) HOOKS.cuddled(); // discipline.js: comforting answers a tantrum
   save(); renderStats(); checkAch();
 }
 // Play opens the mini-game chooser (minigames.js); the star catch below is one of its games
@@ -1750,7 +1751,12 @@ const PET_N = [20, 28, 36];
 function petSprite(o) {
   const sq = Math.floor(o.t * (o.sleeping ? 1 : 2)) % 2;
   const emo = o.sleeping || o.blink ? "sleep" : o.eat ? "surprised" : o.sick || o.mood < 35 ? "sad" : o.mood > 70 ? "happy" : "normal";
-  return shinyCv(PX.sprite(o.kind, PET_N[o.stage], o.stage, sq, emo, o.form === "scruffy"));
+  let sp = null;
+  try { sp = PX.sprite(o.kind, PET_N[o.stage], o.stage, sq, emo, o.form === "scruffy"); } catch (e) { sp = null; }
+  // kinds the drawn library does not know (a Refuge creature brought home) use the creature sprites
+  if (!sp && window.EVS) try { sp = EVS.sprite(o.kind, PET_N[o.stage], o.stage, sq, emo, o.form === "scruffy"); } catch (e) { sp = null; }
+  if (!sp) { sp = document.createElement("canvas"); sp.width = sp.height = PET_N[o.stage] + 2; }
+  return ownCv(sp);
 }
 /* Rare colours (feature plan idea 10): about 1 hatch in 50 (S.shiny) wears another palette. Every place that draws
    YOUR creature passes its sprite through EV.shiny(cv); wild creatures of the same kind keep their colours.
@@ -1763,6 +1769,8 @@ function hueMatrix(deg) {
     0.213 - c * 0.213 + s * 0.143, 0.715 + c * 0.285 + s * 0.140, 0.072 - c * 0.072 - s * 0.283,
     0.213 - c * 0.213 - s * 0.787, 0.715 - c * 0.715 + s * 0.715, 0.072 + c * 0.928 + s * 0.072];
 }
+// every sprite of YOUR creature: rare colours first, then what it wears (accessories.js HOOKS.dress)
+function ownCv(cv) { const o = shinyCv(cv); return HOOKS.dress ? HOOKS.dress(o) : o; }
 function shinyCv(cv) {
   if (!cv || !S || !S.shiny) return cv;
   const hit = shinyCache.get(cv); if (hit) return hit;
@@ -1921,7 +1929,7 @@ function showScreen() {
 let eggCanvases = [];
 function renderEggs() {
   const box = $("eggs"); box.innerHTML = ""; eggCanvases = [];
-  for (const k of Object.keys(SPECIES)) {
+  for (const k of Object.keys(SPECIES).filter((k) => !SPECIES[k].synthetic)) {
     const sp = spT(k);
     const b = document.createElement("button"); b.type = "button"; b.className = "egg-card"; b.id = "egg_" + k;
     const cv = document.createElement("canvas"); const cc = setupCanvas(cv, 120, 140);
@@ -1989,6 +1997,7 @@ function renderStats() {
   const nextAt = S.stage === 0 ? TEEN_AT : S.stage === 1 ? ADULT_AT : null;
   const fromAt = S.stage === 1 ? TEEN_AT : 0, growBar = nextAt ? `<span class="bar age-bar" aria-hidden="true"><i style="width:${Math.round(100 * clamp((S.age - fromAt) / (nextAt - fromAt), 0, 1))}%"></i></span>` : "";
   $("petAge").innerHTML = `${t("age.age", { d: fmtDur(S.age) })}<br>${nextAt ? t("age.grows", { d: fmtDur(Math.max(0, nextAt - S.age)) }) + growBar : t("age.grown")}${S.speed > 1 ? `<br>${t("age.speed", { n: S.speed })}` : ""}`;
+  if (HOOKS.statsDrawn) HOOKS.statsDrawn();
   const sl = S.sleeping, busy = !!mini;
   $("aFeed").disabled = sl || busy; $("aPlay").disabled = sl || busy; $("aClean").disabled = busy;
   $("aHeal").disabled = busy; $("aPet").disabled = sl || busy; $("aSleep").disabled = busy; $("aItems").disabled = busy;
@@ -2011,7 +2020,7 @@ function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (ch) => ({ "&": "&
 function renderAll() { renderStats(); renderLog(); }
 function renderJournal() {
   const j = loadJournal();
-  $("journalList").innerHTML = j.length ? j.map((e) => `<li><span><b>${escapeHtml(e.name)}</b>, ${escapeHtml(e.kind)} (${e.end === "released" ? t("end.released") : t("end.gone")})</span><span>${fmtDur(e.age)}</span></li>`).join("") : `<li><span>${t("jr.empty")}</span><span></span></li>`;
+  $("journalList").innerHTML = j.length ? j.map((e) => `<li><span><b>${escapeHtml(e.name)}</b>, ${escapeHtml(e.kind)} (${e.end === "released" ? t("end.released") : e.end === "retired" ? t("end.retired") : t("end.gone")})</span><span>${fmtDur(e.age)}</span></li>`).join("") : `<li><span>${t("jr.empty")}</span><span></span></li>`;
 }
 function renderSettings() {
   for (const [seg, on] of [["soundSeg", P.sound], ["hapticSeg", P.haptics], ["quietSeg", quietOn()], ["hardSeg", P.hard]]) document.querySelectorAll(`#${seg} button`).forEach((b) => b.setAttribute("aria-pressed", String((b.dataset.v === "1") === !!on)));
@@ -2238,7 +2247,7 @@ const dayKey = () => (window.EV && EV.DAILY && EV.DAILY.dayKey ? EV.DAILY.dayKey
 const HOOKS = { startCatch: () => startCatch() };
 window.EV = {
   get S() { return S; }, get P() { return P; }, get LANG() { return LANG; },
-  feed, cleanUp, toggleSleep, startPlay, cuddle, ITEMS, shiny: shinyCv, saveFile,
+  feed, cleanUp, toggleSleep, startPlay, cuddle, catchUp, ITEMS, shiny: ownCv, saveFile,
   // what the side scene is showing right now, so the view from above can draw the same hearts, bubbles and speech
   get FX() { return { effects, bubble, petX, foodAnim, mini }; }, miniOn: () => !!mini, itemName, quietOn, STR, ACH, ACH_META, SPECIES, SFX, HOOKS, $, clamp, rand, pick, text, TEXTS, dayKey, t, tone, sfx, buzz, save, saveProfile, flush, slice, SLICES, SAVE_INFO: { SAVE_V, PROFILE_V, MIGRATE, upgrade }, get saveReadOnly() { return readOnly; }, addCoins, spendCoins, toast, addLog,
   renderAll, renderStats, showScreen, stocked, every, applyStatic, escapeHtml, drawCreature, setupCanvas, ell, drawStar, checkAch, togglePanel, closeSheets, stageName, careNow, pixelText,
@@ -2248,6 +2257,8 @@ window.EV = {
 LANG = P.lang || ((navigator.language || "en").toLowerCase().startsWith("es") ? "es" : "en");
 applyStatic(); renderSettings();
 S = load() || freshState();
+// a Refuge creature brought home as the main one (elder.js) carries its own species entry
+if (S.spDef && S.species && !SPECIES[S.species]) { SPECIES[S.species] = S.spDef.sp; for (const lg of ["es", "en"]) if (STR[lg] && STR[lg].sp) STR[lg].sp[S.species] = S.spDef[lg]; }
 if (S.phase === "gone" && !S.goneName) S = freshState();
 if (S.phase === "alive") { P.seen.species[S.species] = 1; if (S.stage === 2 && S.form) P.seen.forms[S.species + ":" + S.form] = 1; }
 $("speedSel").value = String(S.speed || 1);
@@ -2323,6 +2334,10 @@ requestAnimationFrame(frame);
 <script src="ach.js"></script>
 <script src="minigames.js"></script>
 <script src="photo.js"></script>
+<script src="discipline.js"></script>
+<script src="accessories.js"></script>
+<script src="elder.js"></script>
+<script src="notify.js"></script>
 <script src="weather.js"></script>
 <script src="world.js"></script>
 <script src="guide.js"></script>
