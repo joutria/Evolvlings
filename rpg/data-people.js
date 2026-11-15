@@ -83,6 +83,13 @@
     nasa: P(["Abuela Nasa", "Grandma Nasa"], ["Abuela Nasa", "Nasa"], "Anciana de la barca", "la anciana de la barca", "Old woman in the boat", "the old woman in the boat", ["Grandma Nasa", "Nasa"]),
     cardo: P(["Cardo, aguador", "Cardo, water seller"], ["Cardo"], "Aguador del Prado", "el aguador del Prado", "Meadow water seller", "the Meadow water seller"),
     orilla: P(["Orilla"], ["Orilla"], "Lectora del cuaderno", "la lectora del cuaderno", "Notebook reader", "the notebook reader"),
+    // era 2, La Calma (rpg/events-era2.js)
+    cirio: P(["Cirio, guarda del tablón", "Cirio, notice-board warden"], ["Cirio"], "Guarda del tablón", "el guarda del tablón", "Notice-board warden", "the notice-board warden"),
+    umbria: P(["Umbría"], ["Umbría"], "Madre de la Sombra", "la madre de la Sombra", "Shadow mother", "the Shadow mother"),
+    destello: P(["Lucerna Destello"], ["Lucerna Destello", "Destello", "Lucerna"], "Matriarca nueva", "la matriarca nueva", "New matriarch", "the new matriarch"),
+    brida: P(["Brida, capataz", "Brida, forewoman"], ["Brida"], "Capataz del casco", "la capataz del casco", "Forewoman in a helmet", "the forewoman in a helmet"),
+    ceniza: P(["Ceniza"], ["Ceniza"], "Muchacha de la capucha", "la muchacha de la capucha", "Hooded girl", "the hooded girl"),
+    lobrego: P(["Rey Lóbrego", "King Lóbrego"], ["Rey Lóbrego", "Lóbrego"], "Rey de la Corte", "el rey de la Corte", "King of the Court", "the king of the Court", ["King Lóbrego", "Lóbrego"]),
     // named by others in the conversations and on the cards, never speakers themselves
     ola: P([], ["Ola"], "Hermana del lago", "la hermana del lago", "Sister from the lake", "the sister from the lake"),
     coplo: P([], ["Coplo"], "Cantor de la plaza", "el cantor de la plaza", "Square singer", "the square singer"),
@@ -183,6 +190,27 @@
     diario: ["El cuaderno de hule", "The oilcloth notebook"],
     cara: ["La muchacha del agua", "The girl in the water"],
     flotan: ["Las barcas flotan", "The boats float"],
+    // era 2, La Calma
+    "e2-ley": ["Cuatro clavos", "Four nails"],
+    "e2-coro": ["El coro del último farol", "The choir under the last lantern"],
+    "e2-velada": ["La noche más larga", "The longest night"],
+    "e2-tubos": ["Tubos más largos", "Longer tubes"],
+    "e2-brida": ["Se buscan cavadores", "Diggers wanted"],
+    "e2-fruta": ["Demasiada fruta", "Too much fruit"],
+    "e2-seto": ["El abrazo seco", "The dry embrace"],
+    "e2-bajan": ["Los que bajan", "Those coming down"],
+    "e2-cefira": ["Tres sillas", "Three chairs"],
+    "e2-vuelta": ["La niebla no sale", "The mist won't come"],
+    "e2-nombres": ["Tres nombres en la plaza", "Three names in the square"],
+    "e2-ciego": ["El lago ciego", "The blind lake"],
+    "e2-mudo": ["Una Estrella en la red", "A Star in the net"],
+    "e2-noche": ["Golpe, nombre, silencio", "Strike, name, silence"],
+    "e2-pozo": ["El Pozo Ciego", "The Blind Well"],
+    "e2-setas": ["Las setas grises", "The grey mushrooms"],
+    "e2-oyen": ["El círculo del Turno", "The Watch circle"],
+    "e2-estatuas": ["Cuatro bocas abiertas", "Four open mouths"],
+    "e2-coros": ["Cuatro coros", "Four choirs"],
+    "e2-final": ["La Raíz en Vela", "The Wakeful Root"],
   };
   const BY_WHO = {};
   for (const id in PEOPLE) for (const w of PEOPLE[id].who) BY_WHO[w] = id;

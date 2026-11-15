@@ -68,10 +68,13 @@ const evTitle = (id) => { const t = window.EVPEOPLE && EVPEOPLE.TITLES[id]; retu
 const zoneLabel = (z) => (z === "common" ? bt("common") : zt("name", null, z));
 // the endings of a conversation: nodes with "end"
 const evEnds = (ev) => Object.keys(ev.nodes).filter((n) => ev.nodes[n].end);
+// conversations of an era the Glade has not reached yet stay out of the Diary (rpg/ui-eras.js)
+const evLater = (ev) => ((ev.need && ev.need.era) || 1) > (window.EVERA ? EVERA.now() : 1);
 function diaryCounts(z) {
   const D = diarySlice(); let lived = 0, ends = 0, seen = 0, all = 0;
   for (const id in TALK[z]) {
     const ev = TALK[z][id], R = D[z + "/" + id], E = evEnds(ev);
+    if (!R && evLater(ev)) continue;
     all++; ends += E.length;
     if (R) { lived++; seen += E.filter((n) => R.v[n]).length; }
   }
@@ -87,6 +90,7 @@ function diaryList() {
     const ids = Object.keys(TALK[z]).sort((a, b) => ((D[z + "/" + a] || {}).t || 1e9) - ((D[z + "/" + b] || {}).t || 1e9));
     for (const id of ids) {
       const k = z + "/" + id, R = D[k], ev = TALK[z][id], E = evEnds(ev);
+      if (!R && evLater(ev)) continue;
       if (!R) { h += `<li><button type="button" class="bk-it locked" data-bksel="${k}"${BK.sel.diario === k ? ' aria-current="true"' : ""}><span class="bk-th q">?</span><span class="bk-nm">???<small>${esc(bt("notLived"))}</small></span><span class="bk-ct">0 / ${E.length}</span></button></li>`; continue; }
       h += `<li><button type="button" class="bk-it" data-bksel="${k}"${BK.sel.diario === k ? ' aria-current="true"' : ""}>${thumbBox("ev:" + id + ":" + z)}<span class="bk-nm">${esc(evTitle(id))}<small>${esc(tx("talk.k." + ev.kind))}</small></span><span class="bk-ct">${E.filter((n) => R.v[n]).length} / ${E.length}</span></button></li>`;
     }

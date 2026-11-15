@@ -32,10 +32,22 @@
     return 1;
   }
 
-  function needOk(need, P) {
+  // the ten eras (rpg/data-eras.js): the Glade lives in one era at a time (P.era, 1 by default). In era 1 the layer
+  // counts the guardians ever beaten (P.cleared); in a later era, only those beaten since it began (P.eraWins).
+  const eraOf = (P) => (P && P.era) || 1;
+  const layerOf = (P) => (eraOf(P) > 1 ? loreLayer(P && P.eraWins) : loreLayer(P && P.cleared));
+  // need.era: the era an event belongs to (a number, or [first, last]); events without one belong to era 1.
+  // opt.anyEra skips that check (the common events of the road: campfires, chests...).
+  // need.eraWin: a zone whose guardian you must have beaten in this era.
+  function needOk(need, P, opt) {
+    if (!(opt && opt.anyEra)) {
+      const e = eraOf(P), ne = (need && need.era) || 1;
+      if (Array.isArray(ne) ? e < ne[0] || e > ne[1] : e !== ne) return false;
+    }
     if (!need) return true;
     const flags = (P && P.flags) || {};
-    if (need.layer && loreLayer(P && P.cleared) < need.layer) return false;
+    if (need.layer && layerOf(P) < need.layer) return false;
+    if (need.eraWin && !((P && P.eraWins) || {})[need.eraWin]) return false;
     if (need.flag && !flags[need.flag]) return false;
     if (need.anyFlag && !need.anyFlag.some((f) => flags[f])) return false;
     return true;
@@ -336,7 +348,7 @@
     return pick ? pick[lang === "en" ? "en" : "es"] : "";
   }
 
-  const api = { loreLayer, needOk, LORE_EVENTS, LORE_EVT, LORE_ESCRITOS, LORE_HILOS, LORE_EPILOGOS, LORE_LOADING, loadingLine };
+  const api = { loreLayer, needOk, eraOf, layerOf, LORE_EVENTS, LORE_EVT, LORE_ESCRITOS, LORE_HILOS, LORE_EPILOGOS, LORE_LOADING, loadingLine };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.EvoLore = api;
 })(typeof window !== "undefined" ? window : this);

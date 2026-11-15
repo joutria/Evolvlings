@@ -145,7 +145,7 @@ function finish(res) {
   if (coins > 0) EV.addCoins(coins, true);
   X.keyGot = null;
   if (res === "win" && !X.deep && !X.echo && !((P.cleared || {})[X.zone])) for (const k in KEYS) if (KEYS[k].from === X.zone && !(P.keys || {})[k]) { P.keys = P.keys || {}; P.keys[k] = 1; X.keyGot = k; }
-  if (res === "win" && !X.deep) { P.c.guard = (P.c.guard || 0) + 1; P.cleared = P.cleared || {}; if (!X.echo) P.cleared[X.zone] = (P.cleared[X.zone] || 0) + 1; }
+  if (res === "win" && !X.deep) { P.c.guard = (P.c.guard || 0) + 1; P.cleared = P.cleared || {}; if (!X.echo) { P.cleared[X.zone] = (P.cleared[X.zone] || 0) + 1; if (window.EVERA) EVERA.win(X.zone); } }
   X.epiNew = res === "win" && !X.deep && !X.echo ? epiClose() : [];
   X.deepRew = X.deep && res === "win" ? deepWin(X.deep, X.stars || 1) : null;
   // the Guardian's Echo: Stardust and Chispas instead of zone stars
