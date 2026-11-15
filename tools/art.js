@@ -50,7 +50,8 @@ function halfAlpha(p) {
 const RULES = {
   creatures: { ids: kinds, check: (p) => p.w % 64 === 0 && p.h % 64 === 0 && p.w <= 640 && p.h <= 192, size: "celdas de 64 px, hasta 640 × 192" },
   guardians: { ids: bosses, check: (p) => p.w % 96 === 0 && p.h === 96 && p.w <= 960, size: "celdas de 96 px, una fila, hasta 960 × 96" },
-  maps: { ids: maps.flatMap((m) => [m, m + "-front"]), check: (p) => p.w === 720 && p.h === 528, size: "720 × 528" },
+  // the home maps, and the valley on the expedition screen (tools/ninja-scenes.py valley)
+  maps: { ids: maps.flatMap((m) => [m, m + "-front"]).concat(["valley"]), check: (p, id) => (id === "valley" ? p.w === 480 && p.h === 304 : p.w === 720 && p.h === 528), size: "720 × 528 (valley: 480 × 304)" },
   battle: { ids: zones.flatMap((z) => [z + "-day", z + "-night"]), check: (p) => p.w === 360 && p.h === 240, size: "360 × 240" },
   pause: { ids: zones.flatMap((z) => pauseKinds.map((k) => z + "-" + k)), check: (p) => p.w === 256 && p.h === 192, size: "256 × 192" },
   objects: { ids: objKinds, check: (p) => p.w <= 64 && p.h <= 64, size: "hasta 64 × 64 (16 px por casilla)" },
@@ -69,7 +70,7 @@ if (fs.existsSync(dir)) for (const folder of fs.readdirSync(dir)) {
     const id = f.slice(0, -4), p = png(path.join(fd, f));
     if (!p) { warns.push(`art/${folder}/${f}: el archivo no es un PNG válido`); continue; }
     if (rule.ids && !rule.ids.includes(id)) warns.push(`art/${folder}/${f}: el juego no conoce «${id}»`);
-    if (!rule.check(p)) warns.push(`art/${folder}/${f}: mide ${p.w} × ${p.h}, debería ser ${rule.size}`);
+    if (!rule.check(p, id)) warns.push(`art/${folder}/${f}: mide ${p.w} × ${p.h}, debería ser ${rule.size}`);
     if (folder === "creatures" || folder === "guardians") { const n = halfAlpha(p); if (n) warns.push(`art/${folder}/${f}: ${n} píxeles semitransparentes (deben ser opacos o vacíos)`); }
     files.push({ path: folder + "/" + f, w: p.w, h: p.h });
   }
