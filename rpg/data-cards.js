@@ -227,20 +227,27 @@ const CARDS = {
   firstnote:{ type: "star", by: "unisona", story: true, p: { teamCrit: 6 }, a: { cd: 4, tgt: "allies", shield: [20, 2] }, s: { on: "allyLow", pct: 40, fx: { tgt: "theAlly", st: ["guard", 2, 1, 20] } } },
 };
 const DROP_POOL = Object.keys(CARDS).filter((k) => !CARDS[k].boss && !CARDS[k].story);
-// Which card types each home creature can use: its own type, two from its circle or close to it,
-// and one for coverage. Adults also learn their evolution's type, and a creature can always use its own signature cards.
+// The one rule for which cards a creature can use, for your creature at home and for Refuge companions alike:
+// its own signature cards, Star cards, and its types. Lumo, Fizz and Pebb have a hand-picked list (their own type,
+// two from its circle or close to it, and one for coverage); every other creature uses the three types of its circle.
+// Adults also learn their evolution's type.
 const COMPAT = {
   lumo: ["light", "fire", "plant", "bolt"],
   fizz: ["air", "bolt", "music", "dream"],
   pebb: ["stone", "water", "shadow", "ice"],
 };
-function canUse(species, form, id) {
-  const c = CARDS[id], list = COMPAT[species];
-  if (!c || !list) return true;
-  if (c.type === "star") return true; // Star cards fit every creature
-  if (c.by === species || list.includes(c.type)) return true;
-  const adult = MONS[species] && MONS[species].adult && form && MONS[species].adult[form];
-  return adult === c.type;
+function typesFor(kind, form) {
+  const m = MONS[kind]; if (!m) return [];
+  const circ = TYPES[m.types[0]] && TYPES[m.types[0]].circle;
+  const ts = COMPAT[kind] ? COMPAT[kind].slice() : Object.keys(TYPES).filter((t) => circ && TYPES[t].circle === circ);
+  const adult = m.adult && form && m.adult[form];
+  if (adult && !ts.includes(adult)) ts.push(adult);
+  return ts;
+}
+function canUse(kind, form, id) {
+  const c = CARDS[id]; if (!c) return false;
+  if (!MONS[kind]) return true;
+  return c.by === kind || c.type === "star" || typesFor(kind, form).includes(c.type);
 }
 const UPGRADE_N = 5; // 5 cards of one grade make 1 of the next
 

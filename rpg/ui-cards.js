@@ -102,7 +102,7 @@ function cfPass(scope, I, key) {
   if (F.fx.size) { const f = fxCats(id); for (const k of F.fx) if (!f.has(k)) return false; }
   for (const k of F.only) {
     if (k === "fav" && !cfSlice().fav[id]) return false;
-    if (k === "usable" && !usable(id)) return false;
+    if (k === "usable" && !anyFits(id)) return false;
     if (k === "inUse" && !list.some((c) => I.eqSet.has(c.uid))) return false;
     if (k === "fuse") { const n = {}; for (const c of list) n[c.g] = (n[c.g] || 0) + 1; if (!Object.keys(n).some((g) => n[g] >= UPGRADE_N && +g < GRADES.length - 1)) return false; }
   }
@@ -146,6 +146,24 @@ function cfClick(t, rerender) {
   return false;
 }
 let colCard = null;
+// your Refuge creatures that can carry a card (the same rule as your own creature: canUse in rpg/data-cards.js),
+// the card's owner first, then by level
+function fitComps(id) {
+  const ro = (EV.P.eg && EV.P.eg.roster) || {}, by = CARDS[id] && CARDS[id].by;
+  return Object.keys(ro).filter((k) => compFits(k, id)).sort((a, b) => (b === by) - (a === by) || ro[b].lvl - ro[a].lvl);
+}
+const anyFits = (id) => usable(id) || fitComps(id).length > 0;
+// card view: give the card to a Refuge creature from here, one button per slot
+function giveHtml(id) {
+  const ks = fitComps(id); if (!ks.length) return "";
+  const by = CARDS[id].by, rows = ks.slice(0, 5).map((k) => {
+    const r = rosterOf(k), on = ["a", "p", "s"].find((sl) => (compCard(k, sl) || {}).id === id);
+    const bs = ["a", "p", "s"].map((sl) => `<button class="btn ghost${on === sl ? " on" : ""}" type="button" data-give="${k}:${sl}" data-gid="${id}" ${r.lvl < SLOT_LVL[sl] || on === sl ? "disabled" : ""}>${esc(tx("slot." + sl))}</button>`).join("");
+    return `<div class="rc-giverow"><span class="rc-givenm">${esc(monName(k))} <small>${esc(tx("cards.lvl", { n: r.lvl }))}</small>${on ? ` <i>${esc(tx("cards.carries"))}</i>` : ""}</span><span class="rc-btns">${bs}</span></div>`;
+  }).join("");
+  const usual = ks.includes(by) ? `<p class="muted">${esc(tx("cards.usual", { name: monName(by) }))}</p>` : "";
+  return `<div class="rc-give"><p class="sub">${esc(tx("cards.whoGive"))}</p>${rows}${usual}</div>`;
+}
 function renderCards() {
   const el = $("cardsPanel"); if (!el) return;
   const R = rpgState(), P = EV.P, S = EV.S;
@@ -169,7 +187,7 @@ function renderCards() {
   const groups = {};
   for (const c of P.cards) (groups[c.id] = groups[c.id] || []).push(c);
   const bestG = (id) => Math.max(...groups[id].map((c) => c.g));
-  const ids = Object.keys(groups).sort((a, b) => (usable(b) - usable(a)) || bestG(b) - bestG(a) || cardName(a).localeCompare(cardName(b)));
+  const ids = Object.keys(groups).sort((a, b) => (anyFits(b) - anyFits(a)) || bestG(b) - bestG(a) || cardName(a).localeCompare(cardName(b)));
   const eqSet = new Set([...(R ? Object.values(R.eq).filter(Boolean) : []), ...compUids()]);
   html = html.replace(esc(tx("cards.owned", { n: P.cards.length })), esc(tx("cards.owned", { n: ids.length })));
   colCard = (id) => {
@@ -193,14 +211,14 @@ function renderCards() {
     const spare = list.filter((c) => !eqSet.has(c.uid)).sort((a, b) => a.g - b.g);
     if (list.length > 1 && spare.length) btns.push(`<button class="btn ghost" type="button" data-dust="${spare[0].uid}">${esc(tx("dust.btn", { n: DUST_OF(spare[0].g) }))}</button>`);
     for (const gi of gs.slice().reverse()) if (counts[gi] >= UPGRADE_N && gi < GRADES.length - 1) btns.push(`<button class="btn" type="button" data-fuse="${id}:${gi}">${esc(tx("cards.fuse", { n: UPGRADE_N, a: GRADES[gi][L()], g: GRADES[gi + 1][L()] }))}</button>`);
-    return cardHtml(id, g, { count: list.length, foot: `${copies}${cantNote(id)}${btns.length ? `<div class="rc-btns">${btns.join("")}</div>` : ""}` });
+    return cardHtml(id, g, { count: list.length, foot: `${copies}${cantNote(id)}${btns.length ? `<div class="rc-btns">${btns.join("")}</div>` : ""}${giveHtml(id)}` });
   };
   // the collection is a grid of thumbnails; tapping one opens the whole card with its buttons
   if (ids.length) html += fuseAllBtn() + cfFilterHtml("col");
   const favs = cfSlice().fav;
   html += `<div class="ctiles">${ids.map((id) => {
     const g = bestG(id), n = groups[id].length, inUse = groups[id].some((c) => eqSet.has(c.uid));
-    return `<button type="button" class="ctile${usable(id) ? "" : " cant"}" data-cview="${id}" aria-label="${esc(cardName(id))}">${favs[id] ? `<span class="ct-fav" title="${esc(tx("cf.only.fav"))}">★</span>` : ""}${thumbHtml(id, g)}<span class="ct-name">${esc(cardName(id))}</span><span class="ct-meta">${gradeChip(g)}${n > 1 ? ` <b>×${n}</b>` : ""}${inUse ? ` <i>${esc(tx("cards.inUse"))}</i>` : ""}</span></button>`;
+    return `<button type="button" class="ctile${anyFits(id) ? "" : " cant"}" data-cview="${id}" aria-label="${esc(cardName(id))}">${favs[id] ? `<span class="ct-fav" title="${esc(tx("cf.only.fav"))}">★</span>` : ""}${thumbHtml(id, g)}<span class="ct-name">${esc(cardName(id))}</span><span class="ct-meta">${gradeChip(g)}${n > 1 ? ` <b>×${n}</b>` : ""}${inUse ? ` <i>${esc(tx("cards.inUse"))}</i>` : ""}</span></button>`;
   }).join("")}</div>`;
   el.innerHTML = html;
   CFX.col = { keys: ids, id: (k) => k, cards: (k) => groups[k], eqSet, box: el.querySelector(".ctiles"), attr: "data-cview" };
@@ -330,6 +348,21 @@ function onCardsClick(e) {
     // no duplicate card on one creature: remove the same card id from other slots
     for (const k of ["a", "p", "s"]) { const o = R.eq[k] && cardByUid(R.eq[k]); if (o && (o.uid === uid || o.id === c.id)) R.eq[k] = null; }
     R.eq[slot] = uid; P.c.equips = (P.c.equips || 0) + 1; EV.sfx("card"); EV.save(); renderCards(); return;
+  }
+  if (t.dataset.give) {
+    const [kind, slot] = t.dataset.give.split(":"), id = t.dataset.gid, r = rosterOf(kind);
+    if (!r || !compFits(kind, id) || r.lvl < SLOT_LVL[slot]) { EV.sfx("deny"); return; }
+    const used = usedUids(kind, slot), copies = P.cards.filter((c) => c.id === id).sort((a, b) => b.g - a.g);
+    const c = copies.find((x) => !used.has(x.uid)) || copies[0]; if (!c) return;
+    // you chose to give it here, so take that copy off whoever had it
+    if (R) for (const k of ["a", "p", "s"]) if (R.eq[k] === c.uid) R.eq[k] = null;
+    const ro = P.eg.roster;
+    for (const o in ro) for (const k of ["a", "p", "s"]) if (ro[o].eq && ro[o].eq[k] === c.uid) ro[o].eq[k] = null;
+    r.eq = r.eq || {};
+    for (const k of ["a", "p", "s"]) if (k !== slot && (compCard(kind, k) || {}).id === id) r.eq[k] = null;
+    r.eq[slot] = c.uid; P.c.equips = (P.c.equips || 0) + 1;
+    EV.toast(tx("cards.given", { name: monName(kind), card: cardName(id), s: tx("slot." + slot) }));
+    EV.sfx("card"); EV.save(); renderCards(); return;
   }
   if (t.dataset.unequip && R) { R.eq[t.dataset.unequip] = null; EV.sfx("tap"); EV.save(); renderCards(); return; }
   if (t.dataset.fuseall) { EV.sfx("tap"); openFuseAll(); return; }
