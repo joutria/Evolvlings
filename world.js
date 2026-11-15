@@ -362,14 +362,14 @@ function petSprite(dir, sq) {
   if (typeof EVART !== "undefined") {
     const m = mood(), fx = EV.FX || {};
     const emo = S.sleeping ? "sleep" : fx.foodAnim ? "surprised" : S.sick || m < 35 ? "sad" : m > 70 ? "happy" : "normal";
-    const cv = EVART.creature(S.species, Math.max(0, Math.min(2, S.stage || 0)), sq || 0, (dir || "front") === "front" ? emo : "normal", dir || "front");
+    const cv = EV.shiny(EVART.creature(S.species, Math.max(0, Math.min(2, S.stage || 0)), sq || 0, (dir || "front") === "front" ? emo : "normal", dir || "front"));
     if (cv) return cv;
   }
   if (typeof EVS !== "undefined" && EVS.KINDS && EVS.KINDS.includes(S.species)) {
     const st = Math.max(0, Math.min(2, S.stage || 0)), n = [14, 18, 24][st];
     const fx = EV.FX || {}, m = mood();
     const emo = S.sleeping ? "sleep" : fx.foodAnim ? "surprised" : S.sick || m < 35 ? "sad" : m > 70 ? "happy" : "normal";
-    try { return EVS.sprite(S.species, n, st, sq || 0, emo, S.form === "scruffy", dir || "front"); } catch (e) { return null; }
+    try { return EV.shiny(EVS.sprite(S.species, n, st, sq || 0, emo, S.form === "scruffy", dir || "front")); } catch (e) { return null; }
   }
   return null;
 }
@@ -726,7 +726,7 @@ function tilaBust(g, emo) {
 function petPortrait(g, emo) {
   const S = EV.S;
   if (S && typeof EVS !== "undefined" && EVS.KINDS && EVS.KINDS.includes(S.species)) {
-    try { const sp = EVS.sprite(S.species, 30, Math.max(0, Math.min(2, S.stage || 0)), 0, emo || "normal", S.form === "scruffy"); g.drawImage(sp, Math.round(20 - sp.width / 2), 39 - sp.height); return; } catch (e) {}
+    try { const sp = EV.shiny(EVS.sprite(S.species, 30, Math.max(0, Math.min(2, S.stage || 0)), 0, emo || "normal", S.form === "scruffy")); g.drawImage(sp, Math.round(20 - sp.width / 2), 39 - sp.height); return; } catch (e) {}
   }
   g.fillStyle = C.gold; g.beginPath(); g.arc(20, 24, 10, 0, Math.PI * 2); g.fill();
 }

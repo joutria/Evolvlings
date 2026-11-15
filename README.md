@@ -81,6 +81,17 @@ Progress is saved in your browser's `localStorage`: the creature in `glimmerglad
 
 An RPG expedition mode, a creature encyclopedia, more evolution branches and creature lines, more mini-games, and idle progression. See the project plan.
 
+## Mini-games
+
+Play opens a small chooser with four games (`minigames.js`, phase 3 of the feature plan):
+
+- **Catch the starseeds**: the original side-view game.
+- **Glade pairs**: 12 tiles, 6 pairs of Glade types, 45 seconds.
+- **Song rehearsal**: notes slide to a ring next to your creature; tap (or press space) on time and it dances. Streaks add bonus points.
+- **Pebble hail**: drag or use the arrow keys to dodge falling pebbles for 25 seconds; three hits end the round, golden starseeds add 3 points. It costs 14 energy instead of 10.
+
+Every game pays like the catch game (fun, Chispas, the burr ball's bonus) and keeps its own record, shown in the chooser. Beating a record you already had gives +5 Chispas. Records are in `P.mg.best` (the catch game keeps `P.c.bestRound`).
+
 ## Compact home
 
 The home fits on one phone screen. Five status icons sit above the window (tap them to see names and numbers), the eight care buttons are one row under it, and the battle stats start folded. Every menu (shop, tasks, season, refuge, cards, map, achievements, settings, food and bag) opens as a sheet over the game instead of at the end of the page. The shop, the food menu and the bag are grids of pixel icons; tapping one opens a small card with the picture, price or amount, description, effects and one confirm button.
@@ -307,3 +318,13 @@ Daily things now pile up for up to 3 days instead of being lost when you skip a 
 | Steps | up to 20 saved | up to 30 saved |
 
 Daily and weekly tasks already kept 2 unfinished days, and the 28-day calendar only moves when you claim it, so neither of them changed.
+
+## Photos
+
+A small camera button in the top-right corner of the game window (`photo.js`) takes a picture of whatever the window shows, adds a strip with your creature's name, its form and the date, and opens a preview with a Save button (on phones you can also press and hold the picture). Browsers that hide canvas pictures for privacy (LibreWolf, Firefox with resistFingerprinting) get a note on how to allow it instead of a blank photo.
+
+## Rare colours
+
+About 1 hatch in 50 is born with rare colours (`S.shiny`): its sprite is turned 150° round the colour wheel and a little brighter, and a ✧ follows its name. Every place that draws your own creature (home from above and from the side, the map walker, battles, mini-games) passes the sprite through `EV.shiny(canvas)` in `index.html`, so wild creatures of the same kind keep their usual colours. The colours are changed on the pixels when the browser allows reading them (`PX.readOk`), with the canvas filter otherwise, and left alone if neither works.
+
+Saving files (photos and the backup copy) goes through `saveFile(name, blob, done)` in `index.html`: inside the claude.ai artifact viewer, where plain download links do nothing, it asks the viewer's `downloads` capability (the viewer confirms the save); everywhere else it uses a normal download link.

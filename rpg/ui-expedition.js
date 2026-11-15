@@ -292,7 +292,7 @@ function pmapDraw(now) {
   let [tx2, ty2] = PMAP[at], walking = false;
   if (pm) { const k = Math.min(1, (now - pm.t0) / 700), [ax, ay] = PMAP[pm.from], [bx, by] = PMAP[pm.to]; tx2 = ax + (bx - ax) * k; ty2 = ay + (by - ay) * k - Math.abs(Math.sin(k * Math.PI * 4)) * 2; walking = k < 1; if (!walking) { const id = pm.to; pm = null; P.mapAt = id; EV.saveProfile(); pickZone(id); return false; } }
   if (S && typeof EVS !== "undefined" && EVS.KINDS.includes(S.species)) {
-    try { const sp = EVS.sprite(S.species, 12, Math.max(0, Math.min(2, S.stage || 0)), walking ? Math.floor(now / 140) % 2 : 0, "happy"); g.drawImage(sp, Math.round(tx2 - sp.width / 2 + 9), Math.round(ty2 - sp.height + 4)); } catch (e) {}
+    try { const sp = EV.shiny(EVS.sprite(S.species, 12, Math.max(0, Math.min(2, S.stage || 0)), walking ? Math.floor(now / 140) % 2 : 0, "happy")); g.drawImage(sp, Math.round(tx2 - sp.width / 2 + 9), Math.round(ty2 - sp.height + 4)); } catch (e) {}
   }
   return walking;
 }
