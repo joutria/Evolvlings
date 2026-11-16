@@ -108,6 +108,7 @@
     bruna: P(["Bruna"], ["Bruna"], "Niña sin sombra", "la niña sin sombra", "Girl without a shadow", "the girl without a shadow"),
     jabega: P(["Jábega, tabernera", "Jábega, innkeeper"], ["Jábega"], "Tabernera de la barca", "la tabernera de la barca", "Boat innkeeper", "the boat innkeeper"),
     esparto: P(["Esparto, pescador", "Esparto, fisherman"], ["Esparto"], "Pescador del muelle", "el pescador del muelle", "Jetty fisherman", "the jetty fisherman"),
+    vilano: P(["Vilano, comprador", "Vilano, buyer"], ["Vilano"], "Comprador enojado", "el comprador enojado", "Angry buyer", "the angry buyer"),
   };
   // titles for the book's Diary (no names in them: they would give away who you meet)
   const TITLES = {
@@ -350,6 +351,26 @@
     "e3-sordina": ["Lo que nadie miró", "What nobody looked at"],
     "e3-pared2": ["Sin lugar en la piedra", "No room in the stone"],
     "e3-lindero": ["Dos años de agua", "Two years of water"],
+    "e3-rafaga": ["Un frasco en la cola", "A flask on the tail"],
+    "e3-tanido": ["Tres golpes, culpable", "Three strokes, guilty"],
+    "e3-coplo": ["Coplas de juicio", "Trial verses"],
+    "e3-cefira": ["La lista de la ventana", "The window list"],
+    "e3-centella": ["La lluvia que recuerda", "The rain that remembers"],
+    "e3-tormo": ["Barriles para afuera", "Barrels for outside"],
+    "e3-vilano": ["Compró la mitad", "He bought half"],
+    "e3-escarcha": ["Ladrones de sueños", "Dream thieves"],
+    "e3-albina": ["La corona nueva", "The new crown"],
+    "e3-esporina": ["Setas de agua oscura", "Dark-water mushrooms"],
+    "e3-yesca": ["Noches en hielo", "Nights in ice"],
+    "e3-turno": ["Dormir por encargo", "Dreaming to order"],
+    "e3-granizo": ["Dos niños patinando", "Two children skating"],
+    "e3-sonambulos": ["Los que caminan dormidos", "The ones who walk asleep"],
+    "e3-brezo": ["Barro sobre el Tocón", "Mud on the Stump"],
+    "e3-cincel": ["La estatua del veredicto", "The verdict statue"],
+    "e3-antifona": ["Una estatua sin nombre", "A statue with no name"],
+    "e3-barrena": ["El agua sube por abajo", "The water rises from below"],
+    "e3-heredero": ["Un charco en el Corazón", "A puddle in the Heart"],
+    "e3-vispera": ["La víspera", "The night before"],
   };
   const BY_WHO = {};
   for (const id in PEOPLE) for (const w of PEOPLE[id].who) BY_WHO[w] = id;

@@ -124,6 +124,20 @@
     e2esporina: { era: 2, zone: "deep", layer: 3, know: "esporina", page: "esporina", rules: [{ end: "A", any: ["e2_remedioSonado"] }, { end: "B", any: ["m2_setaCava", "e2_setasSavia"] }, { end: "C" }] },
     albina: { era: 2, zone: "deep", layer: 3, rules: [{ end: "A", any: ["e2_coronaTurno"] }, { end: "B", any: ["e2_coronaRota"] }, { end: "C" }] },
     e2nim: { era: 2, zone: "heart", layer: 4, know: "nim", page: "nim", rules: [{ end: "A", any: ["e2_nimLejos"] }, { end: "B", any: ["e2_nimQueda"] }, { end: "C" }] },
+    // era 3 (El Lago que Recuerda)
+    candela: { era: 3, zone: "aurora", layer: 2, rules: [{ end: "A", any: ["e3_cuadernoAlbor"] }, { end: "B", any: ["e3_candelaBebe"] }, { end: "C" }] },
+    albura: { era: 3, zone: "heart", layer: 4, rules: [{ end: "A", any: ["e3_juezaNoSabe"] }, { end: "B", any: ["e3_juezaSella"] }, { end: "C" }] },
+    trueque: { era: 3, zone: "heights", layer: 3, rules: [{ end: "A", any: ["e3_nocheEntera"] }, { end: "B", any: ["e3_vilanoCuarenta", "e3_lluviaVendida", "m3_ruinasVendidas"] }, { end: "C" }] },
+    retono: { era: 3, zone: "forest", layer: 3, rules: [{ end: "A", any: ["e3_retonoConcejo"] }, { end: "B", any: ["e3_retonoOrilla"] }, { end: "C" }] },
+    umbela: { era: 3, zone: "hollow", layer: 3, rules: [{ end: "A", any: ["e3_umbelaQueda"] }, { end: "B", any: ["e3_umbelaVado"] }, { end: "C" }] },
+    e3lobrego: { era: 3, zone: "hollow", layer: 3, know: "lobrego", page: "lobrego", rules: [{ end: "A", any: ["e3_reyConfiesa"] }, { end: "B", any: ["e3_reyBebe"] }, { end: "C" }] },
+    bruna: { era: 3, zone: "hollow", layer: 2, rules: [{ end: "A", any: ["e3_sombraTejida"] }, { end: "B", any: ["e3_sombraNana"] }, { end: "C" }] },
+    remanso: { era: 3, zone: "lake", layer: 3, rules: [{ end: "A", any: ["e3_lucesDejadas", "m3_remansoLejos"] }, { end: "B", any: ["e3_luzTomada", "m3_remansoVe"] }, { end: "C" }] },
+    e3ola: { era: 3, zone: "lake", layer: 3, know: "ola", page: "ola", rules: [{ end: "A", any: ["e3_guardianas"] }, { end: "B", any: ["e3_olaCasas", "e3_hermanasOla"] }, { end: "C" }] },
+    e3orilla: { era: 3, zone: "lake", layer: 3, know: "orilla", page: "orilla", rules: [{ end: "A", any: ["m3_ruinasVistas"] }, { end: "B", any: ["e3_hermanasOrilla", "m3_ruinasTapadas"] }, { end: "C" }] },
+    cuarzo: { era: 3, zone: "caves", layer: 3, rules: [{ end: "A", any: ["e3_paredLlena", "e3_visionesBorradas"] }, { end: "B", any: ["e3_nombresBorrados"] }, { end: "C" }] },
+    e3nevisca: { era: 3, zone: "deep", layer: 3, know: "nevisca", page: "nevisca", rules: [{ end: "A", any: ["e3_turnoRaiz", "e3_versoRecuerda"] }, { end: "B", any: ["e3_turnoDoble", "e3_suenosVendidos"] }, { end: "C" }] },
+    e3nieve: { era: 3, zone: "deep", layer: 3, know: "nieve", page: "nieve", rules: [{ end: "A", any: ["e3_nieveDevuelve"] }, { end: "B", any: ["e3_nieveBebe"] }, { end: "C" }] },
   };
 
   // the echo lines for one node of one conversation, given the flags you hold
