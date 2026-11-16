@@ -101,14 +101,16 @@ const epiSlice = EV.slice("epi", () => ({}));
 // called after every guardian win: the stories that close now, with the end your choices gave them (fixed from then on)
 function epiClose() {
   if (!window.EVECHO || !LORE) return [];
-  const E = epiSlice(), P = EV.P, F = P.flags || {}, era = LORE.eraOf(P), out = [];
+  const E = epiSlice(), P = EV.P, F = P.flags = P.flags || {}, era = LORE.eraOf(P), out = [];
+  // a closed story also leaves its end as a flag (end_<ch>_<A|B|C>), so later eras can ask for it with cNeed
+  for (const ch in E) F[`end_${ch}_${E[ch]}`] = 1;
   for (const ch in EVECHO.EPI) {
     const r = EVECHO.EPI[ch], know = r.know === undefined ? ch : r.know, re = r.era || 1;
     if (E[ch] || re > era || (know && !isKnown(know))) continue;
     // a story of an era already over closes now; one of this era when its zone's guardian falls at its layer
     if (re === era && (!(LORE.layerOf(P) >= r.layer) || !((era > 1 ? P.eraWins : P.cleared) || {})[r.zone])) continue;
     const end = EVECHO.epiEnd(ch, F); if (!end) continue;
-    E[ch] = end; out.push(ch);
+    E[ch] = end; F[`end_${ch}_${end}`] = 1; out.push(ch);
   }
   if (out.length) EV.P.bookNew = Object.assign(EV.P.bookNew || {}, { gente: 1 });
   return out;

@@ -47,6 +47,7 @@
     "Ola": "NinjaBlue~1", "Agente de la Casa Alba": "Inspector~2", "Cavador de las manos negras": "Caveman2", "Niño de la Hondonada": "Boy~1", "Coplo, cantor": "Monk2",
     "Candela Albor": "Villager3", "Jueza Albura": "Sultan", "Ampolla, sopladora": "Cavegirl", "Retoño": "Child~2", "Trueque, mercader": "Villager4",
     "Umbela, archivera de la Corte": "NinjaMageBlack~1", "Remanso": "EggBoy", "Cuarzo, cronista": "Caveman", "Paño, testigo": "Villager~1", "Lacre, sellador": "Villager3~1",
+    "Bruna": "Child~1", "Jábega, tabernera": "Woman~1", "Esparto, pescador": "Hunter",
     // anywhere
     "Retal, el que va y viene": "Hunter", "Doña Alforja": "Noble",
   };
