@@ -91,7 +91,7 @@
     ceniza: P(["Ceniza"], ["Ceniza"], "Muchacha de la capucha", "la muchacha de la capucha", "Hooded girl", "the hooded girl"),
     lobrego: P(["Rey Lóbrego", "King Lóbrego"], ["Rey Lóbrego", "Lóbrego"], "Rey de la Corte", "el rey de la Corte", "King of the Court", "the king of the Court", ["King Lóbrego", "Lóbrego"]),
     // named by others in the conversations and on the cards, never speakers themselves
-    ola: P([], ["Ola"], "Hermana del lago", "la hermana del lago", "Sister from the lake", "the sister from the lake"),
+    ola: P(["Ola"], ["Ola"], "Hermana del lago", "la hermana del lago", "Sister from the lake", "the sister from the lake"),
     coplo: P([], ["Coplo"], "Cantor de la plaza", "el cantor de la plaza", "Square singer", "the square singer"),
     aurelia: P(["Aurelia Albor"], ["Aurelia Albor", "Aurelia"], "Señora de la Casa Albor", "la señora de la Casa Albor", "Lady of House Albor", "the lady of House Albor"),
   };
@@ -233,6 +233,30 @@
     "e2-cripta": ["Árbol cargado, árbol pelado", "Laden tree, bare tree"],
     "e2-llovizna": ["Una mochila hecha", "A packed bag"],
     "e2-raices": ["Planté un muro", "I planted a wall"],
+    // era 2, entrega 3 (la Noche)
+    "e2-cuna": ["Una casa sin sombra", "A house with no shade"],
+    "e2-tordo": ["La bolsa del cartero", "The letter carrier's bag"],
+    "e2-cierzo": ["La silla vacía", "The empty chair"],
+    "e2-telar": ["La calle del telar", "Loom Street"],
+    "e2-carros": ["A la izquierda", "To the left"],
+    "e2-llamada": ["Un nombre gritado", "A name shouted"],
+    "e2-niebla": ["La niebla vuelve", "The mist comes back"],
+    "e2-pablito": ["Sombra en un frasco", "Shade in a jar"],
+    "e2-anea": ["Remar sin cielo", "Rowing without a sky"],
+    "e2-cardo": ["Limpia como el olvido", "Clean as forgetting"],
+    "e2-sargazo": ["Alguien tiene que llorar", "Someone has to weep"],
+    "e2-ola": ["Vidrio que canta en el agua", "Glass that sings in water"],
+    "e2-berro": ["El pez sin ojos", "The eyeless fish"],
+    "e2-orilla": ["La orilla del norte", "The north shore"],
+    "e2-espejo": ["El sueño en el agua", "The dream in the water"],
+    "e2-sebo": ["Una luz que no avisa", "A light that gives no warning"],
+    "e2-sordina": ["Nombres que se borran", "Names that fade"],
+    "e2-lindero": ["La raya roja", "The red line"],
+    "e2-pirita": ["Hoy no baja nadie", "Nobody goes down today"],
+    "e2-tunel9": ["El túnel nueve", "Tunnel nine"],
+    "e2-derrumbe": ["El pico de los derrumbes", "The cave-in pick"],
+    "e2-eco": ["La Sala contesta", "The Hall answers"],
+    "e2-sebo2": ["La llama azul", "The blue flame"],
   };
   const BY_WHO = {};
   for (const id in PEOPLE) for (const w of PEOPLE[id].who) BY_WHO[w] = id;

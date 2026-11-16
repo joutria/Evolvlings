@@ -44,6 +44,7 @@
     "Brida, capataz": "NinjaDark", "Ceniza": "NinjaMageBlack", "Rey Lóbrego": "SorcererBlack",
     "Aurelia Albor": "Noble", "Recolector de la Torre": "Inspector~1", "Guarda de la matriarca": "KnightGold", "Comprador del Prado": "Villager5",
     "Concejala del Bosque": "Shaman",
+    "Ola": "NinjaBlue~1", "Agente de la Casa Alba": "Inspector~2", "Cavador de las manos negras": "Caveman2", "Niño de la Hondonada": "Boy~1",
     // anywhere
     "Retal, el que va y viene": "Hunter", "Doña Alforja": "Noble",
   };
