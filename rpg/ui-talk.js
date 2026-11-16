@@ -101,10 +101,12 @@ const epiSlice = EV.slice("epi", () => ({}));
 // called after every guardian win: the stories that close now, with the end your choices gave them (fixed from then on)
 function epiClose() {
   if (!window.EVECHO || !LORE) return [];
-  const E = epiSlice(), P = EV.P, F = P.flags || {}, lay = LORE.loreLayer(P.cleared), out = [];
+  const E = epiSlice(), P = EV.P, F = P.flags || {}, era = LORE.eraOf(P), out = [];
   for (const ch in EVECHO.EPI) {
-    const r = EVECHO.EPI[ch], know = r.know === undefined ? ch : r.know;
-    if (E[ch] || !(P.cleared || {})[r.zone] || lay < r.layer || (know && !isKnown(know))) continue;
+    const r = EVECHO.EPI[ch], know = r.know === undefined ? ch : r.know, re = r.era || 1;
+    if (E[ch] || re > era || (know && !isKnown(know))) continue;
+    // a story of an era already over closes now; one of this era when its zone's guardian falls at its layer
+    if (re === era && (!(LORE.layerOf(P) >= r.layer) || !((era > 1 ? P.eraWins : P.cleared) || {})[r.zone])) continue;
     const end = EVECHO.epiEnd(ch, F); if (!end) continue;
     E[ch] = end; out.push(ch);
   }
