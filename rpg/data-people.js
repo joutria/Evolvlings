@@ -103,6 +103,8 @@
     umbela: P(["Umbela, archivera de la Corte", "Umbela, Court archivist"], ["Umbela"], "Mujer del velo y las copas", "la mujer del velo y las copas", "Veiled woman with the cups", "the veiled woman with the cups"),
     remanso: P(["Remanso"], ["Remanso"], "Niño del muelle", "el niño del muelle", "Boy on the jetty", "the boy on the jetty"),
     cuarzo: P(["Cuarzo, cronista", "Cuarzo, chronicler"], ["Cuarzo"], "Cronista de los brazos blancos", "el cronista de los brazos blancos", "Chronicler with white arms", "the chronicler with white arms"),
+    pano: P(["Paño, testigo", "Paño, witness"], ["Paño"], "Hombre del cartel", "el hombre del cartel", "Man with a sign", "the man with a sign"),
+    lacre: P(["Lacre, sellador", "Lacre, sealer"], ["Lacre"], "Sellador del sótano", "el sellador del sótano", "Cellar sealer", "the cellar sealer"),
   };
   // titles for the book's Diary (no names in them: they would give away who you meet)
   const TITLES = {
@@ -305,6 +307,27 @@
     "e3-huecos": ["Un hermano sin cara", "A brother with no face"],
     "e3-cantora": ["La que mira al lago", "She who looks at the lake"],
     "e3-final": ["La Crónica Oficial", "The Official Chronicle"],
+    "e3-pano": ["Un testigo a sueldo", "A witness for hire"],
+    "e3-alvar": ["Media vela", "Half a candle"],
+    "e3-destello": ["La de la Velada", "The Night of Lanterns woman"],
+    "e3-cirio": ["El decreto original", "The original decree"],
+    "e3-penumbra": ["Cintas otra vez", "Ribbons again"],
+    "e3-albura": ["Trescientas copas", "Three hundred cups"],
+    "e3-plaza": ["Las tarimas rotas", "The smashed platforms"],
+    "e3-tizon": ["Una herradura", "A horseshoe"],
+    "e3-lacre": ["Copas de río", "River cups"],
+    "e3-junco": ["Fiebre de copa", "Cup fever"],
+    "e3-ascuas": ["Las Ascuas canceladas", "The cancelled Embers"],
+    "e3-fragua": ["Cruces rojas", "Red crosses"],
+    "e3-guijo": ["El niño del martillo, otra vez", "The boy with the hammer, again"],
+    "e3-reserva": ["El estante vacío", "The empty shelf"],
+    "e3-yedra": ["La hamaca y el barril", "The hammock and the barrel"],
+    "e3-bruma": ["Papas y un velo", "Potatoes and a veil"],
+    "e3-orilla": ["Los que no volvieron", "The ones who didn't come back"],
+    "e3-hojas": ["Las hojas del abuelo", "Grandpa's leaves"],
+    "e3-seto": ["Las mismas tijeras", "The same shears"],
+    "e3-silencio": ["El Largo Silencio", "The Long Silence"],
+    "e3-retono2": ["Una silla chica", "A small chair"],
   };
   const BY_WHO = {};
   for (const id in PEOPLE) for (const w of PEOPLE[id].who) BY_WHO[w] = id;
