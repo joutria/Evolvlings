@@ -99,7 +99,7 @@ function sims(n) {
     vm.runInContext(fs.readFileSync(path.join(ROOT, "rpg", "data-echoes.js"), "utf8"), xc, { filename: "rpg/data-echoes.js" });
     const lore = require(path.join(ROOT, "lore.js")), src = files.map((f) => fs.readFileSync(path.join(ROOT, "rpg", f), "utf8")).join("\n")
       + fs.readFileSync(path.join(ROOT, "lore.js"), "utf8") + fs.readFileSync(path.join(ROOT, "rpg", "data-events.js"), "utf8");
-    const setsFlag = (f) => new RegExp(`flag: *"${f}"`).test(src);
+    const setsFlag = (f) => new RegExp(`flag: *(\\[[^\\]]*)?"${f}"`).test(src);
     const { ECHOES, EPI } = ex.EVECHO;
     ECHOES.forEach((e, i) => {
       const [z, id] = e.ev.split("/"), ev = (w.EVEVENTS[z] || {})[id], at = `echo ${i} (${e.ev})`;

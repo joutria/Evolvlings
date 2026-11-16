@@ -62,6 +62,18 @@
     { ev: "deep/e2-setas", node: "esporina", flag: "albinaHija", who: "esporina",
       es: "Mi madre me mandó una manta la semana pasada. Sin nota. Es lo primero que me manda en veinte años. Supongo que alguien le contó algo.",
       en: "My mother sent me a blanket last week. No note. It's the first thing she's sent me in twenty years. I suppose someone told her something." },
+    { ev: "deep/e2-carrasca", node: "a", flag: "pasoAbierto", who: "carrasca",
+      es: "¿Te acuerdas del paso que abrí, el de la luz? Lo pensé mucho y no me fui. Los que vinieron por él sí se quedaron. Encima me pagan a mí.",
+      en: "Remember the pass I opened, the one with the light? I thought about it a lot and didn't leave. The ones who came through it stayed, though. And they pay me, on top of it." },
+    { ev: "heart/e2-hollin", node: "a", flag: "farolDejado", who: "hollin",
+      es: "Ese es el farol que dejé aquí, como te dije. Apagado. Lo miro cada vez que levanto la cabeza. Ya casi no miro otra cosa.",
+      en: "That's the lantern I left here, like I told you. Dark. I look at it every time I lift my head. I hardly look at anything else now." },
+    { ev: "heart/e2-barrena", node: "a", flag: "bombaParada", who: "barrena",
+      es: "La paré una vez por ti, ¿te acuerdas? Duró hasta la Calma. Un hombre con hijos no puede parar dos veces.",
+      en: "I stopped it once for you, remember? It lasted until the Calm. A man with children can't stop twice." },
+    { ev: "heights/e2-coplo", node: "a", flag: "cefiraKept", who: "coplo",
+      es: "Y tú, aquella vez, preferiste guardar el secreto de la Dama. Yo también lo guardé, un año más. Ya ves: la verdad sale igual, solo que más tarde y más cara.",
+      en: "And you, that time, chose to keep the Lady's secret. I kept it too, another year. You see: the truth comes out anyway, just later and dearer." },
   ];
 
   const EPI = {
@@ -77,6 +89,19 @@
     coplo: { zone: "heights", layer: 3, rules: [{ end: "A", any: ["coploTruth"] }, { end: "B" }] },
     esporina: { zone: "deep", layer: 3, rules: [{ end: "B", any: ["albinaHija"] }, { end: "C", any: ["pasoAbierto"] }, { end: "A" }] },
     marejada: { zone: "heart", layer: 4, rules: [{ end: "A", any: ["orillaContara", "verdadMareas"] }, { end: "B" }] },
+    // era 2 (La Calma): the story closes when its zone's guardian falls in era 2 at that layer (or once the era is over)
+    destello: { era: 2, zone: "aurora", layer: 3, rules: [{ end: "A", any: ["e2_destelloCede"] }, { end: "B", any: ["e2_destelloEnemiga"] }, { end: "C" }] },
+    e2aurelia: { era: 2, zone: "aurora", layer: 2, know: "aurelia", page: "aurelia", rules: [{ end: "A", any: ["e2_libroPlaza"] }, { end: "B", any: ["e2_aureliaGuarda"] }, { end: "C" }] },
+    penumbra: { era: 2, zone: "aurora", layer: 2, rules: [{ end: "A", any: ["e2_cintasVado"] }, { end: "B", any: ["e2_cintasSelladas"] }, { end: "C" }] },
+    fogarin: { era: 2, zone: "crater", layer: 2, rules: [{ end: "A", any: ["e2_olaFogarin"] }, { end: "B", any: ["e2_tuboAfinado", "e2_tuboCanta", "e2_tizonTubo"] }, { end: "C" }] },
+    llovizna: { era: 2, zone: "forest", layer: 3, rules: [{ end: "A", any: ["e2_lloviznaCanta"] }, { end: "B", any: ["e2_lloviznaVado"] }, { end: "C" }] },
+    ceniza: { era: 2, zone: "hollow", layer: 3, rules: [{ end: "A", any: ["e2_cenizaLibre"] }, { end: "B", any: ["e2_cenizaTuya", "m2_cenizaVado"] }, { end: "C" }] },
+    brida: { era: 2, zone: "caves", layer: 3, rules: [{ end: "A", any: ["e2_bridaRompe"] }, { end: "B", any: ["e2_bridaAvisa", "e2_bridaGuijo", "e2_bridaMapa"] }, { end: "C" }] },
+    e2basalto: { era: 2, zone: "caves", layer: 3, know: "basalto", page: "basalto", rules: [{ end: "A", any: ["e2_hondaGolpea"] }, { end: "B", any: ["e2_derrumbe"] }, { end: "C" }] },
+    cefira: { era: 2, zone: "heights", layer: 2, rules: [{ end: "A", any: ["e2_cefiraHabla"] }, { end: "B", any: ["e2_manosCefira"] }, { end: "C" }] },
+    e2esporina: { era: 2, zone: "deep", layer: 3, know: "esporina", page: "esporina", rules: [{ end: "A", any: ["e2_remedioSonado"] }, { end: "B", any: ["m2_setaCava", "e2_setasSavia"] }, { end: "C" }] },
+    albina: { era: 2, zone: "deep", layer: 3, rules: [{ end: "A", any: ["e2_coronaTurno"] }, { end: "B", any: ["e2_coronaRota"] }, { end: "C" }] },
+    e2nim: { era: 2, zone: "heart", layer: 4, know: "nim", page: "nim", rules: [{ end: "A", any: ["e2_nimLejos"] }, { end: "B", any: ["e2_nimQueda"] }, { end: "C" }] },
   };
 
   // the echo lines for one node of one conversation, given the flags you hold

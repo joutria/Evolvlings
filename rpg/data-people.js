@@ -92,7 +92,7 @@
     lobrego: P(["Rey Lóbrego", "King Lóbrego"], ["Rey Lóbrego", "Lóbrego"], "Rey de la Corte", "el rey de la Corte", "King of the Court", "the king of the Court", ["King Lóbrego", "Lóbrego"]),
     // named by others in the conversations and on the cards, never speakers themselves
     ola: P(["Ola"], ["Ola"], "Hermana del lago", "la hermana del lago", "Sister from the lake", "the sister from the lake"),
-    coplo: P([], ["Coplo"], "Cantor de la plaza", "el cantor de la plaza", "Square singer", "the square singer"),
+    coplo: P(["Coplo, cantor", "Coplo, singer"], ["Coplo"], "Cantor de la plaza", "el cantor de la plaza", "Square singer", "the square singer"),
     aurelia: P(["Aurelia Albor"], ["Aurelia Albor", "Aurelia"], "Señora de la Casa Albor", "la señora de la Casa Albor", "Lady of House Albor", "the lady of House Albor"),
   };
   // titles for the book's Diary (no names in them: they would give away who you meet)
@@ -257,6 +257,25 @@
     "e2-derrumbe": ["El pico de los derrumbes", "The cave-in pick"],
     "e2-eco": ["La Sala contesta", "The Hall answers"],
     "e2-sebo2": ["La llama azul", "The blue flame"],
+    "e2-rafaga": ["Mensajes de hambre", "Messages of hunger"],
+    "e2-tanido": ["Las campanas atadas", "The tied bells"],
+    "e2-coplo": ["El cantor culpable", "The guilty singer"],
+    "e2-glosa": ["Un registro por escribir", "A record to be written"],
+    "e2-centella": ["El viento que baja", "The wind going down"],
+    "e2-cometas": ["Treinta cometas", "Thirty kites"],
+    "e2-arpegio": ["La piedra que tararea", "The humming stone"],
+    "e2-nieve": ["Hielo blando", "Soft ice"],
+    "e2-carrasca": ["Un pozo en el hielo", "A well in the ice"],
+    "e2-escarcha": ["La guardia que oye", "The guard who hears"],
+    "e2-tumba": ["Las paredes lloran", "The walls weep"],
+    "e2-yesca": ["Doce camas", "Twelve beds"],
+    "e2-nevisca": ["Alguien que conteste", "Someone to answer"],
+    "e2-corona": ["Una corona en la mesa", "A crown on the table"],
+    "e2-antifona": ["La lista de lo tomado", "The list of what was taken"],
+    "e2-hollin": ["El que no come", "The one who doesn't eat"],
+    "e2-barrena": ["La bomba otra vez", "The pump again"],
+    "e2-tilanim": ["La víspera", "The night before"],
+    "e2-raiz": ["Debajo del Tocón", "Beneath the Stump"],
   };
   const BY_WHO = {};
   for (const id in PEOPLE) for (const w of PEOPLE[id].who) BY_WHO[w] = id;

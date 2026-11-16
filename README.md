@@ -315,6 +315,7 @@ The lore runs in ten eras, each one turn of the lullaby cycle (plan: [Las diez e
 - **Moving on:** era 1 closes when the Heart is calmed and offers era 2 right away. A later era closes when its final choice sets one of the `ends` flags of `rpg/data-eras.js`; the next one begins when you retire your creature to the Hall of Fame (`P.hof` grows) or with the button on its Chronicle page. Changing era empties the event bags and swaps the zone texts the era rewrites.
 - **Content:** `rpg/events-era<N>.js` and `.en.js` add each era's conversations to the zones. The peoples you bring together set the era's `peoples` flags; with all of them, its `unite` flag opens the best ending.
 - **Writings:** an era's Writings live in `LORE_ESCRITOS` (`lore.js`) with `era: N`; the Book lists them only once the Glade reaches that era. They are given by a conversation end (`escrito`) and carry `unlock` with the same flag, so the Deep Root chests never hand them out early.
+- **Story endings:** an era's people endings go in `EVECHO.EPI` (`rpg/data-echoes.js`) with `era: N` (texts in `LORE_EPILOGOS`). They close when that zone's guardian falls in era N at the story's layer; any story of an era that is already over closes at the next guardian win.
 - **Checks:** `node tools/check.js` also checks that every era event belongs to a ready era and that every ending and people flag is set by some event.
 
 ## Nothing daily expires (design rule 4)
