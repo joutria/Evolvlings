@@ -42,6 +42,8 @@
     // era 2, La Calma
     "Cirio, guarda del tablón": "KnightGold~1", "Umbría": "NinjaMageBlack~1", "Lucerna Destello": "Princess", "Maestra de coro": "Inspector",
     "Brida, capataz": "NinjaDark", "Ceniza": "NinjaMageBlack", "Rey Lóbrego": "SorcererBlack",
+    "Aurelia Albor": "Noble", "Recolector de la Torre": "Inspector~1", "Guarda de la matriarca": "KnightGold", "Comprador del Prado": "Villager5",
+    "Concejala del Bosque": "Shaman",
     // anywhere
     "Retal, el que va y viene": "Hunter", "Doña Alforja": "Noble",
   };

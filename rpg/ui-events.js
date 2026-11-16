@@ -61,7 +61,7 @@ function hilosHtml(have) {
 }
 function escritosHtml() {
   if (!LORE) return "";
-  const have = EV.P.escritos || {}, all = LORE.LORE_ESCRITOS, n = all.filter((w) => have[w.id]).length;
+  const have = EV.P.escritos || {}, all = LORE.LORE_ESCRITOS.filter((w) => (w.era || 1) <= (EV.P.era || 1) || have[w.id]), n = all.filter((w) => have[w.id]).length;
   return `<h3 class="cat-title">${esc(tx("esc.title"))}</h3><p class="muted" style="margin:0">${esc(tx("esc.desc"))} ${esc(tx("grim.count", { n, m: all.length }))}</p><div class="escritos">${all.map((w) => {
     if (!have[w.id]) return `<div class="esc locked"><b>???</b><small class="muted">${esc(isOrphan(w) ? tx("esc.from.deep") : tx("esc.from." + w.from, { z: w.zone ? zt("name", null, w.zone) : "" }))}</small></div>`;
     const t = w[L()] || w.es;

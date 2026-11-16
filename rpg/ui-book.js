@@ -245,7 +245,7 @@ function paintStage(cv) {
 /* ---------- Writings ---------- */
 function escList() {
   if (!LORE) return "";
-  const have = EV.P.escritos || {}, all = LORE.LORE_ESCRITOS;
+  const have = EV.P.escritos || {}, all = LORE.LORE_ESCRITOS.filter((w) => (w.era || 1) <= (EV.P.era || 1) || have[w.id]);
   let h = `<p class="bk-sub">${esc(tx("esc.desc"))} ${esc(tx("grim.count", { n: all.filter((w) => have[w.id]).length, m: all.length }))}</p><ul class="bk-list">`;
   for (const w of all) {
     const on = BK.sel.escritos === w.id ? ' aria-current="true"' : "";
