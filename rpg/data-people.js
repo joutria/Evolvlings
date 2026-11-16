@@ -105,6 +105,9 @@
     cuarzo: P(["Cuarzo, cronista", "Cuarzo, chronicler"], ["Cuarzo"], "Cronista de los brazos blancos", "el cronista de los brazos blancos", "Chronicler with white arms", "the chronicler with white arms"),
     pano: P(["Paño, testigo", "Paño, witness"], ["Paño"], "Hombre del cartel", "el hombre del cartel", "Man with a sign", "the man with a sign"),
     lacre: P(["Lacre, sellador", "Lacre, sealer"], ["Lacre"], "Sellador del sótano", "el sellador del sótano", "Cellar sealer", "the cellar sealer"),
+    bruna: P(["Bruna"], ["Bruna"], "Niña sin sombra", "la niña sin sombra", "Girl without a shadow", "the girl without a shadow"),
+    jabega: P(["Jábega, tabernera", "Jábega, innkeeper"], ["Jábega"], "Tabernera de la barca", "la tabernera de la barca", "Boat innkeeper", "the boat innkeeper"),
+    esparto: P(["Esparto, pescador", "Esparto, fisherman"], ["Esparto"], "Pescador del muelle", "el pescador del muelle", "Jetty fisherman", "the jetty fisherman"),
   };
   // titles for the book's Diary (no names in them: they would give away who you meet)
   const TITLES = {
@@ -328,6 +331,25 @@
     "e3-seto": ["Las mismas tijeras", "The same shears"],
     "e3-silencio": ["El Largo Silencio", "The Long Silence"],
     "e3-retono2": ["Una silla chica", "A small chair"],
+    "e3-calina": ["Velos para beber", "Veils for drinking"],
+    "e3-tordo": ["Una copa sin remitente", "A cup with no sender"],
+    "e3-orvallo": ["La casa sin sombra", "The house with no shadow"],
+    "e3-cierzo": ["La bodega del Trono", "The Throne's cellar"],
+    "e3-sombras": ["La niña sin sombra", "The girl without a shadow"],
+    "e3-velo": ["Sin velo", "Without a veil"],
+    "e3-lobrego": ["Creer o saber", "Believing or knowing"],
+    "e3-cardo": ["El barril que gotea", "The leaking barrel"],
+    "e3-hermanas": ["Cincuenta años de lo mismo", "Fifty years of the same"],
+    "e3-fondo": ["Las luces del fondo", "The lights at the bottom"],
+    "e3-taberna": ["Bebe lo lindo", "Drink the nice ones"],
+    "e3-peces": ["Peces de ojos gastados", "Fish with worn-out eyes"],
+    "e3-pirita": ["La pared que contesta", "The wall that answers"],
+    "e3-brida": ["Doscientos nombres", "Two hundred names"],
+    "e3-sebo": ["Teatro de agua", "Water theatre"],
+    "e3-pared": ["Cien noches de una noche", "A hundred nights of one night"],
+    "e3-sordina": ["Lo que nadie miró", "What nobody looked at"],
+    "e3-pared2": ["Sin lugar en la piedra", "No room in the stone"],
+    "e3-lindero": ["Dos años de agua", "Two years of water"],
   };
   const BY_WHO = {};
   for (const id in PEOPLE) for (const w of PEOPLE[id].who) BY_WHO[w] = id;
