@@ -308,11 +308,12 @@ The path events now include illustrated conversations, in the style of Life in A
 
 ## The ten eras
 
-The lore runs in ten eras, each one turn of the lullaby cycle (plan: [Las diez eras del Claro](https://claude.ai/artifact/RFy6uGdhz9DJeW7e9ZfdkE)). Era 1 is the story the game started with; era 2, La Calma, is the first one added.
+The lore runs in ten eras, each one turn of the lullaby cycle (plan: [Las diez eras del Claro](https://claude.ai/artifact/RFy6uGdhz9DJeW7e9ZfdkE)). Era 1 is the story the game started with; era 2, La Calma, is the first one added, and era 3, El Lago que Recuerda, the second.
 
 - **State:** `P.era` (1 when missing), `P.eraWins` (guardians beaten per zone since the era began), `P.eras` (how each era closed), `P.eraOffer` (the next era, once it can begin).
 - **Gating:** an event's `need.era` says which era it belongs to (a number or `[first, last]`); events without it belong to era 1, and the common events belong to every era. After era 1, `need.layer` counts `P.eraWins`, so each era is discovered from the start. `need.eraWin: "<zone>"` asks for that zone's guardian beaten in this era. An event with `first: true` comes up before anything else in its zone's bag, and `once: true` is told a single time.
 - **Moving on:** era 1 closes when the Heart is calmed and offers era 2 right away. A later era closes when its final choice sets one of the `ends` flags of `rpg/data-eras.js`; the next one begins when you retire your creature to the Hall of Fame (`P.hof` grows) or with the button on its Chronicle page. Changing era empties the event bags and swaps the zone texts the era rewrites.
+- **Opening:** an era's `intro` lines show when it begins; `introBy` adds lines first for how the era before it ended (keyed by that era's `ends` key). When an era closes and the next is ready, the dialog offers "Let the years pass".
 - **Content:** `rpg/events-era<N>.js` and `.en.js` add each era's conversations to the zones. The peoples you bring together set the era's `peoples` flags; with all of them, its `unite` flag opens the best ending.
 - **Writings:** an era's Writings live in `LORE_ESCRITOS` (`lore.js`) with `era: N`; the Book lists them only once the Glade reaches that era. They are given by a conversation end (`escrito`) and carry `unlock` with the same flag, so the Deep Root chests never hand them out early.
 - **Story endings:** an era's people endings go in `EVECHO.EPI` (`rpg/data-echoes.js`) with `era: N` (texts in `LORE_EPILOGOS`). They close when that zone's guardian falls in era N at the story's layer; any story of an era that is already over closes at the next guardian win.

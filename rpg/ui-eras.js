@@ -31,6 +31,8 @@ const etx = EV.text("eras", ERA_TX);
 const eraNow = () => (EV.P && EV.P.era) || 1;
 const eraTxt = (e) => (e && (e[L()] || e.es)) || {};
 const erasDone = () => EV.P.eras || (EV.P.eras = {});
+// the opening lines of an era: the ones for how the era before it ended (introBy), then the common ones
+const eraIntro = (n) => { const t = eraTxt(ERA.era(n)), d = erasDone()[n - 1], by = (t.introBy && d && t.introBy[d.end]) || []; return by.concat(t.intro || []); };
 
 /* ---------- zone texts: each era can rewrite a zone's description and its guardian's lines ---------- */
 const ZT_BASE = { es: {}, en: {} };
@@ -109,9 +111,13 @@ function eraDialog(n, kind) {
   let h = `<div class="era-back" data-erax="1"></div><div class="era-box"><p class="era-k">${esc(etx(kind === "closed" ? "closed" : "begins", { name: t.name }))}</p>`;
   if (kind === "closed") {
     const d = erasDone()[n], end = (e.ends || []).find((x) => x.key === (d && d.end)), et = eraTxt(end);
-    h += `<h3>${esc(et.t || t.name)}</h3><p>${esc(et.d || "")}</p><p class="muted">${esc(etx("closedHow"))}</p><div class="era-row"><button class="btn" type="button" data-erax="1">${esc(etx("ok"))}</button></div>`;
+    h += `<h3>${esc(et.t || t.name)}</h3><p>${esc(et.d || "")}</p>`;
+    const nx = ERA.era(n + 1);
+    // the next era is in the game: it begins when you retire your creature, or now if you let the years pass
+    if (nx && nx.ready) h += `<p class="muted">${esc(etx("yearsHow"))}</p><div class="era-row"><button class="btn" type="button" data-erago="${n + 1}">${esc(etx("years"))}</button><button class="btn ghost" type="button" data-erax="1">${esc(etx("later"))}</button></div>`;
+    else h += `<p class="muted">${esc(etx("closedHow"))}</p><div class="era-row"><button class="btn" type="button" data-erax="1">${esc(etx("ok"))}</button></div>`;
   } else {
-    h += `<h3>${esc(etx("era", { n }))} · ${esc(t.name)}</h3>${(t.intro || []).map((l) => `<p>${esc(l)}</p>`).join("")}`;
+    h += `<h3>${esc(etx("era", { n }))} · ${esc(t.name)}</h3>${eraIntro(n).map((l) => `<p>${esc(l)}</p>`).join("")}`;
     if (kind === "offer") h += `<p class="muted">${esc(etx("wait"))}</p><div class="era-row"><button class="btn" type="button" data-erago="${n}">${esc(etx("start", { name: t.name }))}</button><button class="btn ghost" type="button" data-erax="1">${esc(etx("later"))}</button></div>`;
     else h += `<div class="era-row"><button class="btn" type="button" data-erax="1">${esc(etx("ok"))}</button></div>`;
   }
@@ -149,7 +155,7 @@ function cronicaPage(sel) {
     const F = EV.P.flags || {}, P = ERA.PEOPLES[L()] || ERA.PEOPLES.es, with_ = e.peoples.filter(([f]) => F[f]).map(([, k]) => P[k]);
     h += `<p class="bk-q">${esc(etx("peoples"))}</p><p class="bk-say">${esc(with_.length ? with_.join(" · ") : etx("none"))}</p><p class="bk-say n">${esc(with_.length === e.peoples.length ? etx("allIn") : etx("unite"))}</p>`;
   }
-  if (st === "now" && t.intro) h += t.intro.map((l) => `<p class="bk-say n">${esc(l)}</p>`).join("");
+  if (st === "now") h += eraIntro(n).map((l) => `<p class="bk-say n">${esc(l)}</p>`).join("");
   if (st === "next") h += `<p class="bk-say n">${esc(etx("yearsHow"))}</p><div class="bctl"><button class="btn" type="button" data-erago="${n}">${esc(n === 2 ? etx("start", { name: t.name }) : etx("years"))}</button></div>`;
   if (st === "soon") h += `<p class="bk-say n">${esc(etx("soon"))}</p>`;
   return h;
