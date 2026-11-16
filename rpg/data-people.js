@@ -94,6 +94,15 @@
     ola: P(["Ola"], ["Ola"], "Hermana del lago", "la hermana del lago", "Sister from the lake", "the sister from the lake"),
     coplo: P(["Coplo, cantor", "Coplo, singer"], ["Coplo"], "Cantor de la plaza", "el cantor de la plaza", "Square singer", "the square singer"),
     aurelia: P(["Aurelia Albor"], ["Aurelia Albor", "Aurelia"], "Señora de la Casa Albor", "la señora de la Casa Albor", "Lady of House Albor", "the lady of House Albor"),
+    // era 3, El Lago que Recuerda (rpg/events-era3.js)
+    candela: P(["Candela Albor"], ["Candela Albor", "Candela"], "Muchacha del abrigo bueno", "la muchacha del abrigo bueno", "Young woman in a good coat", "the young woman in a good coat"),
+    albura: P(["Jueza Albura", "Judge Albura"], ["Jueza Albura", "Albura"], "Jueza de la toga blanca", "la jueza de la toga blanca", "Judge in the white robe", "the judge in the white robe", ["Judge Albura", "Albura"]),
+    ampolla: P(["Ampolla, sopladora", "Ampolla, glassblower"], ["Ampolla"], "Sopladora del martillo", "la sopladora del martillo", "Glassblower with a hammer", "the glassblower with a hammer"),
+    retono: P(["Retoño"], ["Retoño"], "Muchacho de la boca morada", "el muchacho de la boca morada", "Boy with a purple mouth", "the boy with a purple mouth"),
+    trueque: P(["Trueque, mercader", "Trueque, merchant"], ["Trueque"], "Mercader del toldo", "el mercader del toldo", "Merchant under the awning", "the merchant under the awning"),
+    umbela: P(["Umbela, archivera de la Corte", "Umbela, Court archivist"], ["Umbela"], "Mujer del velo y las copas", "la mujer del velo y las copas", "Veiled woman with the cups", "the veiled woman with the cups"),
+    remanso: P(["Remanso"], ["Remanso"], "Niño del muelle", "el niño del muelle", "Boy on the jetty", "the boy on the jetty"),
+    cuarzo: P(["Cuarzo, cronista", "Cuarzo, chronicler"], ["Cuarzo"], "Cronista de los brazos blancos", "el cronista de los brazos blancos", "Chronicler with white arms", "the chronicler with white arms"),
   };
   // titles for the book's Diary (no names in them: they would give away who you meet)
   const TITLES = {
@@ -276,6 +285,26 @@
     "e2-barrena": ["La bomba otra vez", "The pump again"],
     "e2-tilanim": ["La víspera", "The night before"],
     "e2-raiz": ["Debajo del Tocón", "Beneath the Stump"],
+    "e3-candela": ["Tres copas más", "Three more cups"],
+    "e3-juicio": ["El Juicio de las Versiones", "The Trial of Versions"],
+    "e3-copas": ["Las copas del Gremio", "The Guild's cups"],
+    "e3-ampolla": ["Copas que cambian", "Cups that change"],
+    "e3-llovizna": ["El cartel del Bosque", "The Wood's sign"],
+    "e3-retono": ["Una cantimplora escondida", "A hidden water bottle"],
+    "e3-trueque": ["Noches por pedazos", "Nights by the slice"],
+    "e3-glosa": ["La pluma de cuervo", "The crow's quill"],
+    "e3-noctua": ["Cuarenta copas vacías", "Forty empty cups"],
+    "e3-nim": ["Lo que nadie compra", "What nobody buys"],
+    "e3-beber": ["El agua de abajo", "The water below"],
+    "e3-remanso": ["La copa número cien", "The hundredth cup"],
+    "e3-ruinas": ["La plaza hundida", "The sunken square"],
+    "e3-ola": ["Dos tratos", "Two deals"],
+    "e3-cuarzo": ["La pared de las noches", "The wall of nights"],
+    "e3-grabado": ["Un grabado de más", "One carving too many"],
+    "e3-nevisca": ["Sueños con huecos", "Dreams with gaps"],
+    "e3-huecos": ["Un hermano sin cara", "A brother with no face"],
+    "e3-cantora": ["La que mira al lago", "She who looks at the lake"],
+    "e3-final": ["La Crónica Oficial", "The Official Chronicle"],
   };
   const BY_WHO = {};
   for (const id in PEOPLE) for (const w of PEOPLE[id].who) BY_WHO[w] = id;

@@ -74,6 +74,28 @@
     { ev: "heights/e2-coplo", node: "a", flag: "cefiraKept", who: "coplo",
       es: "Y tú, aquella vez, preferiste guardar el secreto de la Dama. Yo también lo guardé, un año más. Ya ves: la verdad sale igual, solo que más tarde y más cara.",
       en: "And you, that time, chose to keep the Lady's secret. I kept it too, another year. You see: the truth comes out anyway, just later and dearer." },
+    // era 3, El Lago que Recuerda (rpg/events-era3.js): how La Calma ended, and what you chose in it, comes back
+    { ev: "lake/e3-beber", node: "a", flag: "m2_linea", who: "ola",
+      es: "Desde que se cerraron los pozos, el lago volvió a ver. Durante veinte años mostró solo el cielo. Ahora muestra también lo de abajo.",
+      en: "Since the wells were closed, the lake sees again. For twenty years it showed only the sky. Now it shows what's below as well." },
+    { ev: "lake/e3-beber", node: "a", flag: "m2_quinta", who: "ola",
+      es: "El lago sigue ciego por arriba. Por eso bajamos. Debajo de la Línea el agua sí ve, y lo primero que nos mostró fue tu estatua, cantando.",
+      en: "The lake is still blind on top. That's why we went down. Below the Line the water does see, and the first thing it showed us was your statue, singing." },
+    { ev: "lake/e3-beber", node: "a", flag: "m2_ligero", who: "ola",
+      es: "Solo la orilla sana refleja. La alquilamos por turnos. La otra orilla, la negra, no la quiere nadie, y es justo la que más recuerda.",
+      en: "Only the healthy shore reflects. We rent it out by turns. The other shore, the black one, nobody wants, and it's the one that remembers most." },
+    { ev: "aurora/e3-candela", node: "a", flag: "e2_libroPlaza", who: "candela",
+      es: "Alguien leyó el cuaderno de mi abuela en la plaza, hace años. La gente oyó «Albor» y nos tiró piedras a la puerta. Por eso quiero mi propia prueba.",
+      en: "Someone read my grandmother's notebook in the square, years ago. People heard “Albor” and threw stones at our door. That's why I want my own proof." },
+    { ev: "crater/e3-copas", node: "a", flag: "e2_olaFogarin", who: "fogarin",
+      es: "Ola y yo seguimos haciendo tubos, ¿sabes? Uno de fuego, uno de agua. Ella ahora manda en las Mareas. Yo en el Gremio. Nunca nos casamos. Nunca hizo falta.",
+      en: "Ola and I still make tubes, you know? One of fire, one of water. She runs the Tides now. I run the Guild. We never married. It was never needed." },
+    { ev: "forest/e3-llovizna", node: "a", flag: "e2_lloviznaVado", who: "llovizna",
+      es: "Cuidé criaturas en tu Vado once años. Volví al Bosque cuando el abuelo empezó a olvidarse de los domingos. Todavía tengo la cuchara.",
+      en: "I looked after creatures in your Ford for eleven years. I came back to the Wood when Grandpa started forgetting the Sundays. I still have the spoon." },
+    { ev: "heart/e3-cantora", node: "a", flag: "m2_quinta", who: "brezo",
+      es: "Y en el Vado, la quinta. La tuya. Todavía canta de noche. Los niños creen que es una nana. Yo sé que es una despedida.",
+      en: "And in the Ford, the fifth. Yours. It still sings at night. The children think it's a lullaby. I know it's a farewell." },
   ];
 
   const EPI = {

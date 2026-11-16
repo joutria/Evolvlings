@@ -45,6 +45,8 @@
     "Aurelia Albor": "Noble", "Recolector de la Torre": "Inspector~1", "Guarda de la matriarca": "KnightGold", "Comprador del Prado": "Villager5",
     "Concejala del Bosque": "Shaman",
     "Ola": "NinjaBlue~1", "Agente de la Casa Alba": "Inspector~2", "Cavador de las manos negras": "Caveman2", "Niño de la Hondonada": "Boy~1", "Coplo, cantor": "Monk2",
+    "Candela Albor": "Villager3", "Jueza Albura": "Sultan", "Ampolla, sopladora": "Cavegirl", "Retoño": "Child~2", "Trueque, mercader": "Villager4",
+    "Umbela, archivera de la Corte": "NinjaMageBlack~1", "Remanso": "EggBoy", "Cuarzo, cronista": "Caveman",
     // anywhere
     "Retal, el que va y viene": "Hunter", "Doña Alforja": "Noble",
   };
