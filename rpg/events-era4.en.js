@@ -1293,9 +1293,9 @@ window.EVEVENTS_EN = window.EVEVENTS_EN || {};
                      "The ceiling sings! The teacher will say it isn't learning. But it sounds nice."] },
     } },
 
-    "e4-turno": { who: { carambano: "Carámbano, of the Watch" }, nodes: {
+    "e4-turno": { who: { carambano: "Nevado, of the Watch" }, nodes: {
       a: { say: ["The circle of the Watch is still in its ice hall, but the ice drips on the sleepers. There are fewer dreamers than before. Each has a waxed blanket over them.",
-                 "I'm Carámbano. I've kept the Watch since Nevisca died. We still sleep. I'm not sure for whom. Not even the Meadow families pay anymore: they buy Bell turns.",
+                 "I'm Nevado. I've kept the Watch since Nevisca died. We still sleep. I'm not sure for whom. Not even the Meadow families pay anymore: they buy Bell turns.",
                  "The odd thing is that everyone who sleeps here has dreamed the same thing for a year: a sound you can't hear and something enormous going still."],
            opts: ["“Nevisca slept for the Root with half the dreamers.”", "“The Deep charged double for every dream.”", "“Nevisca took in those who arrived with hollows.”", "“That dream is the Bell.”", "“Wake them up. Nobody should be made to dream that.”"] },
       raiz: { say: ["Yes. Half still do. We dream white, as she used to say. But now the white has a red line down the middle. It won't go away.",
@@ -1307,7 +1307,7 @@ window.EVEVENTS_EN = window.EVEVENTS_EN || {};
       campana: { say: ["The Bell? We're dreaming the Bell before it rings?",
                        "He looks at the sleepers. One stirs, moans, goes still again.",
                        "Then the Watch knows what's going to happen. And nobody asks the Watch. I'll write the dreams down. All of them. In case anyone wants to know what the Root feels."] },
-      despertar: { say: ["Carámbano wakes the dreamers one by one. Some cry when they open their eyes. One asks whether it has rung yet.",
+      despertar: { say: ["Nevado wakes the dreamers one by one. Some cry when they open their eyes. One asks whether it has rung yet.",
                          "No. Not yet. Go home. If the Root wants to dream in fear, let it dream alone for a while. We are not its fear.",
                          "The Watch is empty for the first time in a thousand years. It drips on the waxed blankets, empty."] },
     } },
@@ -1383,7 +1383,7 @@ window.EVEVENTS_EN = window.EVEVENTS_EN || {};
                        "He says nothing more. He goes back to the Crater that night. The next day, the great Bell is still in its mould. But the deep furnaces work at half."] },
     } },
 
-    "e4-fondovoto": { who: { tempano: "Témpano, ice keeper", carambano: "Carámbano, of the Watch" }, nodes: {
+    "e4-fondovoto": { who: { tempano: "Témpano, ice keeper", carambano: "Nevado, of the Watch" }, nodes: {
       a: { say: ["In the upper hall, where the Deep moved, people gather around a brazier. For the first time in the Deep's history there's fire indoors. It's needed: the ones from below arrive soaked.",
                  "They're calling us to the Heart. Over the Bell. If we go, we'll ask for the furnaces to be put out. All of them. The Deep doesn't survive otherwise.",
                  "And if they're all put out, the Crater starves. They're people too. I sleep beside the ones who come with grey hands."],

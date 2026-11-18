@@ -1517,9 +1517,9 @@ window.EVEVENTS = window.EVEVENTS || {};
                      ["copo", "¡El techo canta! La maestra va a decir que no es aprender. Pero suena lindo."]], end: { xp: 14, heal: 0.1, flag: "e4_gotasNana" } },
     } },
 
-    "e4-turno": { kind: "dialogo", need: { era: 4, layer: 1 }, who: { carambano: "Carámbano, del Turno" }, start: "a", nodes: {
+    "e4-turno": { kind: "dialogo", need: { era: 4, layer: 1 }, who: { carambano: "Nevado, del Turno" }, start: "a", nodes: {
       a: { say: [[null, "El círculo del Turno sigue en su sala de hielo, pero el hielo gotea sobre los que duermen. Hay menos soñadores que antes. Cada uno tiene una manta encerada encima."],
-                 ["carambano", "Soy Carámbano. Cuido el Turno desde que murió Nevisca. Seguimos durmiendo. No sé bien para quién. Ya ni las familias del Prado pagan: compran turnos de Campana."],
+                 ["carambano", "Soy Nevado. Cuido el Turno desde que murió Nevisca. Seguimos durmiendo. No sé bien para quién. Ya ni las familias del Prado pagan: compran turnos de Campana."],
                  ["carambano", "Lo raro es que los que duermen aquí sueñan todos lo mismo desde hace un año: un ruido que no se oye y algo enorme que se queda quieto."]],
            opts: [{ t: "«Nevisca dormía para la Raíz con la mitad de los soñadores.»", go: "raiz", cNeed: "end_e3nevisca_A" },
                   { t: "«El Fondo cobraba el doble por cada sueño.»", go: "doble", cNeed: "end_e3nevisca_B" },
@@ -1535,7 +1535,7 @@ window.EVEVENTS = window.EVEVENTS || {};
       campana: { say: [["carambano", "¿La Campana? ¿Soñamos la Campana antes de que suene?"],
                        [null, "Mira a los que duermen. Uno se mueve, se queja, vuelve a quedarse quieto."],
                        ["carambano", "Entonces el Turno sabe lo que va a pasar. Y nadie le pregunta al Turno. Voy a escribir los sueños. Todos. Por si alguien quiere saber qué siente la Raíz."]], end: { xp: 16, flag: "e4_suenosEscritos" } },
-      despertar: { say: [[null, "Carámbano despierta a los soñadores uno por uno. Algunos lloran al abrir los ojos. Uno pregunta si ya sonó."],
+      despertar: { say: [[null, "Nevado despierta a los soñadores uno por uno. Algunos lloran al abrir los ojos. Uno pregunta si ya sonó."],
                          ["carambano", "No. Todavía no. Vuelvan a sus casas. Si la Raíz quiere soñar con miedo, que sueñe sola un tiempo. Nosotros no somos su miedo."],
                          [null, "El Turno queda vacío por primera vez en mil años. Gotea sobre las mantas enceradas, vacías."]], end: { xp: 12, flag: "e4_turnoVacio" } },
     } },
@@ -1623,7 +1623,7 @@ window.EVEVENTS = window.EVEVENTS || {};
                        [null, "No dice nada más. Vuelve al Cráter esa noche. Al día siguiente, la Campana grande sigue en el molde. Pero los hornos hondos trabajan la mitad."]], end: { xp: 20, flag: "e4_fogarinCampanas" } },
     } },
 
-    "e4-fondovoto": { kind: "dialogo", need: { era: 4, layer: 3 }, who: { tempano: "Témpano, guardiana del hielo", carambano: "Carámbano, del Turno" }, start: "a", nodes: {
+    "e4-fondovoto": { kind: "dialogo", need: { era: 4, layer: 3 }, who: { tempano: "Témpano, guardiana del hielo", carambano: "Nevado, del Turno" }, start: "a", nodes: {
       a: { say: [[null, "En la sala alta, donde el Fondo se mudó, la gente se junta alrededor de un brasero. Por primera vez en la historia del Fondo hay fuego adentro. Hace falta: los de abajo vienen empapados."],
                  ["tempano", "Nos llaman al Corazón. Por la Campana. Si vamos, vamos a pedir que se apaguen los hornos. Todos. El Fondo no sobrevive si no."],
                  ["carambano", "Y si se apagan todos, el Cráter se muere de hambre. Ellos también son gente. Yo duermo al lado de los que vienen con las manos grises."]],
