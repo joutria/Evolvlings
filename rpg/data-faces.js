@@ -63,6 +63,9 @@
     "Reina Calígine": "Princess~d", "Grisalla, el que no se levanta": "OldMan2", "Sepia, archivera de la Corte": "NinjaMageBlack~1", "Ancla, pescador de las Mareas": "Villager~1",
     "Rompiente, voz de las Mareas": "Woman~1", "Cinabrio, picador": "Caveman2", "Mica, de la Hondura": "EggGirl",
     "Escarpia, guía de los Altos": "Eskimo~1", "Lucero, el que mira el cielo": "OldMan3",
+    "Desmemoria, del pozo": "NinjaGray", "Reina Noctámbula": "Princess~D", "Gualda, la Nombrada": "NinjaMageBlack~1", "Legajo, archivero del Velo": "Inspector~2",
+    "Rastrojo, del Barrio": "Villager4", "Tojo, de las Casas del Farol": "Noble", "Recaudo, cobrador del Gremio": "Sultan", "Acebo, del Concejo del Musgo": "Monk2",
+    "Redoble, tamborero": "Caveman", "Ondina, de las Mareas": "Woman", "Sopor, soñadora del Fondo": "Eskimo",
     // anywhere
     "Retal, el que va y viene": "Hunter", "Doña Alforja": "Noble",
   };

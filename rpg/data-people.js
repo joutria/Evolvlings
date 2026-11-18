@@ -164,6 +164,18 @@
     mica: P(["Mica, de la Hondura", "Mica, of the Hondura"], ["Mica"], "Niña de la oreja en la pared", "la niña de la oreja en la pared", "Girl with her ear to the wall", "the girl with her ear to the wall"),
     escarpia: P(["Escarpia, guía de los Altos", "Escarpia, Heights guide"], ["Escarpia"], "Guía de las raquetas de nieve", "la guía de las raquetas de nieve", "Guide with snowshoes", "the guide with snowshoes"),
     lucero: P(["Lucero, el que mira el cielo", "Lucero, sky watcher"], ["Lucero"], "Viejo del tubo de cobre", "el viejo del tubo de cobre", "Old man with a copper tube", "the old man with a copper tube"),
+    // era 6: La Corte de los Nombres
+    desmemoria: P(["Desmemoria, del pozo", "Desmemoria, of the well"], ["Desmemoria"], "Hombre del pozo del medio", "el hombre del pozo del medio", "Man at the middle well", "the man at the middle well"),
+    noctambula: P(["Reina Noctámbula", "Queen Noctámbula"], ["Reina Noctámbula", "Noctámbula"], "Reina de las siete cortinas", "la reina de las siete cortinas", "Queen of the seven curtains", "the queen of the seven curtains", ["Queen Noctámbula", "Noctámbula"]),
+    gualda: P(["Gualda, la Nombrada", "Gualda, the Named One"], ["Gualda"], "Sombra que saluda a todos", "la sombra que saluda a todos", "Shadow who greets everyone", "the shadow who greets everyone"),
+    legajo: P(["Legajo, archivero del Velo", "Legajo, archivist of the Veil"], ["Legajo"], "Archivero de los anteojos ahumados", "el archivero de los anteojos ahumados", "Archivist in smoked spectacles", "the archivist in smoked spectacles"),
+    rastrojo: P(["Rastrojo, del Barrio", "Rastrojo, of the Quarter"], ["Rastrojo"], "Vecino de la casa azul", "el vecino de la casa azul", "Neighbour from the blue house", "the neighbour from the blue house"),
+    tojo: P(["Tojo, de las Casas del Farol", "Tojo, of the Lantern Houses"], ["Tojo"], "Joven de los retratos tapados", "el joven de los retratos tapados", "Young man with the covered portraits", "the young man with the covered portraits"),
+    recaudo: P(["Recaudo, cobrador del Gremio", "Recaudo, Guild collector"], ["Recaudo"], "Cobrador de la tablilla", "el cobrador de la tablilla", "Collector with a tally board", "the collector with a tally board"),
+    acebo: P(["Acebo, del Concejo del Musgo", "Acebo, of the Moss Council"], ["Acebo"], "Concejal del musgo en los oídos", "el concejal del musgo en los oídos", "Councillor with moss in the ears", "the councillor with moss in the ears"),
+    redoble: P(["Redoble, tamborero", "Redoble, drummer"], ["Redoble"], "Tamborero de las manos grandes", "el tamborero de las manos grandes", "Drummer with big hands", "the drummer with big hands"),
+    ondina: P(["Ondina, de las Mareas", "Ondina, of the Tides"], ["Ondina"], "Maestra de nadar", "la maestra de nadar", "Swimming teacher", "the swimming teacher"),
+    sopor: P(["Sopor, soñadora del Fondo", "Sopor, dreamer of the Deep"], ["Sopor"], "Soñadora que llora dormida", "la soñadora que llora dormida", "Dreamer who cries in her sleep", "the dreamer who cries in her sleep"),
   };
   // titles for the book's Diary (no names in them: they would give away who you meet)
   const TITLES = {
@@ -587,6 +599,25 @@
     "e5-sorda": ["La Raíz Sorda", "The Deaf Root"],
     "e5-vispera": ["La víspera", "The night before"],
     "e5-desvelofin": ["Lo que no sabe la voz", "What the voice doesn't know"],
+    "e6-pozos": ["Los pozos de sombra", "The shadow wells"],
+    "e6-olvidar": ["Una página en gris", "A page gone grey"],
+    "e6-noctambula": ["La reina de las siete cortinas", "The queen of the seven curtains"],
+    "e6-nombrada": ["La sombra con el nombre dicho", "The shadow with her name spoken"],
+    "e6-legajo": ["La página arrancada", "The torn-out page"],
+    "e6-comercio": ["El comercio de olvido", "The trade in forgetting"],
+    "e6-verso": ["El noveno verso", "The ninth verse"],
+    "e6-vecinos": ["La casa azul y la verde", "The blue house and the green"],
+    "e6-casas": ["Los retratos tapados", "The covered portraits"],
+    "e6-tojo": ["El culpable que olvidó", "The culprit who forgot"],
+    "e6-deudas": ["Las deudas olvidadas", "The forgotten debts"],
+    "e6-silencio": ["El silencio con musgo", "The moss silence"],
+    "e6-canciones": ["Canciones sin dueño", "Songs with no owner"],
+    "e6-nadar": ["Los chicos que no nadan", "The children who can't swim"],
+    "e6-grabar": ["La pared sin espacio", "The wall with no room"],
+    "e6-sonadores": ["Los que sueñan lo olvidado", "Those who dream the forgotten"],
+    "e6-estatuas": ["Estatuas de nadie", "Nobody's statues"],
+    "e6-estrellas": ["Dos versiones del pacto", "Two versions of the pact"],
+    "e6-final": ["Lo que se recuerda", "What is remembered"],
   };
   const BY_WHO = {};
   for (const id in PEOPLE) for (const w of PEOPLE[id].who) BY_WHO[w] = id;
