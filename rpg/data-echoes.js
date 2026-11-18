@@ -138,6 +138,20 @@
     cuarzo: { era: 3, zone: "caves", layer: 3, rules: [{ end: "A", any: ["e3_paredLlena", "e3_visionesBorradas"] }, { end: "B", any: ["e3_nombresBorrados"] }, { end: "C" }] },
     e3nevisca: { era: 3, zone: "deep", layer: 3, know: "nevisca", page: "nevisca", rules: [{ end: "A", any: ["e3_turnoRaiz", "e3_versoRecuerda"] }, { end: "B", any: ["e3_turnoDoble", "e3_suenosVendidos"] }, { end: "C" }] },
     e3nieve: { era: 3, zone: "deep", layer: 3, know: "nieve", page: "nieve", rules: [{ end: "A", any: ["e3_nieveDevuelve"] }, { end: "B", any: ["e3_nieveBebe"] }, { end: "C" }] },
+    // era 4 (Las Forjas Hondas)
+    e4fogarin: { era: 4, zone: "heart", layer: 4, know: "fogarin", page: "fogarin", rules: [{ end: "A", any: ["e4_fogarinPared", "e4_fogarinLista", "e4_lagoLibre"] }, { end: "B", any: ["e4_hornosNuevos", "e4_tratoAfuera"] }, { end: "C" }] },
+    yunque: { era: 4, zone: "crater", layer: 3, rules: [{ end: "A", any: ["e4_yunqueNombra", "e4_yunqueDeja"] }, { end: "B", any: ["e4_yunqueTermina", "e4_yunqueCodo"] }, { end: "C" }] },
+    escoria: { era: 4, zone: "crater", layer: 3, rules: [{ end: "A", any: ["e4_paredManos", "e4_manosCorazon", "e4_paredPueblos"] }, { end: "B", any: ["e4_madreCortada", "e4_tizonObreros"] }, { end: "C" }] },
+    cobre: { era: 4, zone: "aurora", layer: 3, rules: [{ end: "A", any: ["e4_sillasRepartidas", "e4_ambarLibera", "e4_nocheBarrio"] }, { end: "B", any: ["e4_toqueCorte", "e4_subastaRota"] }, { end: "C" }] },
+    chispa: { era: 4, zone: "crater", layer: 2, rules: [{ end: "A", any: ["e4_chispaResina", "e4_pizcaChispa", "e4_tizonChispa"] }, { end: "B", any: ["e4_chispaSigue"] }, { end: "C" }] },
+    hacha: { era: 4, zone: "forest", layer: 3, rules: [{ end: "A", any: ["e4_concejoHacha", "e4_madreSangra", "e4_leniaCarbon"] }, { end: "B", any: ["e4_madreCortada", "e4_ladoHulla"] }, { end: "C" }] },
+    hulla: { era: 4, zone: "hollow", layer: 3, rules: [{ end: "A", any: ["e4_sinVelo", "e4_carbonerosVan", "e4_carbonVisto"] }, { end: "B", any: ["e4_carbonDelatado", "e4_corteNoVa"] }, { end: "C" }] },
+    ebano: { era: 4, zone: "hollow", layer: 2, rules: [{ end: "A", any: ["e4_nombreVisto", "e4_listaPiedra", "e4_listaLeida"] }, { end: "B", any: ["e4_nombreGuardado"] }, { end: "C" }] },
+    merma: { era: 4, zone: "hollow", layer: 3, rules: [{ end: "A", any: ["e4_reinaNorte"] }, { end: "B", any: ["e4_reinaExpuesta"] }, { end: "C" }] },
+    salitre: { era: 4, zone: "lake", layer: 3, rules: [{ end: "A", any: ["e4_hornosLagoCerrados", "e4_valvulasMareas", "e4_lagoPagado"] }, { end: "B", any: ["e4_salitreCobra", "e4_vetaLagoSacada"] }, { end: "C" }] },
+    galena: { era: 4, zone: "caves", layer: 3, rules: [{ end: "A", any: ["e4_cuarentaVistos", "e4_paredPueblos", "e4_tunelesParados"] }, { end: "B", any: ["e4_cuarentaSellados", "e4_vetaSellada"] }, { end: "C" }] },
+    peaje: { era: 4, zone: "heights", layer: 3, rules: [{ end: "A", any: ["e4_pasosCerrados", "e4_carretasParadas", "e4_espadaCorazon"] }, { end: "B", any: ["e4_peajeObreros", "e4_tratoAfuera"] }, { end: "C" }] },
+    tempano: { era: 4, zone: "deep", layer: 3, rules: [{ end: "A", any: ["e4_hornosFondo", "e4_saviaCongelada", "e4_campanasViejas"] }, { end: "B", any: ["e4_fondoSube", "e4_fondoNoVa"] }, { end: "C" }] },
   };
 
   // the echo lines for one node of one conversation, given the flags you hold

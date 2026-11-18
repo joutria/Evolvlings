@@ -44,7 +44,7 @@
     nevisca: P(["Nevisca, soñadora del Turno", "Nevisca, dreamer of the Watch"], ["Nevisca"], "Soñadora del Turno", "la soñadora del Turno", "Dreamer of the Watch", "the dreamer of the Watch"),
     yesca: P(["Yesca, cultivadora", "Yesca, grower"], ["Yesca"], "Cultivador de setas", "el cultivador de setas", "Mushroom grower", "the mushroom grower"),
     carrasca: P(["Carrasca"], ["Carrasca"], "Mujer de la pala", "la mujer de la pala", "Woman with a shovel", "the woman with a shovel"),
-    nieve: P(["Nieve"], ["Nieve"], "Niña del hielo", "la niña del hielo", "Ice girl", "the ice girl"),
+    nieve: P(["Nieve", "Doña Nieve", "Old Nieve"], ["Nieve"], "Niña del hielo", "la niña del hielo", "Ice girl", "the ice girl"),
     granizo: P(["Granizo"], ["Granizo"], "Niño del hielo", "el niño del hielo", "Ice boy", "the ice boy"),
     escarcha: P(["Escarcha, guardia de la Regente", "Escarcha, the Regent's guard"], ["Escarcha"], "Guardia de la tumba", "la guardia de la tumba", "Tomb guard", "the tomb guard"),
     albina: P(["Regente Albina", "Regent Albina"], ["Regente Albina", "Albina"], "Mujer de la corona", "la mujer de la corona", "Woman in the crown", "the woman in the crown", ["Regent Albina", "Albina"]),
@@ -134,6 +134,11 @@
     rada: P(["Rada, de las Mareas", "Rada, of the Tides"], ["Rada"], "Lectora de paredes", "la lectora de paredes", "Wall reader", "the wall reader"),
     plomo: P(["Plomo, capataz del Gremio", "Plomo, Guild foreman"], ["Plomo"], "Capataz de la pizarra", "el capataz de la pizarra", "Foreman with a slate", "the foreman with a slate"),
     pizca: P(["Pizca"], ["Pizca"], "Niña de los túneles chicos", "la niña de los túneles chicos", "Small-tunnel girl", "the small-tunnel girl"),
+    toldo: P(["Toldo, de los Altos", "Toldo, of the Heights"], ["Toldo"], "Vendedor de mapas", "el vendedor de mapas", "Map seller", "the map seller"),
+    cizalla: P(["Cizalla, compradora de afuera", "Cizalla, buyer from outside"], ["Cizalla"], "Forastera de la espada", "la forastera de la espada", "Stranger with a sword", "the stranger with a sword"),
+    romanza: P(["Romanza, mensajera", "Romanza, messenger"], ["Romanza"], "Mensajera del tambor", "la mensajera del tambor", "Messenger with a drum", "the messenger with a drum"),
+    copo: P(["Copo"], ["Copo"], "Chico de las goteras", "el chico de las goteras", "Boy of the leaks", "the boy of the leaks"),
+    carambano: P(["Carámbano, del Turno", "Carámbano, of the Watch"], ["Carámbano"], "Cuidador del Turno", "el cuidador del Turno", "Keeper of the Watch", "the keeper of the Watch"),
   };
   // titles for the book's Diary (no names in them: they would give away who you meet)
   const TITLES = {
@@ -456,6 +461,26 @@
     "e4-pizca": ["Los túneles chicos", "The small tunnels"],
     "e4-paredmanos": ["Una pared de vivos", "A wall of the living"],
     "e4-otrolado": ["Del otro lado", "The other side"],
+    "e4-nieveroja": ["Nieve roja", "Red snow"],
+    "e4-mirador": ["Pedazos de montaña", "Slices of mountain"],
+    "e4-afuera": ["Una espada sobre la mesa", "A sword on the table"],
+    "e4-versos": ["La última mensajera", "The last messenger"],
+    "e4-trineo": ["La carreta volcada", "The overturned cart"],
+    "e4-espada": ["Lo que vuelve", "What comes back"],
+    "e4-cumbre": ["Un fuego en la cumbre", "A fire on the summit"],
+    "e4-goteras": ["La sala de las goteras", "The leak hall"],
+    "e4-turno": ["Un sueño que se repite", "A dream that repeats"],
+    "e4-nieve": ["Patines viejos", "Old skates"],
+    "e4-hielero": ["Hielo en venta", "Ice for sale"],
+    "e4-glaciar": ["La grieta azul", "The blue crack"],
+    "e4-guardado": ["Lo que guardaba el hielo", "What the ice kept"],
+    "e4-fondovoto": ["Fuego adentro", "Fire indoors"],
+    "e4-tocon": ["El Tocón con fiebre", "The feverish Stump"],
+    "e4-estatua": ["La escoria de la base", "The slag on the base"],
+    "e4-llegan": ["Nueve fuegos", "Nine fires"],
+    "e4-pruebas": ["Una hora de silencio", "An hour of silence"],
+    "e4-vispera": ["La última fundición", "The last casting"],
+    "e4-cantores": ["Cinco que saben", "Five who know it"],
   };
   const BY_WHO = {};
   for (const id in PEOPLE) for (const w of PEOPLE[id].who) BY_WHO[w] = id;
