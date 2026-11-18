@@ -1,5 +1,5 @@
 {
- "v": 3019982076,
+ "v": 2234025372,
  "files": [
   {
    "path": "battle/aurora-day.png",
@@ -517,9 +517,19 @@
    "h": 64
   },
   {
+   "path": "creatures/albadrago.png",
+   "w": 640,
+   "h": 64
+  },
+  {
    "path": "creatures/bostezo.png",
    "w": 640,
    "h": 192
+  },
+  {
+   "path": "creatures/brasadrago.png",
+   "w": 640,
+   "h": 64
   },
   {
    "path": "creatures/brotin.png",
@@ -548,6 +558,11 @@
   },
   {
    "path": "creatures/chisporro.png",
+   "w": 640,
+   "h": 64
+  },
+  {
+   "path": "creatures/colmillon.png",
    "w": 640,
    "h": 64
   },
@@ -592,9 +607,19 @@
    "h": 192
   },
   {
+   "path": "creatures/mohin.png",
+   "w": 640,
+   "h": 64
+  },
+  {
    "path": "creatures/nim.png",
    "w": 640,
    "h": 192
+  },
+  {
+   "path": "creatures/nubedrago.png",
+   "w": 640,
+   "h": 64
   },
   {
    "path": "creatures/ojuelo.png",
@@ -605,6 +630,16 @@
    "path": "creatures/pebb.png",
    "w": 640,
    "h": 192
+  },
+  {
+   "path": "creatures/pinzote.png",
+   "w": 640,
+   "h": 64
+  },
+  {
+   "path": "creatures/ramacuerno.png",
+   "w": 640,
+   "h": 64
   },
   {
    "path": "creatures/relampin.png",
@@ -640,6 +675,11 @@
    "path": "creatures/unisona.png",
    "w": 640,
    "h": 192
+  },
+  {
+   "path": "creatures/ventisco.png",
+   "w": 640,
+   "h": 64
   },
   {
    "path": "creatures/vidriela.png",
@@ -2267,7 +2307,17 @@
    "h": 38
   },
   {
+   "path": "faces/mon-albadrago.png",
+   "w": 38,
+   "h": 38
+  },
+  {
    "path": "faces/mon-bostezo.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-brasadrago.png",
    "w": 38,
    "h": 38
   },
@@ -2298,6 +2348,11 @@
   },
   {
    "path": "faces/mon-chisporro.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-colmillon.png",
    "w": 38,
    "h": 38
   },
@@ -2342,7 +2397,17 @@
    "h": 38
   },
   {
+   "path": "faces/mon-mohin.png",
+   "w": 38,
+   "h": 38
+  },
+  {
    "path": "faces/mon-nim.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-nubedrago.png",
    "w": 38,
    "h": 38
   },
@@ -2353,6 +2418,16 @@
   },
   {
    "path": "faces/mon-pebb.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-pinzote.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-ramacuerno.png",
    "w": 38,
    "h": 38
   },
@@ -2388,6 +2463,11 @@
   },
   {
    "path": "faces/mon-unisona.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-ventisco.png",
    "w": 38,
    "h": 38
   },
