@@ -52,6 +52,7 @@
     "Chispa": "Child~2", "Hacha, leñadora": "Hunter", "Hulla, carbonera de la Corte": "NinjaMageBlack", "Ébano, archivero de la Corte": "NinjaGray",
     "Salitre, pescadora": "Woman", "Galena, minera": "Cavegirl~1", "Peaje, arriero": "Villager2", "Témpano, guardiana del hielo": "Eskimo~1",
     "Retama, guarda del Tocón": "OldWoman~2",
+    "Cerillo": "Child", "Badajo, campanero de las Casas": "Villager", "Doña Ámbar": "OldWoman", "Abuela Candela": "OldWoman~1", "Pizarra, maestra": "Woman~1", "Fuelle, maestro joven": "Caveman", "Retoño, del Concejo": "OldMan", "Musgo, del Concejo": "OldMan2",
     // anywhere
     "Retal, el que va y viene": "Hunter", "Doña Alforja": "Noble",
   };
