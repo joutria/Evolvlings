@@ -308,7 +308,7 @@ The path events now include illustrated conversations, in the style of Life in A
 
 ## The ten eras
 
-The lore runs in ten eras, each one turn of the lullaby cycle (plan: [Las diez eras del Claro](https://claude.ai/artifact/RFy6uGdhz9DJeW7e9ZfdkE)). Era 1 is the story the game started with; era 2, La Calma, is the first one added, and era 3, El Lago que Recuerda, the second.
+The lore runs in ten eras, each one turn of the lullaby cycle (plan: [Las diez eras del Claro](https://claude.ai/artifact/RFy6uGdhz9DJeW7e9ZfdkE)). Era 1 is the story the game started with; era 2, La Calma, is the first one added, era 3, El Lago que Recuerda, the second, and era 4, Las Forjas Hondas, the third.
 
 - **State:** `P.era` (1 when missing), `P.eraWins` (guardians beaten per zone since the era began), `P.eras` (how each era closed), `P.eraOffer` (the next era, once it can begin).
 - **Gating:** an event's `need.era` says which era it belongs to (a number or `[first, last]`); events without it belong to era 1, and the common events belong to every era. After era 1, `need.layer` counts `P.eraWins`, so each era is discovered from the start. `need.eraWin: "<zone>"` asks for that zone's guardian beaten in this era. An event with `first: true` comes up before anything else in its zone's bag, and `once: true` is told a single time.

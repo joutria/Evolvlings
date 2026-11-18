@@ -109,6 +109,19 @@
     jabega: P(["Jábega, tabernera", "Jábega, innkeeper"], ["Jábega"], "Tabernera de la barca", "la tabernera de la barca", "Boat innkeeper", "the boat innkeeper"),
     esparto: P(["Esparto, pescador", "Esparto, fisherman"], ["Esparto"], "Pescador del muelle", "el pescador del muelle", "Jetty fisherman", "the jetty fisherman"),
     vilano: P(["Vilano, comprador", "Vilano, buyer"], ["Vilano"], "Comprador enojado", "el comprador enojado", "Angry buyer", "the angry buyer"),
+    // era 4 (Las Forjas Hondas)
+    yunque: P(["Yunque, forjador", "Yunque, smith"], ["Yunque"], "Forjador del amuleto", "el forjador del amuleto", "Smith with an amulet", "the smith with an amulet"),
+    escoria: P(["Escoria, obrera", "Escoria, worker"], ["Escoria"], "Obrera del hollín", "la obrera del hollín", "Sooty worker", "the sooty worker"),
+    cobre: P(["Cobre, de las Casas", "Cobre, of the Houses"], ["Cobre"], "Heredero de los puños gastados", "el heredero de los puños gastados", "Heir with worn cuffs", "the heir with worn cuffs"),
+    chispa: P(["Chispa"], ["Chispa"], "Niña de la ladera sur", "la niña de la ladera sur", "Girl from the south slope", "the girl from the south slope"),
+    hacha: P(["Hacha, leñadora", "Hacha, woodcutter"], ["Hacha"], "Leñadora del Bosque", "la leñadora del Bosque", "Wood woodcutter", "the Wood woodcutter"),
+    hulla: P(["Hulla, carbonera de la Corte", "Hulla, Court charcoal burner"], ["Hulla"], "Carbonera del velo", "la carbonera del velo", "Veiled charcoal burner", "the veiled charcoal burner"),
+    ebano: P(["Ébano, archivero de la Corte", "Ébano, Court archivist"], ["Ébano"], "Archivero joven", "el archivero joven", "Young archivist", "the young archivist"),
+    salitre: P(["Salitre, pescadora", "Salitre, fisher"], ["Salitre"], "Pescadora de la orilla sur", "la pescadora de la orilla sur", "South-shore fisher", "the south-shore fisher"),
+    galena: P(["Galena, minera", "Galena, miner"], ["Galena"], "Minera del casco abollado", "la minera del casco abollado", "Miner with a dented helmet", "the miner with a dented helmet"),
+    peaje: P(["Peaje, arriero", "Peaje, carter"], ["Peaje"], "Arriero del paso", "el arriero del paso", "Pass carter", "the pass carter"),
+    tempano: P(["Témpano, guardiana del hielo", "Témpano, ice keeper"], ["Témpano"], "Guardiana de las goteras", "la guardiana de las goteras", "Keeper of the leaks", "the keeper of the leaks"),
+    retama: P(["Retama, guarda del Tocón", "Retama, keeper of the Stump"], ["Retama"], "Guarda nueva del Tocón", "la guarda nueva del Tocón", "New keeper of the Stump", "the new keeper of the Stump"),
   };
   // titles for the book's Diary (no names in them: they would give away who you meet)
   const TITLES = {
@@ -371,6 +384,26 @@
     "e3-barrena": ["El agua sube por abajo", "The water rises from below"],
     "e3-heredero": ["Un charco en el Corazón", "A puddle in the Heart"],
     "e3-vispera": ["La víspera", "The night before"],
+    "e4-fogarin": ["Un sueño de bronce", "A bronze sleep"],
+    "e4-huelga": ["Ni una pala más", "Not one more shovel"],
+    "e4-manos": ["La mano que pesa", "The hand that weighs"],
+    "e4-ascuas": ["Una brasa vieja", "An old ember"],
+    "e4-cobre": ["Turnos de Campana", "Bell turns"],
+    "e4-chispa": ["Quema lindo", "It burns nice"],
+    "e4-tala": ["Hachas en el Bosque", "Axes in the Wood"],
+    "e4-resina": ["La resina que ablanda", "The resin that softens"],
+    "e4-hulla": ["Carbón sin humo", "Smokeless charcoal"],
+    "e4-ebano": ["El nombre tachado", "The crossed-out name"],
+    "e4-hierve": ["El lago hierve", "The lake boils"],
+    "e4-forjahundida": ["La forja bajo el agua", "The forge under the water"],
+    "e4-galena": ["La pared que contesta", "The wall that knocks back"],
+    "e4-veta": ["La veta que late", "The beating vein"],
+    "e4-peaje": ["Metal para afuera", "Metal for outside"],
+    "e4-alud": ["La nieve que cuelga", "The hanging snow"],
+    "e4-deshielo": ["El primer deshielo", "The first thaw"],
+    "e4-aguanegra": ["Agua negra bajo el hielo", "Black water under the ice"],
+    "e4-campana": ["La campana de prueba", "The test bell"],
+    "e4-final": ["La Campana grande", "The big Bell"],
   };
   const BY_WHO = {};
   for (const id in PEOPLE) for (const w of PEOPLE[id].who) BY_WHO[w] = id;

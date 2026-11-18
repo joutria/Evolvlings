@@ -48,6 +48,10 @@
     "Candela Albor": "Villager3", "Jueza Albura": "Sultan", "Ampolla, sopladora": "Cavegirl", "Retoño": "Child~2", "Trueque, mercader": "Villager4",
     "Umbela, archivera de la Corte": "NinjaMageBlack~1", "Remanso": "EggBoy", "Cuarzo, cronista": "Caveman", "Paño, testigo": "Villager~1", "Lacre, sellador": "Villager3~1",
     "Bruna": "Child~1", "Jábega, tabernera": "Woman~1", "Esparto, pescador": "Hunter", "Vilano, comprador": "Noble",
+    "Fogarín, Maestro del Gremio": "OldMan3", "Yunque, forjador": "Caveman2", "Escoria, obrera": "Cavegirl2", "Cobre, de las Casas": "Noble",
+    "Chispa": "Child~2", "Hacha, leñadora": "Hunter", "Hulla, carbonera de la Corte": "NinjaMageBlack", "Ébano, archivero de la Corte": "NinjaGray",
+    "Salitre, pescadora": "Woman", "Galena, minera": "Cavegirl~1", "Peaje, arriero": "Villager2", "Témpano, guardiana del hielo": "Eskimo~1",
+    "Retama, guarda del Tocón": "OldWoman~2",
     // anywhere
     "Retal, el que va y viene": "Hunter", "Doña Alforja": "Noble",
   };
