@@ -62,6 +62,7 @@
     "Rescoldo, nieto de Chispa": "FighterRed", "Serrín, leñador": "Hunter", "Doña Avena, madre de Centeno": "OldWoman~2",
     "Reina Calígine": "Princess~d", "Grisalla, el que no se levanta": "OldMan2", "Sepia, archivera de la Corte": "NinjaMageBlack~1", "Ancla, pescador de las Mareas": "Villager~1",
     "Rompiente, voz de las Mareas": "Woman~1", "Cinabrio, picador": "Caveman2", "Mica, de la Hondura": "EggGirl",
+    "Escarpia, guía de los Altos": "Eskimo~1", "Lucero, el que mira el cielo": "OldMan3",
     // anywhere
     "Retal, el que va y viene": "Hunter", "Doña Alforja": "Noble",
   };

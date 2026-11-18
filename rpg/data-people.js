@@ -162,6 +162,8 @@
     rompiente: P(["Rompiente, voz de las Mareas", "Rompiente, voice of the Tides"], ["Rompiente"], "Mujer del banco", "la mujer del banco", "Woman on the bench", "the woman on the bench"),
     cinabrio: P(["Cinabrio, picador", "Cinabrio, picker"], ["Cinabrio"], "Picador de las cicatrices", "el picador de las cicatrices", "Scarred picker", "the scarred picker"),
     mica: P(["Mica, de la Hondura", "Mica, of the Hondura"], ["Mica"], "Niña de la oreja en la pared", "la niña de la oreja en la pared", "Girl with her ear to the wall", "the girl with her ear to the wall"),
+    escarpia: P(["Escarpia, guía de los Altos", "Escarpia, Heights guide"], ["Escarpia"], "Guía de las raquetas de nieve", "la guía de las raquetas de nieve", "Guide with snowshoes", "the guide with snowshoes"),
+    lucero: P(["Lucero, el que mira el cielo", "Lucero, sky watcher"], ["Lucero"], "Viejo del tubo de cobre", "el viejo del tubo de cobre", "Old man with a copper tube", "the old man with a copper tube"),
   };
   // titles for the book's Diary (no names in them: they would give away who you meet)
   const TITLES = {
@@ -571,6 +573,20 @@
     "e5-cuarenta": ["Manos tibias de piedra", "Warm stone hands"],
     "e5-precio": ["Tres monedas", "Three coins"],
     "e5-debajo": ["Debajo de la Tumba", "Under the Tomb"],
+    "e5-sepultados": ["El pueblo enterrado", "The buried village"],
+    "e5-escarpia": ["El paso de afuera", "The pass to the outside"],
+    "e5-tambores": ["Dos tambores a la vez", "Two drums at once"],
+    "e5-cornisa": ["La cornisa", "The cornice"],
+    "e5-orden": ["El mensaje de la regencia", "The regency's message"],
+    "e5-lucero": ["El hueco en el cielo", "The gap in the sky"],
+    "e5-quedarse": ["El último vecino", "The last neighbour"],
+    "e5-ultimotambor": ["Quién toca ahora", "Who drums now"],
+    "e5-cellisca": ["La regente sin corona", "The regent without a crown"],
+    "e5-tocon": ["Quien cuide el Tocón", "Who keeps the Stump"],
+    "e5-testigos": ["Los nueve palos", "The nine sticks"],
+    "e5-sorda": ["La Raíz Sorda", "The Deaf Root"],
+    "e5-vispera": ["La víspera", "The night before"],
+    "e5-desvelofin": ["Lo que no sabe la voz", "What the voice doesn't know"],
   };
   const BY_WHO = {};
   for (const id in PEOPLE) for (const w of PEOPLE[id].who) BY_WHO[w] = id;

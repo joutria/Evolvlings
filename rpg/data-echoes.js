@@ -152,6 +152,23 @@
     galena: { era: 4, zone: "caves", layer: 3, rules: [{ end: "A", any: ["e4_cuarentaVistos", "e4_paredPueblos", "e4_tunelesParados"] }, { end: "B", any: ["e4_cuarentaSellados", "e4_vetaSellada"] }, { end: "C" }] },
     peaje: { era: 4, zone: "heights", layer: 3, rules: [{ end: "A", any: ["e4_pasosCerrados", "e4_carretasParadas", "e4_espadaCorazon"] }, { end: "B", any: ["e4_peajeObreros", "e4_tratoAfuera"] }, { end: "C" }] },
     tempano: { era: 4, zone: "deep", layer: 3, rules: [{ end: "A", any: ["e4_hornosFondo", "e4_saviaCongelada", "e4_campanasViejas"] }, { end: "B", any: ["e4_fondoSube", "e4_fondoNoVa"] }, { end: "C" }] },
+    // era 5 (El Invierno Largo)
+    lirio: { era: 5, zone: "deep", layer: 3, rules: [{ end: "A", any: ["m5_boda", "m5_bodaPedida", "e5_visperaDicha"] }, { end: "B", any: ["m5_huida"] }, { end: "C" }] },
+    moho: { era: 5, zone: "deep", layer: 3, rules: [{ end: "A", any: ["e5_mohoSabe", "e5_visperaDicha", "e5_toconSeta"] }, { end: "B", any: ["e5_mohoMiedo", "m5_delatados"] }, { end: "C" }] },
+    cellisca: { era: 5, zone: "deep", layer: 3, rules: [{ end: "A", any: ["e5_celliscaAbriria", "m5_racionesIgual", "m5_noCortar"] }, { end: "B", any: ["e5_celliscaDura", "m5_cortarHielo", "m5_mantasFondo", "m5_racionesTrabajo"] }, { end: "C" }] },
+    centeno: { era: 5, zone: "deep", layer: 2, rules: [{ end: "A", any: ["e5_centenoReparte", "e5_centenoPuerta", "m5_noCortar"] }, { end: "B", any: ["e5_centenoGuarda", "m5_cortarHielo"] }, { end: "C" }] },
+    e5esporina: { era: 5, zone: "deep", layer: 2, know: "esporina", page: "esporina", rules: [{ end: "A", any: ["e5_esporinaDice", "e5_esporinaNevado"] }, { end: "B", any: ["e5_esporinaCalla"] }, { end: "C" }] },
+    desvelo: { era: 5, zone: "heart", layer: 3, rules: [{ end: "A", any: ["e5_desveloNoSabe", "e5_desveloEscucha", "m5_tumbaAbierta"] }, { end: "B", any: ["e5_desveloRey", "m5_desveloSellado"] }, { end: "C" }] },
+    pavesa: { era: 5, zone: "aurora", layer: 3, rules: [{ end: "A", any: ["e5_llamaDosManos", "e5_plazaJunta", "e5_tableroPlaza"] }, { end: "B", any: ["e5_llamaFria", "e5_llamaGuardada", "e5_tableroBorrado"] }, { end: "C" }] },
+    ortiga: { era: 5, zone: "aurora", layer: 2, rules: [{ end: "A", any: ["e5_ortigaPan", "e5_coplasLibres", "e5_toconTurnos"] }, { end: "B", any: ["m5_marchaPrado", "e5_coplasCalladas"] }, { end: "C" }] },
+    e5chispa: { era: 5, zone: "crater", layer: 3, know: "chispa", page: "chispa", rules: [{ end: "A", any: ["e5_calorGratis", "e5_votoChispa", "e5_martilloRescoldo"] }, { end: "B", any: ["e5_martilloEnterrado", "e5_filasNecesidad"] }, { end: "C" }] },
+    abeto: { era: 5, zone: "forest", layer: 3, rules: [{ end: "A", any: ["e5_roblesAbiertos", "m5_cuentasBosque", "e5_saviaSeta"] }, { end: "B", any: ["e5_robleCortado", "e5_cuentasDejadas", "e5_saviaProhibida"] }, { end: "C" }] },
+    tizna: { era: 5, zone: "hollow", layer: 3, rules: [{ end: "A", any: ["e5_tiznaLibre", "e5_mantasEtiqueta", "e5_tejerTurnos"] }, { end: "B", any: ["e5_tiznaPagada", "e5_mantasRegaladas"] }, { end: "C" }] },
+    caligine: { era: 5, zone: "hollow", layer: 3, rules: [{ end: "A", any: ["e5_caligineNo", "e5_porteroEchado"] }, { end: "B", any: ["m5_mantasFondo", "m5_olvidoVendido"] }, { end: "C" }] },
+    e5rada: { era: 5, zone: "lake", layer: 3, know: "rada", page: "rada", rules: [{ end: "A", any: ["e5_barcaLeida", "e5_radaOrilla", "e5_banderasLago"] }, { end: "B", any: ["e5_radaHielo", "e5_padreDejado"] }, { end: "C" }] },
+    e5pizca: { era: 5, zone: "caves", layer: 3, know: "pizca", page: "pizca", rules: [{ end: "A", any: ["e5_chicosGratis", "e5_portonAbierto", "e5_precioUna"] }, { end: "B", any: ["e5_entradaPagada", "m5_honduraTabla", "e5_precioTrabajo"] }, { end: "C" }] },
+    romanza: { era: 5, zone: "heights", layer: 3, rules: [{ end: "A", any: ["e5_tamborTodos", "e5_ordenAgregada", "e5_tamborChico"] }, { end: "B", any: ["e5_ordenTocada", "e5_trineoEste", "e5_trineoOeste"] }, { end: "C" }] },
+    escarpia: { era: 5, zone: "heights", layer: 2, rules: [{ end: "A", any: ["e5_pasoCerrado"] }, { end: "B", any: ["m5_exodoAltos"] }, { end: "C" }] },
   };
 
   // the echo lines for one node of one conversation, given the flags you hold
