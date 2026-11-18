@@ -60,6 +60,8 @@
     "Chispa, forjadora": "OldWoman~1", "Pizca, de la Hondura": "Cavegirl~1", "Doña Rada": "OldWoman~2",
     "Velón, guarda del Farol": "KnightGold~1", "Ortiga, del Prado": "Villager5", "Carbonilla, deshollinadora": "Child~2", "Maese Brasero, del Gremio": "Sultan",
     "Rescoldo, nieto de Chispa": "FighterRed", "Serrín, leñador": "Hunter", "Doña Avena, madre de Centeno": "OldWoman~2",
+    "Reina Calígine": "Princess~d", "Grisalla, el que no se levanta": "OldMan2", "Sepia, archivera de la Corte": "NinjaMageBlack~1", "Ancla, pescador de las Mareas": "Villager~1",
+    "Rompiente, voz de las Mareas": "Woman~1", "Cinabrio, picador": "Caveman2", "Mica, de la Hondura": "EggGirl",
     // anywhere
     "Retal, el que va y viene": "Hunter", "Doña Alforja": "Noble",
   };
