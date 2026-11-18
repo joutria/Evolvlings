@@ -138,7 +138,7 @@
     cizalla: P(["Cizalla, compradora de afuera", "Cizalla, buyer from outside"], ["Cizalla"], "Forastera de la espada", "la forastera de la espada", "Stranger with a sword", "the stranger with a sword"),
     romanza: P(["Romanza, mensajera", "Romanza, messenger"], ["Romanza"], "Mensajera del tambor", "la mensajera del tambor", "Messenger with a drum", "the messenger with a drum"),
     copo: P(["Copo"], ["Copo"], "Chico de las goteras", "el chico de las goteras", "Boy of the leaks", "the boy of the leaks"),
-    carambano: P(["Carámbano, del Turno", "Carámbano, of the Watch"], ["Carámbano"], "Cuidador del Turno", "el cuidador del Turno", "Keeper of the Watch", "the keeper of the Watch"),
+    carambano: P(["Nevado, del Turno", "Nevado, of the Watch"], ["Nevado"], "Cuidador del Turno", "el cuidador del Turno", "Keeper of the Watch", "the keeper of the Watch"),
     // era 5: El Invierno Largo
     centeno: P(["Centeno, intendente del granero", "Centeno, granary steward"], ["Centeno"], "Hombre de la tablilla", "el hombre de la tablilla", "Man with the tablet", "the man with the tablet"),
     lirio: P(["Lirio, de la Casa del Hielo", "Lirio, of the House of Ice"], ["Lirio"], "Muchacha de las trenzas blancas", "la muchacha de las trenzas blancas", "Girl with white braids", "the girl with white braids"),
@@ -148,6 +148,13 @@
     pavesa: P(["Pavesa, farolera", "Pavesa, lamplighter"], ["Pavesa"], "Farolera vieja", "la farolera vieja", "Old lamplighter woman", "the old lamplighter woman"),
     abeto: P(["Abeto, del Concejo", "Abeto, of the Council"], ["Abeto"], "Hombre del roble con puerta", "el hombre del roble con puerta", "Man of the oak with a door", "the man of the oak with a door"),
     tizna: P(["Tizna, tejedora de la Corte", "Tizna, weaver of the Court"], ["Tizna"], "Tejedora de los telares negros", "la tejedora de los telares negros", "Weaver at the black looms", "the weaver at the black looms"),
+    velon: P(["Velón, guarda del Farol", "Velón, Lantern guard"], ["Velón"], "Guarda de la capa blanca", "el guarda de la capa blanca", "Guard in the white cape", "the guard in the white cape"),
+    ortiga: P(["Ortiga, del Prado", "Ortiga, of the Meadow"], ["Ortiga"], "Madre del hilo", "la madre del hilo", "Mother with the thread", "the mother with the thread"),
+    carbonilla: P(["Carbonilla, deshollinadora", "Carbonilla, chimney sweep"], ["Carbonilla"], "Chica tiznada", "la chica tiznada", "Sooty girl", "the sooty girl"),
+    brasero: P(["Maese Brasero, del Gremio", "Master Brasero, of the Guild"], ["Maese Brasero", "Brasero"], "Maestro de la pizarra", "el maestro de la pizarra", "Master with the slate", "the master with the slate", ["Master Brasero", "Brasero"]),
+    rescoldo: P(["Rescoldo, nieto de Chispa", "Rescoldo, Chispa's grandson"], ["Rescoldo"], "Muchacho del pico", "el muchacho del pico", "Young man with a pick", "the young man with a pick"),
+    serrin: P(["Serrín, leñador", "Serrín, woodcutter"], ["Serrín"], "Leñador de la bufanda", "el leñador de la bufanda", "Woodcutter in a scarf", "the woodcutter in a scarf"),
+    avena: P(["Doña Avena, madre de Centeno", "Old Avena, Centeno's mother"], ["Avena"], "Mujer que teje", "la mujer que teje", "Knitting woman", "the knitting woman"),
   };
   // titles for the book's Diary (no names in them: they would give away who you meet)
   const TITLES = {
@@ -510,6 +517,29 @@
     "e5-pareja": ["Las dos voces", "The two voices"],
     "e5-tumba": ["La grieta de la Tumba", "The crack in the Tomb"],
     "e5-final": ["Lo que se canta en invierno", "What is sung in winter"],
+    "e5-velon": ["El toque de frío", "The cold curfew"],
+    "e5-casasvacias": ["Fuimos al Fondo", "We went to the Deep"],
+    "e5-mediosaco": ["Un pan en cinco", "A loaf in five"],
+    "e5-tablero": ["Siete mil noches", "Seven thousand nights"],
+    "e5-carbonilla": ["El sótano que calienta", "The warm cellar"],
+    "e5-coplas": ["La copla prohibida", "The forbidden song"],
+    "e5-llamas": ["Entre dos manos", "Between two hands"],
+    "e5-ladrona": ["Un balde de carbón", "A bucket of coal"],
+    "e5-brasero": ["Rayas en la pizarra", "Lines on the slate"],
+    "e5-rescoldo": ["El rojo de abajo", "The red below"],
+    "e5-dormidos": ["La última fila", "The last row"],
+    "e5-cizalla": ["Pan blanco", "White bread"],
+    "e5-voto": ["Seis y seis", "Six and six"],
+    "e5-molde": ["El nombre tachado", "The crossed-out name"],
+    "e5-martillo": ["Un martillo gastado", "A worn hammer"],
+    "e5-grieta": ["Calor gratis", "Free warmth"],
+    "e5-serrin": ["Un hacha de noche", "An axe at night"],
+    "e5-avena": ["Debajo de la alfombra", "Under the rug"],
+    "e5-madre": ["Savia helada", "Frozen sap"],
+    "e5-pelea": ["Una olla en el suelo", "A pot on the floor"],
+    "e5-criaturas": ["Hambre de corteza", "Hungry for bark"],
+    "e5-cuentas": ["Tres por uno, en el papel", "Three for one, on paper"],
+    "e5-semillas": ["Las semillas bajo el hielo", "The seeds under the ice"],
   };
   const BY_WHO = {};
   for (const id in PEOPLE) for (const w of PEOPLE[id].who) BY_WHO[w] = id;
