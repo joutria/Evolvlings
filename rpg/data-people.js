@@ -95,10 +95,10 @@
     coplo: P(["Coplo, cantor", "Coplo, singer"], ["Coplo"], "Cantor de la plaza", "el cantor de la plaza", "Square singer", "the square singer"),
     aurelia: P(["Aurelia Albor"], ["Aurelia Albor", "Aurelia"], "Señora de la Casa Albor", "la señora de la Casa Albor", "Lady of House Albor", "the lady of House Albor"),
     // era 3, El Lago que Recuerda (rpg/events-era3.js)
-    candela: P(["Candela Albor"], ["Candela Albor", "Candela"], "Muchacha del abrigo bueno", "la muchacha del abrigo bueno", "Young woman in a good coat", "the young woman in a good coat"),
+    candela: P(["Candela Albor", "Abuela Candela", "Grandma Candela"], ["Candela Albor", "Candela"], "Muchacha del abrigo bueno", "la muchacha del abrigo bueno", "Young woman in a good coat", "the young woman in a good coat"),
     albura: P(["Jueza Albura", "Judge Albura"], ["Jueza Albura", "Albura"], "Jueza de la toga blanca", "la jueza de la toga blanca", "Judge in the white robe", "the judge in the white robe", ["Judge Albura", "Albura"]),
     ampolla: P(["Ampolla, sopladora", "Ampolla, glassblower"], ["Ampolla"], "Sopladora del martillo", "la sopladora del martillo", "Glassblower with a hammer", "the glassblower with a hammer"),
-    retono: P(["Retoño"], ["Retoño"], "Muchacho de la boca morada", "el muchacho de la boca morada", "Boy with a purple mouth", "the boy with a purple mouth"),
+    retono: P(["Retoño", "Retoño, del Concejo", "Retoño, of the Council"], ["Retoño"], "Muchacho de la boca morada", "el muchacho de la boca morada", "Boy with a purple mouth", "the boy with a purple mouth"),
     trueque: P(["Trueque, mercader", "Trueque, merchant"], ["Trueque"], "Mercader del toldo", "el mercader del toldo", "Merchant under the awning", "the merchant under the awning"),
     umbela: P(["Umbela, archivera de la Corte", "Umbela, Court archivist"], ["Umbela"], "Mujer del velo y las copas", "la mujer del velo y las copas", "Veiled woman with the cups", "the veiled woman with the cups"),
     remanso: P(["Remanso"], ["Remanso"], "Niño del muelle", "el niño del muelle", "Boy on the jetty", "the boy on the jetty"),
@@ -122,6 +122,12 @@
     peaje: P(["Peaje, arriero", "Peaje, carter"], ["Peaje"], "Arriero del paso", "el arriero del paso", "Pass carter", "the pass carter"),
     tempano: P(["Témpano, guardiana del hielo", "Témpano, ice keeper"], ["Témpano"], "Guardiana de las goteras", "la guardiana de las goteras", "Keeper of the leaks", "the keeper of the leaks"),
     retama: P(["Retama, guarda del Tocón", "Retama, keeper of the Stump"], ["Retama"], "Guarda nueva del Tocón", "la guarda nueva del Tocón", "New keeper of the Stump", "the new keeper of the Stump"),
+    cerillo: P(["Cerillo"], ["Cerillo"], "Chico descalzo del Barrio", "el chico descalzo del Barrio", "Barefoot Quarter boy", "the barefoot Quarter boy"),
+    badajo: P(["Badajo, campanero de las Casas", "Badajo, bell-ringer of the Houses"], ["Badajo"], "Campanero sordo", "el campanero sordo", "Deaf bell-ringer", "the deaf bell-ringer"),
+    ambar: P(["Doña Ámbar", "Lady Ámbar"], ["Doña Ámbar", "Ámbar"], "Anciana de las paredes desnudas", "la anciana de las paredes desnudas", "Old woman with bare walls", "the old woman with bare walls", ["Lady Ámbar", "Ámbar"]),
+    pizarra: P(["Pizarra, maestra", "Pizarra, teacher"], ["Pizarra"], "Maestra de la tiza en el pelo", "la maestra de la tiza en el pelo", "Teacher with chalk in her hair", "the teacher with chalk in her hair"),
+    fuelle: P(["Fuelle, maestro joven", "Fuelle, young master"], ["Fuelle"], "Maestro joven del Gremio", "el maestro joven del Gremio", "Young Guild master", "the young Guild master"),
+    musgo: P(["Musgo, del Concejo", "Musgo, of the Council"], ["Musgo"], "Viejo de la barba verdosa", "el viejo de la barba verdosa", "Elder with a greenish beard", "the elder with a greenish beard"),
   };
   // titles for the book's Diary (no names in them: they would give away who you meet)
   const TITLES = {
@@ -404,6 +410,25 @@
     "e4-aguanegra": ["Agua negra bajo el hielo", "Black water under the ice"],
     "e4-campana": ["La campana de prueba", "The test bell"],
     "e4-final": ["La Campana grande", "The big Bell"],
+    "e4-tablero": ["Casilleros de tiza", "Chalk squares"],
+    "e4-badajo": ["Una campana de madera", "A wooden bell"],
+    "e4-ambar": ["Las paredes desnudas", "The bare walls"],
+    "e4-candela": ["Pan por la ventana", "Bread through a window"],
+    "e4-hundimiento": ["La casa que falta", "The missing house"],
+    "e4-subasta": ["El primer toque", "The first stroke"],
+    "e4-escuela": ["La pregunta de la nena", "The little girl's question"],
+    "e4-maestros": ["Doce sillas", "Twelve chairs"],
+    "e4-fundicion": ["El día de la fundición", "Casting day"],
+    "e4-chispa2": ["El primer clavo", "The first nail"],
+    "e4-escoria": ["La escalinata del Gremio", "The Guild steps"],
+    "e4-tizon": ["Monedas sobre la manta", "Coins on the blanket"],
+    "e4-musgo": ["Siete que dicen no", "Seven who say no"],
+    "e4-claro": ["Un plato vacío", "An empty plate"],
+    "e4-carboneros": ["Leña contra carbón", "Wood against charcoal"],
+    "e4-retono": ["La silla en la orilla", "The chair on the shore"],
+    "e4-semillas": ["Tres por uno", "Three for one"],
+    "e4-arbolviejo": ["La Madre del Bosque", "The Mother of the Wood"],
+    "e4-incendio": ["Fuego rojo", "Red fire"],
   };
   const BY_WHO = {};
   for (const id in PEOPLE) for (const w of PEOPLE[id].who) BY_WHO[w] = id;
