@@ -1,5 +1,5 @@
 {
- "v": 2234025372,
+ "v": 1722069725,
  "files": [
   {
    "path": "battle/aurora-day.png",
@@ -537,6 +537,16 @@
    "h": 192
   },
   {
+   "path": "creatures/buhueco.png",
+   "w": 640,
+   "h": 64
+  },
+  {
+   "path": "creatures/calavero.png",
+   "w": 640,
+   "h": 64
+  },
+  {
    "path": "creatures/canin.png",
    "w": 640,
    "h": 64
@@ -567,14 +577,34 @@
    "h": 64
   },
   {
+   "path": "creatures/cuernillo.png",
+   "w": 640,
+   "h": 64
+  },
+  {
    "path": "creatures/ecolito.png",
    "w": 640,
    "h": 192
   },
   {
+   "path": "creatures/embozado.png",
+   "w": 640,
+   "h": 64
+  },
+  {
+   "path": "creatures/escarcho.png",
+   "w": 640,
+   "h": 64
+  },
+  {
    "path": "creatures/espinardo.png",
    "w": 640,
    "h": 192
+  },
+  {
+   "path": "creatures/fatuo.png",
+   "w": 640,
+   "h": 64
   },
   {
    "path": "creatures/fizz.png",
@@ -597,6 +627,21 @@
    "h": 192
   },
   {
+   "path": "creatures/huesillo.png",
+   "w": 640,
+   "h": 64
+  },
+  {
+   "path": "creatures/legamo.png",
+   "w": 640,
+   "h": 64
+  },
+  {
+   "path": "creatures/lodoverde.png",
+   "w": 640,
+   "h": 64
+  },
+  {
    "path": "creatures/lumo.png",
    "w": 640,
    "h": 192
@@ -612,9 +657,24 @@
    "h": 64
   },
   {
+   "path": "creatures/musgoso.png",
+   "w": 640,
+   "h": 64
+  },
+  {
+   "path": "creatures/mustio.png",
+   "w": 640,
+   "h": 64
+  },
+  {
    "path": "creatures/nim.png",
    "w": 640,
    "h": 192
+  },
+  {
+   "path": "creatures/noctambulo.png",
+   "w": 640,
+   "h": 64
   },
   {
    "path": "creatures/nubedrago.png",
@@ -652,7 +712,17 @@
    "h": 192
   },
   {
+   "path": "creatures/segador.png",
+   "w": 640,
+   "h": 64
+  },
+  {
    "path": "creatures/sombrerin.png",
+   "w": 640,
+   "h": 64
+  },
+  {
+   "path": "creatures/tiznajo.png",
    "w": 640,
    "h": 64
   },
@@ -677,6 +747,11 @@
    "h": 192
   },
   {
+   "path": "creatures/velador.png",
+   "w": 640,
+   "h": 64
+  },
+  {
    "path": "creatures/ventisco.png",
    "w": 640,
    "h": 64
@@ -685,6 +760,11 @@
    "path": "creatures/vidriela.png",
    "w": 640,
    "h": 192
+  },
+  {
+   "path": "creatures/yelmo.png",
+   "w": 640,
+   "h": 64
   },
   {
    "path": "creatures/yunqueron.png",
@@ -2327,6 +2407,16 @@
    "h": 38
   },
   {
+   "path": "faces/mon-buhueco.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-calavero.png",
+   "w": 38,
+   "h": 38
+  },
+  {
    "path": "faces/mon-canin.png",
    "w": 38,
    "h": 38
@@ -2357,12 +2447,32 @@
    "h": 38
   },
   {
+   "path": "faces/mon-cuernillo.png",
+   "w": 38,
+   "h": 38
+  },
+  {
    "path": "faces/mon-ecolito.png",
    "w": 38,
    "h": 38
   },
   {
+   "path": "faces/mon-embozado.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-escarcho.png",
+   "w": 38,
+   "h": 38
+  },
+  {
    "path": "faces/mon-espinardo.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-fatuo.png",
    "w": 38,
    "h": 38
   },
@@ -2387,6 +2497,21 @@
    "h": 38
   },
   {
+   "path": "faces/mon-huesillo.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-legamo.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-lodoverde.png",
+   "w": 38,
+   "h": 38
+  },
+  {
    "path": "faces/mon-lumo.png",
    "w": 38,
    "h": 38
@@ -2402,7 +2527,22 @@
    "h": 38
   },
   {
+   "path": "faces/mon-musgoso.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-mustio.png",
+   "w": 38,
+   "h": 38
+  },
+  {
    "path": "faces/mon-nim.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-noctambulo.png",
    "w": 38,
    "h": 38
   },
@@ -2442,7 +2582,17 @@
    "h": 38
   },
   {
+   "path": "faces/mon-segador.png",
+   "w": 38,
+   "h": 38
+  },
+  {
    "path": "faces/mon-sombrerin.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-tiznajo.png",
    "w": 38,
    "h": 38
   },
@@ -2467,12 +2617,22 @@
    "h": 38
   },
   {
+   "path": "faces/mon-velador.png",
+   "w": 38,
+   "h": 38
+  },
+  {
    "path": "faces/mon-ventisco.png",
    "w": 38,
    "h": 38
   },
   {
    "path": "faces/mon-vidriela.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-yelmo.png",
    "w": 38,
    "h": 38
   },
