@@ -1,6 +1,6 @@
 /* Evolvlings RPG: wild creatures, filler foes of each zone.
    Their pictures come from the CC0 Ninja Adventure pack (art/creatures/<id>.png, built by tools/ninja-maps.py) and, for the
-   second wild creature of each zone, from the CC0 MiniWorld Sprites pack (tools/miniworld-wild.py); the third, a common beast
+   MiniWorld beasts and monsters (two to four per zone), from the CC0 MiniWorld Sprites pack (tools/miniworld-wild.py); the third, a common beast
    of the zone that the Savia Negra has reached, from the CC0 0x72 Dungeon Tileset II, Pixel_Poem's dungeon packs or a Savia
    repaint (tools/sap-wild.py);
    see CREDITS.md.
@@ -79,20 +79,75 @@
       "Huesos con guadaña que cosechan lo que la Savia hace brotar cerca de la Raíz", "Bones with a scythe that reap whatever the Sap makes sprout near the Root"],
     ["velador", "deep", "dream", { hp: 44, str: 40, def: 34, spd: 30, cr: 40 }, ["pillow", "yawn", "tale"], ["#7a8090", "#a0a8b8", "#2a2018", "#7dffb0"],
       "Encapuchado que vela las tumbas heladas del Fondo Blanco; la Savia le enrojeció los ojos", "A hooded figure that watches over the frozen tombs of the White Deep; the Sap reddened its eyes"],
+    // the rest of MiniWorld's beasts and monsters (Jose: "usa todos", 2026-11-18)
+    ["ombradrago", "hollow", "shadow", { hp: 40, str: 40, def: 32, spd: 38, cr: 36 }, ["night", "nohide", "truename"], ["#4a3a5a", "#7a6a8a", "#140e1a", "#d0c0e0"],
+      "Dragoncito negro que se esconde en la sombra de los tronos rotos", "A little black dragon that hides in the shadow of the broken thrones"],
+    ["marejadrago", "lake", "water", { hp: 40, str: 40, def: 32, spd: 38, cr: 36 }, ["whirl", "vessel", "lostwave"], ["#4a90d0", "#a0d0f0", "#102a48", "#ffc0c0"],
+      "Dragoncito azul que nada bajo el hielo fino de las orillas", "A little blue dragon that swims under the thin ice of the shores"],
+    ["fogonero", "crater", "fire", { hp: 34, str: 40, def: 26, spd: 50, cr: 40 }, ["bellows", "piece", "temper"], ["#d0503a", "#f0a080", "#3a1010", "#ffc0a0"],
+      "Diablillo rojo que aviva las forjas soplando cuando nadie mira", "A red imp that fans the forges with its breath when no one is looking"],
+    ["acorazado", "heart", "shadow", { hp: 44, str: 48, def: 34, spd: 26, cr: 34 }, ["night", "nohide", "truename"], ["#4a3a5a", "#7a6a8a", "#140e1a", "#d0c0e0"],
+      "Diablo con casco de hierro negro que monta guardia cerca de la Raíz", "A devil in a black iron helmet that stands guard near the Root"],
+    ["tortuguin", "lake", "water", { hp: 48, str: 40, def: 44, spd: 20, cr: 32 }, ["whirl", "vessel", "lostwave"], ["#4a90d0", "#a0d0f0", "#102a48", "#ffc0c0"],
+      "Tortuga verde que duerme en las piedras tibias del Lago", "A green turtle that naps on the Lake's warm stones"],
+    ["escamin", "lake", "water", { hp: 30, str: 34, def: 28, spd: 48, cr: 42 }, ["whirl", "vessel", "lostwave"], ["#4a90d0", "#a0d0f0", "#102a48", "#ffc0c0"],
+      "Pececillo que salta fuera del agua para morder tobillos", "A little fish that jumps out of the water to nip ankles"],
+    ["potrillo", "aurora", "light", { hp: 34, str: 40, def: 26, spd: 50, cr: 40 }, ["street", "oil", "flash"], ["#f0d070", "#fff0b0", "#4a3a10", "#ffc0a0"],
+      "Potro salvaje que galopa entre los faroles del prado al amanecer", "A wild colt that gallops among the meadow lanterns at dawn"],
+    ["gotin", "forest", "plant", { hp: 30, str: 34, def: 28, spd: 48, cr: 42 }, ["acorn", "rings", "seedling"], ["#6ab040", "#b0e080", "#1a3a10", "#e0c0a0"],
+      "Gota de rocío verde que rebota entre las hojas", "A drop of green dew that bounces among the leaves"],
+    ["gelin", "deep", "ice", { hp: 30, str: 34, def: 28, spd: 48, cr: 42 }, ["frostslow", "tombquiet", "vigil"], ["#7ad0e0", "#d0f4f8", "#1a3a48", "#e0f0f0"],
+      "Gota helada que se pega a las botas de los viajeros", "A frozen drop that sticks to travellers' boots"],
+    ["flechin", "forest", "plant", { hp: 34, str: 40, def: 26, spd: 50, cr: 40 }, ["acorn", "rings", "seedling"], ["#6ab040", "#b0e080", "#1a3a10", "#e0c0a0"],
+      "Duende arquero que caza con flechas de caña en el Bosque", "An archer goblin that hunts with cane arrows in the Forest"],
+    ["porrin", "caves", "stone", { hp: 44, str: 48, def: 34, spd: 26, cr: 34 }, ["throw", "miner", "echo"], ["#9a7a5a", "#c8b090", "#2a2018", "#f0e0d0"],
+      "Duende con garrote que golpea las paredes buscando huecos", "A club goblin that knocks on the walls looking for hollows"],
+    ["hortelin", "aurora", "plant", { hp: 40, str: 40, def: 32, spd: 38, cr: 36 }, ["acorn", "rings", "seedling"], ["#6ab040", "#b0e080", "#1a3a10", "#e0c0a0"],
+      "Duende con rastrillo que se roba los nabos de las huertas", "A goblin with a rake that steals turnips from the gardens"],
+    ["petardin", "crater", "fire", { hp: 34, str: 40, def: 26, spd: 50, cr: 40 }, ["bellows", "piece", "temper"], ["#d0503a", "#f0a080", "#3a1010", "#ffc0a0"],
+      "Duende que corre con una mecha encendida y no sabe frenar", "A goblin that runs with a lit fuse and doesn't know how to stop"],
+    ["lancin", "heights", "air", { hp: 34, str: 40, def: 26, spd: 50, cr: 40 }, ["gust", "cloud", "rain"], ["#d0e0f0", "#ffffff", "#3a4858", "#f0d0c0"],
+      "Duende con lanza que vigila el paso desde las rocas altas", "A spear goblin that watches the pass from the high rocks"],
+    ["torote", "caves", "stone", { hp: 44, str: 48, def: 34, spd: 26, cr: 34 }, ["throw", "miner", "echo"], ["#9a7a5a", "#c8b090", "#2a2018", "#f0e0d0"],
+      "Hombre toro que se perdió en los túneles y ya no quiere salir", "A bull-man who got lost in the tunnels and no longer wants to leave"],
+    ["ogron", "heart", "shadow", { hp: 48, str: 40, def: 44, spd: 20, cr: 32 }, ["night", "nohide", "truename"], ["#4a3a5a", "#7a6a8a", "#140e1a", "#d0c0e0"],
+      "Ogro verde que cree que el Corazón del Claro es suyo", "A green ogre who thinks the Heart of the Glade belongs to him"],
+    ["brujon", "deep", "dream", { hp: 40, str: 40, def: 32, spd: 38, cr: 36 }, ["yawn", "pillow", "tale"], ["#8a80b0", "#c0b8e0", "#2a2440", "#f0d0f0"],
+      "Ogro brujo que adormece la nieve con canciones roncas", "An ogre sorcerer who lulls the snow with hoarse songs"],
+    ["chaman", "deep", "mush", { hp: 40, str: 40, def: 32, spd: 38, cr: 36 }, ["harvest", "stillgrow", "saprem"], ["#c04050", "#f0e0d0", "#3a1418", "#ffc0c0"],
+      "Ogro que cultiva setas bajo la nieve y las vende muy caras", "An ogre who grows mushrooms under the snow and sells them very dear"],
+    ["salobre", "lake", "water", { hp: 44, str: 48, def: 34, spd: 26, cr: 34 }, ["whirl", "vessel", "lostwave"], ["#4a90d0", "#a0d0f0", "#102a48", "#ffc0c0"],
+      "Viejo pirata del Lago que todavía busca un tesoro que nunca hubo", "An old Lake pirate still looking for a treasure that never was"],
+    ["polvorin", "caves", "stone", { hp: 40, str: 40, def: 32, spd: 38, cr: 36 }, ["throw", "miner", "echo"], ["#9a7a5a", "#c8b090", "#2a2018", "#f0e0d0"],
+      "Artillero sin barco que vuela rocas en las Cuevas por diversión", "A gunner without a ship who blasts rocks in the Caves for fun"],
+    ["grumete", "heights", "air", { hp: 34, str: 40, def: 26, spd: 50, cr: 40 }, ["gust", "cloud", "rain"], ["#d0e0f0", "#ffffff", "#3a4858", "#f0d0c0"],
+      "Pirata joven que asalta a quien sube al paso con viento a favor", "A young pirate who robs anyone climbing the pass with the wind at their back"],
+    ["susurro", "hollow", "shadow", { hp: 40, str: 40, def: 32, spd: 38, cr: 36 }, ["night", "nohide", "truename"], ["#4a3a5a", "#7a6a8a", "#140e1a", "#d0c0e0"],
+      "Brujo con calavera de toro que llama a los muertos por su nombre", "A sorcerer with a bull skull who calls the dead by their names"],
+    ["huesudo", "heart", "shadow", { hp: 40, str: 40, def: 32, spd: 38, cr: 36 }, ["night", "nohide", "truename"], ["#4a3a5a", "#7a6a8a", "#140e1a", "#d0c0e0"],
+      "Soldado de huesos que sigue una orden que nadie recuerda", "A soldier of bones that still follows an order no one remembers"],
   ];
   const NAMES = { fulgor: "Fulgor", chisporro: "Chisporro", canin: "Cañín", ojuelo: "Ojuelo", ajolin: "Ajolín", topacio: "Topacio", ululu: "Ululú", sombrerin: "Sombrerín",
     albadrago: "Albadrago", brasadrago: "Brasadrago", ramacuerno: "Ramacuerno", mohin: "Mohín", pinzote: "Pinzote", colmillon: "Colmillón",
     nubedrago: "Nubedrago", ventisco: "Ventisco",
     mustio: "Mustio", tiznajo: "Tiznajo", lodoverde: "Lodoverde", embozado: "Embozado", legamo: "Légamo", huesillo: "Huesillo",
     buhueco: "Búho hueco", escarcho: "Escarcho", cuernillo: "Cuernillo",
-    fatuo: "Fatuo", yelmo: "Yelmo", noctambulo: "Noctámbulo", musgoso: "Musgoso", calavero: "Calavero", segador: "Segador", velador: "Velador" };
+    fatuo: "Fatuo", yelmo: "Yelmo", noctambulo: "Noctámbulo", musgoso: "Musgoso", calavero: "Calavero", segador: "Segador", velador: "Velador",
+    ombradrago: "Ombradrago", marejadrago: "Marejadrago", fogonero: "Fogonero", acorazado: "Acorazado", tortuguin: "Tortuguín", escamin: "Escamín", potrillo: "Potrillo", gotin: "Gotín", gelin: "Gelín", flechin: "Flechín", porrin: "Porrín", hortelin: "Hortelín", petardin: "Petardín", lancin: "Lancín", torote: "Torote", ogron: "Ogrón", brujon: "Brujón", chaman: "Chamán", salobre: "Capitán Salobre", polvorin: "Polvorín", grumete: "Grumete", susurro: "Susurro", huesudo: "Huesudo" };
   for (const [id, zone, type, st, cards, col, es, en] of WILD) {
     R.addCreature(id, {
       mon: { types: [type], rar: 0, st, cards, wild: true },
       name: NAMES[id], desc: { es, en },
       col: { body: col[0], belly: col[1], line: col[2], cheek: col[3] },
     });
-    // one copy each in the zone's foe list: with three or four wild creatures, close to half the fights meet one of them
     if (ZONES[zone]) ZONES[zone].foes.push(id);
+  }
+  // one copy of each wild creature in its zone's foe list, and the zone's own creatures repeated until they are at least as
+  // many as the wild ones: about half the fights still meet a wild creature, however many a zone has
+  const wild = new Set(WILD.map((w) => w[0]));
+  for (const z of Object.values(ZONES)) {
+    const own = z.foes.filter((k) => !wild.has(k)), nWild = z.foes.length - own.length;
+    if (!own.length) continue;
+    for (let i = 0; own.length * (1 + i) < nWild; i++) z.foes.push(...own);
   }
 })();

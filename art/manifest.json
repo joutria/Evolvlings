@@ -1,5 +1,5 @@
 {
- "v": 1722069725,
+ "v": 3076871725,
  "files": [
   {
    "path": "battle/aurora-day.png",
@@ -512,6 +512,11 @@
    "h": 192
   },
   {
+   "path": "creatures/acorazado.png",
+   "w": 640,
+   "h": 64
+  },
+  {
    "path": "creatures/ajolin.png",
    "w": 640,
    "h": 64
@@ -535,6 +540,11 @@
    "path": "creatures/brotin.png",
    "w": 640,
    "h": 192
+  },
+  {
+   "path": "creatures/brujon.png",
+   "w": 640,
+   "h": 64
   },
   {
    "path": "creatures/buhueco.png",
@@ -567,6 +577,11 @@
    "h": 192
   },
   {
+   "path": "creatures/chaman.png",
+   "w": 640,
+   "h": 64
+  },
+  {
    "path": "creatures/chisporro.png",
    "w": 640,
    "h": 64
@@ -592,6 +607,11 @@
    "h": 64
   },
   {
+   "path": "creatures/escamin.png",
+   "w": 640,
+   "h": 64
+  },
+  {
    "path": "creatures/escarcho.png",
    "w": 640,
    "h": 64
@@ -612,6 +632,16 @@
    "h": 192
   },
   {
+   "path": "creatures/flechin.png",
+   "w": 640,
+   "h": 64
+  },
+  {
+   "path": "creatures/fogonero.png",
+   "w": 640,
+   "h": 64
+  },
+  {
    "path": "creatures/fuellito.png",
    "w": 640,
    "h": 192
@@ -622,12 +652,42 @@
    "h": 64
   },
   {
+   "path": "creatures/gelin.png",
+   "w": 640,
+   "h": 64
+  },
+  {
+   "path": "creatures/gotin.png",
+   "w": 640,
+   "h": 64
+  },
+  {
+   "path": "creatures/grumete.png",
+   "w": 640,
+   "h": 64
+  },
+  {
    "path": "creatures/guardatumba.png",
    "w": 640,
    "h": 192
   },
   {
+   "path": "creatures/hortelin.png",
+   "w": 640,
+   "h": 64
+  },
+  {
    "path": "creatures/huesillo.png",
+   "w": 640,
+   "h": 64
+  },
+  {
+   "path": "creatures/huesudo.png",
+   "w": 640,
+   "h": 64
+  },
+  {
+   "path": "creatures/lancin.png",
    "w": 640,
    "h": 64
   },
@@ -645,6 +705,11 @@
    "path": "creatures/lumo.png",
    "w": 640,
    "h": 192
+  },
+  {
+   "path": "creatures/marejadrago.png",
+   "w": 640,
+   "h": 64
   },
   {
    "path": "creatures/mecha.png",
@@ -682,7 +747,17 @@
    "h": 64
   },
   {
+   "path": "creatures/ogron.png",
+   "w": 640,
+   "h": 64
+  },
+  {
    "path": "creatures/ojuelo.png",
+   "w": 640,
+   "h": 64
+  },
+  {
+   "path": "creatures/ombradrago.png",
    "w": 640,
    "h": 64
   },
@@ -692,7 +767,27 @@
    "h": 192
   },
   {
+   "path": "creatures/petardin.png",
+   "w": 640,
+   "h": 64
+  },
+  {
    "path": "creatures/pinzote.png",
+   "w": 640,
+   "h": 64
+  },
+  {
+   "path": "creatures/polvorin.png",
+   "w": 640,
+   "h": 64
+  },
+  {
+   "path": "creatures/porrin.png",
+   "w": 640,
+   "h": 64
+  },
+  {
+   "path": "creatures/potrillo.png",
    "w": 640,
    "h": 64
   },
@@ -712,6 +807,11 @@
    "h": 192
   },
   {
+   "path": "creatures/salobre.png",
+   "w": 640,
+   "h": 64
+  },
+  {
    "path": "creatures/segador.png",
    "w": 640,
    "h": 64
@@ -722,12 +822,27 @@
    "h": 64
   },
   {
+   "path": "creatures/susurro.png",
+   "w": 640,
+   "h": 64
+  },
+  {
    "path": "creatures/tiznajo.png",
    "w": 640,
    "h": 64
   },
   {
    "path": "creatures/topacio.png",
+   "w": 640,
+   "h": 64
+  },
+  {
+   "path": "creatures/torote.png",
+   "w": 640,
+   "h": 64
+  },
+  {
+   "path": "creatures/tortuguin.png",
    "w": 640,
    "h": 64
   },
@@ -2382,6 +2497,11 @@
    "h": 38
   },
   {
+   "path": "faces/mon-acorazado.png",
+   "w": 38,
+   "h": 38
+  },
+  {
    "path": "faces/mon-ajolin.png",
    "w": 38,
    "h": 38
@@ -2403,6 +2523,11 @@
   },
   {
    "path": "faces/mon-brotin.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-brujon.png",
    "w": 38,
    "h": 38
   },
@@ -2437,6 +2562,11 @@
    "h": 38
   },
   {
+   "path": "faces/mon-chaman.png",
+   "w": 38,
+   "h": 38
+  },
+  {
    "path": "faces/mon-chisporro.png",
    "w": 38,
    "h": 38
@@ -2462,6 +2592,11 @@
    "h": 38
   },
   {
+   "path": "faces/mon-escamin.png",
+   "w": 38,
+   "h": 38
+  },
+  {
    "path": "faces/mon-escarcho.png",
    "w": 38,
    "h": 38
@@ -2482,6 +2617,16 @@
    "h": 38
   },
   {
+   "path": "faces/mon-flechin.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-fogonero.png",
+   "w": 38,
+   "h": 38
+  },
+  {
    "path": "faces/mon-fuellito.png",
    "w": 38,
    "h": 38
@@ -2492,12 +2637,42 @@
    "h": 38
   },
   {
+   "path": "faces/mon-gelin.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-gotin.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-grumete.png",
+   "w": 38,
+   "h": 38
+  },
+  {
    "path": "faces/mon-guardatumba.png",
    "w": 38,
    "h": 38
   },
   {
+   "path": "faces/mon-hortelin.png",
+   "w": 38,
+   "h": 38
+  },
+  {
    "path": "faces/mon-huesillo.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-huesudo.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-lancin.png",
    "w": 38,
    "h": 38
   },
@@ -2513,6 +2688,11 @@
   },
   {
    "path": "faces/mon-lumo.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-marejadrago.png",
    "w": 38,
    "h": 38
   },
@@ -2552,7 +2732,17 @@
    "h": 38
   },
   {
+   "path": "faces/mon-ogron.png",
+   "w": 38,
+   "h": 38
+  },
+  {
    "path": "faces/mon-ojuelo.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-ombradrago.png",
    "w": 38,
    "h": 38
   },
@@ -2562,7 +2752,27 @@
    "h": 38
   },
   {
+   "path": "faces/mon-petardin.png",
+   "w": 38,
+   "h": 38
+  },
+  {
    "path": "faces/mon-pinzote.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-polvorin.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-porrin.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-potrillo.png",
    "w": 38,
    "h": 38
   },
@@ -2582,6 +2792,11 @@
    "h": 38
   },
   {
+   "path": "faces/mon-salobre.png",
+   "w": 38,
+   "h": 38
+  },
+  {
    "path": "faces/mon-segador.png",
    "w": 38,
    "h": 38
@@ -2592,12 +2807,27 @@
    "h": 38
   },
   {
+   "path": "faces/mon-susurro.png",
+   "w": 38,
+   "h": 38
+  },
+  {
    "path": "faces/mon-tiznajo.png",
    "w": 38,
    "h": 38
   },
   {
    "path": "faces/mon-topacio.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-torote.png",
+   "w": 38,
+   "h": 38
+  },
+  {
+   "path": "faces/mon-tortuguin.png",
    "w": 38,
    "h": 38
   },
