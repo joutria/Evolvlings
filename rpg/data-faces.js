@@ -55,6 +55,9 @@
     "Cerillo": "Child", "Badajo, campanero de las Casas": "Villager", "Doña Ámbar": "OldWoman", "Abuela Candela": "OldWoman~1", "Pizarra, maestra": "Woman~1", "Fuelle, maestro joven": "Caveman", "Retoño, del Concejo": "OldMan", "Musgo, del Concejo": "OldMan2",
     "Doña Bruna": "OldWoman~2", "Ónix, guarda de las tumbas": "NinjaGray", "Reina Merma": "NinjaMageBlack~1", "Remanso, el viejo vidente": "OldMan2~1", "Nácar, de las Casas": "Princess", "Rada, de las Mareas": "Woman", "Plomo, capataz del Gremio": "Inspector", "Pizca": "Child~1",
     "Toldo, de los Altos": "Villager4", "Cizalla, compradora de afuera": "Hunter", "Romanza, mensajera": "Monk~1", "Copo": "Boy", "Carámbano, del Turno": "Eskimo", "Doña Nieve": "OldWoman~1",
+    "Centeno, intendente del granero": "Villager3", "Lirio, de la Casa del Hielo": "Princess~2", "Moho, de la Casa de la Seta": "Boy~1", "Regente Cellisca": "NinjaEskimo",
+    "Desvelo, voz de Los Que Oyen": "Monk2", "Pavesa, farolera": "OldWoman", "Abeto, del Concejo": "ManGreen~1", "Tizna, tejedora de la Corte": "NinjaMageBlack",
+    "Chispa, forjadora": "OldWoman~1", "Pizca, de la Hondura": "Cavegirl~1", "Doña Rada": "OldWoman~2",
     // anywhere
     "Retal, el que va y viene": "Hunter", "Doña Alforja": "Noble",
   };
