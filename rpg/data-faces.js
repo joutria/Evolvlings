@@ -66,7 +66,7 @@
     "Desmemoria, del pozo": "NinjaGray", "Reina Noctámbula": "Princess~D", "Gualda, la Nombrada": "NinjaMageBlack~1", "Legajo, archivero del Velo": "Inspector~2",
     "Rastrojo, del Barrio": "Villager4", "Tojo, de las Casas del Farol": "Noble", "Recaudo, cobrador del Gremio": "Sultan", "Acebo, del Concejo del Musgo": "Monk2",
     "Redoble, tamborero": "Caveman", "Ondina, de las Mareas": "Woman", "Sopor, soñadora del Fondo": "Eskimo",
-    "Lumbre, de las Casas del Farol": "OldMan2", "Mimbre, maestra del Prado": "Woman~1", "Yesquero, comerciante del Prado": "Villager5", "Crisol, maestra del Gremio": "CaveGirl2", "Helecho, vendedor de musgo": "Boy", "Tilo, el más viejo del Bosque": "OldMan", "Humareda, chambelán de la Corte": "SorcererBlack", "Espuma, carpintero de barcas": "OldMan3", "Calima, guarda del faro": "Eskimo~1", "Raspa, el que borra de noche": "NinjaGray",
+    "Lumbre, de las Casas del Farol": "OldMan2", "Mimbre, maestra del Prado": "Woman~1", "Yesquero, comerciante del Prado": "Villager5", "Crisol, maestra del Gremio": "CaveGirl2", "Helecho, vendedor de musgo": "Boy", "Tilo, el más viejo del Bosque": "OldMan", "Humareda, chambelán de la Corte": "SorcererBlack", "Espuma, carpintero de barcas": "OldMan3", "Calima, guarda del faro": "Eskimo~1", "Raspa, el que borra de noche": "NinjaGray", "Tonada, la de la canción": "OldWoman~2", "Aulaga, de las Casas del Farol": "OldMan2~1", "Brisa, niña de la cumbre": "Child~1", "Grumo, el soñador chico": "Child~2", "Pruina, regente del Fondo": "Eskimo", "Garúa, escribana de la Crónica": "Princess~2",
     // anywhere
     "Retal, el que va y viene": "Hunter", "Doña Alforja": "Noble",
   };

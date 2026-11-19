@@ -169,6 +169,24 @@
     e5pizca: { era: 5, zone: "caves", layer: 3, know: "pizca", page: "pizca", rules: [{ end: "A", any: ["e5_chicosGratis", "e5_portonAbierto", "e5_precioUna"] }, { end: "B", any: ["e5_entradaPagada", "m5_honduraTabla", "e5_precioTrabajo"] }, { end: "C" }] },
     romanza: { era: 5, zone: "heights", layer: 3, rules: [{ end: "A", any: ["e5_tamborTodos", "e5_ordenAgregada", "e5_tamborChico"] }, { end: "B", any: ["e5_ordenTocada", "e5_trineoEste", "e5_trineoOeste"] }, { end: "C" }] },
     escarpia: { era: 5, zone: "heights", layer: 2, rules: [{ end: "A", any: ["e5_pasoCerrado"] }, { end: "B", any: ["m5_exodoAltos"] }, { end: "C" }] },
+    // era 6 (La Corte de los Nombres)
+    desmemoria: { era: 6, zone: "hollow", layer: 3, rules: [{ end: "A", any: ["e6_pozoCerrado", "e6_madreSonada", "e6_madreCinta", "e6_madreNombre"] }, { end: "B", any: ["e6_madreHueco", "e6_pozosLlenos"] }, { end: "C" }] },
+    noctambula: { era: 6, zone: "hollow", layer: 3, rules: [{ end: "A", any: ["e6_reinaMoneda", "e6_reinaDuda", "e6_cortinaPozo", "e6_humaredaConfiesa"] }, { end: "B", any: ["m6_politicaComprada", "e6_cortinaNombre", "e6_pozoChicoReina"] }, { end: "C" }] },
+    gualda: { era: 6, zone: "hollow", layer: 2, rules: [{ end: "A", any: ["e6_gualdaVuelve", "e6_chicoNombres", "m6_guardado"] }, { end: "B", any: ["e6_gualdaFuera", "e6_gualdaNueva"] }, { end: "C" }] },
+    legajo: { era: 6, zone: "hollow", layer: 3, rules: [{ end: "A", any: ["e6_legajoHondura", "e6_versoGrabado", "e6_archivoCopiado"] }, { end: "B", any: ["e6_paginaQuemada", "e6_ninaArchivo", "e6_paredRota"] }, { end: "C" }] },
+    humareda: { era: 6, zone: "hollow", layer: 2, rules: [{ end: "A", any: ["e6_humaredaConfiesa"] }, { end: "B", any: ["e6_humaredaEchado"] }, { end: "C" }] },
+    tojo: { era: 6, zone: "aurora", layer: 3, rules: [{ end: "A", any: ["e6_historiaCasas", "e6_cronicaGrabada", "e6_librosGuardados"] }, { end: "B", any: ["e6_retratosQuemados", "e6_cronicaBorrada"] }, { end: "C" }] },
+    lumbre: { era: 6, zone: "aurora", layer: 2, rules: [{ end: "A", any: ["e6_tioTrato"] }, { end: "B", any: ["e6_tioDenunciado"] }, { end: "C" }] },
+    mimbre: { era: 6, zone: "aurora", layer: 3, rules: [{ end: "A", any: ["e6_escuelaPared", "e6_leyPared", "e6_escuelaNoSabe"] }, { end: "B", any: ["e6_escuelaCronica"] }, { end: "C" }] },
+    crisol: { era: 6, zone: "crater", layer: 3, rules: [{ end: "A", any: ["e6_gremioConfiesa", "e6_gremioPagaFondo", "e6_deudaTrabajo"] }, { end: "B", any: ["e6_gremioDebe", "e6_deudaCobradaTodo", "e6_huelgaRota"] }, { end: "C" }] },
+    acebo: { era: 6, zone: "forest", layer: 3, rules: [{ end: "A", any: ["e6_silencioAbierto", "e6_raizHablada", "e6_bosqueSinPozo"] }, { end: "B", any: ["e6_bosquePozo", "e6_silencioHueco", "e6_robleCortado"] }, { end: "C" }] },
+    redoble: { era: 6, zone: "heights", layer: 3, rules: [{ end: "A", any: ["e6_redobleToca", "e6_tamborGaleria", "e6_golpesPregunta"] }, { end: "B", any: ["e6_redobleOlvida", "e6_librosVendidos"] }, { end: "C" }] },
+    aulaga: { era: 6, zone: "heights", layer: 2, rules: [{ end: "A", any: ["e6_aulagaDevuelve", "e6_aulagaRecuerda"] }, { end: "B", any: ["e6_aulagaCastigado"] }, { end: "C" }] },
+    ondina: { era: 6, zone: "lake", layer: 3, rules: [{ end: "A", any: ["e6_hermanoDicho", "e6_hermanoPiedra"] }, { end: "B", any: ["e6_hermanoCallado", "e6_orillaSeca"] }, { end: "C" }] },
+    espuma: { era: 6, zone: "lake", layer: 3, rules: [{ end: "A", any: ["e6_barcaSale", "e6_barcasAprendices"] }, { end: "B", any: ["e6_barcasAdorno", "e6_redesDevueltas"] }, { end: "C" }] },
+    calima: { era: 6, zone: "lake", layer: 3, rules: [{ end: "A", any: ["e6_faroBarca", "e6_faroGuardado", "e6_faroPrendido"] }, { end: "B", any: ["e6_faroVendido"] }, { end: "C" }] },
+    mica: { era: 6, zone: "caves", layer: 3, rules: [{ end: "A", any: ["e6_pactoGrabado", "e6_hijaFirme", "e6_hijaTapa", "e6_memoriaPagada"] }, { end: "B", any: ["e6_hijaOlvida", "e6_cuarentaVendida", "e6_paredCobrada"] }, { end: "C" }] },
+    sopor: { era: 6, zone: "deep", layer: 3, rules: [{ end: "A", any: ["e6_soporDespierta", "e6_soporNombre"] }, { end: "B", any: ["e6_soporSigue", "e6_felizSopor"] }, { end: "C" }] },
   };
 
   // the echo lines for one node of one conversation, given the flags you hold
