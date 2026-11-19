@@ -401,7 +401,7 @@ function peopleList() {
     h += `<p class="bk-grp">${esc(g === "@heard" ? bt("heardOf") : zoneLabel(g))}</p><ul class="bk-list">`;
     for (const p of groups[g]) {
       const on = BK.sel.gente === p ? ' aria-current="true"' : "", n = I[p] ? I[p].ev.length : 0;
-      h += `<li><button type="button" class="bk-it" data-bksel="${p}"${on}>${artImg(personFace(p) || "", "bk-th face") || '<span class="bk-th q">?</span>'}<span class="bk-nm">${esc(personName(p))}<small>${esc(isKnown(p) ? PPL[p].a[L()] || PPL[p].a.es : bt("noName"))}</small></span><span class="bk-ct">${n ? `💬 ${n}` : ""}</span></button></li>`;
+      h += p === forgotPerson() ? `<li><button type="button" class="bk-it locked bk-gris" data-bksel="${p}"${on}><span class="bk-th q">?</span><span class="bk-nm">${esc(bt("forgotT"))}<small>${esc(bt("forgotS"))}</small></span></button></li>` : `<li><button type="button" class="bk-it" data-bksel="${p}"${on}>${artImg(personFace(p) || "", "bk-th face") || '<span class="bk-th q">?</span>'}<span class="bk-nm">${esc(personName(p))}<small>${esc(isKnown(p) ? PPL[p].a[L()] || PPL[p].a.es : bt("noName"))}</small></span><span class="bk-ct">${n ? `💬 ${n}` : ""}</span></button></li>`;
     }
     h += `</ul>`;
   }
@@ -409,7 +409,17 @@ function peopleList() {
   if (left) h += `<ul class="bk-list"><li><button type="button" class="bk-it locked" data-bksel="@none"${BK.sel.gente === "@none" ? ' aria-current="true"' : ""}><span class="bk-th q">?</span><span class="bk-nm">${esc(bt("peopleLeft", { n: left }))}<small>${esc(bt("notYet"))}</small></span></button></li></ul>`;
   return h;
 }
+// era 6: someone who forgot a memory at the well (flag m6_olvidoPropio) has one person from an earlier era whose page
+// went grey: the first person met in an earlier era, picked once and kept in EV.P.bkForgot
+function forgotPerson() {
+  const P = EV.P; if (!(P.flags || {}).m6_olvidoPropio) return null;
+  if (P.bkForgot && PPL[P.bkForgot]) return P.bkForgot;
+  const I = peopleIndex(), p = Object.keys(PPL).find((q) => I[q] && I[q].ev.length && I[q].ev.every((k) => !/\/e6-/.test(k)));
+  if (p) { P.bkForgot = p; EV.save(); }
+  return p || null;
+}
 function peoplePage(p) {
+  if (p && p === forgotPerson()) return `<div class="bk-gris"><h3>${esc(bt("forgotT"))}</h3><p class="bk-sub">${esc(bt("forgotS"))}</p>${plate('<span class="bk-q-big">?</span>', "dark", zoneBg("hollow"))}<p class="bk-say n">${esc(bt("forgotP"))}</p></div>`;
   if (!PPL[p]) return `<h3>???</h3><p class="bk-sub">${esc(bt("peopleHow"))}</p>${plate('<span class="bk-q-big">?</span>', "dark", zoneBg("aurora"))}`;
   const I = peopleIndex()[p] || { ev: [], said: [], about: [] }, Z = personZones()[p];
   let h = `<h3>${esc(personName(p))}</h3><p class="bk-sub">${esc(isKnown(p) ? PPL[p].a[L()] || PPL[p].a.es : bt("noNameLong"))}${Z && I.ev.length ? " · " + esc(zoneLabel(Z)) : ""}</p>`;
@@ -530,6 +540,7 @@ function refreshBookBtn() {
 .bk-book{--bp:#f2e6cc;--bp2:#e3d0aa;--bi:#3a2a22;--bi2:#6e5848;--bf:#a8957a;--bg2:#9a6420;--bs:#4b3a6e;--bh:#e9cf8f;--lea:#6b4228;--lea2:#4a2c1a;position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;width:min(1100px,100%);height:min(760px,calc(100dvh - 24px));color:var(--bi)}
 /* the cover: leather around two facing pages, a fold in the middle and the edges of the other pages underneath */
 .bk-cover{position:relative;display:grid;grid-template-columns:minmax(210px,.8fr) minmax(0,1.3fr);min-height:0;padding:10px 10px 14px;background:linear-gradient(160deg,var(--lea),var(--lea2));border-radius:14px;box-shadow:0 14px 34px rgba(0,0,0,.45),inset 0 0 0 2px rgba(255,220,160,.12)}
+.bk-gris{filter:grayscale(1) blur(.6px);opacity:.6}
 .bk-page{position:relative;background:var(--bp);padding:16px 18px 22px;min-width:0;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--bf) transparent}
 .bk-page.l{border-radius:8px 2px 2px 8px;background:linear-gradient(90deg,var(--bp) 0,var(--bp) 86%,var(--bp2) 100%);box-shadow:-3px 3px 0 -1px #e6d5b3,-6px 6px 0 -2px #cdb68c}
 .bk-page.r{border-radius:2px 8px 8px 2px;background:linear-gradient(270deg,var(--bp) 0,var(--bp) 88%,var(--bp2) 100%);box-shadow:3px 3px 0 -1px #e6d5b3,6px 6px 0 -2px #cdb68c;perspective:900px}
