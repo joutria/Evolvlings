@@ -222,6 +222,13 @@
     caracola: P(["Caracola, nieta de Calima", "Caracola, Calima's granddaughter"], ["Caracola"], "Guarda del faro", "la guarda del faro", "Lighthouse keeper", "the lighthouse keeper"),
     silice: P(["Sílice, picadora", "Sílice, miner"], ["Sílice"], "Picadora de la galería", "la picadora de la galería", "Gallery miner", "the gallery miner"),
     yeso: P(["Yeso, picador", "Yeso, miner"], ["Yeso"], "Picador de la promesa", "el picador de la promesa", "Miner with the promise", "the miner with the promise"),
+    esquila: P(["Esquila, pastora de la cumbre", "Esquila, summit shepherd"], ["Esquila"], "Pastora del silbato de hueso", "la pastora del silbato de hueso", "Shepherd with a bone whistle", "the shepherd with a bone whistle"),
+    timbal: P(["Timbal, tamborero", "Timbal, drummer"], ["Timbal"], "Tamborero del tambor roto", "el tamborero del tambor roto", "Drummer with a broken drum", "the drummer with a broken drum"),
+    morrina: P(["Morriña, soñadora", "Morriña, dreamer"], ["Morriña"], "Soñadora que no sueña", "la soñadora que no sueña", "Dreamer who doesn't dream", "the dreamer who doesn't dream"),
+    cuajo: P(["Cuajo, regente del Fondo", "Cuajo, regent of the Deep"], ["Cuajo"], "Regente del manto de piel", "el regente del manto de piel", "Regent in a fur cloak", "the regent in a fur cloak"),
+    escarchilla: P(["Escarchilla, niña del Fondo", "Escarchilla, girl of the Deep"], ["Escarchilla"], "Niña nacida en el hielo", "la niña nacida en el hielo", "Girl born in the ice", "the girl born in the ice"),
+    modorra: P(["Modorra, vendedora de sueños", "Modorra, dream seller"], ["Modorra"], "Mujer de las ojeras", "la mujer de las ojeras", "Woman with dark circles", "the woman with dark circles"),
+    anfora: P(["Ánfora, vendedora del Corazón", "Ánfora, seller at the Heart"], ["Ánfora"], "Vendedora de frascos", "la vendedora de frascos", "Jar seller", "the jar seller"),
   };
   // titles for the book's Diary (no names in them: they would give away who you meet)
   const TITLES = {
@@ -795,6 +802,26 @@
     "e7-ecocompra": ["El Coro quiere comprar el eco", "The Choir wants to buy the echo"],
     "e7-mica": ["Un espacio vacío en la pared", "An empty space on the wall"],
     "e7-notaeco": ["La nota que el eco no tuerce", "The note the echo won't twist"],
+    "e7-esquila": ["Ovejas que siguen el viento", "Sheep that follow the wind"],
+    "e7-timbal": ["Nadie quiere oír el tambor del hambre", "Nobody wants to hear the hunger drum"],
+    "e7-trece": ["El molino trece", "The thirteenth windmill"],
+    "e7-librocoro": ["El libro de cuentas del Coro", "The Choir's ledger"],
+    "e7-brisavoz": ["La voz del Coro se rompe", "The Choir's voice breaks"],
+    "e7-manosventa": ["Gestos en venta", "Gestures for sale"],
+    "e7-suenoviento": ["Un llanto en el viento", "Crying on the wind"],
+    "e7-morrina": ["Una soñadora que ya no sueña", "A dreamer who no longer dreams"],
+    "e7-cuajo": ["Harina a cambio de sueños", "Flour for dreams"],
+    "e7-escarchilla": ["Una niña que sueña un verso", "A girl who dreams a verse"],
+    "e7-modorra": ["Sueños en frascos vacíos", "Dreams in empty jars"],
+    "e7-soporsuena": ["Un sueño feliz de treinta años", "A thirty-year happy dream"],
+    "e7-jovenes": ["Los jóvenes del Fondo se van", "The young of the Deep leave"],
+    "e7-papeles": ["Sueños escritos para vender", "Dreams written down for sale"],
+    "e7-quiereraiz": ["Lo que quiere la Raíz", "What the Root wants"],
+    "e7-ofrendas": ["Canciones colgadas en las estatuas", "Songs hung on the statues"],
+    "e7-anfora": ["La nota del talón en frasco", "The heel's note in a jar"],
+    "e7-tararatalon": ["El único lugar en silencio", "The only silent place"],
+    "e7-picos": ["Picos en el talón de la Raíz", "Picks at the Root's heel"],
+    "e7-vispera": ["Qué van a prometer mañana", "What they'll promise tomorrow"],
   };
   const BY_WHO = {};
   for (const id in PEOPLE) for (const w of PEOPLE[id].who) BY_WHO[w] = id;
