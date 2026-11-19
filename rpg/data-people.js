@@ -182,6 +182,10 @@
     crisol: P(["Crisol, maestra del Gremio", "Crisol, Guild master"], ["Crisol"], "Maestra del delantal de cuero", "la maestra del delantal de cuero", "Master in a leather apron", "the master in a leather apron"),
     helecho: P(["Helecho, vendedor de musgo", "Helecho, moss seller"], ["Helecho"], "Muchacho del carro de musgo", "el muchacho del carro de musgo", "Young man with the moss cart", "the young man with the moss cart"),
     tilo: P(["Tilo, el más viejo del Bosque", "Tilo, eldest of the Forest"], ["Tilo"], "Viejo de la pipa de corteza", "el viejo de la pipa de corteza", "Old man with a bark pipe", "the old man with a bark pipe"),
+    humareda: P(["Humareda, chambelán de la Corte", "Humareda, chamberlain of the Court"], ["Humareda"], "Hombre de los bordados de plata", "el hombre de los bordados de plata", "Man with silver embroidery", "the man with silver embroidery"),
+    espuma: P(["Espuma, carpintero de barcas", "Espuma, boat carpenter"], ["Espuma"], "Viejo de las barcas", "el viejo de las barcas", "Old boat man", "the old boat man"),
+    calima: P(["Calima, guarda del faro", "Calima, keeper of the lighthouse"], ["Calima"], "Mujer del faro", "la mujer del faro", "Lighthouse woman", "the lighthouse woman"),
+    raspa: P(["Raspa, el que borra de noche", "Raspa, who scrapes at night"], ["Raspa"], "Hombre del cuchillo de hierro", "el hombre del cuchillo de hierro", "Man with an iron knife", "the man with an iron knife"),
   };
   // titles for the book's Diary (no names in them: they would give away who you meet)
   const TITLES = {
@@ -647,6 +651,30 @@
     "e6-huecos": ["Veinte en un tronco", "Twenty in a trunk"],
     "e6-raizbosque": ["Lo que dice la tierra", "What the earth says"],
     "e6-semillas": ["El centeno de antes", "The old rye"],
+    "e6-humareda": ["El chambelán", "The chamberlain"],
+    "e6-mercadonombres": ["Nombres en una manta", "Names on a blanket"],
+    "e6-madre": ["Una cara de carbón", "A charcoal face"],
+    "e6-escondida": ["La nieta del archivero", "The archivist's granddaughter"],
+    "e6-versotaberna": ["Tres versos en la taberna", "Three verses in the tavern"],
+    "e6-cortinas": ["Siete cortinas", "Seven curtains"],
+    "e6-pozoseco": ["El pozo que devuelve", "The well that gives back"],
+    "e6-reinasola": ["La reina sin velo", "The queen without a veil"],
+    "e6-espuma": ["Una barca por año", "One boat a year"],
+    "e6-ahogados": ["Las piedras de la orilla", "The stones on the shore"],
+    "e6-espejo": ["Lo que muestra el lago", "What the lake shows"],
+    "e6-mareasfondo": ["Una barca de hielo", "A boat of ice"],
+    "e6-hermano": ["Un plato de más", "An extra plate"],
+    "e6-redes": ["Redes llenas de cosas", "Nets full of things"],
+    "e6-faro": ["Algo que se prende por si acaso", "Something lit just in case"],
+    "e6-niebla": ["La niebla que olvida", "The forgetting fog"],
+    "e6-raspa": ["El que borra", "The one who erases"],
+    "e6-picadores": ["Picos y punzones", "Picks and awls"],
+    "e6-paredrepite": ["La pared con fiebre", "The feverish wall"],
+    "e6-rollos": ["Martillos en la galería", "Hammers in the gallery"],
+    "e6-hijamica": ["La de las paredes", "The wall girl"],
+    "e6-cuarentahoy": ["La galería más pedida", "The most visited gallery"],
+    "e6-honda": ["La pared negra", "The black wall"],
+    "e6-ecosnuevos": ["Para que la piedra se acuerde", "So the stone remembers"],
   };
   const BY_WHO = {};
   for (const id in PEOPLE) for (const w of PEOPLE[id].who) BY_WHO[w] = id;
