@@ -186,6 +186,12 @@
     espuma: P(["Espuma, carpintero de barcas", "Espuma, boat carpenter"], ["Espuma"], "Viejo de las barcas", "el viejo de las barcas", "Old boat man", "the old boat man"),
     calima: P(["Calima, guarda del faro", "Calima, keeper of the lighthouse"], ["Calima"], "Mujer del faro", "la mujer del faro", "Lighthouse woman", "the lighthouse woman"),
     raspa: P(["Raspa, el que borra de noche", "Raspa, who scrapes at night"], ["Raspa"], "Hombre del cuchillo de hierro", "el hombre del cuchillo de hierro", "Man with an iron knife", "the man with an iron knife"),
+    tonada: P(["Tonada, la de la canción", "Tonada, of the song"], ["Tonada"], "Vieja que teje llorando", "la vieja que teje llorando", "Old woman knitting in tears", "the old woman knitting in tears"),
+    aulaga: P(["Aulaga, de las Casas del Farol", "Aulaga, of the Lantern Houses"], ["Aulaga"], "Viejo del trineo de leña", "el viejo del trineo de leña", "Old man with the firewood sled", "the old man with the firewood sled"),
+    brisa: P(["Brisa, niña de la cumbre", "Brisa, girl of the summit"], ["Brisa"], "Niña que canta en el viento", "la niña que canta en el viento", "Girl who sings into the wind", "the girl who sings into the wind"),
+    grumo: P(["Grumo, el soñador chico", "Grumo, the little dreamer"], ["Grumo"], "Niño del pelo de escarcha", "el niño del pelo de escarcha", "Boy with frosted hair", "the boy with frosted hair"),
+    pruina: P(["Pruina, regente del Fondo", "Pruina, regent of the Deep"], ["Pruina"], "Regente de la mesa de hielo", "la regente de la mesa de hielo", "Regent at the ice table", "the regent at the ice table"),
+    garua: P(["Garúa, escribana de la Crónica", "Garúa, scribe of the Chronicle"], ["Garúa"], "Escribana de la boca manchada", "la escribana de la boca manchada", "Scribe with inky lips", "the scribe with inky lips"),
   };
   // titles for the book's Diary (no names in them: they would give away who you meet)
   const TITLES = {
@@ -675,6 +681,27 @@
     "e6-cuarentahoy": ["La galería más pedida", "The most visited gallery"],
     "e6-honda": ["La pared negra", "The black wall"],
     "e6-ecosnuevos": ["Para que la piedra se acuerde", "So the stone remembers"],
+    "e6-tonada": ["La de la lana", "The wool one"],
+    "e6-aulaga": ["Leña de noche", "Firewood at night"],
+    "e6-libros": ["Treinta libros de mensajes", "Thirty message books"],
+    "e6-dosgolpes": ["Dos golpes al final", "Two beats at the end"],
+    "e6-eco": ["Lo que guardó el valle", "What the valley kept"],
+    "e6-coro": ["El concurso de coros", "The choir contest"],
+    "e6-cumbre": ["El tambor de la boda", "The wedding drum"],
+    "e6-brisa": ["Una canción en el viento", "A song on the wind"],
+    "e6-camas": ["No hay camas de hielo", "No ice beds left"],
+    "e6-grumo": ["El soñador más chico", "The youngest dreamer"],
+    "e6-puerta": ["Aquí no bajaron", "Here they didn't come down"],
+    "e6-pruina": ["Pan a cambio de silencio", "Bread for silence"],
+    "e6-feliz": ["Un sueño feliz", "A happy dream"],
+    "e6-hierbas": ["Dormir como una piedra", "Sleep like a stone"],
+    "e6-campanas": ["Las campanas atadas", "The tied bells"],
+    "e6-soporduerme": ["La que no despierta", "The one who won't wake"],
+    "e6-puesto": ["Olvido al pie de las estatuas", "Forgetting at the statues"],
+    "e6-garua": ["La Crónica de estos años", "The Chronicle of these years"],
+    "e6-juego": ["El juego de la cola", "The line game"],
+    "e6-vispera": ["La noche antes", "The night before"],
+    "e6-grieta": ["Caras en la grieta", "Faces in the crack"],
   };
   const BY_WHO = {};
   for (const id in PEOPLE) for (const w of PEOPLE[id].who) BY_WHO[w] = id;
