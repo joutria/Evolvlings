@@ -187,6 +187,24 @@
     calima: { era: 6, zone: "lake", layer: 3, rules: [{ end: "A", any: ["e6_faroBarca", "e6_faroGuardado", "e6_faroPrendido"] }, { end: "B", any: ["e6_faroVendido"] }, { end: "C" }] },
     mica: { era: 6, zone: "caves", layer: 3, rules: [{ end: "A", any: ["e6_pactoGrabado", "e6_hijaFirme", "e6_hijaTapa", "e6_memoriaPagada"] }, { end: "B", any: ["e6_hijaOlvida", "e6_cuarentaVendida", "e6_paredCobrada"] }, { end: "C" }] },
     sopor: { era: 6, zone: "deep", layer: 3, rules: [{ end: "A", any: ["e6_soporDespierta", "e6_soporNombre"] }, { end: "B", any: ["e6_soporSigue", "e6_felizSopor"] }, { end: "C" }] },
+    // era 7 (Los Vientos Vendidos)
+    aspa: { era: 7, zone: "heights", layer: 2, rules: [{ end: "A", any: ["m7_molinosCumbre", "e7_treceVotado", "e7_treceReves", "e7_suenoFrenado", "e7_grietaFrenada"] }, { end: "B", any: ["m7_molinosQuedan", "e7_treceGira", "e7_suenoPasa", "e7_grietaAbierta"] }, { end: "C" }] },
+    brisa: { era: 7, zone: "heights", layer: 2, rules: [{ end: "A", any: ["e7_brisaNina", "e7_brisaRonca", "e7_brisaDescansa", "e7_odioBrisa", "e7_coroGratis"] }, { end: "B", any: ["e7_brisaReemplazo", "e7_brisaIgual", "e7_coroSocio"] }, { end: "C" }] },
+    arpegia: { era: 7, zone: "heights", layer: 3, rules: [{ end: "A", any: ["e7_manosGratis", "e7_sordosCumbre", "e7_guardianaManos"] }, { end: "B", any: ["e7_manosVendidas", "e7_arpegiaSola", "e7_manosCuaderno"] }, { end: "C" }] },
+    bordon: { era: 7, zone: "heights", layer: 3, rules: [{ end: "A", any: ["e7_libroCoroLeido", "e7_libroCoroParte", "e7_coroNo"] }, { end: "B", any: ["e7_libroCoroGuardado", "e7_grietaAbierta", "m7_versoVendido"] }, { end: "C" }] },
+    pregonero: { era: 7, zone: "aurora", layer: 2, rules: [{ end: "A", any: ["e7_pregoneroPropia", "e7_odioTapado", "e7_pregoneroNana"] }, { end: "B", any: ["e7_pregoneroVendida", "e7_odioQueda", "e7_pregoneroSigue"] }, { end: "C" }] },
+    tarara: { era: 7, zone: "aurora", layer: 2, rules: [{ end: "A", any: ["m7_tararaManos", "e7_tararaNotaManos", "e7_tararaCorazon", "e7_tararaCuidada"] }, { end: "B", any: ["m7_tararaCallada", "e7_tararaMolino", "e7_tararaVuelve"] }, { end: "C" }] },
+    hogaza: { era: 7, zone: "aurora", layer: 3, rules: [{ end: "A", any: ["e7_mesaUna", "e7_mesaSilencio", "e7_cancionBarrio", "e7_votoMano"] }, { end: "B", any: ["e7_mesaPartida", "e7_concejoCasas"] }, { end: "C" }] },
+    quinque: { era: 7, zone: "aurora", layer: 3, rules: [{ end: "A", any: ["e7_farolLeido", "e7_farolEscrito"] }, { end: "B", any: ["e7_farolMolino", "e7_concejoCasas"] }, { end: "C" }] },
+    martinete: { era: 7, zone: "crater", layer: 2, rules: [{ end: "A", any: ["e7_cuentasLeidas", "e7_huelgaManos", "e7_sordosVuelven", "e7_fuegoPlaza"] }, { end: "B", any: ["e7_cuentasGuardadas", "e7_huelgaDoble", "e7_fuegoMolino"] }, { end: "C" }] },
+    azufre: { era: 7, zone: "crater", layer: 3, rules: [{ end: "A", any: ["e7_campanaTurno", "e7_diezHoras"] }, { end: "B", any: ["e7_campanaGremio", "e7_gremioCaja"] }, { end: "C" }] },
+    hornaza: { era: 7, zone: "crater", layer: 3, rules: [{ end: "A", any: ["e7_hornazaEnsena", "e7_hornazaForja"] }, { end: "B", any: ["e7_hornazaSola"] }, { end: "C" }] },
+    ligustro: { era: 7, zone: "forest", layer: 3, rules: [{ end: "A", any: ["e7_silencioRaiz", "e7_silencioManos", "e7_setosPuertas", "e7_raicesCortadas"] }, { end: "B", any: ["e7_silencioSordo", "e7_bosqueParte", "e7_raicesBeben"] }, { end: "C" }] },
+    sigilo: { era: 7, zone: "hollow", layer: 3, rules: [{ end: "A", any: ["e7_sigiloHija", "e7_sigiloCancion", "e7_sombrasCalle"] }, { end: "B", any: ["e7_sombrasCoro", "e7_sigiloEspera"] }, { end: "C" }] },
+    mirla: { era: 7, zone: "hollow", layer: 2, rules: [{ end: "A", any: ["e7_bodaManos", "e7_bodaOido", "e7_mirlaPropias"] }, { end: "B", any: ["e7_bodaLey", "e7_mirlaPaga"] }, { end: "C" }] },
+    albufera: { era: 7, zone: "lake", layer: 3, rules: [{ end: "A", any: ["e7_burbujas", "e7_ahogoBoca", "e7_ahogoSoga", "e7_aguaPermiso"] }, { end: "B", any: ["e7_burbujasVendidas", "e7_ahogoProhibe", "e7_aguaVendida"] }, { end: "C" }] },
+    cuarcita: { era: 7, zone: "caves", layer: 3, rules: [{ end: "A", any: ["e7_notaGrabada", "e7_micaGrabada", "e7_letrasGrabadas", "e7_ecoAlquilado"] }, { end: "B", any: ["e7_ecoComprado", "e7_ecoVendido", "e7_notaSecreta"] }, { end: "C" }] },
+    grumo: { era: 7, zone: "deep", layer: 3, rules: [{ end: "A", any: ["e7_nanaGuardia", "e7_raizEscuchada", "e7_soporTodos", "e7_escarchillaZumba"] }, { end: "B", any: ["e7_suenosVuelan", "e7_raizDuerma", "e7_jovenesEncerrados"] }, { end: "C" }] },
   };
 
   // the echo lines for one node of one conversation, given the flags you hold
